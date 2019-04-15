@@ -1,8 +1,8 @@
 # Source code for Gradle manipulation plugins
 
-## Alignment
+## Analyzer
 
-The `alignment` directory contains the gradle plugin that generates metadata information about aligned dependencies and the project version.
+The `analyzer` directory contains the gradle plugin that generates metadata information about aligned dependencies and the project version.
 
 ## Manipulation
 

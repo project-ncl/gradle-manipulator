@@ -1,4 +1,4 @@
-# Source code for Gradle manupilation plugins
+# Source code for Gradle manipulation plugins
 
 ## Alignment
 

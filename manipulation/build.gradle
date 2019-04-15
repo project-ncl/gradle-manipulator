@@ -1,0 +1,17 @@
+plugins {
+    id 'java-gradle-plugin' // applies "java" plugin and adds gradleApi() to dependencies
+}
+
+group 'org.jboss.pme.manipulation'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+gradlePlugin {
+    plugins {
+        manipulationPlugin {
+            id = 'pme-manipulation'
+            implementationClass = 'org.jboss.pme.build.ManipulationPlugin'
+        }
+    }
+}

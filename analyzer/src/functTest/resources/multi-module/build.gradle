@@ -1,12 +1,12 @@
 plugins {
-    id 'pme-alignment'
+    id 'gm-analyzer'
 }
 
 allprojects {
     group = 'org.acme.gradle'
 
     apply plugin: 'java'
-    apply plugin: 'pme-alignment'
+    apply plugin: 'gm-analyzer'
 }
 
 repositories {

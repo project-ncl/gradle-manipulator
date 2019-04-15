@@ -1,4 +1,4 @@
-package org.jboss.pme.alignment;
+package org.jboss.gm.analyzer.alignment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

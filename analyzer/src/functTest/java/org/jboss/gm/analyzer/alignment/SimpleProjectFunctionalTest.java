@@ -1,4 +1,4 @@
-package org.jboss.pme.alignment;
+package org.jboss.gm.analyzer.alignment;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,17 +13,16 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.pme.alignment.TestUtils.copyDirectory;
 
-public class MultiModuleProjectFunctionalTest {
+public class SimpleProjectFunctionalTest {
 
 	@Rule
 	public TemporaryFolder tempDir = new TemporaryFolder();
 
 	@Test
 	public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException {
-		final File simpleProjectRoot = tempDir.newFolder("multi-module");
-		copyDirectory("multi-module", simpleProjectRoot);
+		final File simpleProjectRoot = tempDir.newFolder("simple-project");
+		TestUtils.copyDirectory("simple-project", simpleProjectRoot);
 		assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
 
 		final BuildResult buildResult = GradleRunner.create()
@@ -46,17 +45,15 @@ public class MultiModuleProjectFunctionalTest {
 				assertThat(b.getGroup()).isEqualTo("org.acme.gradle");
 				assertThat(b.getName()).isEqualTo("root");
 			});
-			assertThat(am.getModules()).hasSize(3).extracting("name").containsExactly("root", "subproject1", "subproject2");
-
-			assertThat(am.getModules()).satisfies(ml -> {
-				assertThat(ml.get(1)).satisfies(subproject1 -> {
-					assertThat(subproject1.getNewVersion()).contains("redhat"); //ensure the project version was updated
-					assertThat(subproject1.getAlignedDependencies()
+			assertThat(am.getModules()).hasSize(1).satisfies(ml -> {
+				assertThat(ml.get(0)).satisfies(root -> {
+					assertThat(root.getNewVersion()).contains("redhat"); //ensure the project version was updated
+					assertThat(root.getName()).isEqualTo("root");
+					assertThat(root.getAlignedDependencies()
 							//ensure that the dependencies were updated - dummy for now
 							.stream().filter(d -> "compile".equals(d.getConfiguration()))).hasSize(1);
 				});
 			});
 		});
 	}
-
 }

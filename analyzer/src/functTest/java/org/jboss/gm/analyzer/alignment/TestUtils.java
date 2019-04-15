@@ -1,4 +1,4 @@
-package org.jboss.pme.alignment;
+package org.jboss.gm.analyzer.alignment;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,17 +1,14 @@
-package org.jboss.pme.alignment;
+package org.jboss.gm.analyzer.alignment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.DependencyResolveDetails;
-import org.gradle.api.artifacts.ModuleVersionSelector;
 import org.gradle.api.tasks.TaskAction;
 
-import static org.jboss.pme.alignment.AlignmentUtils.getCurrentAlignmentModel;
-import static org.jboss.pme.alignment.AlignmentUtils.writeUpdatedAlignmentModel;
+import static org.jboss.gm.analyzer.alignment.AlignmentUtils.getCurrentAlignmentModel;
+import static org.jboss.gm.analyzer.alignment.AlignmentUtils.writeUpdatedAlignmentModel;
 
 public class AlignmentTask extends DefaultTask {
 

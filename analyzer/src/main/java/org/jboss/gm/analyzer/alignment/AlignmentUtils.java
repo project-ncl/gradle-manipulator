@@ -1,4 +1,4 @@
-package org.jboss.pme.alignment;
+package org.jboss.gm.analyzer.alignment;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

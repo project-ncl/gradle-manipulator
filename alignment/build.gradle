@@ -3,7 +3,7 @@ plugins {
     id 'java-gradle-plugin' // applies "java" plugin and adds gradleApi() to dependencies
 }
 
-group 'org.jboss.pme.alignment'
+group 'org.jboss.gm.alignment'
 version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
@@ -23,8 +23,8 @@ dependencies {
 gradlePlugin {
     plugins {
         alignmentPlugin {
-            id = 'pme-alignment'
-            implementationClass = 'org.jboss.pme.alignment.AlignmentPlugin'
+            id = 'gm-alignment'
+            implementationClass = 'org.jboss.gm.alignment.AlignmentPlugin'
         }
     }
 }

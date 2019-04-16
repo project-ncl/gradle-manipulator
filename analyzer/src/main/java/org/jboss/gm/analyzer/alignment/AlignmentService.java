@@ -30,4 +30,46 @@ public interface AlignmentService {
 
 		String getAlignedVersionOfGav(GAV gav);
 	}
+
+	interface RequestCustomizer {
+
+		Request customize(Request request);
+
+		// Integer.MIN_VALUE is the max order
+		int order();
+
+		RequestCustomizer NOOP = new RequestCustomizer() {
+			@Override
+			public Request customize(Request request) {
+				return request;
+			}
+
+			@Override
+			public int order() {
+				return Integer.MAX_VALUE;
+			}
+		};
+
+	}
+
+	interface ResponseCustomizer {
+
+		Response customize(Response response);
+
+		// Integer.MIN_VALUE is the max order
+		int order();
+
+		ResponseCustomizer NOOP = new ResponseCustomizer() {
+			@Override
+			public Response customize(Response response) {
+				return response;
+			}
+
+			@Override
+			public int order() {
+				return Integer.MAX_VALUE;
+			}
+		};
+
+	}
 }

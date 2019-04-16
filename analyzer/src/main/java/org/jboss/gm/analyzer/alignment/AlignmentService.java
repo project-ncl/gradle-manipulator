@@ -35,7 +35,9 @@ public interface AlignmentService {
 
 		Request customize(Request request);
 
-		// Integer.MIN_VALUE is the max order
+		// Integer.MIN_VALUE is the max order. This means that if we have 2 services for example
+		// we with the first one to be invoked before the second, we would give the first one a
+		// value for order that is smaller than that of the second one (for example 0 and 10)
 		int order();
 
 		RequestCustomizer NOOP = new RequestCustomizer() {
@@ -56,7 +58,9 @@ public interface AlignmentService {
 
 		Response customize(Response response);
 
-		// Integer.MIN_VALUE is the max order
+		// Integer.MIN_VALUE is the max order. This means that if we have 2 services for example
+		// we with the first one to be invoked before the second, we would give the first one a
+		// value for order that is smaller than that of the second one (for example 0 and 10)
 		int order();
 
 		ResponseCustomizer NOOP = new ResponseCustomizer() {

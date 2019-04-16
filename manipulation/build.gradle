@@ -1,0 +1,12 @@
+group 'org.jboss.gm.manipulation'
+
+sourceCompatibility = 1.8
+
+gradlePlugin {
+    plugins {
+        manipulationPlugin {
+            id = 'gm-manipulation'
+            implementationClass = 'org.jboss.gm.manipulation.ManipulationPlugin'
+        }
+    }
+}

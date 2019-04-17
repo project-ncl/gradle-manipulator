@@ -6,32 +6,32 @@ import java.util.List;
 
 public class WithCustomizersDelegatingAlignmentService implements AlignmentService {
 
-	private final AlignmentService delegate;
-	private final List<AlignmentService.RequestCustomizer> requestCustomizers;
-	private final List<AlignmentService.ResponseCustomizer> responseCustomizers;
+    private final AlignmentService delegate;
+    private final List<AlignmentService.RequestCustomizer> requestCustomizers;
+    private final List<AlignmentService.ResponseCustomizer> responseCustomizers;
 
-	public WithCustomizersDelegatingAlignmentService(AlignmentService delegate,
-			List<RequestCustomizer> requestCustomizers, List<ResponseCustomizer> responseCustomizers) {
-		this.delegate = delegate;
-		this.requestCustomizers = requestCustomizers != null ? requestCustomizers : new ArrayList<>();
-		this.responseCustomizers = responseCustomizers != null ? responseCustomizers : new ArrayList<>();
+    public WithCustomizersDelegatingAlignmentService(AlignmentService delegate,
+            List<RequestCustomizer> requestCustomizers, List<ResponseCustomizer> responseCustomizers) {
+        this.delegate = delegate;
+        this.requestCustomizers = requestCustomizers != null ? requestCustomizers : new ArrayList<>();
+        this.responseCustomizers = responseCustomizers != null ? responseCustomizers : new ArrayList<>();
 
-		this.requestCustomizers.sort(Comparator.comparingInt(RequestCustomizer::order));
-		this.responseCustomizers.sort(Comparator.comparingInt(ResponseCustomizer::order));
-	}
+        this.requestCustomizers.sort(Comparator.comparingInt(RequestCustomizer::order));
+        this.responseCustomizers.sort(Comparator.comparingInt(ResponseCustomizer::order));
+    }
 
-	@Override
-	public Response align(Request request) {
-		for (RequestCustomizer requestCustomizer : requestCustomizers) {
-			request = requestCustomizer.customize(request);
-		}
+    @Override
+    public Response align(Request request) {
+        for (RequestCustomizer requestCustomizer : requestCustomizers) {
+            request = requestCustomizer.customize(request);
+        }
 
-		Response response = delegate.align(request);
+        Response response = delegate.align(request);
 
-		for (ResponseCustomizer responseCustomizer : responseCustomizers) {
-			response = responseCustomizer.customize(response);
-		}
+        for (ResponseCustomizer responseCustomizer : responseCustomizers) {
+            response = responseCustomizer.customize(response);
+        }
 
-		return response;
-	}
+        return response;
+    }
 }

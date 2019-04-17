@@ -20,96 +20,95 @@ import org.slf4j.LoggerFactory;
  */
 public class DependencyOverrideCustomizer implements AlignmentService.ResponseCustomizer {
 
-	private static final Logger log = LoggerFactory.getLogger(DependencyExclusionCustomizer.class);
+    private static final Logger log = LoggerFactory.getLogger(DependencyExclusionCustomizer.class);
 
-	private final Map<ProjectRef, String> overrideMap;
+    private final Map<ProjectRef, String> overrideMap;
 
-	public DependencyOverrideCustomizer(Map<ProjectRef, String> overrideMap) {
-		this.overrideMap = overrideMap;
-	}
+    public DependencyOverrideCustomizer(Map<ProjectRef, String> overrideMap) {
+        this.overrideMap = overrideMap;
+    }
 
-	@Override
-	public AlignmentService.Response customize(AlignmentService.Response response) {
-		return new DependencyOverrideCustomizerResponse(overrideMap, response);
-	}
+    @Override
+    public AlignmentService.Response customize(AlignmentService.Response response) {
+        return new DependencyOverrideCustomizerResponse(overrideMap, response);
+    }
 
-	public static AlignmentService.ResponseCustomizer fromConfigurationForModule(Configuration configuration, ProjectRef projectRef) {
-		final Configuration dependencyExclusionConfiguration = configuration.subset("dependencyOverride");
-		if (dependencyExclusionConfiguration.isEmpty()) {
-			return AlignmentService.ResponseCustomizer.NOOP;
-		}
+    public static AlignmentService.ResponseCustomizer fromConfigurationForModule(Configuration configuration,
+            ProjectRef projectRef) {
+        final Configuration dependencyExclusionConfiguration = configuration.subset("dependencyOverride");
+        if (dependencyExclusionConfiguration.isEmpty()) {
+            return AlignmentService.ResponseCustomizer.NOOP;
+        }
 
-		final Map<ProjectRef, String> overrideMap = new LinkedHashMap<>();
+        final Map<ProjectRef, String> overrideMap = new LinkedHashMap<>();
 
-		final Iterator<String> keys = dependencyExclusionConfiguration.getKeys();
-		//the idea is to create one DependencyOverrideCustomizer per configuration property
-		while (keys.hasNext()) {
-			final String key = keys.next();
+        final Iterator<String> keys = dependencyExclusionConfiguration.getKeys();
+        //the idea is to create one DependencyOverrideCustomizer per configuration property
+        while (keys.hasNext()) {
+            final String key = keys.next();
 
-			try {
-				final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
-				if (keyParseResult.matchesModule(projectRef)) {
-					final String overrideVersion = dependencyExclusionConfiguration.getString(key);
-					log.debug("Overriding dependency {} from in module {} with version {}",
-							keyParseResult.getDependency(), projectRef, overrideVersion);
-					overrideMap.put(keyParseResult.getDependency(), overrideVersion);
-				}
-			}
-			catch (RuntimeException e) {
-				log.debug("Unable to parse key {}", key, e);
-			}
-		}
+            try {
+                final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
+                if (keyParseResult.matchesModule(projectRef)) {
+                    final String overrideVersion = dependencyExclusionConfiguration.getString(key);
+                    log.debug("Overriding dependency {} from in module {} with version {}",
+                            keyParseResult.getDependency(), projectRef, overrideVersion);
+                    overrideMap.put(keyParseResult.getDependency(), overrideVersion);
+                }
+            } catch (RuntimeException e) {
+                log.debug("Unable to parse key {}", key, e);
+            }
+        }
 
-		if (overrideMap.isEmpty()) {
-			return AlignmentService.ResponseCustomizer.NOOP;
-		}
+        if (overrideMap.isEmpty()) {
+            return AlignmentService.ResponseCustomizer.NOOP;
+        }
 
-		return new DependencyOverrideCustomizer(overrideMap);
-	}
+        return new DependencyOverrideCustomizer(overrideMap);
+    }
 
-	private static class DependencyOverrideCustomizerResponse implements AlignmentService.Response {
+    private static class DependencyOverrideCustomizerResponse implements AlignmentService.Response {
 
-		private final Map<ProjectRef, String> overrideMap;
-		private final AlignmentService.Response originalResponse;
+        private final Map<ProjectRef, String> overrideMap;
+        private final AlignmentService.Response originalResponse;
 
-		DependencyOverrideCustomizerResponse(Map<ProjectRef, String> overrideMap,
-				AlignmentService.Response originalResponse) {
-			this.overrideMap = overrideMap;
-			this.originalResponse = originalResponse;
-		}
+        DependencyOverrideCustomizerResponse(Map<ProjectRef, String> overrideMap,
+                AlignmentService.Response originalResponse) {
+            this.overrideMap = overrideMap;
+            this.originalResponse = originalResponse;
+        }
 
-		@Override
-		public String getNewProjectVersion() {
-			return originalResponse.getNewProjectVersion();
-		}
+        @Override
+        public String getNewProjectVersion() {
+            return originalResponse.getNewProjectVersion();
+        }
 
-		@Override
-		public String getAlignedVersionOfGav(ProjectVersionRef gav) {
-			final Optional<ProjectRef> projectRef = matchingProjectRef(gav);
-			if (projectRef.isPresent()) {
-				return overrideMap.get(projectRef.get());
-			}
+        @Override
+        public String getAlignedVersionOfGav(ProjectVersionRef gav) {
+            final Optional<ProjectRef> projectRef = matchingProjectRef(gav);
+            if (projectRef.isPresent()) {
+                return overrideMap.get(projectRef.get());
+            }
 
-			return gav.getVersionString();
-		}
+            return gav.getVersionString();
+        }
 
-		private Optional<ProjectRef> matchingProjectRef(ProjectRef gav) {
-			return overrideMap.keySet().stream().filter(p -> p.matches(gav)).findFirst();
-		}
-	}
+        private Optional<ProjectRef> matchingProjectRef(ProjectRef gav) {
+            return overrideMap.keySet().stream().filter(p -> p.matches(gav)).findFirst();
+        }
+    }
 
-	private static class DependencyOverridePredicate implements Predicate<ProjectRef> {
-		private final ProjectRef dependency;
+    private static class DependencyOverridePredicate implements Predicate<ProjectRef> {
+        private final ProjectRef dependency;
 
-		DependencyOverridePredicate(ProjectRef dependency) {
-			this.dependency = dependency;
-		}
+        DependencyOverridePredicate(ProjectRef dependency) {
+            this.dependency = dependency;
+        }
 
-
-		@Override
-		public boolean test(ProjectRef gav) {
-			return !dependency.matches(gav);
-		}
-	}
+        @Override
+        public boolean test(ProjectRef gav) {
+            return !dependency.matches(gav);
+        }
+    }
 
 }

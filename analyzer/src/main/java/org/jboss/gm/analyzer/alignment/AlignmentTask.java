@@ -14,9 +14,6 @@ public class AlignmentTask extends DefaultTask {
 
 	static final String NAME = "generateAlignmentMetadata";
 
-	//TODO is there a way to do dependency injection in gradle plugins?
-	private AlignmentService alignmentService = AlignmentServiceFactory.getAlignmentService();
-
 	/**
 	 * The idea here is for every project to read the current alignment file from disk,
 	 * add the dependency alignment info for the specific project which for which the task was ran
@@ -29,6 +26,7 @@ public class AlignmentTask extends DefaultTask {
 
 		final Project project = getProject();
 		final List<CollectedDependency> deps = getAllProjectDependencies(project);
+		final AlignmentService alignmentService = AlignmentServiceFactory.getAlignmentService(project);
 		final AlignmentService.Response alignmentResponse = alignmentService.align(
 				new AlignmentService.Request(
 						new GAV.Simple(project.getGroup().toString(), project.getName(), project.getVersion().toString()),

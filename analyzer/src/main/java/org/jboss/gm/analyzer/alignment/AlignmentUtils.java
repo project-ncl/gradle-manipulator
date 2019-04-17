@@ -6,6 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.gradle.api.Project;
 
 public final class AlignmentUtils {
@@ -57,7 +59,21 @@ public final class AlignmentUtils {
 					StandardCharsets.UTF_8.name());
 		}
 		catch (IOException e) {
-			throw new RuntimeException("Unable to create empty alignment.json in project root", e);
+			throw new RuntimeException("Unable to write alignment.json in project root", e);
 		}
+	}
+
+	static ProjectVersionRef withNewVersion(ProjectVersionRef dependency, String newVersion) {
+		return withGAV(dependency.getGroupId(), dependency.getArtifactId(), newVersion);
+	}
+
+	static ProjectVersionRef withGAV(String group, String artifact, String version) {
+        return new SimpleProjectVersionRef(group, artifact, version);
+    }
+
+	static ProjectVersionRef withGAVAndConfiguration(String group, String artifact, String version,
+													 String configuration) {
+		// todo: add configuration support?
+		return withGAV(group, artifact, version);
 	}
 }

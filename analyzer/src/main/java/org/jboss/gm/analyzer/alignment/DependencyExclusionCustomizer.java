@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+
 import org.apache.commons.configuration2.Configuration;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.slf4j.Logger;
@@ -22,16 +24,16 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
 
 	private static final Logger log = LoggerFactory.getLogger(DependencyExclusionCustomizer.class);
 
-	private final Predicate<GAV> predicate;
+	private final Predicate<ProjectVersionRef> predicate;
 
-	public DependencyExclusionCustomizer(Predicate<GAV> predicate) {
+	public DependencyExclusionCustomizer(Predicate<ProjectVersionRef> predicate) {
 		this.predicate = predicate;
 	}
 
 	@Override
 	public AlignmentService.Request customize(AlignmentService.Request request) {
-		final GAV project = request.getProject();
-		final List<? extends GAV> dependenciesWithoutExclusions =
+		final ProjectVersionRef project = request.getProject();
+		final List<? extends ProjectVersionRef> dependenciesWithoutExclusions =
 				request.getDependencies().stream().filter(predicate).collect(Collectors.toList());
 
 		return new AlignmentService.Request(project, dependenciesWithoutExclusions);
@@ -69,7 +71,7 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
 		return new DependencyExclusionCustomizer(predicates.stream().reduce(x->true, Predicate::and));
 	}
 
-	private static class DependencyExclusionPredicate implements Predicate<GAV> {
+	private static class DependencyExclusionPredicate implements Predicate<ProjectRef> {
 		private final ProjectRef dependency;
 
 		DependencyExclusionPredicate(ProjectRef dependency) {
@@ -78,8 +80,8 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
 
 
 		@Override
-		public boolean test(GAV gav) {
-			return !dependency.matches(gav.toProjectVersionRef());
+		public boolean test(ProjectRef gav) {
+			return !dependency.matches(gav);
 		}
 	}
 }

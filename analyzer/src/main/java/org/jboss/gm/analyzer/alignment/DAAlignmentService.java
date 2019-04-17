@@ -11,7 +11,7 @@ import org.commonjava.maven.ext.io.rest.Translator;
 
 public class DAAlignmentService implements AlignmentService {
 
-	private final DefaultTranslator restEndpoint;
+    private final Translator restEndpoint;
 
 	public DAAlignmentService(String endpointUrl) {
 		//TODO: the parameters needs to be verified
@@ -28,18 +28,13 @@ public class DAAlignmentService implements AlignmentService {
 	@Override
 	public Response align(Request request) {
 		final List<ProjectVersionRef> translateRequest = new ArrayList<>(request.getDependencies().size() + 1);
-		final ProjectVersionRef refOfProject = toProjectVersionRef(request.getProject());
+		final ProjectVersionRef refOfProject = request.getProject();
 		translateRequest.add(refOfProject);
-		request.getDependencies().forEach(DAAlignmentService::toProjectVersionRef);
+		translateRequest.addAll(request.getDependencies());
 
-		final Map<ProjectVersionRef, String> translationMap = restEndpoint
-				.translateVersions(translateRequest);
+		final Map<ProjectVersionRef, String> translationMap = restEndpoint.translateVersions(translateRequest);
 
 		return new Response(refOfProject, translationMap);
-	}
-
-	private static ProjectVersionRef toProjectVersionRef(GAV gav) {
-		return new SimpleProjectVersionRef(new SimpleProjectVersionRef(gav.getGroup(), gav.getName(), gav.getVersion()));
 	}
 
 	private static class Response implements AlignmentService.Response {
@@ -58,8 +53,8 @@ public class DAAlignmentService implements AlignmentService {
 		}
 
 		@Override
-		public String getAlignedVersionOfGav(GAV gav) {
-			return translationMap.get(toProjectVersionRef(gav));
+		public String getAlignedVersionOfGav(ProjectVersionRef gav) {
+			return translationMap.get(gav);
 		}
 	}
 }

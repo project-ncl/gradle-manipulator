@@ -2,24 +2,26 @@ package org.jboss.gm.analyzer.alignment;
 
 import java.util.List;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+
 public interface AlignmentService {
 
 	Response align(Request request);
 
 	class Request {
-		private final List<? extends GAV> dependencies;
-		private final GAV project;
+		private final List<? extends ProjectVersionRef> dependencies;
+		private final ProjectVersionRef project;
 
-		public Request(GAV project, List<? extends GAV> dependencies) {
+		public Request(ProjectVersionRef project, List<? extends ProjectVersionRef> dependencies) {
 			this.dependencies = dependencies;
 			this.project = project;
 		}
 
-		List<? extends GAV> getDependencies() {
+		List<? extends ProjectVersionRef> getDependencies() {
 			return dependencies;
 		}
 
-		GAV getProject() {
+		ProjectVersionRef getProject() {
 			return project;
 		}
 	}
@@ -28,7 +30,7 @@ public interface AlignmentService {
 
 		String getNewProjectVersion();
 
-		String getAlignedVersionOfGav(GAV gav);
+		String getAlignedVersionOfGav(ProjectVersionRef gav);
 	}
 
 	interface RequestCustomizer {

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 
 public class AlignmentModel {
 
@@ -64,7 +66,7 @@ public class AlignmentModel {
 	public static class Module {
 		private String name;
 		private String newVersion;
-		private List<AlignedDependency> alignedDependencies = new ArrayList<>();
+		private List<ProjectVersionRef> alignedDependencies = new ArrayList<>();
 
 		public Module() {
 		}
@@ -81,11 +83,11 @@ public class AlignmentModel {
 			this.name = name;
 		}
 
-		public List<AlignedDependency> getAlignedDependencies() {
+		public List<ProjectVersionRef> getAlignedDependencies() {
 			return alignedDependencies;
 		}
 
-		public void setAlignedDependencies(List<AlignedDependency> alignedDependencies) {
+		public void setAlignedDependencies(List<ProjectVersionRef> alignedDependencies) {
 			this.alignedDependencies = alignedDependencies;
 		}
 
@@ -99,56 +101,4 @@ public class AlignmentModel {
 		}
 	}
 
-	public static class AlignedDependency implements GAV {
-		protected String group;
-		protected String name;
-		protected String version;
-		protected String configuration; //the gradle configuration that produced this dependency
-
-		public AlignedDependency() {
-		}
-
-		public AlignedDependency(String group, String name, String version, String configuration) {
-			this.group = group;
-			this.name = name;
-			this.version = version;
-			this.configuration = configuration;
-		}
-
-		public String getGroup() {
-			return group;
-		}
-
-		public void setGroup(String group) {
-			this.group = group;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public String getVersion() {
-			return version;
-		}
-
-		public void setVersion(String version) {
-			this.version = version;
-		}
-
-		public String getConfiguration() {
-			return configuration;
-		}
-
-		public void setConfiguration(String configuration) {
-			this.configuration = configuration;
-		}
-
-		public AlignedDependency withNewVersion(String newVersion) {
-			return new AlignedDependency(this.group, this.name, newVersion, this.configuration);
-		}
-	}
 }

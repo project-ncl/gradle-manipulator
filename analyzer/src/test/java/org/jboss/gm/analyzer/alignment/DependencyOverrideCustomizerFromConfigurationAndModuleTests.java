@@ -7,13 +7,15 @@ import java.util.Map;
 
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.MapConfiguration;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DependencyOverrideCustomizerFromConfigurationAndModuleTests {
 
-	private static final GAV.Simple PROJECT = new GAV.Simple("org.acme", "test", "1.0.0-redhat-00001");
+	private static final ProjectVersionRef PROJECT = AlignmentUtils.withGAV("org.acme", "test", "1.0.0-redhat-00001");
 
 	@Test
 	public void noDependencyOverrideProperty() {
@@ -21,7 +23,7 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTests {
 		final Configuration configuration = new MapConfiguration(properties);
 
 		final AlignmentService.ResponseCustomizer sut =
-				DependencyOverrideCustomizer.fromConfigurationForModule(configuration, PROJECT.toProjectVersionRef());
+				DependencyOverrideCustomizer.fromConfigurationForModule(configuration, PROJECT);
 
 		assertThat(sut).isSameAs(AlignmentService.ResponseCustomizer.NOOP);
 	}
@@ -34,21 +36,21 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTests {
 		final Configuration configuration = new MapConfiguration(properties);
 
 		final AlignmentService.ResponseCustomizer sut =
-				DependencyOverrideCustomizer.fromConfigurationForModule(configuration, PROJECT.toProjectVersionRef());
+				DependencyOverrideCustomizer.fromConfigurationForModule(configuration, PROJECT);
 
 		assertThat(sut).isSameAs(AlignmentService.ResponseCustomizer.NOOP);
 	}
 
 	@Test
 	public void ensureOverrideMatches() {
-		final GAV.Simple hibernateCoreGav = new GAV.Simple("org.hibernate", "hibernate-core", "5.3.9.Final-redhat-00001");
-		final GAV.Simple hibernateValidatorGav = new GAV.Simple("org.hibernate", "hibernate-validator", "6.0.16.Final-redhat-00001");
-		final GAV.Simple undertowGav = new GAV.Simple("io.undertow", "undertow-core", "2.0.15.Final-redhat-00001");
-		final GAV.Simple jacksonCoreGav = new GAV.Simple("com.fasterxml.jackson.core", "jackson-core", "2.9.8-redhat-00001");
-		final GAV.Simple jacksonMapperGav = new GAV.Simple("com.fasterxml.jackson.core", "jackson-mapper", "2.9.8-redhat-00001");
-		final GAV.Simple mongoGav = new GAV.Simple("org.mongodb", "mongo-java-driver", "3.10.2-redhat-00001");
-		final GAV.Simple mockitoGav = new GAV.Simple("org.mockito", "mockito-core", "2.27.0-redhat-00001");
-		final GAV.Simple wiremockGav = new GAV.Simple("com.github.tomakehurst", "wiremock-jre8", "2.23.2-redhat-00001");
+		final ProjectVersionRef hibernateCoreGav = AlignmentUtils.withGAV("org.hibernate", "hibernate-core", "5.3.9.Final-redhat-00001");
+		final ProjectVersionRef hibernateValidatorGav = AlignmentUtils.withGAV("org.hibernate", "hibernate-validator", "6.0.16.Final-redhat-00001");
+		final ProjectVersionRef undertowGav = AlignmentUtils.withGAV("io.undertow", "undertow-core", "2.0.15.Final-redhat-00001");
+		final ProjectVersionRef jacksonCoreGav = AlignmentUtils.withGAV("com.fasterxml.jackson.core", "jackson-core", "2.9.8-redhat-00001");
+		final ProjectVersionRef jacksonMapperGav = AlignmentUtils.withGAV("com.fasterxml.jackson.core", "jackson-mapper", "2.9.8-redhat-00001");
+		final ProjectVersionRef mongoGav = AlignmentUtils.withGAV("org.mongodb", "mongo-java-driver", "3.10.2-redhat-00001");
+		final ProjectVersionRef mockitoGav = AlignmentUtils.withGAV("org.mockito", "mockito-core", "2.27.0-redhat-00001");
+		final ProjectVersionRef wiremockGav = AlignmentUtils.withGAV("com.github.tomakehurst", "wiremock-jre8", "2.23.2-redhat-00001");
 
 		final Map<String, String> properties = new HashMap<String, String>() {{
 			put("dependencyOverride.org.hibernate:hibernate-core@*", "5.3.7.Final-redhat-00001");  // should result in overriding only hibernate-core dependency
@@ -61,7 +63,7 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTests {
 
 
 		final AlignmentService.ResponseCustomizer sut =
-				DependencyOverrideCustomizer.fromConfigurationForModule(configuration, PROJECT.toProjectVersionRef());
+				DependencyOverrideCustomizer.fromConfigurationForModule(configuration, PROJECT);
 
 
 		final AlignmentService.Response originalResp = new DummyResponse(PROJECT,
@@ -70,35 +72,35 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTests {
 		final AlignmentService.Response finalResp = sut.customize(originalResp);
 
 		assertThat(finalResp).isNotNull().satisfies(r -> {
-			assertThat(r.getNewProjectVersion()).isEqualTo(PROJECT.getVersion());
+			assertThat(r.getNewProjectVersion()).isEqualTo(PROJECT.getVersionString());
 			assertThat(r.getAlignedVersionOfGav(hibernateCoreGav)).isEqualTo("5.3.7.Final-redhat-00001");
-			assertThat(r.getAlignedVersionOfGav(hibernateValidatorGav)).isEqualTo(hibernateValidatorGav.getVersion());
-			assertThat(r.getAlignedVersionOfGav(undertowGav)).isEqualTo(undertowGav.getVersion());
+			assertThat(r.getAlignedVersionOfGav(hibernateValidatorGav)).isEqualTo(hibernateValidatorGav.getVersionString());
+			assertThat(r.getAlignedVersionOfGav(undertowGav)).isEqualTo(undertowGav.getVersionString());
 			assertThat(r.getAlignedVersionOfGav(jacksonCoreGav)).isEqualTo("2.9.5-redhat-00001");
 			assertThat(r.getAlignedVersionOfGav(mockitoGav)).isEqualTo("2.27.0-redhat-00002");
-			assertThat(r.getAlignedVersionOfGav(wiremockGav)).isEqualTo(wiremockGav.getVersion());
+			assertThat(r.getAlignedVersionOfGav(wiremockGav)).isEqualTo(wiremockGav.getVersionString());
 		});
 	}
 
 	private static class DummyResponse implements AlignmentService.Response {
-		private final GAV project;
-		private final Map<GAV, String> alignedVersionsMap = new HashMap<>();
+		private final ProjectVersionRef project;
+		private final Map<ProjectVersionRef, String> alignedVersionsMap = new HashMap<>();
 
-		DummyResponse(GAV project, List<? extends GAV> dependencies) {
+		DummyResponse(ProjectVersionRef project, List<? extends ProjectVersionRef> dependencies) {
 			this.project = project;
 			dependencies.forEach(d -> {
-				this.alignedVersionsMap.put(d, d.getVersion());
+				this.alignedVersionsMap.put(d, d.getVersionString());
 			});
 		}
 
 
 		@Override
 		public String getNewProjectVersion() {
-			return project.getVersion();
+			return project.getVersionString();
 		}
 
 		@Override
-		public String getAlignedVersionOfGav(GAV gav) {
+		public String getAlignedVersionOfGav(ProjectVersionRef gav) {
 			return alignedVersionsMap.get(gav);
 		}
 	}

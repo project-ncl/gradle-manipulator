@@ -7,6 +7,7 @@ import java.util.Map;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.MapConfiguration;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.junit.Test;
 
@@ -40,14 +41,14 @@ public class DependencyExclusionCustomizerFromConfigurationAndModuleTests {
 
 	@Test
 	public void ensureExclusionMatches() {
-		final GAV.Simple project = new GAV.Simple("org.acme", "dummy", "1.0.0");
-		final GAV.Simple hibernateGav = new GAV.Simple("org.hibernate", "hibernate-core", "5.3.7.Final");
-		final GAV.Simple hibernateValidatorGav = new GAV.Simple("org.hibernate", "hibernate-validator", "6.0.16.Final");
-		final GAV.Simple undertowGav = new GAV.Simple("io.undertow", "undertow-core", "2.0.15.Final");
-		final GAV.Simple jacksonDatabindGav = new GAV.Simple("com.fasterxml.jackson.core", "jackson-databind", "2.9.8");
-		final GAV.Simple mongoGav = new GAV.Simple("org.mongodb", "mongo-java-driver", "3.10.2");
-		final GAV.Simple mockitoGav = new GAV.Simple("org.mockito", "mockito-core", "2.27.0");
-		final GAV.Simple wiremockGav = new GAV.Simple("com.github.tomakehurst", "wiremock-jre8", "2.23.2");
+		final ProjectVersionRef project = AlignmentUtils.withGAV("org.acme", "dummy", "1.0.0");
+		final ProjectVersionRef hibernateGav = AlignmentUtils.withGAV("org.hibernate", "hibernate-core", "5.3.7.Final");
+		final ProjectVersionRef hibernateValidatorGav = AlignmentUtils.withGAV("org.hibernate", "hibernate-validator", "6.0.16.Final");
+		final ProjectVersionRef undertowGav = AlignmentUtils.withGAV("io.undertow", "undertow-core", "2.0.15.Final");
+		final ProjectVersionRef jacksonDatabindGav = AlignmentUtils.withGAV("com.fasterxml.jackson.core", "jackson-databind", "2.9.8");
+		final ProjectVersionRef mongoGav = AlignmentUtils.withGAV("org.mongodb", "mongo-java-driver", "3.10.2");
+		final ProjectVersionRef mockitoGav = AlignmentUtils.withGAV("org.mockito", "mockito-core", "2.27.0");
+		final ProjectVersionRef wiremockGav = AlignmentUtils.withGAV("com.github.tomakehurst", "wiremock-jre8", "2.23.2");
 
 		final Map<String, String> properties = new HashMap<String, String>() {{
 			put("dependencyExclusion.org.hibernate:*@*", "");  // should result in the removal of all our hibernate deps
@@ -67,7 +68,8 @@ public class DependencyExclusionCustomizerFromConfigurationAndModuleTests {
 
 		assertThat(customizedReq).isNotNull().satisfies(r -> {
 			assertThat(r.getProject()).isEqualTo(project);
-			assertThat(r.getDependencies()).extracting("name").containsOnly("undertow-core", "mongo-java-driver", "wiremock-jre8");
+			assertThat(r.getDependencies()).extracting("artifactId").containsOnly("undertow-core", "mongo-java-driver",
+					"wiremock-jre8");
 		});
 	}
 }

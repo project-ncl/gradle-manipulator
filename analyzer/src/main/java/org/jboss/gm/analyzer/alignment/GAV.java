@@ -2,6 +2,9 @@ package org.jboss.gm.analyzer.alignment;
 
 import java.beans.Transient;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+
 public interface GAV {
 
 	String getGroup();
@@ -13,6 +16,10 @@ public interface GAV {
 	@Transient
 	default String getIdentifier() {
 		return String.format("%s:%s", getGroup(), getName());
+	}
+
+	default ProjectVersionRef toProjectVersionRef() {
+		return new SimpleProjectVersionRef(getGroup(), getName(), getVersion());
 	}
 
 	class Simple implements GAV {

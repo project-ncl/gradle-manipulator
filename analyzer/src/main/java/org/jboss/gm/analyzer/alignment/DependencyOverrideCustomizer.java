@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 
 import org.apache.commons.configuration2.Configuration;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,12 +93,12 @@ public class DependencyOverrideCustomizer implements AlignmentService.ResponseCu
 			return gav.getVersionString();
 		}
 
-		private Optional<ProjectRef> matchingProjectRef(GAV gav) {
-			return overrideMap.keySet().stream().filter(p -> p.matches(gav.toProjectVersionRef())).findFirst();
+		private Optional<ProjectRef> matchingProjectRef(ProjectRef gav) {
+			return overrideMap.keySet().stream().filter(p -> p.matches(gav)).findFirst();
 		}
 	}
 
-	private static class DependencyOverridePredicate implements Predicate<GAV> {
+	private static class DependencyOverridePredicate implements Predicate<ProjectRef> {
 		private final ProjectRef dependency;
 
 		DependencyOverridePredicate(ProjectRef dependency) {
@@ -106,8 +107,8 @@ public class DependencyOverrideCustomizer implements AlignmentService.ResponseCu
 
 
 		@Override
-		public boolean test(GAV gav) {
-			return !dependency.matches(gav.toProjectVersionRef());
+		public boolean test(ProjectRef gav) {
+			return !dependency.matches(gav);
 		}
 	}
 

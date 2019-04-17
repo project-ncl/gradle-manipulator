@@ -71,7 +71,7 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
 		return new DependencyExclusionCustomizer(predicates.stream().reduce(x->true, Predicate::and));
 	}
 
-	private static class DependencyExclusionPredicate implements Predicate<GAV> {
+	private static class DependencyExclusionPredicate implements Predicate<ProjectRef> {
 		private final ProjectRef dependency;
 
 		DependencyExclusionPredicate(ProjectRef dependency) {
@@ -80,8 +80,8 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
 
 
 		@Override
-		public boolean test(GAV gav) {
-			return !dependency.matches(gav.toProjectVersionRef());
+		public boolean test(ProjectRef gav) {
+			return !dependency.matches(gav);
 		}
 	}
 }

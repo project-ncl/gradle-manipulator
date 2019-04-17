@@ -9,11 +9,11 @@ import org.apache.commons.io.FileUtils;
 
 public final class TestUtils {
 
-	private TestUtils() {
-	}
+    private TestUtils() {
+    }
 
-	public static void copyDirectory(String classpathResource, File target) throws URISyntaxException, IOException {
-		FileUtils.copyDirectory(Paths
-				.get(TestUtils.class.getClassLoader().getResource(classpathResource).toURI()).toFile(), target);
-	}
+    public static void copyDirectory(String classpathResource, File target) throws URISyntaxException, IOException {
+        FileUtils.copyDirectory(Paths
+                .get(TestUtils.class.getClassLoader().getResource(classpathResource).toURI()).toFile(), target);
+    }
 }

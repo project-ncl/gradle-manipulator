@@ -6,10 +6,9 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-
 import org.apache.commons.configuration2.Configuration;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,66 +21,66 @@ import org.slf4j.LoggerFactory;
  */
 public class DependencyExclusionCustomizer implements AlignmentService.RequestCustomizer {
 
-	private static final Logger log = LoggerFactory.getLogger(DependencyExclusionCustomizer.class);
+    private static final Logger log = LoggerFactory.getLogger(DependencyExclusionCustomizer.class);
 
-	private final Predicate<ProjectVersionRef> predicate;
+    private final Predicate<ProjectVersionRef> predicate;
 
-	public DependencyExclusionCustomizer(Predicate<ProjectVersionRef> predicate) {
-		this.predicate = predicate;
-	}
+    public DependencyExclusionCustomizer(Predicate<ProjectVersionRef> predicate) {
+        this.predicate = predicate;
+    }
 
-	@Override
-	public AlignmentService.Request customize(AlignmentService.Request request) {
-		final ProjectVersionRef project = request.getProject();
-		final List<? extends ProjectVersionRef> dependenciesWithoutExclusions =
-				request.getDependencies().stream().filter(predicate).collect(Collectors.toList());
+    @Override
+    public AlignmentService.Request customize(AlignmentService.Request request) {
+        final ProjectVersionRef project = request.getProject();
+        final List<? extends ProjectVersionRef> dependenciesWithoutExclusions = request.getDependencies().stream()
+                .filter(predicate).collect(Collectors.toList());
 
-		return new AlignmentService.Request(project, dependenciesWithoutExclusions);
-	}
+        return new AlignmentService.Request(project, dependenciesWithoutExclusions);
+    }
 
-	public static AlignmentService.RequestCustomizer fromConfigurationForModule(Configuration configuration, ProjectRef projectRef) {
-		final Configuration dependencyExclusionConfiguration = configuration.subset("dependencyExclusion");
-		if (dependencyExclusionConfiguration.isEmpty()) {
-			return AlignmentService.RequestCustomizer.NOOP;
-		}
+    public static AlignmentService.RequestCustomizer fromConfigurationForModule(Configuration configuration,
+            ProjectRef projectRef) {
+        final Configuration dependencyExclusionConfiguration = configuration.subset("dependencyExclusion");
+        if (dependencyExclusionConfiguration.isEmpty()) {
+            return AlignmentService.RequestCustomizer.NOOP;
+        }
 
-		final Iterator<String> keys = dependencyExclusionConfiguration.getKeys();
-		//the idea is to start with a predicate that passes all artifacts and add one predicate per configured exclusion
-		final List<Predicate> predicates = new ArrayList<>();
-		while (keys.hasNext()) {
-			final String key = keys.next();
+        final Iterator<String> keys = dependencyExclusionConfiguration.getKeys();
+        //the idea is to start with a predicate that passes all artifacts and add one predicate per configured exclusion
+        final List<Predicate> predicates = new ArrayList<>();
+        while (keys.hasNext()) {
+            final String key = keys.next();
 
-			try {
-				final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
-				if (keyParseResult.matchesModule(projectRef)) {
-					log.debug("Excluding dependency {} from alignment of module {}", keyParseResult.getDependency(), projectRef);
-					// if the key matches this module, add a predicate that rejects the artifact that was configured in the property
-					predicates.add(new DependencyExclusionPredicate(keyParseResult.getDependency()));
-				}
-			}
-			catch (RuntimeException e) {
-				log.debug("Unable to parse key {}", key, e);
-			}
-		}
+            try {
+                final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
+                if (keyParseResult.matchesModule(projectRef)) {
+                    log.debug("Excluding dependency {} from alignment of module {}", keyParseResult.getDependency(),
+                            projectRef);
+                    // if the key matches this module, add a predicate that rejects the artifact that was configured in the property
+                    predicates.add(new DependencyExclusionPredicate(keyParseResult.getDependency()));
+                }
+            } catch (RuntimeException e) {
+                log.debug("Unable to parse key {}", key, e);
+            }
+        }
 
-		if (predicates.isEmpty()) {
-			return AlignmentService.RequestCustomizer.NOOP;
-		}
+        if (predicates.isEmpty()) {
+            return AlignmentService.RequestCustomizer.NOOP;
+        }
 
-		return new DependencyExclusionCustomizer(predicates.stream().reduce(x->true, Predicate::and));
-	}
+        return new DependencyExclusionCustomizer(predicates.stream().reduce(x -> true, Predicate::and));
+    }
 
-	private static class DependencyExclusionPredicate implements Predicate<ProjectRef> {
-		private final ProjectRef dependency;
+    private static class DependencyExclusionPredicate implements Predicate<ProjectRef> {
+        private final ProjectRef dependency;
 
-		DependencyExclusionPredicate(ProjectRef dependency) {
-			this.dependency = dependency;
-		}
+        DependencyExclusionPredicate(ProjectRef dependency) {
+            this.dependency = dependency;
+        }
 
-
-		@Override
-		public boolean test(ProjectRef gav) {
-			return !dependency.matches(gav);
-		}
-	}
+        @Override
+        public boolean test(ProjectRef gav) {
+            return !dependency.matches(gav);
+        }
+    }
 }

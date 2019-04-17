@@ -2,6 +2,8 @@ package org.jboss.gm.analyzer.alignment;
 
 import java.io.IOException;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,7 +15,6 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
 public final class SerializationUtils {
 
@@ -22,25 +23,26 @@ public final class SerializationUtils {
     private static final String VERSION = "version";
 
     private SerializationUtils() {
-	}
+    }
 
-	private static ObjectMapper mapper;
+    private static ObjectMapper mapper;
 
-	public static ObjectMapper getObjectMapper() {
-		if (mapper == null) {
-			mapper = new ObjectMapper();
+    public static ObjectMapper getObjectMapper() {
+        if (mapper == null) {
+            mapper = new ObjectMapper();
             SimpleModule module = new SimpleModule();
             module.addDeserializer(ProjectVersionRef.class, new ProjectVersionRefDeserializer());
             module.addSerializer(ProjectVersionRef.class, new ProjectVersionRefSerializer());
             mapper.registerModule(module);
-		}
-		return mapper;
-	}
+        }
+        return mapper;
+    }
 
     public static class ProjectVersionRefDeserializer extends JsonDeserializer<ProjectVersionRef> {
 
         @Override
-        public ProjectVersionRef deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+        public ProjectVersionRef deserialize(JsonParser p, DeserializationContext ctxt)
+                throws IOException, JsonProcessingException {
             JsonNode node = p.getCodec().readTree(p);
             final String groupId = node.get(GROUP_ID).asText();
             final String artifactId = node.get(ARTIFACT_ID).asText();

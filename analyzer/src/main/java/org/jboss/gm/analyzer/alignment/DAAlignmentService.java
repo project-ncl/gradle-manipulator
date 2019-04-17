@@ -11,7 +11,7 @@ import org.commonjava.maven.ext.io.rest.Translator;
 
 public class DAAlignmentService implements AlignmentService {
 
-	private final DefaultTranslator restEndpoint;
+    private final Translator restEndpoint;
 
 	public DAAlignmentService(String endpointUrl) {
 		//TODO: the parameters needs to be verified

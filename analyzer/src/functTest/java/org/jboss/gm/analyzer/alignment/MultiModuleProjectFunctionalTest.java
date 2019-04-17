@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.List;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
@@ -29,7 +31,7 @@ public class MultiModuleProjectFunctionalTest {
 		final BuildResult buildResult = GradleRunner.create()
 				.withProjectDir(simpleProjectRoot)
 				.withArguments(AlignmentTask.NAME)
-//				.withDebug(true)
+				.withDebug(true)
 				.withPluginClasspath()
 				.build();
 
@@ -51,9 +53,10 @@ public class MultiModuleProjectFunctionalTest {
 			assertThat(am.getModules()).satisfies(ml -> {
 				assertThat(ml.get(1)).satisfies(subproject1 -> {
 					assertThat(subproject1.getNewVersion()).contains("redhat"); //ensure the project version was updated
-					assertThat(subproject1.getAlignedDependencies()
-							//ensure that the dependencies were updated - dummy for now
-							.stream().filter(d -> "compile".equals(d.getConfiguration()))).hasSize(1);
+					final List<ProjectVersionRef> alignedDependencies = subproject1.getAlignedDependencies();
+					//ensure that the dependencies were updated - dummy for now
+					assertThat(alignedDependencies .stream().filter(d -> d.getVersionString().contains("redhat")))
+							.hasSize(alignedDependencies.size());
 				});
 			});
 		});

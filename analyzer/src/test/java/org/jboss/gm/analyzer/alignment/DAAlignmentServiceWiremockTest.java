@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.apache.commons.io.FileUtils;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,10 +37,10 @@ public class DAAlignmentServiceWiremockTest {
 	public void alignmentWorksAsExpected() {
 		final DAAlignmentService sut = new DAAlignmentService(String.format("http://localhost:%d/da/rest/v-1", PORT));
 
-		final GAV.Simple projectGav = new GAV.Simple("org.acme", "dummy", "1.0.0");
-		final GAV.Simple hibernateGav = new GAV.Simple("org.hibernate", "hibernate-core", "5.3.7.Final");
-		final GAV.Simple undertowGav = new GAV.Simple("io.undertow", "undertow-core", "2.0.15.Final");
-		final GAV.Simple mockitoGav = new GAV.Simple("org.mockito", "mockito-core", "2.27.0");
+		final ProjectVersionRef projectGav = AlignmentUtils.withGAV("org.acme", "dummy", "1.0.0");
+		final ProjectVersionRef hibernateGav = AlignmentUtils.withGAV("org.hibernate", "hibernate-core", "5.3.7.Final");
+		final ProjectVersionRef undertowGav = AlignmentUtils.withGAV("io.undertow", "undertow-core", "2.0.15.Final");
+		final ProjectVersionRef mockitoGav = AlignmentUtils.withGAV("org.mockito", "mockito-core", "2.27.0");
 		final AlignmentService.Response response = sut.align(new AlignmentService.Request(
 				projectGav,
 				Arrays.asList(

@@ -3,6 +3,8 @@ package org.jboss.gm.analyzer.alignment;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+
 public class DummyAlignmentService implements AlignmentService {
 
 	@Override
@@ -12,7 +14,7 @@ public class DummyAlignmentService implements AlignmentService {
 
 	// transforms the version by simply appending "-redhat-00001"
 	private String getProjectAlignment(Request request) {
-		return request.getProject().getVersion() + "-redhat-00002";
+		return request.getProject().getVersionString() + "-redhat-00002";
 	}
 
 	// only transforms the first dependency by simply appending "-redhat-00001"
@@ -22,8 +24,8 @@ public class DummyAlignmentService implements AlignmentService {
 			return result;
 		}
 
-		final GAV first = request.getDependencies().get(0);
-		result.put(first.getIdentifier(), first.getVersion() + "-redhat-00001");
+		final ProjectVersionRef first = request.getDependencies().get(0);
+		result.put(first.toString(), first.getVersionString() + "-redhat-00001");
 		return result;
 	}
 
@@ -42,8 +44,8 @@ public class DummyAlignmentService implements AlignmentService {
 		}
 
 		@Override
-		public String getAlignedVersionOfGav(GAV gav) {
-			return dependencyAlignments.get(gav.getIdentifier());
+		public String getAlignedVersionOfGav(ProjectVersionRef gav) {
+			return dependencyAlignments.get(gav.toString());
 		}
 	}
 

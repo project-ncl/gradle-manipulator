@@ -2,6 +2,7 @@ package org.jboss.gm.analyzer.alignment;
 
 import java.util.HashMap;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.junit.Test;
@@ -18,8 +19,8 @@ public class DependencyOverrideCustomizerTests {
 
 	@Test
 	public void ensureOverrideOfDependenciesWorks() {
-		final GAV.Simple hibernateGav = new GAV.Simple("org.hibernate", "hibernate-core", "5.3.7.Final");
-		final GAV.Simple undertowGav = new GAV.Simple("io.undertow", "undertow-core", "2.0.15.Final");
+		final ProjectVersionRef hibernateGav = AlignmentUtils.withGAV("org.hibernate", "hibernate-core", "5.3.7.Final");
+		final ProjectVersionRef undertowGav = AlignmentUtils.withGAV("io.undertow", "undertow-core", "2.0.15.Final");
 
 
 		final String expectedHibernateVersion = "5.3.7.Final-redhat-00002";
@@ -30,9 +31,9 @@ public class DependencyOverrideCustomizerTests {
 
 		final AlignmentService.Response originalResp = mock(AlignmentService.Response.class);
 		// the default behavior of the response will be to add '-redhat-00001' suffix
-		when(originalResp.getAlignedVersionOfGav(any(GAV.class))).thenAnswer((Answer<String>) invocation -> {
-			final GAV input = (GAV) invocation.getArguments()[0];
-			return input.getVersion() + DEFAULT_SUFFIX;
+		when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
+			final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
+			return input.getVersionString() + DEFAULT_SUFFIX;
 		});
 		final String newProjectVersion = "1.0.0" + DEFAULT_SUFFIX;
 		when(originalResp.getNewProjectVersion()).thenReturn(newProjectVersion);
@@ -45,7 +46,7 @@ public class DependencyOverrideCustomizerTests {
 			// make sure the matched dependency's version has changed
 			assertThat(r.getAlignedVersionOfGav(hibernateGav)).isEqualTo(expectedHibernateVersion);
 			// make sure that non matched dependencies still return their original value
-			assertThat(r.getAlignedVersionOfGav(undertowGav)).isEqualTo(undertowGav.getVersion());
+			assertThat(r.getAlignedVersionOfGav(undertowGav)).isEqualTo(undertowGav.getVersionString());
 		});
 	}
 

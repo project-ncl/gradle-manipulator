@@ -83,13 +83,13 @@ public class DependencyOverrideCustomizer implements AlignmentService.ResponseCu
 		}
 
 		@Override
-		public String getAlignedVersionOfGav(GAV gav) {
+		public String getAlignedVersionOfGav(ProjectVersionRef gav) {
 			final Optional<ProjectRef> projectRef = matchingProjectRef(gav);
 			if (projectRef.isPresent()) {
 				return overrideMap.get(projectRef.get());
 			}
 
-			return gav.getVersion();
+			return gav.getVersionString();
 		}
 
 		private Optional<ProjectRef> matchingProjectRef(GAV gav) {

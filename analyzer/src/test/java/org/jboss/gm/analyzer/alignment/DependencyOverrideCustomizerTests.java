@@ -1,7 +1,9 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.util.function.Predicate;
+import java.util.HashMap;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
 
@@ -20,10 +22,11 @@ public class DependencyOverrideCustomizerTests {
 		final GAV.Simple undertowGav = new GAV.Simple("io.undertow", "undertow-core", "2.0.15.Final");
 
 
-		final Predicate<GAV> overrideHibernatePredicate = (gav -> "org.hibernate".equals(gav.getGroup()));
 		final String expectedHibernateVersion = "5.3.7.Final-redhat-00002";
 		final DependencyOverrideCustomizer sut =
-				new DependencyOverrideCustomizer(overrideHibernatePredicate, expectedHibernateVersion, 0);
+				new DependencyOverrideCustomizer(new HashMap<ProjectRef, String>() {{
+					put(new SimpleProjectRef("org.hibernate", "*"), expectedHibernateVersion);
+				}});
 
 		final AlignmentService.Response originalResp = mock(AlignmentService.Response.class);
 		// the default behavior of the response will be to add '-redhat-00001' suffix

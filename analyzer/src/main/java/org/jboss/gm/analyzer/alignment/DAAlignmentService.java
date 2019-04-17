@@ -39,7 +39,7 @@ public class DAAlignmentService implements AlignmentService {
 	}
 
 	private static ProjectVersionRef toProjectVersionRef(GAV gav) {
-		return new SimpleProjectVersionRef(new SimpleProjectVersionRef(gav.getGroup(), gav.getName(), gav.getVersion()));
+        return new SimpleProjectVersionRef(gav.getGroup(), gav.getName(), gav.getVersion());
 	}
 
 	private static class Response implements AlignmentService.Response {

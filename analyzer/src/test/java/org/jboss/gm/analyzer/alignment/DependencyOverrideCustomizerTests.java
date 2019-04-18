@@ -1,6 +1,7 @@
 package org.jboss.gm.analyzer.alignment;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -19,8 +20,8 @@ public class DependencyOverrideCustomizerTests {
 
     @Test
     public void ensureOverrideOfDependenciesWorks() {
-        final ProjectVersionRef hibernateGav = AlignmentUtils.withGAV("org.hibernate", "hibernate-core", "5.3.7.Final");
-        final ProjectVersionRef undertowGav = AlignmentUtils.withGAV("io.undertow", "undertow-core", "2.0.15.Final");
+        final ProjectVersionRef hibernateGav = withGAV("org.hibernate", "hibernate-core", "5.3.7.Final");
+        final ProjectVersionRef undertowGav = withGAV("io.undertow", "undertow-core", "2.0.15.Final");
 
         final String expectedHibernateVersion = "5.3.7.Final-redhat-00002";
         final DependencyOverrideCustomizer sut = new DependencyOverrideCustomizer(new HashMap<ProjectRef, String>() {

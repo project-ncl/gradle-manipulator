@@ -13,6 +13,8 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
+import org.jboss.gm.common.alignment.AlignmentModel;
+import org.jboss.gm.common.alignment.SerializationUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;

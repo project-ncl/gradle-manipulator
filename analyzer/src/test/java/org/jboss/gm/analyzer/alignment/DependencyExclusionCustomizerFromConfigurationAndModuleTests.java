@@ -1,6 +1,7 @@
 package org.jboss.gm.analyzer.alignment;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,16 +46,16 @@ public class DependencyExclusionCustomizerFromConfigurationAndModuleTests {
 
     @Test
     public void ensureExclusionMatches() {
-        final ProjectVersionRef project = AlignmentUtils.withGAV("org.acme", "dummy", "1.0.0");
-        final ProjectVersionRef hibernateGav = AlignmentUtils.withGAV("org.hibernate", "hibernate-core", "5.3.7.Final");
-        final ProjectVersionRef hibernateValidatorGav = AlignmentUtils.withGAV("org.hibernate", "hibernate-validator",
+        final ProjectVersionRef project = withGAV("org.acme", "dummy", "1.0.0");
+        final ProjectVersionRef hibernateGav = withGAV("org.hibernate", "hibernate-core", "5.3.7.Final");
+        final ProjectVersionRef hibernateValidatorGav = withGAV("org.hibernate", "hibernate-validator",
                 "6.0.16.Final");
-        final ProjectVersionRef undertowGav = AlignmentUtils.withGAV("io.undertow", "undertow-core", "2.0.15.Final");
-        final ProjectVersionRef jacksonDatabindGav = AlignmentUtils.withGAV("com.fasterxml.jackson.core", "jackson-databind",
+        final ProjectVersionRef undertowGav = withGAV("io.undertow", "undertow-core", "2.0.15.Final");
+        final ProjectVersionRef jacksonDatabindGav = withGAV("com.fasterxml.jackson.core", "jackson-databind",
                 "2.9.8");
-        final ProjectVersionRef mongoGav = AlignmentUtils.withGAV("org.mongodb", "mongo-java-driver", "3.10.2");
-        final ProjectVersionRef mockitoGav = AlignmentUtils.withGAV("org.mockito", "mockito-core", "2.27.0");
-        final ProjectVersionRef wiremockGav = AlignmentUtils.withGAV("com.github.tomakehurst", "wiremock-jre8", "2.23.2");
+        final ProjectVersionRef mongoGav = withGAV("org.mongodb", "mongo-java-driver", "3.10.2");
+        final ProjectVersionRef mockitoGav = withGAV("org.mockito", "mockito-core", "2.27.0");
+        final ProjectVersionRef wiremockGav = withGAV("com.github.tomakehurst", "wiremock-jre8", "2.23.2");
 
         final Map<String, String> properties = new HashMap<String, String>() {
             {

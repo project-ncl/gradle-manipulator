@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.jboss.gm.common.alignment.AlignmentModel;
+import org.jboss.gm.common.alignment.AlignmentUtils;
 
 public class AlignmentPlugin implements Plugin<Project> {
 

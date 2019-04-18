@@ -1,8 +1,9 @@
-package org.jboss.gm.analyzer.alignment;
+package org.jboss.gm.common.alignment;
 
 import java.io.IOException;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.jboss.gm.common.ProjectVersionFactory;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -11,7 +12,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -48,7 +48,7 @@ public final class SerializationUtils {
             final String artifactId = node.get(ARTIFACT_ID).asText();
             final String version = node.get(VERSION).asText();
 
-            return AlignmentUtils.withGAV(groupId, artifactId, version);
+            return ProjectVersionFactory.withGAV(groupId, artifactId, version);
         }
     }
 

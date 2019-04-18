@@ -3,7 +3,7 @@ plugins {
 }
 
 allprojects {
-    group = 'org.acme.gradle'
+    group = 'org.acme'
 
     apply plugin: 'java'
     apply plugin: 'gm-analyzer'

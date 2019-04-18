@@ -13,7 +13,7 @@ import org.apache.commons.configuration2.MapConfiguration;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.junit.Test;
 
-public class DependencyOverrideCustomizerFromConfigurationAndModuleTests {
+public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
 
     private static final ProjectVersionRef PROJECT = withGAV("org.acme", "test", "1.0.0-redhat-00001");
 

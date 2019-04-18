@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-public class WithCustomizersDelegatingAlignmentServiceTests {
+public class WithCustomizersDelegatingAlignmentServiceTest {
 
     @Test
     public void nullCustomizersShouldBeAllowed() {

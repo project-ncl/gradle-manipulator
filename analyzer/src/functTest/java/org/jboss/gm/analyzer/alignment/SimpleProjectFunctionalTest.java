@@ -1,11 +1,17 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -14,17 +20,27 @@ import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.jboss.gm.common.alignment.AlignmentModel;
 import org.jboss.gm.common.alignment.SerializationUtils;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-public class SimpleProjectFunctionalTest {
+public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
+    @Before
+    public void setup() {
+        stubFor(post(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                        .withBody(readSampleDAResponse("simple-project-da-response.json"))));
+    }
+
     @Test
-    public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException {
+    public void ensureAlignmentFileCreated() throws IOException, URISyntaxException {
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         TestUtils.copyDirectory("simple-project", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
@@ -37,7 +53,6 @@ public class SimpleProjectFunctionalTest {
                 .build();
 
         assertThat(buildResult.task(":" + AlignmentTask.NAME).getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
-        assertThat(buildResult.getOutput()).containsIgnoringCase("Starting alignment task");
 
         final Path alignmentFilePath = simpleProjectRoot.toPath().resolve("alignment.json");
         assertThat(alignmentFilePath).isRegularFile();
@@ -51,12 +66,14 @@ public class SimpleProjectFunctionalTest {
             });
             assertThat(am.getModules()).hasSize(1).satisfies(ml -> {
                 assertThat(ml.get(0)).satisfies(root -> {
-                    assertThat(root.getNewVersion()).contains("redhat"); //ensure the project version was updated
+                    assertThat(root.getNewVersion()).isEqualTo("1.0.1-redhat-00001");
                     assertThat(root.getName()).isEqualTo("root");
                     final List<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies();
-                    //ensure that the dependencies were updated - dummy for now
-                    assertThat(alignedDependencies.stream().filter(d -> d.getVersionString().contains("redhat")))
-                            .hasSize(alignedDependencies.size());
+                    assertThat(alignedDependencies)
+                            .extracting("artifactId", "versionString")
+                            .containsOnly(
+                                    tuple("undertow-core", "2.0.15.Final-redhat-00001"),
+                                    tuple("hibernate-core", "5.3.7.Final-redhat-00001"));
                 });
             });
         });

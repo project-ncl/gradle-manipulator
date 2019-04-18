@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.junit.Test;
 
-public class DependencyExclusionCustomizerTests {
+public class DependencyExclusionCustomizerTest {
 
     @Test
     public void ensureExclusionOfDependenciesWorks() {

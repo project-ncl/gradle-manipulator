@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.Translator;
 

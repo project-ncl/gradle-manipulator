@@ -8,7 +8,7 @@ package org.jboss.gm.manipulation;
 
 import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 
-import java.util.List;
+import java.util.Map;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.Action;
@@ -31,13 +31,12 @@ public class AlignedDependencyResolver implements Action<DependencyResolveDetail
         final ModuleVersionSelector requested = resolveDetails.getRequested();
         final ProjectVersionRef requestedGAV = withGAV(requested.getGroup(), requested.getName(), requested.getVersion());
 
-        // todo: change aligned dependencies view to be able to query it directly
-        final List<ProjectVersionRef> alignedDependencies = module.getAlignedDependencies();
-        final int i = alignedDependencies.indexOf(requestedGAV);
-        if (i != -1) {
-            final ProjectVersionRef aligned = alignedDependencies.get(i);
+        final Map<String, ProjectVersionRef> alignedDependencies = module.getAlignedDependencies();
+        final String key = requestedGAV.toString();
+        final ProjectVersionRef aligned = alignedDependencies.get(key);
+        if (aligned != null) {
             final String alignedGAV = aligned.toString();
-            resolveDetails.because(requested.toString() + " is aligned to " + alignedGAV).useTarget(alignedGAV);
+            resolveDetails.because(key + " is aligned to " + alignedGAV).useTarget(alignedGAV);
         }
     }
 }

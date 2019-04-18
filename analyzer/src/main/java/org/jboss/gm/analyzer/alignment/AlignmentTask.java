@@ -34,17 +34,19 @@ public class AlignmentTask extends DefaultTask {
 
         final Collection<ProjectVersionRef> deps = getAllProjectDependencies(project);
         final AlignmentService alignmentService = AlignmentServiceFactory.getAlignmentService(project);
+        final String currentProjectVersion = project.getVersion().toString();
         final AlignmentService.Response alignmentResponse = alignmentService.align(
                 new AlignmentService.Request(
                         ProjectVersionFactory.withGAV(project.getGroup().toString(), projectName,
-                                project.getVersion().toString()),
+                                currentProjectVersion),
                         deps));
 
         final AlignmentModel alignmentModel = getCurrentAlignmentModel(project);
         final AlignmentModel.Module correspondingModule = alignmentModel.findCorrespondingModule(projectName);
-        correspondingModule.setNewVersion(alignmentResponse.getNewProjectVersion());
 
+        correspondingModule.setNewVersion(alignmentResponse.getNewProjectVersion());
         updateModuleDependencies(correspondingModule, deps, alignmentResponse);
+
         writeUpdatedAlignmentModel(project, alignmentModel);
     }
 

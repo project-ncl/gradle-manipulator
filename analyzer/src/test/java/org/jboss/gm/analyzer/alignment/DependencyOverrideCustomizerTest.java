@@ -14,9 +14,9 @@ import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
 
-public class DependencyOverrideCustomizerTests {
+public class DependencyOverrideCustomizerTest {
 
-    protected static final String DEFAULT_SUFFIX = "-redhat-00001";
+    private static final String DEFAULT_SUFFIX = "-redhat-00001";
 
     @Test
     public void ensureOverrideOfDependenciesWorks() {

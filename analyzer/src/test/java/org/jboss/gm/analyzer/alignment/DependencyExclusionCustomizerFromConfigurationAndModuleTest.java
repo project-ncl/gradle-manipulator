@@ -14,7 +14,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.junit.Test;
 
-public class DependencyExclusionCustomizerFromConfigurationAndModuleTests {
+public class DependencyExclusionCustomizerFromConfigurationAndModuleTest {
 
     private static final ProjectRef PROJECT = new SimpleProjectRef("org.acme", "test");
 

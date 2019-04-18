@@ -24,7 +24,7 @@ public class DummyAlignmentService implements AlignmentService {
             return result;
         }
 
-        final ProjectVersionRef first = request.getDependencies().get(0);
+        final ProjectVersionRef first = request.getDependencies().iterator().next();
         result.put(first.toString(), first.getVersionString() + "-redhat-00001");
         return result;
     }

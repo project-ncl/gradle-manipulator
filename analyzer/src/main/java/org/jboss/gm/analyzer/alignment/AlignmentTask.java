@@ -4,7 +4,10 @@ import static org.jboss.gm.analyzer.alignment.AlignmentUtils.getCurrentAlignment
 import static org.jboss.gm.analyzer.alignment.AlignmentUtils.writeUpdatedAlignmentModel;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.DefaultTask;
@@ -27,7 +30,7 @@ public class AlignmentTask extends DefaultTask {
         final String projectName = project.getName();
         System.out.println("Starting alignment task for project " + projectName);
 
-        final List<ProjectVersionRef> deps = getAllProjectDependencies(project);
+        final Collection<ProjectVersionRef> deps = getAllProjectDependencies(project);
         final AlignmentService alignmentService = AlignmentServiceFactory.getAlignmentService(project);
         final AlignmentService.Response alignmentResponse = alignmentService.align(
                 new AlignmentService.Request(
@@ -42,15 +45,15 @@ public class AlignmentTask extends DefaultTask {
         writeUpdatedAlignmentModel(project, alignmentModel);
     }
 
-    private List<ProjectVersionRef> getAllProjectDependencies(Project project) {
-        final List<ProjectVersionRef> result = new ArrayList<>();
+    private Collection<ProjectVersionRef> getAllProjectDependencies(Project project) {
+        final Set<ProjectVersionRef> result = new LinkedHashSet<>();
         project.getConfigurations().all(configuration -> configuration.getAllDependencies().forEach(d -> result.add(
                 AlignmentUtils.withGAVAndConfiguration(d.getGroup(), d.getName(), d.getVersion(), configuration.getName()))));
         return result;
     }
 
     private void updateModuleDependencies(AlignmentModel.Module correspondingModule,
-            List<ProjectVersionRef> allModuleDependencies, AlignmentService.Response alignmentResponse) {
+            Collection<ProjectVersionRef> allModuleDependencies, AlignmentService.Response alignmentResponse) {
 
         final List<ProjectVersionRef> alignedDependencies = new ArrayList<>();
         allModuleDependencies.forEach(d -> {

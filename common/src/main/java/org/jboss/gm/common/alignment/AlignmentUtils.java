@@ -26,8 +26,7 @@ public final class AlignmentUtils {
      */
     public static AlignmentModel getCurrentAlignmentModel(Project project) {
         try {
-            return SerializationUtils.getObjectMapper().readValue(
-                    getAlignmentFilePath(project).toFile(), AlignmentModel.class);
+            return SerializationUtils.getObjectMapper().readValue(getAlignmentFilePath(project).toFile(), AlignmentModel.class);
         } catch (IOException e) {
             throw new RuntimeException("Unable to deserialize " + ALIGNMENT_FILE_NAME, e);
         }

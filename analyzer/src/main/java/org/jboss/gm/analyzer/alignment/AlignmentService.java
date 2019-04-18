@@ -1,6 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
@@ -9,15 +9,15 @@ public interface AlignmentService {
     Response align(Request request);
 
     class Request {
-        private final List<? extends ProjectVersionRef> dependencies;
+        private final Collection<? extends ProjectVersionRef> dependencies;
         private final ProjectVersionRef project;
 
-        public Request(ProjectVersionRef project, List<? extends ProjectVersionRef> dependencies) {
+        public Request(ProjectVersionRef project, Collection<? extends ProjectVersionRef> dependencies) {
             this.dependencies = dependencies;
             this.project = project;
         }
 
-        List<? extends ProjectVersionRef> getDependencies() {
+        Collection<? extends ProjectVersionRef> getDependencies() {
             return dependencies;
         }
 

@@ -3,10 +3,8 @@ package org.jboss.gm.analyzer.alignment;
 import static org.jboss.gm.common.alignment.AlignmentUtils.getCurrentAlignmentModel;
 import static org.jboss.gm.common.alignment.AlignmentUtils.writeUpdatedAlignmentModel;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -61,14 +59,13 @@ public class AlignmentTask extends DefaultTask {
     private void updateModuleDependencies(AlignmentModel.Module correspondingModule,
             Collection<ProjectVersionRef> allModuleDependencies, AlignmentService.Response alignmentResponse) {
 
-        final List<ProjectVersionRef> alignedDependencies = new ArrayList<>();
         allModuleDependencies.forEach(d -> {
             final String newDependencyVersion = alignmentResponse.getAlignedVersionOfGav(d);
             if (newDependencyVersion != null) {
-                alignedDependencies.add(ProjectVersionFactory.withNewVersion(d, newDependencyVersion));
+                final ProjectVersionRef newVersion = ProjectVersionFactory.withNewVersion(d, newDependencyVersion);
+                correspondingModule.getAlignedDependencies().put(newVersion.toString(), newVersion);
             }
         });
-        correspondingModule.setAlignedDependencies(alignedDependencies);
     }
 
 }

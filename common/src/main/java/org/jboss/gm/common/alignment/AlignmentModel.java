@@ -1,24 +1,40 @@
 package org.jboss.gm.common.alignment;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class AlignmentModel {
 
-    private BasicInfo basicInfo;
+    @JsonProperty
+    private String group;
+    @JsonProperty
+    private String name;
+
+    public AlignmentModel() {
+    }
+
+    public AlignmentModel(String group, String name) {
+        this.group = group;
+        this.name = name;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     // the root project is always the first project in the list
     private List<Module> modules = new ArrayList<>();
-
-    public BasicInfo getBasicInfo() {
-        return basicInfo;
-    }
-
-    public void setBasicInfo(BasicInfo basicInfo) {
-        this.basicInfo = basicInfo;
-    }
 
     public List<Module> getModules() {
         return modules;
@@ -34,39 +50,14 @@ public class AlignmentModel {
                 .orElseThrow(() -> new IllegalArgumentException("Project " + name + "does not exist"));
     }
 
-    public static class BasicInfo {
-        private String group;
-        private String name;
-
-        public BasicInfo() {
-        }
-
-        public BasicInfo(String group, String name) {
-            this.group = group;
-            this.name = name;
-        }
-
-        public String getGroup() {
-            return group;
-        }
-
-        public void setGroup(String group) {
-            this.group = group;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-    }
-
     public static class Module {
+        @JsonProperty
         private String name;
+
+        @JsonProperty
         private String newVersion;
-        private List<ProjectVersionRef> alignedDependencies = new ArrayList<>();
+
+        private Map<String, ProjectVersionRef> alignedDependencies = new HashMap<>();
 
         public Module() {
         }
@@ -79,24 +70,16 @@ public class AlignmentModel {
             return name;
         }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public List<ProjectVersionRef> getAlignedDependencies() {
+        public Map<String, ProjectVersionRef> getAlignedDependencies() {
             return alignedDependencies;
-        }
-
-        public void setAlignedDependencies(List<ProjectVersionRef> alignedDependencies) {
-            this.alignedDependencies = alignedDependencies;
         }
 
         public String getNewVersion() {
             return newVersion;
         }
 
-        public void setNewVersion(String newVersion) {
-            this.newVersion = newVersion;
+        public void setNewVersion(String newProjectVersion) {
+            this.newVersion = newProjectVersion;
         }
     }
 

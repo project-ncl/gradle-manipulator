@@ -12,9 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.List;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
@@ -81,10 +79,9 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         final AlignmentModel alignmentModel = SerializationUtils.getObjectMapper()
                 .readValue(alignmentFilePath.toFile(), AlignmentModel.class);
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
-            assertThat(am.getBasicInfo()).isNotNull().satisfies(b -> {
-                assertThat(b.getGroup()).isEqualTo("org.acme");
-                assertThat(b.getName()).isEqualTo("root");
-            });
+            assertThat(am.getGroup()).isEqualTo("org.acme");
+            assertThat(am.getName()).isEqualTo("root");
+
             assertThat(am.getModules()).hasSize(3).extracting("name").containsExactly("root", "subproject1", "subproject2");
 
             assertThat(am.getModules()).satisfies(ml -> {

@@ -31,8 +31,7 @@ public class AlignmentPlugin implements Plugin<Project> {
     }
 
     private AlignmentModel getInitialAlignmentModel(Project project) {
-        final AlignmentModel alignmentModel = new AlignmentModel();
-        alignmentModel.setBasicInfo(new AlignmentModel.BasicInfo(project.getGroup().toString(), project.getName()));
+        final AlignmentModel alignmentModel = new AlignmentModel(project.getGroup().toString(), project.getName());
         final List<AlignmentModel.Module> modules = new ArrayList<>();
         modules.add(new AlignmentModel.Module(project.getName()));
         if (!project.getSubprojects().isEmpty()) {

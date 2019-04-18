@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -60,10 +59,8 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         final AlignmentModel alignmentModel = SerializationUtils.getObjectMapper()
                 .readValue(alignmentFilePath.toFile(), AlignmentModel.class);
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
-            assertThat(am.getBasicInfo()).isNotNull().satisfies(b -> {
-                assertThat(b.getGroup()).isEqualTo("org.acme.gradle");
-                assertThat(b.getName()).isEqualTo("root");
-            });
+            assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
+            assertThat(am.getName()).isEqualTo("root");
             assertThat(am.getModules()).hasSize(1).satisfies(ml -> {
                 assertThat(ml.get(0)).satisfies(root -> {
                     assertThat(root.getNewVersion()).isEqualTo("1.0.1-redhat-00001");

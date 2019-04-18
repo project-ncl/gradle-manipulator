@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.Collection;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.testkit.runner.BuildResult;
@@ -65,7 +65,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                 assertThat(ml.get(0)).satisfies(root -> {
                     assertThat(root.getNewVersion()).isEqualTo("1.0.1-redhat-00001");
                     assertThat(root.getName()).isEqualTo("root");
-                    final List<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies();
+                    final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
                     assertThat(alignedDependencies)
                             .extracting("artifactId", "versionString")
                             .containsOnly(

@@ -1,7 +1,9 @@
 package org.jboss.gm.common.alignment;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -49,9 +51,13 @@ public class AlignmentModel {
     }
 
     public static class Module {
+        @JsonProperty
         private String name;
+
+        @JsonProperty
         private String newVersion;
-        private List<ProjectVersionRef> alignedDependencies = new ArrayList<>();
+
+        private Map<String, ProjectVersionRef> alignedDependencies = new HashMap<>();
 
         public Module() {
         }
@@ -64,24 +70,16 @@ public class AlignmentModel {
             return name;
         }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public List<ProjectVersionRef> getAlignedDependencies() {
+        public Map<String, ProjectVersionRef> getAlignedDependencies() {
             return alignedDependencies;
-        }
-
-        public void setAlignedDependencies(List<ProjectVersionRef> alignedDependencies) {
-            this.alignedDependencies = alignedDependencies;
         }
 
         public String getNewVersion() {
             return newVersion;
         }
 
-        public void setNewVersion(String newVersion) {
-            this.newVersion = newVersion;
+        public void setNewVersion(String newProjectVersion) {
+            this.newVersion = newProjectVersion;
         }
     }
 

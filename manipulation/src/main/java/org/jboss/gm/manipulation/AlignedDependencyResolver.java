@@ -35,8 +35,7 @@ public class AlignedDependencyResolver implements Action<DependencyResolveDetail
         final String key = requestedGAV.toString();
         final ProjectVersionRef aligned = alignedDependencies.get(key);
         if (aligned != null) {
-            final String alignedGAV = aligned.toString();
-            resolveDetails.because(key + " is aligned to " + alignedGAV).useTarget(alignedGAV);
+            resolveDetails.because(key + " is aligned to " + aligned.toString()).useVersion(aligned.getVersionString());
         }
     }
 }

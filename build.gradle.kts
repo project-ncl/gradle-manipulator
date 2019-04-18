@@ -14,7 +14,7 @@ subprojects {
 
     apply(plugin = "maven-publish")
     apply(plugin = "java-gradle-plugin")
-    apply(plugin = "com.diffplug.gradle.spotless" )
+    apply(plugin = "com.diffplug.gradle.spotless")
 
     spotless {
         java {

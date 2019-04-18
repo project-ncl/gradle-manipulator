@@ -1,4 +1,4 @@
-package org.jboss.gm.analyzer.alignment;
+package org.jboss.gm.common.alignment;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -6,8 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.gradle.api.Project;
 
 public final class AlignmentUtils {
@@ -61,17 +59,4 @@ public final class AlignmentUtils {
         }
     }
 
-    static ProjectVersionRef withNewVersion(ProjectVersionRef dependency, String newVersion) {
-        return withGAV(dependency.getGroupId(), dependency.getArtifactId(), newVersion);
-    }
-
-    static ProjectVersionRef withGAV(String group, String artifact, String version) {
-        return new SimpleProjectVersionRef(group, artifact, version);
-    }
-
-    static ProjectVersionRef withGAVAndConfiguration(String group, String artifact, String version,
-            String configuration) {
-        // todo: add configuration support?
-        return withGAV(group, artifact, version);
-    }
 }

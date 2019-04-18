@@ -1,7 +1,7 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.jboss.gm.analyzer.alignment.AlignmentUtils.getCurrentAlignmentModel;
-import static org.jboss.gm.analyzer.alignment.AlignmentUtils.writeUpdatedAlignmentModel;
+import static org.jboss.gm.common.alignment.AlignmentUtils.getCurrentAlignmentModel;
+import static org.jboss.gm.common.alignment.AlignmentUtils.writeUpdatedAlignmentModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,6 +13,8 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
+import org.jboss.gm.common.ProjectVersionFactory;
+import org.jboss.gm.common.alignment.AlignmentModel;
 
 public class AlignmentTask extends DefaultTask {
 
@@ -34,7 +36,8 @@ public class AlignmentTask extends DefaultTask {
         final AlignmentService alignmentService = AlignmentServiceFactory.getAlignmentService(project);
         final AlignmentService.Response alignmentResponse = alignmentService.align(
                 new AlignmentService.Request(
-                        AlignmentUtils.withGAV(project.getGroup().toString(), projectName, project.getVersion().toString()),
+                        ProjectVersionFactory.withGAV(project.getGroup().toString(), projectName,
+                                project.getVersion().toString()),
                         deps));
 
         final AlignmentModel alignmentModel = getCurrentAlignmentModel(project);
@@ -48,7 +51,8 @@ public class AlignmentTask extends DefaultTask {
     private Collection<ProjectVersionRef> getAllProjectDependencies(Project project) {
         final Set<ProjectVersionRef> result = new LinkedHashSet<>();
         project.getConfigurations().all(configuration -> configuration.getAllDependencies().forEach(d -> result.add(
-                AlignmentUtils.withGAVAndConfiguration(d.getGroup(), d.getName(), d.getVersion(), configuration.getName()))));
+                ProjectVersionFactory.withGAVAndConfiguration(d.getGroup(), d.getName(), d.getVersion(),
+                        configuration.getName()))));
         return result;
     }
 
@@ -59,7 +63,7 @@ public class AlignmentTask extends DefaultTask {
         allModuleDependencies.forEach(d -> {
             final String newDependencyVersion = alignmentResponse.getAlignedVersionOfGav(d);
             if (newDependencyVersion != null) {
-                alignedDependencies.add(AlignmentUtils.withNewVersion(d, newDependencyVersion));
+                alignedDependencies.add(ProjectVersionFactory.withNewVersion(d, newDependencyVersion));
             }
         });
         correspondingModule.setAlignedDependencies(alignedDependencies);

@@ -12,3 +12,7 @@ gradlePlugin {
         }
     }
 }
+
+dependencies {
+    compile(project(":common"))
+}

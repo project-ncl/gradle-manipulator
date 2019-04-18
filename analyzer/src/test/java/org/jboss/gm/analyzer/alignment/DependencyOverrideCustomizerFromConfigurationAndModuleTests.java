@@ -1,6 +1,7 @@
 package org.jboss.gm.analyzer.alignment;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,13 +10,12 @@ import java.util.Map;
 
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.MapConfiguration;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.junit.Test;
 
 public class DependencyOverrideCustomizerFromConfigurationAndModuleTests {
 
-    private static final ProjectVersionRef PROJECT = AlignmentUtils.withGAV("org.acme", "test", "1.0.0-redhat-00001");
+    private static final ProjectVersionRef PROJECT = withGAV("org.acme", "test", "1.0.0-redhat-00001");
 
     @Test
     public void noDependencyOverrideProperty() {
@@ -45,19 +45,19 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTests {
 
     @Test
     public void ensureOverrideMatches() {
-        final ProjectVersionRef hibernateCoreGav = AlignmentUtils.withGAV("org.hibernate", "hibernate-core",
+        final ProjectVersionRef hibernateCoreGav = withGAV("org.hibernate", "hibernate-core",
                 "5.3.9.Final-redhat-00001");
-        final ProjectVersionRef hibernateValidatorGav = AlignmentUtils.withGAV("org.hibernate", "hibernate-validator",
+        final ProjectVersionRef hibernateValidatorGav = withGAV("org.hibernate", "hibernate-validator",
                 "6.0.16.Final-redhat-00001");
-        final ProjectVersionRef undertowGav = AlignmentUtils.withGAV("io.undertow", "undertow-core",
+        final ProjectVersionRef undertowGav = withGAV("io.undertow", "undertow-core",
                 "2.0.15.Final-redhat-00001");
-        final ProjectVersionRef jacksonCoreGav = AlignmentUtils.withGAV("com.fasterxml.jackson.core", "jackson-core",
+        final ProjectVersionRef jacksonCoreGav = withGAV("com.fasterxml.jackson.core", "jackson-core",
                 "2.9.8-redhat-00001");
-        final ProjectVersionRef jacksonMapperGav = AlignmentUtils.withGAV("com.fasterxml.jackson.core", "jackson-mapper",
+        final ProjectVersionRef jacksonMapperGav = withGAV("com.fasterxml.jackson.core", "jackson-mapper",
                 "2.9.8-redhat-00001");
-        final ProjectVersionRef mongoGav = AlignmentUtils.withGAV("org.mongodb", "mongo-java-driver", "3.10.2-redhat-00001");
-        final ProjectVersionRef mockitoGav = AlignmentUtils.withGAV("org.mockito", "mockito-core", "2.27.0-redhat-00001");
-        final ProjectVersionRef wiremockGav = AlignmentUtils.withGAV("com.github.tomakehurst", "wiremock-jre8",
+        final ProjectVersionRef mongoGav = withGAV("org.mongodb", "mongo-java-driver", "3.10.2-redhat-00001");
+        final ProjectVersionRef mockitoGav = withGAV("org.mockito", "mockito-core", "2.27.0-redhat-00001");
+        final ProjectVersionRef wiremockGav = withGAV("com.github.tomakehurst", "wiremock-jre8",
                 "2.23.2-redhat-00001");
 
         final Map<String, String> properties = new HashMap<String, String>() {

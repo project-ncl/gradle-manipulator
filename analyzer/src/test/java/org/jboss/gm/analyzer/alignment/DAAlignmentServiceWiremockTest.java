@@ -5,6 +5,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
@@ -38,10 +39,10 @@ public class DAAlignmentServiceWiremockTest {
     public void alignmentWorksAsExpected() {
         final DAAlignmentService sut = new DAAlignmentService(String.format("http://localhost:%d/da/rest/v-1", PORT));
 
-        final ProjectVersionRef projectGav = AlignmentUtils.withGAV("org.acme", "dummy", "1.0.0");
-        final ProjectVersionRef hibernateGav = AlignmentUtils.withGAV("org.hibernate", "hibernate-core", "5.3.7.Final");
-        final ProjectVersionRef undertowGav = AlignmentUtils.withGAV("io.undertow", "undertow-core", "2.0.15.Final");
-        final ProjectVersionRef mockitoGav = AlignmentUtils.withGAV("org.mockito", "mockito-core", "2.27.0");
+        final ProjectVersionRef projectGav = withGAV("org.acme", "dummy", "1.0.0");
+        final ProjectVersionRef hibernateGav = withGAV("org.hibernate", "hibernate-core", "5.3.7.Final");
+        final ProjectVersionRef undertowGav = withGAV("io.undertow", "undertow-core", "2.0.15.Final");
+        final ProjectVersionRef mockitoGav = withGAV("org.mockito", "mockito-core", "2.27.0");
         final AlignmentService.Response response = sut.align(new AlignmentService.Request(
                 projectGav,
                 Arrays.asList(

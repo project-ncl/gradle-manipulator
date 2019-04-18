@@ -1,11 +1,10 @@
-package org.jboss.gm.analyzer.alignment;
+package org.jboss.gm.common.alignment;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 
 public class AlignmentModel {
 

@@ -1,5 +1,6 @@
 package org.jboss.gm.common.alignment;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -15,7 +16,23 @@ public final class AlignmentUtils {
     private AlignmentUtils() {
     }
 
-    public static Path getAlignmentFilePath(Project project) {
+    public static AlignmentModel getAlignmentModelAt(File path) {
+        if (!path.isDirectory()) {
+            throw new IllegalArgumentException("Path must be a directory. Was: " + path);
+        }
+        File alignment = new File(path, ALIGNMENT_FILE_NAME);
+        return getAlignmentModel(alignment);
+    }
+
+    private static AlignmentModel getAlignmentModel(File alignment) {
+        try {
+            return SerializationUtils.getObjectMapper().readValue(alignment, AlignmentModel.class);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to deserialize " + ALIGNMENT_FILE_NAME, e);
+        }
+    }
+
+    private static Path getAlignmentFilePath(Project project) {
         return project.getRootDir().toPath().resolve(ALIGNMENT_FILE_NAME);
     }
 
@@ -25,11 +42,7 @@ public final class AlignmentUtils {
      * TODO verify that the non-parallel run assumption holds
      */
     public static AlignmentModel getCurrentAlignmentModel(Project project) {
-        try {
-            return SerializationUtils.getObjectMapper().readValue(getAlignmentFilePath(project).toFile(), AlignmentModel.class);
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to deserialize " + ALIGNMENT_FILE_NAME, e);
-        }
+        return getAlignmentModel(getAlignmentFilePath(project).toFile());
     }
 
     /**

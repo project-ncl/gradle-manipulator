@@ -9,9 +9,6 @@ allprojects {
     apply plugin: 'java'
     apply plugin: 'org.jboss.gm.manipulation'
 
-    // TODO: this will need to be removed when the plugin takes care of things
-    apply plugin: 'maven-publish'
-
     repositories {
         mavenCentral()
 

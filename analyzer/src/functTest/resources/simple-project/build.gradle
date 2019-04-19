@@ -1,6 +1,6 @@
 plugins {
     // including this plugin directly instead of by an init script, which allows to use the freshly build version
-    id 'gm-analyzer'
+    id 'org.jboss.gm.analyzer'
     id 'java'
 }
 

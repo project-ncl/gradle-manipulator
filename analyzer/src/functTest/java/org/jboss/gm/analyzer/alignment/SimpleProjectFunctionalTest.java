@@ -10,7 +10,6 @@ import static org.assertj.core.api.Assertions.tuple;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.util.Collection;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -18,7 +17,7 @@ import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.jboss.gm.common.alignment.AlignmentModel;
-import org.jboss.gm.common.alignment.SerializationUtils;
+import org.jboss.gm.common.alignment.AlignmentUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -53,11 +52,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
 
         assertThat(buildResult.task(":" + AlignmentTask.NAME).getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 
-        final Path alignmentFilePath = simpleProjectRoot.toPath().resolve("alignment.json");
-        assertThat(alignmentFilePath).isRegularFile();
-
-        final AlignmentModel alignmentModel = SerializationUtils.getObjectMapper()
-                .readValue(alignmentFilePath.toFile(), AlignmentModel.class);
+        final AlignmentModel alignmentModel = AlignmentUtils.getAlignmentModelAt(simpleProjectRoot.toPath().toFile());
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
             assertThat(am.getName()).isEqualTo("root");

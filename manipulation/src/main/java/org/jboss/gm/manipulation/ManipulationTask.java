@@ -12,8 +12,12 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.alignment.AlignmentModel;
+import org.jboss.gm.manipulation.actions.ManifestUpdateAction;
 import org.jboss.gm.manipulation.actions.OverrideDependenciesAction;
 import org.jboss.gm.manipulation.actions.ProjectChangeVersionAction;
+import org.jboss.gm.manipulation.actions.PublicationPomTransformerAction;
+import org.jboss.gm.manipulation.actions.PublishingRepositoryAction;
+import org.jboss.gm.manipulation.actions.UploadTaskTransformerAction;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
@@ -35,5 +39,9 @@ public class ManipulationTask extends DefaultTask {
         // add actions to manipulate project
         project.afterEvaluate(new ProjectChangeVersionAction(correspondingModule));
         project.afterEvaluate(new OverrideDependenciesAction(correspondingModule));
+        project.afterEvaluate(new PublishingRepositoryAction());
+        project.afterEvaluate(new ManifestUpdateAction(correspondingModule));
+        project.afterEvaluate(new UploadTaskTransformerAction(correspondingModule));
+        project.afterEvaluate(new PublicationPomTransformerAction(correspondingModule));
     }
 }

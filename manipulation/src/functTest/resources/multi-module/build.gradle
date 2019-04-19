@@ -1,0 +1,28 @@
+plugins {
+    // including this plugin directly instead of by an init script, which allows to use the freshly build version
+    id 'gm-manipulation'
+}
+
+allprojects {
+    group = 'org.acme'
+
+    apply plugin: 'java'
+    apply plugin: 'gm-manipulation'
+
+    // TODO: this will need to be removed when the plugin takes care of things
+    apply plugin: 'maven-publish'
+
+    repositories {
+        mavenCentral()
+
+        // TODO: this will need to be removed when the plugin takes care of things
+        publishing {
+            publications {
+                main(MavenPublication) {
+                    from components.java
+                    artifact jar
+                }
+            }
+        }
+    }
+}

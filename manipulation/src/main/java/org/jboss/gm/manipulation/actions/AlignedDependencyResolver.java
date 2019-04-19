@@ -4,7 +4,7 @@
  * Licensed under the Eclipse Public License version 1.0, available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.jboss.gm.manipulation;
+package org.jboss.gm.manipulation.actions;
 
 import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 

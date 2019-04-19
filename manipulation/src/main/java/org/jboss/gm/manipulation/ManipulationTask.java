@@ -8,12 +8,12 @@ package org.jboss.gm.manipulation;
 
 import static org.jboss.gm.common.alignment.AlignmentUtils.getCurrentAlignmentModel;
 
-import org.gradle.api.Action;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.DependencyResolveDetails;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.alignment.AlignmentModel;
+import org.jboss.gm.manipulation.actions.OverrideDependenciesAction;
+import org.jboss.gm.manipulation.actions.ProjectChangeVersionAction;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
@@ -32,14 +32,8 @@ public class ManipulationTask extends DefaultTask {
         final AlignmentModel alignmentModel = getCurrentAlignmentModel(project);
         final AlignmentModel.Module correspondingModule = alignmentModel.findCorrespondingModule(projectName);
 
-        // update project version
-        project.setVersion(correspondingModule.getNewVersion());
-
-        // update project dependencies using custom resolution
-        updateProjectDependencies(project, new AlignedDependencyResolver(correspondingModule));
-    }
-
-    private void updateProjectDependencies(Project project, final Action<DependencyResolveDetails> resolver) {
-        project.getConfigurations().all(configuration -> configuration.getResolutionStrategy().eachDependency(resolver));
+        // add actions to manipulate project
+        project.afterEvaluate(new ProjectChangeVersionAction(correspondingModule));
+        project.afterEvaluate(new OverrideDependenciesAction(correspondingModule));
     }
 }

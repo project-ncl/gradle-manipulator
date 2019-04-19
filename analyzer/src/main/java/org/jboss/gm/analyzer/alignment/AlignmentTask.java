@@ -63,7 +63,7 @@ public class AlignmentTask extends DefaultTask {
             final String newDependencyVersion = alignmentResponse.getAlignedVersionOfGav(d);
             if (newDependencyVersion != null) {
                 final ProjectVersionRef newVersion = ProjectVersionFactory.withNewVersion(d, newDependencyVersion);
-                correspondingModule.getAlignedDependencies().put(newVersion.toString(), newVersion);
+                correspondingModule.getAlignedDependencies().put(d.toString(), newVersion);
             }
         });
     }

@@ -32,6 +32,9 @@ public class ManipulationTask extends DefaultTask {
         final AlignmentModel alignmentModel = getCurrentAlignmentModel(project);
         final AlignmentModel.Module correspondingModule = alignmentModel.findCorrespondingModule(projectName);
 
+        // update project version
+        project.setVersion(correspondingModule.getNewVersion());
+
         // update project dependencies using custom resolution
         updateProjectDependencies(project, new AlignedDependencyResolver(correspondingModule));
     }

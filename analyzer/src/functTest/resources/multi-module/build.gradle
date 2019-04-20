@@ -1,12 +1,12 @@
 plugins {
-    id 'gm-analyzer'
+    id 'org.jboss.gm.analyzer'
 }
 
 allprojects {
     group = 'org.acme'
 
     apply plugin: 'java'
-    apply plugin: 'gm-analyzer'
+    apply plugin: 'org.jboss.gm.analyzer'
 }
 
 repositories {

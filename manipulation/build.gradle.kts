@@ -7,7 +7,7 @@ java {
 gradlePlugin {
     plugins {
         create("manipulationPlugin") {
-            id = "gm-manipulation"
+            id = "org.jboss.gm.manipulation"
             implementationClass = "org.jboss.gm.manipulation.ManipulationPlugin"
         }
     }

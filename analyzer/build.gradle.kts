@@ -7,7 +7,7 @@ java {
 gradlePlugin {
     plugins {
         create("alignmentPlugin") {
-            id = "gm-analyzer"
+            id = "org.jboss.gm.analyzer"
             implementationClass = "org.jboss.gm.analyzer.alignment.AlignmentPlugin"
         }
     }

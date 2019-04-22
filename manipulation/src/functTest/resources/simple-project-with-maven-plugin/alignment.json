@@ -1,0 +1,22 @@
+{
+  "group": "org.acme",
+  "name": "root",
+  "modules": [
+    {
+      "name": "root",
+      "newVersion": "1.0.1-redhat-00001",
+      "alignedDependencies": {
+        "org.hibernate:hibernate-core:5.3.7.Final-redhat-00001": {
+          "groupId": "org.hibernate",
+          "artifactId": "hibernate-core",
+          "version": "5.3.7.Final-redhat-00001"
+        },
+        "io.undertow:undertow-core:2.0.15.Final-redhat-00001": {
+          "groupId": "io.undertow",
+          "artifactId": "undertow-core",
+          "version": "2.0.15.Final-redhat-00001"
+        }
+      }
+    }
+  ]
+}

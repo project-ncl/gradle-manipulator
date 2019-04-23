@@ -36,7 +36,7 @@ public class AlignedProject extends Module {
     }
 
     public Module findCorrespondingModule(String name) {
-        Validate.notEmpty(name, "Supplied project name cannot be empty");
+        Validate.notEmpty(name, "Supplied module name cannot be empty");
 
         if (getName().equals(name)) {
             return this;
@@ -44,7 +44,7 @@ public class AlignedProject extends Module {
 
         final Module module = modules.get(name);
         if (module == null) {
-            throw new IllegalArgumentException("AlignedProject " + name + " does not exist");
+            throw new IllegalArgumentException("Module " + name + " does not exist");
         }
         return module;
     }

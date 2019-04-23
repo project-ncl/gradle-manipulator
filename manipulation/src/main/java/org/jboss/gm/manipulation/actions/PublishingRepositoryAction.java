@@ -8,7 +8,6 @@ package org.jboss.gm.manipulation.actions;
 
 import org.gradle.api.Action;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.credentials.HttpHeaderCredentials;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
@@ -51,7 +50,7 @@ public class PublishingRepositoryAction implements Action<Project> {
         if (pncDeployUrl != null) {
             project.getPlugins().withType(MavenPublishPlugin.class, plugin -> {
                 project.getExtensions().configure(PublishingExtension.class, publishingExtension -> {
-                    MavenArtifactRepository repo = publishingExtension.getRepositories().maven(repository -> {
+                    publishingExtension.getRepositories().maven(repository -> {
                         repository.setName("PNC");
                         repository.setUrl(pncDeployUrl);
                         repository.credentials(HttpHeaderCredentials.class, cred -> {

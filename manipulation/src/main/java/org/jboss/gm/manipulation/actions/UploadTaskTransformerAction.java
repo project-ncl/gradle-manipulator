@@ -7,7 +7,7 @@ import org.gradle.api.tasks.Upload;
 import org.jboss.gm.common.alignment.AlignmentModel;
 
 /**
- * Fixes pom.xml generation in old "maven" plugin.
+ * Fixes pom.xml generation in old "maven-publish" plugin.
  * <p>
  * Adds PomTransformer to all MavenResolver repositories in Upload tasks.
  */

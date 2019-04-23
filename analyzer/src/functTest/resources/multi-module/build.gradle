@@ -17,6 +17,7 @@ project(':subproject1') {
     dependencies {
         compile group: 'org.springframework', name: 'spring-context', version: '5.1.6.RELEASE'
         compile group: 'org.hibernate', name: 'hibernate-core', version: '5.4.2.Final'
+        compile gradleApi() // dependency of type DefaultSelfResolvingDependency
         testCompile group: 'junit', name: 'junit', version: '4.12'
     }
 }

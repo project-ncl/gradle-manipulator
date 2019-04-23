@@ -13,7 +13,9 @@ allprojects {
 subprojects {
 
     apply(plugin = "maven-publish")
-    apply(plugin = "java-gradle-plugin")
+    if (!project.name.equals("common")) {
+        apply(plugin = "java-gradle-plugin")
+    }
     apply(plugin = "com.diffplug.gradle.spotless")
 
     spotless {

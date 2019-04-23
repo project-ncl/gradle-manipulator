@@ -9,6 +9,10 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.gradle.api.Project;
 
+/**
+ * This is what {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME} task uses to retrieve a fully wired
+ * {@link org.jboss.gm.analyzer.alignment.AlignmentService}
+ */
 public final class AlignmentServiceFactory {
 
     private static final String DA_ENDPOINT_URL_PROPERTY = "da.endpoint.url";

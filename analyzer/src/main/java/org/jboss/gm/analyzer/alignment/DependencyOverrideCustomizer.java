@@ -13,8 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The idea is that this class will be created with a Map from GAV to predicate and override version.
- * If a GAV matches a predicate then the overridden version is returned
+ * {@link org.jboss.gm.analyzer.alignment.AlignmentService.ResponseCustomizer} that changes the versions of
+ * aligned dependencies
+ *
+ * The implementation is very simple and takes Map as a constructor argument and uses the map keys to check
+ * if a dependency matches. If so, the map's value is used as the new version
  *
  * TODO: figure out if we need to worry about order
  */

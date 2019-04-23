@@ -14,6 +14,10 @@ import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.ProjectVersionFactory;
 import org.jboss.gm.common.alignment.AlignmentModel;
 
+/**
+ * The actual Gradle task that creates the alignment.json file for the whole project
+ * (whether it's a single or multi module project)
+ */
 public class AlignmentTask extends DefaultTask {
 
     static final String NAME = "generateAlignmentMetadata";

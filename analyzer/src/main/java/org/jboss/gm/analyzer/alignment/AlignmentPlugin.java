@@ -9,6 +9,11 @@ import org.gradle.api.Project;
 import org.jboss.gm.common.alignment.AlignmentModel;
 import org.jboss.gm.common.alignment.AlignmentUtils;
 
+/**
+ * Results in adding a task with name {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME}.
+ * It also creates the basic alignment.json file that {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME} of each project adds to
+ *
+ */
 public class AlignmentPlugin implements Plugin<Project> {
 
     @Override

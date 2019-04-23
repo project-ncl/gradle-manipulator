@@ -4,6 +4,17 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * An implementation of {@link org.jboss.gm.analyzer.alignment.AlignmentService} that
+ * delegates to another {@link org.jboss.gm.analyzer.alignment.AlignmentService}.
+ * The request the delegate receives is not the original this class receives, but
+ * is the product of the list of {@link org.jboss.gm.analyzer.alignment.AlignmentService.RequestCustomizer} this class
+ * was created with.
+ * Moreover, the response returned is not what the delegate returned, but is the result of the list
+ * of {@link org.jboss.gm.analyzer.alignment.AlignmentService.ResponseCustomizer} this class was created with
+ *
+ * @see org.jboss.gm.analyzer.alignment.AlignmentServiceFactory
+ */
 public class WithCustomizersDelegatingAlignmentService implements AlignmentService {
 
     private final AlignmentService delegate;

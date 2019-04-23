@@ -13,6 +13,17 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 
+/**
+ * This is what {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME} task uses in order to retrieve the value of the
+ * various configuration options it needs.
+ * The configuration is backed by Apache Commons Config 2 and uses three sources (or descending order of precedence)
+ * <ul>
+ *   <li>Environment Variables</li>
+ *   <li>System Properties</li>
+ *   <li>analyzer-defaults.properties</li>
+ * </ul>
+ *
+ */
 public final class ConfigurationFactory {
 
     private static CompositeConfiguration configuration;

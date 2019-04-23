@@ -4,10 +4,24 @@ import java.util.Collection;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
+/**
+ * Used by {@link org.jboss.gm.analyzer.alignment.AlignmentTask} in order to perform the alignment
+ *
+ * @see org.jboss.gm.analyzer.alignment.DAAlignmentService
+ */
 public interface AlignmentService {
 
     Response align(Request request);
 
+    /**
+     * Contains both the project collected project dependencies GAVs
+     * and the project GAV.
+     * Done this way because currently with {@link org.jboss.gm.analyzer.alignment.DAAlignmentService}
+     * we have the ability to get both pieces of information with one call
+     *
+     * It might make sense to break this up since other types of AlignmentService implementations might
+     * not be handle the project GAV
+     */
     class Request {
         private final Collection<? extends ProjectVersionRef> dependencies;
         private final ProjectVersionRef project;
@@ -25,7 +39,7 @@ public interface AlignmentService {
             return project;
         }
     }
-
+    
     interface Response {
 
         String getNewProjectVersion();
@@ -33,6 +47,12 @@ public interface AlignmentService {
         String getAlignedVersionOfGav(ProjectVersionRef gav);
     }
 
+    /**
+     * Meant to change {@link org.jboss.gm.analyzer.alignment.AlignmentService.Request} before it is handed to
+     * the {@link org.jboss.gm.analyzer.alignment.AlignmentService}
+     *
+     * @see org.jboss.gm.analyzer.alignment.DependencyExclusionCustomizer
+     */
     interface RequestCustomizer {
 
         Request customize(Request request);
@@ -58,6 +78,13 @@ public interface AlignmentService {
 
     }
 
+    /**
+     * Meant to change {@link org.jboss.gm.analyzer.alignment.AlignmentService.Response} after it is returned by
+     * the {@link org.jboss.gm.analyzer.alignment.AlignmentService}
+     *
+     * @see org.jboss.gm.analyzer.alignment.DependencyOverrideCustomizer
+     * @see org.jboss.gm.analyzer.alignment.UpdateProjectVersionCustomizer
+     */
     interface ResponseCustomizer {
 
         Response customize(Response response);

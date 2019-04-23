@@ -6,7 +6,10 @@ import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 
 /**
- * Meant to parse properties like dependencyOverride and dependencyExclusion
+ * Utility class that is meant to parse properties like dependencyOverride and dependencyExclusion
+ *
+ * See section "Exclusions and Overrides" of
+ * https://release-engineering.github.io/pom-manipulation-ext/guide/dep-manip.html
  */
 final class DependencyPropertyParser {
 

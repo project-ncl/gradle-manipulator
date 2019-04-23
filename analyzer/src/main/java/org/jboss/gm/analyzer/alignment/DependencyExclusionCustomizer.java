@@ -13,6 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * {@link org.jboss.gm.analyzer.alignment.AlignmentService.RequestCustomizer} that removes dependencies from a
+ * {@link org.jboss.gm.analyzer.alignment.AlignmentService.Request}
+ *
  * The idea is that this class will be created with a predicate (which can of course be the product of multiple predicates)
  * that will match dependencies that are supposed to be excluded.
  * The hard part is creating the proper predicate for each project based on configuration similar to what PME offers

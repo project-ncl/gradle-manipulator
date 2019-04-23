@@ -8,6 +8,12 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.Translator;
 
+/**
+ * An implementation of {@link org.jboss.gm.analyzer.alignment.AlignmentService} that uses the Dependency Analyzer service
+ * in order to get the proper aligned versions of dependencies (as well as the version of the project itself)
+ *
+ * The heavy lifting is done by {@link org.commonjava.maven.ext.io.rest.DefaultTranslator}
+ */
 public class DAAlignmentService implements AlignmentService {
 
     private final Translator restEndpoint;

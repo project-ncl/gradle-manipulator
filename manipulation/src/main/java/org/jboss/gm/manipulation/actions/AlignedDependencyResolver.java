@@ -22,20 +22,35 @@ import org.jboss.gm.common.alignment.AlignmentModel;
 public class AlignedDependencyResolver implements Action<DependencyResolveDetails> {
     private final AlignmentModel.Module module;
 
+    private static final boolean BYPASS;
+
+    static {
+        boolean bypass = false;
+        try {
+            final String property = System.getenv("BYPASS_ALIGNER");
+            bypass = Boolean.parseBoolean(property);
+        } catch (Exception e) {
+            // ignore
+        }
+        BYPASS = bypass;
+    }
+
     public AlignedDependencyResolver(AlignmentModel.Module module) {
         this.module = module;
     }
 
     @Override
     public void execute(DependencyResolveDetails resolveDetails) {
-        final ModuleVersionSelector requested = resolveDetails.getRequested();
-        final ProjectVersionRef requestedGAV = withGAV(requested.getGroup(), requested.getName(), requested.getVersion());
+        if (!BYPASS) {
+            final ModuleVersionSelector requested = resolveDetails.getRequested();
+            final ProjectVersionRef requestedGAV = withGAV(requested.getGroup(), requested.getName(), requested.getVersion());
 
-        final Map<String, ProjectVersionRef> alignedDependencies = module.getAlignedDependencies();
-        final String key = requestedGAV.toString();
-        final ProjectVersionRef aligned = alignedDependencies.get(key);
-        if (aligned != null) {
-            resolveDetails.because(key + " is aligned to " + aligned.toString()).useVersion(aligned.getVersionString());
+            final Map<String, ProjectVersionRef> alignedDependencies = module.getAlignedDependencies();
+            final String key = requestedGAV.toString();
+            final ProjectVersionRef aligned = alignedDependencies.get(key);
+            if (aligned != null) {
+                resolveDetails.because(key + " is aligned to " + aligned.toString()).useVersion(aligned.getVersionString());
+            }
         }
     }
 }

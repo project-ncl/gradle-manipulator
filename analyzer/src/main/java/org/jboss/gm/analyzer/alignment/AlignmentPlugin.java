@@ -1,9 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.gradle.api.Plugin;
 import org.jboss.gm.common.alignment.AlignmentUtils;
 import org.jboss.gm.common.alignment.Module;
@@ -37,14 +33,7 @@ public class AlignmentPlugin implements Plugin<org.gradle.api.Project> {
 
     private Project getInitialAlignmentModel(org.gradle.api.Project project) {
         final Project alignmentModel = new Project(project.getGroup().toString(), project.getName());
-        final List<Module> modules = new ArrayList<>();
-        modules.add(new Module(project.getName()));
-        if (!project.getSubprojects().isEmpty()) {
-            modules.addAll(project.getSubprojects().stream()
-                    .map(p -> new Module(p.getName()))
-                    .collect(Collectors.toList()));
-        }
-        alignmentModel.setModules(modules);
+        project.getSubprojects().forEach(p -> alignmentModel.addModule(new Module(p.getName())));
         return alignmentModel;
     }
 }

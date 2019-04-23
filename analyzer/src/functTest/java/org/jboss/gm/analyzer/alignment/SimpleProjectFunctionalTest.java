@@ -56,17 +56,15 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
             assertThat(am.getName()).isEqualTo("root");
-            assertThat(am.getModules()).hasSize(1).satisfies(ml -> {
-                assertThat(ml.get(0)).satisfies(root -> {
-                    assertThat(root.getNewVersion()).isEqualTo("1.0.1-redhat-00001");
-                    assertThat(root.getName()).isEqualTo("root");
-                    final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
-                    assertThat(alignedDependencies)
-                            .extracting("artifactId", "versionString")
-                            .containsOnly(
-                                    tuple("undertow-core", "2.0.15.Final-redhat-00001"),
-                                    tuple("hibernate-core", "5.3.7.Final-redhat-00001"));
-                });
+            assertThat(am.findCorrespondingModule("root")).satisfies(root -> {
+                assertThat(root.getNewVersion()).isEqualTo("1.0.1-redhat-00001");
+                assertThat(root.getName()).isEqualTo("root");
+                final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
+                assertThat(alignedDependencies)
+                        .extracting("artifactId", "versionString")
+                        .containsOnly(
+                                tuple("undertow-core", "2.0.15.Final-redhat-00001"),
+                                tuple("hibernate-core", "5.3.7.Final-redhat-00001"));
             });
         });
     }

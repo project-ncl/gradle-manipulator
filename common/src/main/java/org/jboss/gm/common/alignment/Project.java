@@ -1,7 +1,7 @@
 package org.jboss.gm.common.alignment;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.Validate;
 
@@ -11,6 +11,9 @@ public class Project extends Module {
 
     @JsonProperty
     private String group;
+
+    @JsonProperty
+    private Map<String, Module> modules = new HashMap<>(7);
 
     public Project() {
     }
@@ -24,21 +27,26 @@ public class Project extends Module {
         return group;
     }
 
-    // the root project is always the first project in the list
-    private List<Module> modules = new ArrayList<>();
-
-    public List<Module> getModules() {
+    public Map<String, Module> getModules() {
         return modules;
     }
 
-    public void setModules(List<Module> modules) {
-        this.modules = modules;
+    public void addModule(Module module) {
+        modules.put(module.getName(), module);
     }
 
     public Module findCorrespondingModule(String name) {
         Validate.notEmpty(name, "Supplied project name cannot be empty");
-        return modules.stream().filter(m -> name.equals(m.getName())).findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Project " + name + "does not exist"));
+
+        if (getName().equals(name)) {
+            return this;
+        }
+
+        final Module module = modules.get(name);
+        if (module == null) {
+            throw new IllegalArgumentException("Project " + name + " does not exist");
+        }
+        return module;
     }
 
 }

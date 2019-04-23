@@ -77,12 +77,9 @@ public final class TestUtils {
         if (!external && !relativeGeneratedPomPathAsString.startsWith("build")) {
             final String moduleName = relativeGeneratedPomPathAsString.substring(0,
                     relativeGeneratedPomPathAsString.indexOf('/'));
-            module = alignment.getModules().stream()
-                    .filter(m -> moduleName.equals(m.getName()))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Unknown module: " + moduleName));
+            module = alignment.getModules().get(moduleName);
         } else {
-            module = alignment.getModules().get(0);
+            module = alignment;
         }
 
         final MavenXpp3Reader reader = new MavenXpp3Reader();

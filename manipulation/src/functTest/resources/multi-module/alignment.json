@@ -1,13 +1,10 @@
 {
   "group": "org.acme",
+  "newVersion": "1.1.2-redhat-00004",
   "name": "root",
-  "modules": [
-    {
-      "name": "root",
-      "newVersion": "1.1.2-redhat-00004",
-      "alignedDependencies": {}
-    },
-    {
+  "alignedDependencies": {},
+  "modules": {
+    "subproject1": {
       "name": "subproject1",
       "newVersion": "1.1.2-redhat-00004",
       "alignedDependencies": {
@@ -23,7 +20,7 @@
         }
       }
     },
-    {
+    "subproject2": {
       "name": "subproject2",
       "newVersion": "1.1.2-redhat-00004",
       "alignedDependencies": {
@@ -34,5 +31,5 @@
         }
       }
     }
-  ]
+  }
 }

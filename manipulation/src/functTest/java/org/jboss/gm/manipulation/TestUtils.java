@@ -19,7 +19,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.assertj.core.groups.Tuple;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.jboss.gm.common.alignment.AlignmentModel;
+import org.jboss.gm.common.alignment.Project;
 
 public final class TestUtils {
 
@@ -31,7 +31,7 @@ public final class TestUtils {
                 .get(TestUtils.class.getClassLoader().getResource(classpathResource).toURI()).toFile(), target);
     }
 
-    static Tuple getAlignedTuple(AlignmentModel.Module alignment, String artifactId, String expected) {
+    static Tuple getAlignedTuple(Project.Module alignment, String artifactId, String expected) {
         final List<String> versions = alignment.getAlignedDependencies().entrySet().stream()
                 .filter(entry -> entry.getKey().contains(artifactId))
                 .map(entry -> entry.getValue().getVersionString())
@@ -52,11 +52,11 @@ public final class TestUtils {
         return tuple(artifactId, versions.get(0));
     }
 
-    static Tuple getAlignedTuple(AlignmentModel.Module alignment, String artifactId) {
+    static Tuple getAlignedTuple(Project.Module alignment, String artifactId) {
         return getAlignedTuple(alignment, artifactId, null);
     }
 
-    static Pair<Model, AlignmentModel.Module> getModelAndCheckGAV(File parentLocationForPom, AlignmentModel alignment,
+    static Pair<Model, Project.Module> getModelAndCheckGAV(File parentLocationForPom, Project alignment,
             String relativeGeneratedPomPathAsString)
             throws IOException,
             XmlPullParserException {
@@ -64,7 +64,7 @@ public final class TestUtils {
         return getModelAndCheckGAV(parentLocationForPom, alignment, relativeGeneratedPomPathAsString, false);
     }
 
-    static Pair<Model, AlignmentModel.Module> getModelAndCheckGAV(File parentLocationForPom, AlignmentModel alignment,
+    static Pair<Model, Project.Module> getModelAndCheckGAV(File parentLocationForPom, Project alignment,
             String relativeGeneratedPomPathAsString, boolean external)
             throws IOException,
             XmlPullParserException {
@@ -72,7 +72,7 @@ public final class TestUtils {
         assertThat(generatedPomPath).isRegularFile();
 
         // find module
-        final AlignmentModel.Module module;
+        final Project.Module module;
         if (!external && !relativeGeneratedPomPathAsString.startsWith("build")) {
             final String moduleName = relativeGeneratedPomPathAsString.substring(0,
                     relativeGeneratedPomPathAsString.indexOf('/'));

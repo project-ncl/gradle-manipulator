@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
-import org.gradle.api.Project;
 
 public final class AlignmentUtils {
 
@@ -16,7 +15,7 @@ public final class AlignmentUtils {
     private AlignmentUtils() {
     }
 
-    public static AlignmentModel getAlignmentModelAt(File path) {
+    public static Project getAlignmentModelAt(File path) {
         if (!path.isDirectory()) {
             throw new IllegalArgumentException("Path must be a directory. Was: " + path);
         }
@@ -24,15 +23,15 @@ public final class AlignmentUtils {
         return getAlignmentModel(alignment);
     }
 
-    private static AlignmentModel getAlignmentModel(File alignment) {
+    private static Project getAlignmentModel(File alignment) {
         try {
-            return SerializationUtils.getObjectMapper().readValue(alignment, AlignmentModel.class);
+            return SerializationUtils.getObjectMapper().readValue(alignment, Project.class);
         } catch (IOException e) {
             throw new RuntimeException("Unable to deserialize " + ALIGNMENT_FILE_NAME, e);
         }
     }
 
-    private static Path getAlignmentFilePath(Project project) {
+    private static Path getAlignmentFilePath(org.gradle.api.Project project) {
         return project.getRootDir().toPath().resolve(ALIGNMENT_FILE_NAME);
     }
 
@@ -41,7 +40,7 @@ public final class AlignmentUtils {
      * Is assumes that a task for various projects is never called in parallel
      * TODO verify that the non-parallel run assumption holds
      */
-    public static AlignmentModel getCurrentAlignmentModel(Project project) {
+    public static Project getCurrentAlignmentModel(org.gradle.api.Project project) {
         return getAlignmentModel(getAlignmentFilePath(project).toFile());
     }
 
@@ -49,7 +48,7 @@ public final class AlignmentUtils {
      * Write the model to disk - override any existing file that might exist
      * TODO verify comment of getCurrentAlignmentModel since this method relies on the same assumption
      */
-    public static void writeUpdatedAlignmentModel(Project project, AlignmentModel updatedAlignmentModel) {
+    public static void writeUpdatedAlignmentModel(org.gradle.api.Project project, Project updatedAlignmentModel) {
         final Path alignmentFilePath = AlignmentUtils.getAlignmentFilePath(project);
         try {
             // first delete any existing file
@@ -60,7 +59,7 @@ public final class AlignmentUtils {
         writeAlignmentModelToFile(alignmentFilePath, updatedAlignmentModel);
     }
 
-    private static void writeAlignmentModelToFile(Path alignmentFilePath, AlignmentModel alignmentModel) {
+    private static void writeAlignmentModelToFile(Path alignmentFilePath, Project alignmentModel) {
         try {
             FileUtils.writeStringToFile(
                     alignmentFilePath.toFile(),

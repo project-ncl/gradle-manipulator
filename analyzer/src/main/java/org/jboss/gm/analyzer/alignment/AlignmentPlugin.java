@@ -5,19 +5,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.gradle.api.Plugin;
-import org.gradle.api.Project;
-import org.jboss.gm.common.alignment.AlignmentModel;
 import org.jboss.gm.common.alignment.AlignmentUtils;
+import org.jboss.gm.common.alignment.Project;
 
 /**
  * Results in adding a task with name {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME}.
  * It also creates an {@code alignment.json} file located at the root of the project that
  * is augmented by the {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME} task run on each sub-project
  */
-public class AlignmentPlugin implements Plugin<Project> {
+public class AlignmentPlugin implements Plugin<org.gradle.api.Project> {
 
     @Override
-    public void apply(Project project) {
+    public void apply(org.gradle.api.Project project) {
         // we need to create an empty alignment file at the project root
         // this file will then be populated by the alignment task of each project
         if (project.getRootProject() == project) {
@@ -26,7 +25,7 @@ public class AlignmentPlugin implements Plugin<Project> {
         project.getTasks().create(AlignmentTask.NAME, AlignmentTask.class);
     }
 
-    private void createInitialAlignmentFile(Project project) {
+    private void createInitialAlignmentFile(org.gradle.api.Project project) {
         project.afterEvaluate(pr -> {
             // these operation need to be performed in afterEvaluate because only then is the group information
             // populated for certain
@@ -35,13 +34,13 @@ public class AlignmentPlugin implements Plugin<Project> {
 
     }
 
-    private AlignmentModel getInitialAlignmentModel(Project project) {
-        final AlignmentModel alignmentModel = new AlignmentModel(project.getGroup().toString(), project.getName());
-        final List<AlignmentModel.Module> modules = new ArrayList<>();
-        modules.add(new AlignmentModel.Module(project.getName()));
+    private Project getInitialAlignmentModel(org.gradle.api.Project project) {
+        final Project alignmentModel = new Project(project.getGroup().toString(), project.getName());
+        final List<Project.Module> modules = new ArrayList<>();
+        modules.add(new Project.Module(project.getName()));
         if (!project.getSubprojects().isEmpty()) {
             modules.addAll(project.getSubprojects().stream()
-                    .map(p -> new AlignmentModel.Module(p.getName()))
+                    .map(p -> new Project.Module(p.getName()))
                     .collect(Collectors.toList()));
         }
         alignmentModel.setModules(modules);

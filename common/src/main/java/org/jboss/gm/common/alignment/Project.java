@@ -11,17 +11,17 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class AlignmentModel {
+public class Project {
 
     @JsonProperty
     private String group;
     @JsonProperty
     private String name;
 
-    public AlignmentModel() {
+    public Project() {
     }
 
-    public AlignmentModel(String group, String name) {
+    public Project(String group, String name) {
         this.group = group;
         this.name = name;
     }

@@ -7,21 +7,20 @@
 package org.jboss.gm.manipulation.actions;
 
 import org.gradle.api.Action;
-import org.gradle.api.Project;
-import org.jboss.gm.common.alignment.AlignmentModel;
+import org.jboss.gm.common.alignment.Project;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
  */
-public class OverrideDependenciesAction implements Action<Project> {
+public class OverrideDependenciesAction implements Action<org.gradle.api.Project> {
     private final AlignedDependencyResolver resolver;
 
-    public OverrideDependenciesAction(AlignmentModel.Module correspondingModule) {
+    public OverrideDependenciesAction(Project.Module correspondingModule) {
         this.resolver = new AlignedDependencyResolver(correspondingModule);
     }
 
     @Override
-    public void execute(Project project) {
+    public void execute(org.gradle.api.Project project) {
         project.getConfigurations().all(configuration -> configuration.getResolutionStrategy().eachDependency(resolver));
     }
 }

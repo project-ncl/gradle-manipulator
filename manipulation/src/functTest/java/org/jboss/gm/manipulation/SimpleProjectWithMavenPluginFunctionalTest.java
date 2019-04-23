@@ -12,8 +12,8 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
-import org.jboss.gm.common.alignment.AlignmentModel;
 import org.jboss.gm.common.alignment.AlignmentUtils;
+import org.jboss.gm.common.alignment.Project;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -35,7 +35,7 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
         TestUtils.copyDirectory("simple-project-with-maven-plugin", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
 
-        final AlignmentModel alignment = AlignmentUtils.getAlignmentModelAt(simpleProjectRoot);
+        final Project alignment = AlignmentUtils.getAlignmentModelAt(simpleProjectRoot);
 
         final BuildResult buildResult = GradleRunner.create()
                 .withProjectDir(simpleProjectRoot)
@@ -45,9 +45,9 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
                 .build();
         assertThat(buildResult.task(":install").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 
-        final Pair<Model, AlignmentModel.Module> modelAndModule = TestUtils.getModelAndCheckGAV(m2Directory, alignment,
+        final Pair<Model, Project.Module> modelAndModule = TestUtils.getModelAndCheckGAV(m2Directory, alignment,
                 "org/acme/root/1.0.1-redhat-00001/root-1.0.1-redhat-00001.pom", true);
-        final AlignmentModel.Module module = modelAndModule.getRight();
+        final Project.Module module = modelAndModule.getRight();
         assertThat(modelAndModule.getLeft().getDependencies())
                 .extracting("artifactId", "version")
                 .containsOnly(

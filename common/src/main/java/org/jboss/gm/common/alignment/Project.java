@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.Validate;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Project extends Module {
@@ -23,11 +22,6 @@ public class Project extends Module {
 
     public String getGroup() {
         return group;
-    }
-
-    @JsonIgnore
-    public String getVersion() {
-        return modules.get(0).getNewVersion();
     }
 
     // the root project is always the first project in the list

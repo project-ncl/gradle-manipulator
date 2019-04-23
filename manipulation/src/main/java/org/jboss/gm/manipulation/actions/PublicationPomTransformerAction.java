@@ -1,6 +1,7 @@
 package org.jboss.gm.manipulation.actions;
 
 import org.gradle.api.Action;
+import org.gradle.api.Project;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
@@ -12,7 +13,7 @@ import org.jboss.gm.common.alignment.Module;
  * Applies PomTransformer, that overrides dependencies versions according to given configuration, to all maven
  * publications.
  */
-public class PublicationPomTransformerAction implements Action<org.gradle.api.Project> {
+public class PublicationPomTransformerAction implements Action<Project> {
 
     private Module alignmentConfiguration;
 
@@ -21,7 +22,7 @@ public class PublicationPomTransformerAction implements Action<org.gradle.api.Pr
     }
 
     @Override
-    public void execute(org.gradle.api.Project project) {
+    public void execute(Project project) {
         project.getPlugins().withType(MavenPublishPlugin.class,
                 plugin -> project.getExtensions().configure(PublishingExtension.class, extension -> {
                     extension.getPublications().withType(MavenPublication.class).all(maven -> {

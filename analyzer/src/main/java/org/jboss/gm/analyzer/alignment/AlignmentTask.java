@@ -37,7 +37,7 @@ public class AlignmentTask extends DefaultTask {
      */
     @TaskAction
     public void perform() {
-        final org.gradle.api.Project project = getProject();
+        final Project project = getProject();
         final String projectName = project.getName();
         System.out.println("Starting alignment task for project " + projectName);
 
@@ -59,7 +59,7 @@ public class AlignmentTask extends DefaultTask {
         writeUpdatedAlignmentModel(project, alignmentModel);
     }
 
-    private Collection<ProjectVersionRef> getAllProjectDependencies(org.gradle.api.Project project) {
+    private Collection<ProjectVersionRef> getAllProjectDependencies(Project project) {
         final Set<ProjectVersionRef> result = new LinkedHashSet<>();
         project.getConfigurations().all(configuration -> configuration.getAllDependencies().
                 forEach(dep -> {

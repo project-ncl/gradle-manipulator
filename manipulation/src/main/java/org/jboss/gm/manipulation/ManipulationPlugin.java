@@ -3,6 +3,7 @@ package org.jboss.gm.manipulation;
 import static org.jboss.gm.common.alignment.AlignmentUtils.getCurrentAlignmentModel;
 
 import org.gradle.api.Plugin;
+import org.gradle.api.Project;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
 import org.jboss.gm.common.alignment.AlignedProject;
 import org.jboss.gm.common.alignment.Module;
@@ -13,10 +14,10 @@ import org.jboss.gm.manipulation.actions.PublicationPomTransformerAction;
 import org.jboss.gm.manipulation.actions.PublishingRepositoryAction;
 import org.jboss.gm.manipulation.actions.UploadTaskTransformerAction;
 
-public class ManipulationPlugin implements Plugin<org.gradle.api.Project> {
+public class ManipulationPlugin implements Plugin<Project> {
 
     @Override
-    public void apply(org.gradle.api.Project project) {
+    public void apply(Project project) {
         // apply the maven publishing plugin
         project.getPluginManager().apply(MavenPublishPlugin.class);
 

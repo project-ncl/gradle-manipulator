@@ -7,12 +7,13 @@
 package org.jboss.gm.manipulation.actions;
 
 import org.gradle.api.Action;
+import org.gradle.api.Project;
 import org.jboss.gm.common.alignment.Module;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
  */
-public class OverrideDependenciesAction implements Action<org.gradle.api.Project> {
+public class OverrideDependenciesAction implements Action<Project> {
     private final AlignedDependencyResolver resolver;
 
     public OverrideDependenciesAction(Module correspondingModule) {
@@ -20,7 +21,7 @@ public class OverrideDependenciesAction implements Action<org.gradle.api.Project
     }
 
     @Override
-    public void execute(org.gradle.api.Project project) {
+    public void execute(Project project) {
         project.getConfigurations().all(configuration -> configuration.getResolutionStrategy().eachDependency(resolver));
     }
 }

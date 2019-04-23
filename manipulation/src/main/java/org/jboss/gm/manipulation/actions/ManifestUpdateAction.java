@@ -1,6 +1,7 @@
 package org.jboss.gm.manipulation.actions;
 
 import org.gradle.api.Action;
+import org.gradle.api.Project;
 import org.gradle.api.java.archives.internal.DefaultManifest;
 import org.gradle.api.plugins.osgi.OsgiManifest;
 import org.gradle.api.tasks.bundling.Jar;
@@ -12,7 +13,7 @@ import org.jboss.gm.common.alignment.Module;
  * Currently only overrides manifest of type OsgiManifest and only entries "Specification-Version" and
  * "Implementation-Version".
  */
-public class ManifestUpdateAction implements Action<org.gradle.api.Project> {
+public class ManifestUpdateAction implements Action<Project> {
 
     private Module alignmentConfiguration;
 
@@ -21,7 +22,7 @@ public class ManifestUpdateAction implements Action<org.gradle.api.Project> {
     }
 
     @Override
-    public void execute(org.gradle.api.Project project) {
+    public void execute(Project project) {
         project.getTasks().withType(Jar.class, jar -> {
             if (jar.getManifest() instanceof OsgiManifest) {
                 OsgiManifest manifest = (OsgiManifest) jar.getManifest();

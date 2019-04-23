@@ -7,12 +7,13 @@
 package org.jboss.gm.manipulation.actions;
 
 import org.gradle.api.Action;
+import org.gradle.api.Project;
 import org.jboss.gm.common.alignment.Module;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
  */
-public class ProjectChangeVersionAction implements Action<org.gradle.api.Project> {
+public class ProjectChangeVersionAction implements Action<Project> {
     private final Module module;
 
     public ProjectChangeVersionAction(Module correspondingModule) {
@@ -20,7 +21,7 @@ public class ProjectChangeVersionAction implements Action<org.gradle.api.Project
     }
 
     @Override
-    public void execute(org.gradle.api.Project project) {
+    public void execute(Project project) {
         project.setVersion(module.getVersion());
     }
 }

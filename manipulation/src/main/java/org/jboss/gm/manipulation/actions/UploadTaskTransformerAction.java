@@ -1,6 +1,7 @@
 package org.jboss.gm.manipulation.actions;
 
 import org.gradle.api.Action;
+import org.gradle.api.Project;
 import org.gradle.api.artifacts.maven.MavenResolver;
 import org.gradle.api.tasks.Upload;
 import org.jboss.gm.common.alignment.Module;
@@ -10,7 +11,7 @@ import org.jboss.gm.common.alignment.Module;
  * <p>
  * Adds PomTransformer to all MavenResolver repositories in Upload tasks.
  */
-public class UploadTaskTransformerAction implements Action<org.gradle.api.Project> {
+public class UploadTaskTransformerAction implements Action<Project> {
 
     private Module alignmentConfiguration;
 
@@ -19,7 +20,7 @@ public class UploadTaskTransformerAction implements Action<org.gradle.api.Projec
     }
 
     @Override
-    public void execute(org.gradle.api.Project project) {
+    public void execute(Project project) {
         project.getTasks().withType(Upload.class).all(upload -> upload.getRepositories()
                 .withType(MavenResolver.class).all(resolver -> {
                     resolver.getPom().withXml(new PomTransformer(alignmentConfiguration));

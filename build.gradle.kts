@@ -1,6 +1,5 @@
 plugins {
     id("com.diffplug.gradle.spotless") version "3.21.0"
-    idea
 }
 
 allprojects {
@@ -16,7 +15,6 @@ subprojects {
     apply(plugin = "maven-publish")
     apply(plugin = "java-gradle-plugin")
     apply(plugin = "com.diffplug.gradle.spotless")
-    apply(plugin = "idea")
 
     spotless {
         java {
@@ -27,11 +25,5 @@ subprojects {
 
     tasks.withType<JavaCompile>().configureEach {
         dependsOn("spotlessApply")
-    }
-
-    idea {
-        module {
-            setDownloadSources(true)
-        }
     }
 }

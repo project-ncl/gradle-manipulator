@@ -7,7 +7,7 @@ import org.apache.commons.lang3.Validate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Project extends Module {
+public class AlignedProject extends Module {
 
     @JsonProperty
     private String group;
@@ -15,10 +15,10 @@ public class Project extends Module {
     @JsonProperty
     private Map<String, Module> modules = new HashMap<>(7);
 
-    public Project() {
+    public AlignedProject() {
     }
 
-    public Project(String group, String name) {
+    public AlignedProject(String group, String name) {
         super(name);
         this.group = group;
     }
@@ -44,7 +44,7 @@ public class Project extends Module {
 
         final Module module = modules.get(name);
         if (module == null) {
-            throw new IllegalArgumentException("Project " + name + " does not exist");
+            throw new IllegalArgumentException("AlignedProject " + name + " does not exist");
         }
         return module;
     }

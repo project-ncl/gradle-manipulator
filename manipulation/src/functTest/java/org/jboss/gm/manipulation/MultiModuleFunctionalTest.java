@@ -12,9 +12,9 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
+import org.jboss.gm.common.alignment.AlignedProject;
 import org.jboss.gm.common.alignment.AlignmentUtils;
 import org.jboss.gm.common.alignment.Module;
-import org.jboss.gm.common.alignment.Project;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -29,7 +29,7 @@ public class MultiModuleFunctionalTest {
         final File multiModuleRoot = tempDir.newFolder("multi-module");
         TestUtils.copyDirectory("multi-module", multiModuleRoot);
         assertThat(multiModuleRoot.toPath().resolve("build.gradle")).exists();
-        final Project alignment = AlignmentUtils.getAlignmentModelAt(multiModuleRoot);
+        final AlignedProject alignment = AlignmentUtils.getAlignmentModelAt(multiModuleRoot);
 
         final BuildResult buildResult = GradleRunner.create()
                 .withProjectDir(multiModuleRoot)
@@ -46,11 +46,11 @@ public class MultiModuleFunctionalTest {
         assertSubproject2Pom(multiModuleRoot, alignment);
     }
 
-    private void assertRootPom(File multiModuleRoot, Project alignment) throws IOException, XmlPullParserException {
+    private void assertRootPom(File multiModuleRoot, AlignedProject alignment) throws IOException, XmlPullParserException {
         TestUtils.getModelAndCheckGAV(multiModuleRoot, alignment, "build/publications/main/pom-default.xml");
     }
 
-    private void assertSubproject1Pom(File multiModuleRoot, Project alignment) throws IOException,
+    private void assertSubproject1Pom(File multiModuleRoot, AlignedProject alignment) throws IOException,
             XmlPullParserException {
         final Pair<Model, Module> modelAndModule = TestUtils.getModelAndCheckGAV(multiModuleRoot, alignment,
                 "subproject1/build/publications/main/pom-default.xml");
@@ -63,7 +63,7 @@ public class MultiModuleFunctionalTest {
                         TestUtils.getAlignedTuple(module, "spring-context"));
     }
 
-    private void assertSubproject2Pom(File multiModuleRoot, Project alignment)
+    private void assertSubproject2Pom(File multiModuleRoot, AlignedProject alignment)
             throws IOException, XmlPullParserException {
         final Pair<Model, Module> modelAndModule = TestUtils.getModelAndCheckGAV(multiModuleRoot, alignment,
                 "subproject2/build/publications/main/pom-default.xml");

@@ -15,7 +15,7 @@ public final class AlignmentUtils {
     private AlignmentUtils() {
     }
 
-    public static Project getAlignmentModelAt(File path) {
+    public static AlignedProject getAlignmentModelAt(File path) {
         if (!path.isDirectory()) {
             throw new IllegalArgumentException("Path must be a directory. Was: " + path);
         }
@@ -23,9 +23,9 @@ public final class AlignmentUtils {
         return getAlignmentModel(alignment);
     }
 
-    private static Project getAlignmentModel(File alignment) {
+    private static AlignedProject getAlignmentModel(File alignment) {
         try {
-            return SerializationUtils.getObjectMapper().readValue(alignment, Project.class);
+            return SerializationUtils.getObjectMapper().readValue(alignment, AlignedProject.class);
         } catch (IOException e) {
             throw new RuntimeException("Unable to deserialize " + ALIGNMENT_FILE_NAME, e);
         }
@@ -40,7 +40,7 @@ public final class AlignmentUtils {
      * Is assumes that a task for various projects is never called in parallel
      * TODO verify that the non-parallel run assumption holds
      */
-    public static Project getCurrentAlignmentModel(org.gradle.api.Project project) {
+    public static AlignedProject getCurrentAlignmentModel(org.gradle.api.Project project) {
         return getAlignmentModel(getAlignmentFilePath(project).toFile());
     }
 
@@ -48,7 +48,7 @@ public final class AlignmentUtils {
      * Write the model to disk - override any existing file that might exist
      * TODO verify comment of getCurrentAlignmentModel since this method relies on the same assumption
      */
-    public static void writeUpdatedAlignmentModel(org.gradle.api.Project project, Project updatedAlignmentModel) {
+    public static void writeUpdatedAlignmentModel(org.gradle.api.Project project, AlignedProject updatedAlignmentModel) {
         final Path alignmentFilePath = AlignmentUtils.getAlignmentFilePath(project);
         try {
             // first delete any existing file
@@ -59,7 +59,7 @@ public final class AlignmentUtils {
         writeAlignmentModelToFile(alignmentFilePath, updatedAlignmentModel);
     }
 
-    private static void writeAlignmentModelToFile(Path alignmentFilePath, Project alignmentModel) {
+    private static void writeAlignmentModelToFile(Path alignmentFilePath, AlignedProject alignmentModel) {
         try {
             FileUtils.writeStringToFile(
                     alignmentFilePath.toFile(),

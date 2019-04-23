@@ -1,9 +1,9 @@
 package org.jboss.gm.analyzer.alignment;
 
 import org.gradle.api.Plugin;
+import org.jboss.gm.common.alignment.AlignedProject;
 import org.jboss.gm.common.alignment.AlignmentUtils;
 import org.jboss.gm.common.alignment.Module;
-import org.jboss.gm.common.alignment.Project;
 
 /**
  * Results in adding a task with name {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME}.
@@ -31,8 +31,8 @@ public class AlignmentPlugin implements Plugin<org.gradle.api.Project> {
 
     }
 
-    private Project getInitialAlignmentModel(org.gradle.api.Project project) {
-        final Project alignmentModel = new Project(project.getGroup().toString(), project.getName());
+    private AlignedProject getInitialAlignmentModel(org.gradle.api.Project project) {
+        final AlignedProject alignmentModel = new AlignedProject(project.getGroup().toString(), project.getName());
         project.getSubprojects().forEach(p -> alignmentModel.addModule(new Module(p.getName())));
         return alignmentModel;
     }

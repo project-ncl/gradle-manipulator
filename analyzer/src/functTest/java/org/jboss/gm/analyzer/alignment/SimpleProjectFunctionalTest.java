@@ -57,7 +57,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
             assertThat(am.getName()).isEqualTo("root");
             assertThat(am.findCorrespondingModule("root")).satisfies(root -> {
-                assertThat(root.getNewVersion()).isEqualTo("1.0.1-redhat-00001");
+                assertThat(root.getVersion()).isEqualTo("1.0.1-redhat-00001");
                 assertThat(root.getName()).isEqualTo("root");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
                 assertThat(alignedDependencies)

@@ -21,6 +21,6 @@ public class ProjectChangeVersionAction implements Action<org.gradle.api.Project
 
     @Override
     public void execute(org.gradle.api.Project project) {
-        project.setVersion(module.getNewVersion());
+        project.setVersion(module.getVersion());
     }
 }

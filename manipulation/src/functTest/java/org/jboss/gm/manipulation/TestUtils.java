@@ -86,7 +86,7 @@ public final class TestUtils {
         final Model model = reader.read(new FileReader(generatedPomPath.toFile()));
         assertThat(model.getGroupId()).isEqualTo(alignment.getGroup());
         assertThat(model.getArtifactId()).isEqualTo(module.getName());
-        assertThat(model.getVersion()).isEqualTo(module.getNewVersion());
+        assertThat(model.getVersion()).isEqualTo(module.getVersion());
 
         return new ImmutablePair<>(model, module);
     }

@@ -53,7 +53,7 @@ public class AlignmentTask extends DefaultTask {
         final Project alignmentModel = getCurrentAlignmentModel(project);
         final Module correspondingModule = alignmentModel.findCorrespondingModule(projectName);
 
-        correspondingModule.setNewVersion(alignmentResponse.getNewProjectVersion());
+        correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
         updateModuleDependencies(correspondingModule, deps, alignmentResponse);
 
         writeUpdatedAlignmentModel(project, alignmentModel);

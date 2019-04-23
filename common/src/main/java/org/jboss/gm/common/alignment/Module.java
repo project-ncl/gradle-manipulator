@@ -21,7 +21,7 @@ public class Module {
     private String name;
 
     @JsonProperty
-    private String newVersion;
+    private String version;
 
     private Map<String, ProjectVersionRef> alignedDependencies = new HashMap<>();
 
@@ -40,11 +40,11 @@ public class Module {
         return alignedDependencies;
     }
 
-    public String getNewVersion() {
-        return newVersion;
+    public String getVersion() {
+        return version;
     }
 
-    public void setNewVersion(String newProjectVersion) {
-        this.newVersion = newProjectVersion;
+    public void setVersion(String newProjectVersion) {
+        this.version = newProjectVersion;
     }
 }

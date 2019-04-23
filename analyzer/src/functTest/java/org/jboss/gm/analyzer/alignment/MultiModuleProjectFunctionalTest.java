@@ -83,12 +83,12 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
             assertThat(am.getModules().keySet()).hasSize(2).containsExactly("subproject1", "subproject2");
 
             assertThat(am.findCorrespondingModule("root")).satisfies(root -> {
-                assertThat(root.getNewVersion()).isEqualTo("1.1.2-redhat-00004");
+                assertThat(root.getVersion()).isEqualTo("1.1.2-redhat-00004");
                 assertThat(root.getAlignedDependencies()).isEmpty();
             });
 
             assertThat(am.findCorrespondingModule("subproject1")).satisfies(subproject1 -> {
-                assertThat(subproject1.getNewVersion()).isEqualTo("1.1.2-redhat-00004");
+                assertThat(subproject1.getVersion()).isEqualTo("1.1.2-redhat-00004");
                 final Collection<ProjectVersionRef> alignedDependencies = subproject1.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
@@ -98,7 +98,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
             });
 
             assertThat(am.findCorrespondingModule("subproject2")).satisfies(subproject2 -> {
-                assertThat(subproject2.getNewVersion()).isEqualTo("1.1.2-redhat-00004");
+                assertThat(subproject2.getVersion()).isEqualTo("1.1.2-redhat-00004");
                 final Collection<ProjectVersionRef> alignedDependencies = subproject2.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")

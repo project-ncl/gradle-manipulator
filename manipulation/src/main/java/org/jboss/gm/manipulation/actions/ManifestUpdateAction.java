@@ -26,10 +26,10 @@ public class ManifestUpdateAction implements Action<org.gradle.api.Project> {
             if (jar.getManifest() instanceof OsgiManifest) {
                 OsgiManifest manifest = (OsgiManifest) jar.getManifest();
                 if (manifest.getInstructions().containsKey("Implementation-Version")) {
-                    manifest.instructionReplace("Implementation-Version", alignmentConfiguration.getNewVersion());
+                    manifest.instructionReplace("Implementation-Version", alignmentConfiguration.getVersion());
                 }
                 if (manifest.getInstructions().containsKey("Specification-Version")) {
-                    manifest.instructionReplace("Specification-Version", alignmentConfiguration.getNewVersion());
+                    manifest.instructionReplace("Specification-Version", alignmentConfiguration.getVersion());
                 }
             } else if (jar.getManifest() instanceof DefaultManifest) {
                 // TODO what are common entries here?

@@ -1,7 +1,7 @@
 {
   "group": "org.acme",
   "name": "root",
-  "newVersion": "1.0.1-redhat-00001",
+  "version": "1.0.1-redhat-00001",
   "alignedDependencies": {
     "org.hibernate:hibernate-core:5.3.7.Final": {
       "groupId": "org.hibernate",

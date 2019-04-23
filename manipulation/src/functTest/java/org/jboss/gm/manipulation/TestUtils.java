@@ -56,17 +56,26 @@ public final class TestUtils {
         return getAlignedTuple(alignment, artifactId, null);
     }
 
-    static Pair<Model, AlignmentModel.Module> getModelAndCheckGAV(File multiModuleRoot, AlignmentModel alignment,
-            String generatedPomPathAsString)
+    static Pair<Model, AlignmentModel.Module> getModelAndCheckGAV(File parentLocationForPom, AlignmentModel alignment,
+            String relativeGeneratedPomPathAsString)
             throws IOException,
             XmlPullParserException {
-        final Path generatedPomPath = multiModuleRoot.toPath().resolve(generatedPomPathAsString);
+
+        return getModelAndCheckGAV(parentLocationForPom, alignment, relativeGeneratedPomPathAsString, false);
+    }
+
+    static Pair<Model, AlignmentModel.Module> getModelAndCheckGAV(File parentLocationForPom, AlignmentModel alignment,
+            String relativeGeneratedPomPathAsString, boolean external)
+            throws IOException,
+            XmlPullParserException {
+        final Path generatedPomPath = parentLocationForPom.toPath().resolve(relativeGeneratedPomPathAsString);
         assertThat(generatedPomPath).isRegularFile();
 
         // find module
         final AlignmentModel.Module module;
-        if (!generatedPomPathAsString.startsWith("build")) {
-            final String moduleName = generatedPomPathAsString.substring(0, generatedPomPathAsString.indexOf('/'));
+        if (!external && !relativeGeneratedPomPathAsString.startsWith("build")) {
+            final String moduleName = relativeGeneratedPomPathAsString.substring(0,
+                    relativeGeneratedPomPathAsString.indexOf('/'));
             module = alignment.getModules().stream()
                     .filter(m -> moduleName.equals(m.getName()))
                     .findFirst()

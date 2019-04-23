@@ -4,7 +4,7 @@ import org.gradle.api.Action;
 import org.gradle.api.java.archives.internal.DefaultManifest;
 import org.gradle.api.plugins.osgi.OsgiManifest;
 import org.gradle.api.tasks.bundling.Jar;
-import org.jboss.gm.common.alignment.Project;
+import org.jboss.gm.common.alignment.Module;
 
 /**
  * Overrides specified OSGI manifest entries.
@@ -14,9 +14,9 @@ import org.jboss.gm.common.alignment.Project;
  */
 public class ManifestUpdateAction implements Action<org.gradle.api.Project> {
 
-    private Project.Module alignmentConfiguration;
+    private Module alignmentConfiguration;
 
-    public ManifestUpdateAction(Project.Module alignmentConfiguration) {
+    public ManifestUpdateAction(Module alignmentConfiguration) {
         this.alignmentConfiguration = alignmentConfiguration;
     }
 

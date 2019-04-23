@@ -13,6 +13,7 @@ import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.jboss.gm.common.alignment.AlignmentUtils;
+import org.jboss.gm.common.alignment.Module;
 import org.jboss.gm.common.alignment.Project;
 import org.junit.Rule;
 import org.junit.Test;
@@ -39,10 +40,10 @@ public class SimpleProjectFunctionalTest {
                 .build();
 
         assertThat(buildResult.task(":" + "generatePomFileForMainPublication").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
-        final Pair<Model, Project.Module> modelAndModule = TestUtils.getModelAndCheckGAV(simpleProjectRoot, alignment,
+        final Pair<Model, Module> modelAndModule = TestUtils.getModelAndCheckGAV(simpleProjectRoot, alignment,
                 "build/publications/main/pom-default.xml");
 
-        final Project.Module module = modelAndModule.getRight();
+        final Module module = modelAndModule.getRight();
         assertThat(modelAndModule.getLeft().getDependencies())
                 .extracting("artifactId", "version")
                 .containsOnly(

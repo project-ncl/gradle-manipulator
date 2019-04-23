@@ -7,7 +7,7 @@
 package org.jboss.gm.manipulation.actions;
 
 import org.gradle.api.Action;
-import org.jboss.gm.common.alignment.Project;
+import org.jboss.gm.common.alignment.Module;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
@@ -15,7 +15,7 @@ import org.jboss.gm.common.alignment.Project;
 public class OverrideDependenciesAction implements Action<org.gradle.api.Project> {
     private final AlignedDependencyResolver resolver;
 
-    public OverrideDependenciesAction(Project.Module correspondingModule) {
+    public OverrideDependenciesAction(Module correspondingModule) {
         this.resolver = new AlignedDependencyResolver(correspondingModule);
     }
 

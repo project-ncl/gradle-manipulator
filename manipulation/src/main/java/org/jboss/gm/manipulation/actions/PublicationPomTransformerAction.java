@@ -4,7 +4,7 @@ import org.gradle.api.Action;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
-import org.jboss.gm.common.alignment.Project;
+import org.jboss.gm.common.alignment.Module;
 
 /**
  * Fixes pom.xml generation in "maven-publish" plugin.
@@ -14,9 +14,9 @@ import org.jboss.gm.common.alignment.Project;
  */
 public class PublicationPomTransformerAction implements Action<org.gradle.api.Project> {
 
-    private Project.Module alignmentConfiguration;
+    private Module alignmentConfiguration;
 
-    public PublicationPomTransformerAction(Project.Module alignmentConfiguration) {
+    public PublicationPomTransformerAction(Module alignmentConfiguration) {
         this.alignmentConfiguration = alignmentConfiguration;
     }
 

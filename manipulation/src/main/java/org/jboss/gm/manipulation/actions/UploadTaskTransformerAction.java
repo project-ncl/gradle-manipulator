@@ -3,7 +3,7 @@ package org.jboss.gm.manipulation.actions;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.maven.MavenResolver;
 import org.gradle.api.tasks.Upload;
-import org.jboss.gm.common.alignment.Project;
+import org.jboss.gm.common.alignment.Module;
 
 /**
  * Fixes pom.xml generation in old "maven" plugin.
@@ -12,9 +12,9 @@ import org.jboss.gm.common.alignment.Project;
  */
 public class UploadTaskTransformerAction implements Action<org.gradle.api.Project> {
 
-    private Project.Module alignmentConfiguration;
+    private Module alignmentConfiguration;
 
-    public UploadTaskTransformerAction(Project.Module alignmentConfiguration) {
+    public UploadTaskTransformerAction(Module alignmentConfiguration) {
         this.alignmentConfiguration = alignmentConfiguration;
     }
 

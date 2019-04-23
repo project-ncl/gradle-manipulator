@@ -8,27 +8,21 @@ import org.apache.commons.lang3.Validate;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Project {
+public class Project extends Module {
 
     @JsonProperty
     private String group;
-    @JsonProperty
-    private String name;
 
     public Project() {
     }
 
     public Project(String group, String name) {
+        super(name);
         this.group = group;
-        this.name = name;
     }
 
     public String getGroup() {
         return group;
-    }
-
-    public String getName() {
-        return name;
     }
 
     @JsonIgnore

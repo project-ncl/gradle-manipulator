@@ -14,8 +14,7 @@ public interface AlignmentService {
     Response align(Request request);
 
     /**
-     * Contains both the project collected project dependencies GAVs
-     * and the project GAV.
+     * Contains both the collected project dependencies GAVs and the project GAV.
      * Done this way because currently with {@link org.jboss.gm.analyzer.alignment.DAAlignmentService}
      * we have the ability to get both pieces of information with one call
      *
@@ -39,7 +38,7 @@ public interface AlignmentService {
             return project;
         }
     }
-    
+
     interface Response {
 
         String getNewProjectVersion();

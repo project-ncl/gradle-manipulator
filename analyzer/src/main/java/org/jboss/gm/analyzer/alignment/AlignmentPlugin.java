@@ -11,8 +11,8 @@ import org.jboss.gm.common.alignment.AlignmentUtils;
 
 /**
  * Results in adding a task with name {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME}.
- * It also creates the basic alignment.json file that {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME} of each project adds to
- *
+ * It also creates an {@code alignment.json} file located at the root of the project that
+ * is augmented by the {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME} task run on each sub-project
  */
 public class AlignmentPlugin implements Plugin<Project> {
 

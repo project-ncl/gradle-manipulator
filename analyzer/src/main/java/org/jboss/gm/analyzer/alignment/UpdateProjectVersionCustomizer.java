@@ -2,7 +2,6 @@ package org.jboss.gm.analyzer.alignment;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
-
 /**
  * {@link org.jboss.gm.analyzer.alignment.AlignmentService.ResponseCustomizer} that changes the project version
  *

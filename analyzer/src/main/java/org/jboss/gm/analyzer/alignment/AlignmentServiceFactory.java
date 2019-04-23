@@ -11,14 +11,17 @@ import org.gradle.api.Project;
 
 public final class AlignmentServiceFactory {
 
+    private static final String DA_ENDPOINT_URL_PROPERTY = "da.endpoint.url";
+
     private AlignmentServiceFactory() {
     }
 
     public static AlignmentService getAlignmentService(Project project) {
         final Configuration configuration = ConfigurationFactory.getConfiguration();
-        final String daEndpointUrl = configuration.getString("da.endpoint.url");
+        final String daEndpointUrl = configuration.getString(DA_ENDPOINT_URL_PROPERTY);
         if (daEndpointUrl == null) {
-            throw new IllegalArgumentException("'da.endpointURL' must be configured in order for alignment to work");
+            throw new IllegalArgumentException(
+                    String.format("'%s' must be configured in order for alignment to work", DA_ENDPOINT_URL_PROPERTY));
         }
 
         final ProjectVersionRef projectVersionRef = new SimpleProjectVersionRef(project.getGroup().toString(),

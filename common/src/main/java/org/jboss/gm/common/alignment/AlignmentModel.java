@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.Validate;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AlignmentModel {
@@ -31,6 +32,11 @@ public class AlignmentModel {
 
     public String getName() {
         return name;
+    }
+
+    @JsonIgnore
+    public String getVersion() {
+        return modules.get(0).getNewVersion();
     }
 
     // the root project is always the first project in the list

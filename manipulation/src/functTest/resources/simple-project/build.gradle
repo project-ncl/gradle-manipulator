@@ -2,9 +2,6 @@ plugins {
     // including this plugin directly instead of by an init script, which allows to use the freshly build version
     id 'org.jboss.gm.manipulation'
     id 'java'
-    
-    // TODO: this will need to be removed when the plugin takes care of things 
-    id 'maven-publish'
 }
 
 sourceCompatibility = 1.8

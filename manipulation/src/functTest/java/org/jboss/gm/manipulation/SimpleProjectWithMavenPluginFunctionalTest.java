@@ -1,20 +1,19 @@
 package org.jboss.gm.manipulation;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
+import org.jboss.gm.common.alignment.AlignmentModel;
+import org.jboss.gm.common.alignment.AlignmentUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -36,30 +35,25 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
         TestUtils.copyDirectory("simple-project-with-maven-plugin", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
 
+        final AlignmentModel alignment = AlignmentUtils.getAlignmentModelAt(simpleProjectRoot);
+
         final BuildResult buildResult = GradleRunner.create()
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("install")
                 .withDebug(true)
                 .withPluginClasspath()
                 .build();
+        assertThat(buildResult.task(":install").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 
-        assertThat(buildResult.task(":" + "install").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
-        final Path generatedPomPath = m2Directory.toPath().resolve("org/acme/root/1.0.1/root-1.0.1.pom");
-        assertThat(generatedPomPath).isRegularFile();
-
-        // TODO: fix version assertions when plugin is implemented
-
-        final MavenXpp3Reader reader = new MavenXpp3Reader();
-        final Model model = reader.read(new FileReader(generatedPomPath.toFile()));
-        assertThat(model.getGroupId()).isEqualTo("org.acme");
-        assertThat(model.getArtifactId()).isEqualTo("root");
-        assertThat(model.getVersion()).isEqualTo("1.0.1");
-        assertThat(model.getDependencies())
+        final Pair<Model, AlignmentModel.Module> modelAndModule = TestUtils.getModelAndCheckGAV(m2Directory, alignment,
+                "org/acme/root/1.0.1-redhat-00001/root-1.0.1-redhat-00001.pom", true);
+        final AlignmentModel.Module module = modelAndModule.getRight();
+        assertThat(modelAndModule.getLeft().getDependencies())
                 .extracting("artifactId", "version")
                 .containsOnly(
-                        tuple("commons-lang3", "3.8.1"),
-                        tuple("hibernate-core", "5.3.7.Final"),
-                        tuple("undertow-core", "2.0.15.Final"),
-                        tuple("junit", "4.12"));
+                        TestUtils.getAlignedTuple(module, "commons-lang3", "3.8.1"),
+                        TestUtils.getAlignedTuple(module, "hibernate-core"),
+                        TestUtils.getAlignedTuple(module, "undertow-core"),
+                        TestUtils.getAlignedTuple(module, "junit", "4.12"));
     }
 }

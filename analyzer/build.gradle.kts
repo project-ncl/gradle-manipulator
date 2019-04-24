@@ -15,7 +15,9 @@ gradlePlugin {
 
 dependencies {
     compile(project(":common"))
-    compile("org.apache.commons:commons-lang3:3.8.1")
+    // the shadow configuration is used in order to avoid adding gradle and groovy stuff to the shadowed jar
+    shadow(localGroovy())
+    shadow(gradleApi())
     compile("org.apache.commons:commons-configuration2:2.4")
     compile("commons-beanutils:commons-beanutils:1.9.3")
     compile("org.slf4j:slf4j-simple:1.7.26")

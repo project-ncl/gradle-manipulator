@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
-import org.gradle.api.Project;
 
 public final class AlignmentUtils {
 
@@ -32,8 +31,8 @@ public final class AlignmentUtils {
         }
     }
 
-    private static Path getAlignmentFilePath(Project project) {
-        return project.getRootDir().toPath().resolve(ALIGNMENT_FILE_NAME);
+    private static Path getAlignmentFilePath(File rootDir) {
+        return rootDir.toPath().resolve(ALIGNMENT_FILE_NAME);
     }
 
     /**
@@ -43,16 +42,16 @@ public final class AlignmentUtils {
      * 
      * @return
      */
-    public static ManipulationModel getCurrentAlignmentModel(Project project) {
-        return getAlignmentModel(getAlignmentFilePath(project).toFile());
+    public static ManipulationModel getCurrentAlignmentModel(File rootDir) {
+        return getAlignmentModel(getAlignmentFilePath(rootDir).toFile());
     }
 
     /**
      * Write the model to disk - override any existing file that might exist
      * TODO verify comment of getCurrentAlignmentModel since this method relies on the same assumption
      */
-    public static void writeUpdatedAlignmentModel(Project project, ManipulationModel updatedAlignmentModel) {
-        final Path alignmentFilePath = AlignmentUtils.getAlignmentFilePath(project);
+    public static void writeUpdatedAlignmentModel(File rootDir, ManipulationModel updatedAlignmentModel) {
+        final Path alignmentFilePath = AlignmentUtils.getAlignmentFilePath(rootDir);
         try {
             // first delete any existing file
             Files.delete(alignmentFilePath);

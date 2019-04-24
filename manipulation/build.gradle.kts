@@ -15,6 +15,7 @@ gradlePlugin {
 
 dependencies {
     compile(project(":common"))
+    compile("org.apache.commons:commons-lang3:3.8.1")
     testCompile("junit:junit:4.12")
     testCompile("org.assertj:assertj-core:3.12.2")
 }

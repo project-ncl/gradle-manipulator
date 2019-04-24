@@ -1,13 +1,9 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.jboss.gm.common.alignment.AlignmentModel;
 import org.jboss.gm.common.alignment.AlignmentUtils;
+import org.jboss.gm.common.alignment.ManipulationModel;
 
 /**
  * Results in adding a task with name {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME}.
@@ -35,16 +31,11 @@ public class AlignmentPlugin implements Plugin<Project> {
 
     }
 
-    private AlignmentModel getInitialAlignmentModel(Project project) {
-        final AlignmentModel alignmentModel = new AlignmentModel(project.getGroup().toString(), project.getName());
-        final List<AlignmentModel.Module> modules = new ArrayList<>();
-        modules.add(new AlignmentModel.Module(project.getName()));
-        if (!project.getSubprojects().isEmpty()) {
-            modules.addAll(project.getSubprojects().stream()
-                    .map(p -> new AlignmentModel.Module(p.getName()))
-                    .collect(Collectors.toList()));
-        }
-        alignmentModel.setModules(modules);
+    private ManipulationModel getInitialAlignmentModel(Project project) {
+        final ManipulationModel alignmentModel = new ManipulationModel(project.getName(), project.getGroup().toString());
+        // todo: recursively add sub-modules
+        project.getSubprojects()
+                .forEach(p -> alignmentModel.addChild(new ManipulationModel(p.getName(), p.getGroup().toString())));
         return alignmentModel;
     }
 }

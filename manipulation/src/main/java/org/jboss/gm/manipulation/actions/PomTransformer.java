@@ -5,7 +5,7 @@ import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.Action;
 import org.gradle.api.XmlProvider;
-import org.jboss.gm.common.alignment.AlignmentModel;
+import org.jboss.gm.common.alignment.ManipulationModel;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -21,9 +21,9 @@ public class PomTransformer implements Action<XmlProvider> {
     private static final String GROUPID = "groupId";
     private static final String ARTIFACTID = "artifactId";
 
-    private final AlignmentModel.Module alignmentConfiguration;
+    private final ManipulationModel alignmentConfiguration;
 
-    public PomTransformer(AlignmentModel.Module alignmentConfiguration) {
+    public PomTransformer(ManipulationModel alignmentConfiguration) {
         this.alignmentConfiguration = alignmentConfiguration;
     }
 

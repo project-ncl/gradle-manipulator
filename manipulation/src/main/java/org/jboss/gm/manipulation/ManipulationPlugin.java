@@ -5,7 +5,7 @@ import static org.jboss.gm.common.alignment.AlignmentUtils.getCurrentAlignmentMo
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
-import org.jboss.gm.common.alignment.AlignmentModel;
+import org.jboss.gm.common.alignment.ManipulationModel;
 import org.jboss.gm.manipulation.actions.ManifestUpdateAction;
 import org.jboss.gm.manipulation.actions.OverrideDependenciesAction;
 import org.jboss.gm.manipulation.actions.ProjectChangeVersionAction;
@@ -21,8 +21,8 @@ public class ManipulationPlugin implements Plugin<Project> {
         project.getPluginManager().apply(MavenPublishPlugin.class);
 
         // get the previously performed alignment
-        final AlignmentModel alignmentModel = getCurrentAlignmentModel(project);
-        final AlignmentModel.Module correspondingModule = alignmentModel.findCorrespondingModule(project.getName());
+        final ManipulationModel alignmentModel = getCurrentAlignmentModel(project);
+        final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getName());
 
         // add actions to manipulate project
         project.afterEvaluate(new ProjectChangeVersionAction(correspondingModule));

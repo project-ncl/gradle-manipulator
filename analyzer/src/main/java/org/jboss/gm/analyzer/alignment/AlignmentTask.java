@@ -1,22 +1,22 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.jboss.gm.common.alignment.AlignmentUtils.getCurrentAlignmentModel;
+import static org.jboss.gm.common.alignment.AlignmentUtils.writeUpdatedAlignmentModel;
+
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.internal.artifacts.dependencies.DefaultSelfResolvingDependency;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.ProjectVersionFactory;
-import org.jboss.gm.common.alignment.AlignmentModel;
+import org.jboss.gm.common.alignment.ManipulationModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.jboss.gm.common.alignment.AlignmentUtils.getCurrentAlignmentModel;
-import static org.jboss.gm.common.alignment.AlignmentUtils.writeUpdatedAlignmentModel;
 
 /**
  * The actual Gradle task that creates the alignment.json file for the whole project
@@ -49,10 +49,10 @@ public class AlignmentTask extends DefaultTask {
                                 currentProjectVersion),
                         deps));
 
-        final AlignmentModel alignmentModel = getCurrentAlignmentModel(project);
-        final AlignmentModel.Module correspondingModule = alignmentModel.findCorrespondingModule(projectName);
+        final ManipulationModel alignmentModel = getCurrentAlignmentModel(project);
+        final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(projectName);
 
-        correspondingModule.setNewVersion(alignmentResponse.getNewProjectVersion());
+        correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
         updateModuleDependencies(correspondingModule, deps, alignmentResponse);
 
         writeUpdatedAlignmentModel(project, alignmentModel);
@@ -60,22 +60,21 @@ public class AlignmentTask extends DefaultTask {
 
     private Collection<ProjectVersionRef> getAllProjectDependencies(Project project) {
         final Set<ProjectVersionRef> result = new LinkedHashSet<>();
-        project.getConfigurations().all(configuration -> configuration.getAllDependencies().
-                forEach(dep -> {
-                    if (dep instanceof DefaultSelfResolvingDependency) {
-                        log.warn("Ignoring dependency of type {} on project {}", dep.getClass().getName(), project.getName());
-                    } else if ( isEmpty(dep.getVersion()) ) {
-                        log.warn("Ignoring empty version on dependency {} on project {}", dep.toString(), project.getName());
-                    } else {
-                        result.add(
-                                ProjectVersionFactory.withGAVAndConfiguration(dep.getGroup(), dep.getName(), dep.getVersion(),
-                                        configuration.getName()));
-                    }
-                }));
+        project.getConfigurations().all(configuration -> configuration.getAllDependencies().forEach(dep -> {
+            if (dep instanceof DefaultSelfResolvingDependency) {
+                log.warn("Ignoring dependency of type {} on project {}", dep.getClass().getName(), project.getName());
+            } else if (isEmpty(dep.getVersion())) {
+                log.warn("Ignoring empty version on dependency {} on project {}", dep.toString(), project.getName());
+            } else {
+                result.add(
+                        ProjectVersionFactory.withGAVAndConfiguration(dep.getGroup(), dep.getName(), dep.getVersion(),
+                                configuration.getName()));
+            }
+        }));
         return result;
     }
 
-    private void updateModuleDependencies(AlignmentModel.Module correspondingModule,
+    private void updateModuleDependencies(ManipulationModel correspondingModule,
             Collection<ProjectVersionRef> allModuleDependencies, AlignmentService.Response alignmentResponse) {
 
         allModuleDependencies.forEach(d -> {

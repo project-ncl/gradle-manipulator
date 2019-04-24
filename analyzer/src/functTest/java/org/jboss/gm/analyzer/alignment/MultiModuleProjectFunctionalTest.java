@@ -26,31 +26,25 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
 
     @Before
     public void setup() {
-        stubFor(post(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
-                .inScenario("multi-module")
-                .whenScenarioStateIs(STARTED)
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("multi-module-da-root.json")))
-                .willSetStateTo("project root called"));
+        final String project_root_called = "project root called";
+        final String first_dependency_called = "first module called";
+        final String second_dependency_called = "second module called";
 
-        stubFor(post(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
-                .inScenario("multi-module")
-                .whenScenarioStateIs("project root called")
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("multi-module-da-subproject1.json")))
-                .willSetStateTo("first dependency called"));
+        stubDACall(STARTED, "root", project_root_called);
+        stubDACall(project_root_called, "subproject1", first_dependency_called);
+        stubDACall(first_dependency_called, "subproject2", second_dependency_called);
+        stubDACall(second_dependency_called, "subproject11", "foo");
+    }
 
+    private void stubDACall(String initialState, String projectName, String nextState) {
         stubFor(post(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
                 .inScenario("multi-module")
-                .whenScenarioStateIs("first dependency called")
+                .whenScenarioStateIs(initialState)
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("multi-module-da-subproject2.json"))));
+                        .withBody(readSampleDAResponse("multi-module-da-" + projectName + ".json")))
+                .willSetStateTo(nextState));
     }
 
     @Test
@@ -69,6 +63,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
             });
 
             assertThat(am.findCorrespondingChild("subproject1")).satisfies(subproject1 -> {
+                assertThat(subproject1.getChildren().keySet()).hasSize(1).containsExactly("subproject11");
                 assertThat(subproject1.getVersion()).isEqualTo("1.1.2-redhat-00004");
                 final Collection<ProjectVersionRef> alignedDependencies = subproject1.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
@@ -85,6 +80,15 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                         .extracting("artifactId", "versionString")
                         .containsOnly(
                                 tuple("resteasy-jaxrs", "3.6.3.SP1-redhat-00001"));
+            });
+
+            assertThat(am.findCorrespondingChild(":subproject1:subproject11")).satisfies(subproject11 -> {
+                assertThat(subproject11.getVersion()).isEqualTo("1.1.2-redhat-00004");
+                final Collection<ProjectVersionRef> alignedDependencies = subproject11.getAlignedDependencies().values();
+                assertThat(alignedDependencies)
+                        .extracting("artifactId", "versionString")
+                        .containsOnly(
+                                tuple("spring-context", "5.1.6.RELEASE-redhat-00005"));
             });
         });
     }

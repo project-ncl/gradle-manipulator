@@ -90,16 +90,62 @@ public class ManipulationModel {
     }
 
     public ManipulationModel findCorrespondingChild(String name) {
-        Validate.notEmpty(name, "Supplied module name cannot be empty");
+        Validate.notEmpty(name, "Supplied child name cannot be empty");
 
-        if (getName().equals(name)) {
-            return this;
+        final ManipulationModel module;
+        if (!name.contains(":")) {
+            // we provided a simple name so assume we're looking for a direct child
+            if (getName().equals(name) || name.isEmpty()) {
+                return this;
+            }
+
+            module = children.get(name);
+            if (module == null) {
+                throw new IllegalArgumentException("ManipulationModel " + name + " does not exist");
+            }
+        } else {
+            // we provided a project path, so recursively find the corresponding child by removing the initial ":"
+            if (name.equals(":")) {
+                return this;
+            }
+
+            final int index = name.indexOf(':', 1);
+            if (index < 0) {
+                // we don't have other path separators so remove the leading : and get with name
+                return findCorrespondingChild(name.substring(1));
+            } else {
+                // extract the child name which is the first component of the path and call recursively on it using remaining
+                // path
+                String childName = name.substring(1, index);
+                return findCorrespondingChild(childName).findCorrespondingChild(name.substring(index));
+            }
         }
 
-        final ManipulationModel module = children.get(name);
-        if (module == null) {
-            throw new IllegalArgumentException("ManipulationModel " + name + " does not exist");
-        }
         return module;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        ManipulationModel model = (ManipulationModel) o;
+
+        if (!group.equals(model.group))
+            return false;
+        if (!name.equals(model.name))
+            return false;
+        return version.equals(model.version);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = group.hashCode();
+        result = 31 * result + name.hashCode();
+        result = 31 * result + version.hashCode();
+        return result;
     }
 }

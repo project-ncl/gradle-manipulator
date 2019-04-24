@@ -16,7 +16,7 @@ public final class AlignmentUtils {
     private AlignmentUtils() {
     }
 
-    public static Module getAlignmentModelAt(File path) {
+    public static ManipulationModel getAlignmentModelAt(File path) {
         if (!path.isDirectory()) {
             throw new IllegalArgumentException("Path must be a directory. Was: " + path);
         }
@@ -24,9 +24,9 @@ public final class AlignmentUtils {
         return getAlignmentModel(alignment);
     }
 
-    private static Module getAlignmentModel(File alignment) {
+    private static ManipulationModel getAlignmentModel(File alignment) {
         try {
-            return SerializationUtils.getObjectMapper().readValue(alignment, Module.class);
+            return SerializationUtils.getObjectMapper().readValue(alignment, ManipulationModel.class);
         } catch (IOException e) {
             throw new RuntimeException("Unable to deserialize " + ALIGNMENT_FILE_NAME, e);
         }
@@ -43,7 +43,7 @@ public final class AlignmentUtils {
      * 
      * @return
      */
-    public static Module getCurrentAlignmentModel(Project project) {
+    public static ManipulationModel getCurrentAlignmentModel(Project project) {
         return getAlignmentModel(getAlignmentFilePath(project).toFile());
     }
 
@@ -51,7 +51,7 @@ public final class AlignmentUtils {
      * Write the model to disk - override any existing file that might exist
      * TODO verify comment of getCurrentAlignmentModel since this method relies on the same assumption
      */
-    public static void writeUpdatedAlignmentModel(Project project, Module updatedAlignmentModel) {
+    public static void writeUpdatedAlignmentModel(Project project, ManipulationModel updatedAlignmentModel) {
         final Path alignmentFilePath = AlignmentUtils.getAlignmentFilePath(project);
         try {
             // first delete any existing file
@@ -62,7 +62,7 @@ public final class AlignmentUtils {
         writeAlignmentModelToFile(alignmentFilePath, updatedAlignmentModel);
     }
 
-    private static void writeAlignmentModelToFile(Path alignmentFilePath, Module alignmentModel) {
+    private static void writeAlignmentModelToFile(Path alignmentFilePath, ManipulationModel alignmentModel) {
         try {
             FileUtils.writeStringToFile(
                     alignmentFilePath.toFile(),

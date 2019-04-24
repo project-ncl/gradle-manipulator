@@ -15,28 +15,29 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Represents any buildable module (as in maven module or gradle project) which dependencies and version can be aligned
+ * Contains the information extracted from a gradle project and its sub-project required to perform alignment and version
+ * change
  * 
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
  */
-public class Module {
+public class ManipulationModel {
     @JsonProperty
     protected String group;
 
     /**
-     * Name of the module as defined by the build system.
+     * Name of the project as defined by the build system.
      */
     @JsonProperty
     private String name;
 
     /**
-     * Version of the module.
+     * Version of the project.
      */
     @JsonProperty
     private String version;
 
     /**
-     * Computed aligned dependencies for this module, indexed by the previous GAV of the dependency, e.g.
+     * Computed aligned dependencies for this project, indexed by the previous GAV of the dependency, e.g.
      * {@code org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1} could be the key for a dependency aligned with
      * {@code 3.6.3.SP1-redhat-00001} version
      */
@@ -44,18 +45,18 @@ public class Module {
     private Map<String, ProjectVersionRef> alignedDependencies = new HashMap<>();
 
     /**
-     * Children modules if any.
+     * Representation of this project children projects if any, keyed by name.
      */
     @JsonProperty
-    private Map<String, Module> modules = new HashMap<>(7);
+    private Map<String, ManipulationModel> modules = new HashMap<>(7);
 
     /**
      * Required for Jackson
      */
-    public Module() {
+    public ManipulationModel() {
     }
 
-    public Module(String name, String group) {
+    public ManipulationModel(String name, String group) {
         this.name = name;
         this.group = group;
     }
@@ -80,24 +81,24 @@ public class Module {
         return group;
     }
 
-    public Map<String, Module> getModules() {
+    public Map<String, ManipulationModel> getModules() {
         return modules;
     }
 
-    public void addModule(Module module) {
+    public void addModule(ManipulationModel module) {
         modules.put(module.getName(), module);
     }
 
-    public Module findCorrespondingModule(String name) {
+    public ManipulationModel findCorrespondingModule(String name) {
         Validate.notEmpty(name, "Supplied module name cannot be empty");
 
         if (getName().equals(name)) {
             return this;
         }
 
-        final Module module = modules.get(name);
+        final ManipulationModel module = modules.get(name);
         if (module == null) {
-            throw new IllegalArgumentException("Module " + name + " does not exist");
+            throw new IllegalArgumentException("ManipulationModel " + name + " does not exist");
         }
         return module;
     }

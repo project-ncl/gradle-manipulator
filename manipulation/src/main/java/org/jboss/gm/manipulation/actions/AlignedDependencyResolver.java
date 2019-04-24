@@ -14,13 +14,13 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.DependencyResolveDetails;
 import org.gradle.api.artifacts.ModuleVersionSelector;
-import org.jboss.gm.common.alignment.Module;
+import org.jboss.gm.common.alignment.ManipulationModel;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
  */
 public class AlignedDependencyResolver implements Action<DependencyResolveDetails> {
-    private final Module module;
+    private final ManipulationModel module;
 
     private static final boolean BYPASS;
 
@@ -35,7 +35,7 @@ public class AlignedDependencyResolver implements Action<DependencyResolveDetail
         BYPASS = bypass;
     }
 
-    public AlignedDependencyResolver(Module module) {
+    public AlignedDependencyResolver(ManipulationModel module) {
         this.module = module;
     }
 

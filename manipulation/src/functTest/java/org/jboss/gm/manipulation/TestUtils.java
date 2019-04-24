@@ -19,7 +19,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.assertj.core.groups.Tuple;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.jboss.gm.common.alignment.Module;
+import org.jboss.gm.common.alignment.ManipulationModel;
 
 public final class TestUtils {
 
@@ -31,7 +31,7 @@ public final class TestUtils {
                 .get(TestUtils.class.getClassLoader().getResource(classpathResource).toURI()).toFile(), target);
     }
 
-    static Tuple getAlignedTuple(Module alignment, String artifactId, String expected) {
+    static Tuple getAlignedTuple(ManipulationModel alignment, String artifactId, String expected) {
         final List<String> versions = alignment.getAlignedDependencies().entrySet().stream()
                 .filter(entry -> entry.getKey().contains(artifactId))
                 .map(entry -> entry.getValue().getVersionString())
@@ -52,11 +52,11 @@ public final class TestUtils {
         return tuple(artifactId, versions.get(0));
     }
 
-    static Tuple getAlignedTuple(Module alignment, String artifactId) {
+    static Tuple getAlignedTuple(ManipulationModel alignment, String artifactId) {
         return getAlignedTuple(alignment, artifactId, null);
     }
 
-    static Pair<Model, Module> getModelAndCheckGAV(File parentLocationForPom, Module alignment,
+    static Pair<Model, ManipulationModel> getModelAndCheckGAV(File parentLocationForPom, ManipulationModel alignment,
             String relativeGeneratedPomPathAsString)
             throws IOException,
             XmlPullParserException {
@@ -64,7 +64,7 @@ public final class TestUtils {
         return getModelAndCheckGAV(parentLocationForPom, alignment, relativeGeneratedPomPathAsString, false);
     }
 
-    static Pair<Model, Module> getModelAndCheckGAV(File parentLocationForPom, Module alignment,
+    static Pair<Model, ManipulationModel> getModelAndCheckGAV(File parentLocationForPom, ManipulationModel alignment,
             String relativeGeneratedPomPathAsString, boolean external)
             throws IOException,
             XmlPullParserException {
@@ -72,7 +72,7 @@ public final class TestUtils {
         assertThat(generatedPomPath).isRegularFile();
 
         // find module
-        final Module module;
+        final ManipulationModel module;
         if (!external && !relativeGeneratedPomPathAsString.startsWith("build")) {
             final String moduleName = relativeGeneratedPomPathAsString.substring(0,
                     relativeGeneratedPomPathAsString.indexOf('/'));

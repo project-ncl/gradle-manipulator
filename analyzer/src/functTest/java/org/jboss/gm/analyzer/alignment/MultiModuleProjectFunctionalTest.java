@@ -73,7 +73,6 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                 .build();
 
         assertThat(buildResult.task(":" + AlignmentTask.NAME).getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
-        assertThat(buildResult.getOutput()).containsIgnoringCase("Starting alignment task");
 
         final ManipulationModel alignmentModel = AlignmentUtils.getAlignmentModelAt(simpleProjectRoot.toPath().toFile());
         assertThat(alignmentModel).isNotNull().satisfies(am -> {

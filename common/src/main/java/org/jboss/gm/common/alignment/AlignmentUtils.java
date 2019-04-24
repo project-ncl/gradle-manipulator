@@ -5,12 +5,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 
 public final class AlignmentUtils {
-
     private static final String ALIGNMENT_FILE_NAME = "alignment.json";
+    private static final Map<String, ManipulationModel> cachedModels = new HashMap<>(7);
 
     private AlignmentUtils() {
     }
@@ -24,11 +26,17 @@ public final class AlignmentUtils {
     }
 
     private static ManipulationModel getAlignmentModel(File alignment) {
-        try {
-            return SerializationUtils.getObjectMapper().readValue(alignment, ManipulationModel.class);
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to deserialize " + ALIGNMENT_FILE_NAME, e);
+        final String absolutePath = alignment.getAbsolutePath();
+        ManipulationModel model = cachedModels.get(absolutePath);
+        if (model == null) {
+            try {
+                model = SerializationUtils.getObjectMapper().readValue(alignment, ManipulationModel.class);
+                cachedModels.put(absolutePath, model);
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to deserialize " + ALIGNMENT_FILE_NAME, e);
+            }
         }
+        return model;
     }
 
     private static Path getAlignmentFilePath(File rootDir) {

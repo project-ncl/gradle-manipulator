@@ -26,7 +26,7 @@ public final class AlignmentUtils {
     }
 
     private static ManipulationModel getAlignmentModel(File alignment) {
-        final String absolutePath = alignment.getAbsolutePath();
+        final String absolutePath = getIdentifierFor(alignment);
         ManipulationModel model = cachedModels.get(absolutePath);
         if (model == null) {
             try {
@@ -37,6 +37,10 @@ public final class AlignmentUtils {
             }
         }
         return model;
+    }
+
+    private static String getIdentifierFor(File alignment) {
+        return alignment.getAbsolutePath();
     }
 
     private static Path getAlignmentFilePath(File rootDir) {
@@ -52,6 +56,10 @@ public final class AlignmentUtils {
      */
     public static ManipulationModel getCurrentAlignmentModel(File rootDir) {
         return getAlignmentModel(getAlignmentFilePath(rootDir).toFile());
+    }
+
+    public static void addManipulationModel(File rootDir, ManipulationModel model) {
+        cachedModels.put(getIdentifierFor(getAlignmentFilePath(rootDir).toFile()), model);
     }
 
     /**

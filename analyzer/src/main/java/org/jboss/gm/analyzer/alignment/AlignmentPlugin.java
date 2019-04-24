@@ -35,7 +35,10 @@ public class AlignmentPlugin implements Plugin<Project> {
         final ManipulationModel alignmentModel = new ManipulationModel(project.getName(), project.getGroup().toString());
         // todo: recursively add sub-modules
         project.getSubprojects()
-                .forEach(p -> alignmentModel.addChild(new ManipulationModel(p.getName(), p.getGroup().toString())));
+                .forEach(p -> {
+                    alignmentModel.addChild(new ManipulationModel(p.getName(), p.getGroup().toString()));
+                    AlignmentTask.projectsToAlign.add(p.getName());
+                });
         return alignmentModel;
     }
 }

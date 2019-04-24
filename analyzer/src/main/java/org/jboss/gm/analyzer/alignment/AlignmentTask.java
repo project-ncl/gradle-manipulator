@@ -49,13 +49,13 @@ public class AlignmentTask extends DefaultTask {
                                 currentProjectVersion),
                         deps));
 
-        final ManipulationModel alignmentModel = getCurrentAlignmentModel(project);
+        final ManipulationModel alignmentModel = getCurrentAlignmentModel(project.getRootDir());
         final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(projectName);
 
         correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
         updateModuleDependencies(correspondingModule, deps, alignmentResponse);
 
-        writeUpdatedAlignmentModel(project, alignmentModel);
+        writeUpdatedAlignmentModel(project.getRootDir(), alignmentModel);
     }
 
     private Collection<ProjectVersionRef> getAllProjectDependencies(Project project) {

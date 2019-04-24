@@ -26,7 +26,7 @@ public class AlignmentPlugin implements Plugin<Project> {
         project.afterEvaluate(pr -> {
             // these operation need to be performed in afterEvaluate because only then is the group information
             // populated for certain
-            AlignmentUtils.writeUpdatedAlignmentModel(project, getInitialAlignmentModel(project));
+            AlignmentUtils.writeUpdatedAlignmentModel(project.getRootDir(), getInitialAlignmentModel(project));
         });
 
     }

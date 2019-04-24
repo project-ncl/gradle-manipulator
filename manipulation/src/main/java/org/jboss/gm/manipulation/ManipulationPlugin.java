@@ -21,7 +21,7 @@ public class ManipulationPlugin implements Plugin<Project> {
         project.getPluginManager().apply(MavenPublishPlugin.class);
 
         // get the previously performed alignment
-        final ManipulationModel alignmentModel = getCurrentAlignmentModel(project);
+        final ManipulationModel alignmentModel = getCurrentAlignmentModel(project.getRootDir());
         final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getName());
 
         // add actions to manipulate project

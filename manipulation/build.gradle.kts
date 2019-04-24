@@ -15,7 +15,9 @@ gradlePlugin {
 
 dependencies {
     compile(project(":common"))
-    compile("org.apache.commons:commons-lang3:3.8.1")
+    // the shadow configuration is used in order to avoid adding gradle and groovy stuff to the shadowed jar
+    shadow(localGroovy())
+    shadow(gradleApi())
     testCompile("junit:junit:4.12")
     testCompile("org.assertj:assertj-core:3.12.2")
 }

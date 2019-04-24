@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.jboss.gm.common.ProjectVersionFactory;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,6 +34,7 @@ public final class SerializationUtils {
             SimpleModule module = new SimpleModule();
             module.addDeserializer(ProjectVersionRef.class, new ProjectVersionRefDeserializer());
             module.addSerializer(ProjectVersionRef.class, new ProjectVersionRefSerializer());
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
             mapper.registerModule(module);
         }
         return mapper;

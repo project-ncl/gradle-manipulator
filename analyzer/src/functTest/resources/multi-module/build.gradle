@@ -20,6 +20,15 @@ project(':subproject1') {
         compile gradleApi() // dependency of type DefaultSelfResolvingDependency
         testCompile group: 'junit', name: 'junit', version: '4.12'
     }
+
+
+}
+
+project(':subproject1:subproject11') {
+    dependencies {
+        compile group: 'org.springframework', name: 'spring-context', version: '5.1.6.RELEASE'
+        testCompile group: 'junit', name: 'junit', version: '4.12'
+    }
 }
 
 project(':subproject2') {

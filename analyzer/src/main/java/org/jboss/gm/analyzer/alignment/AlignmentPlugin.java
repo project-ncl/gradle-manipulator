@@ -26,19 +26,16 @@ public class AlignmentPlugin implements Plugin<Project> {
         project.afterEvaluate(pr -> {
             // these operation need to be performed in afterEvaluate because only then is the group information
             // populated for certain
-            AlignmentUtils.addManipulationModel(project.getRootDir(), getInitialAlignmentModel(project));
+            AlignmentUtils.addManipulationModel(pr.getRootDir(), getManipulationModel(pr));
         });
 
     }
 
-    private ManipulationModel getInitialAlignmentModel(Project project) {
-        final ManipulationModel alignmentModel = new ManipulationModel(project.getName(), project.getGroup().toString());
-        // todo: recursively add sub-modules
-        project.getSubprojects()
-                .forEach(p -> {
-                    alignmentModel.addChild(new ManipulationModel(p.getName(), p.getGroup().toString()));
-                    AlignmentTask.projectsToAlign.add(p.getName());
-                });
+    private ManipulationModel getManipulationModel(Project project) {
+        final String name = project.getName();
+        final ManipulationModel alignmentModel = new ManipulationModel(name, project.getGroup().toString());
+        AlignmentTask.projectsToAlign.add(name);
+        project.getChildProjects().forEach((n, p) -> alignmentModel.addChild(getManipulationModel(p)));
         return alignmentModel;
     }
 }

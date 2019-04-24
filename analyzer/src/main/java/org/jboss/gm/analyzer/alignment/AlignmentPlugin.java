@@ -17,16 +17,16 @@ public class AlignmentPlugin implements Plugin<Project> {
         // we need to create an empty alignment file at the project root
         // this file will then be populated by the alignment task of each project
         if (project.getRootProject() == project) {
-            createInitialAlignmentFile(project);
+            createInitialManipulationModel(project);
         }
         project.getTasks().create(AlignmentTask.NAME, AlignmentTask.class);
     }
 
-    private void createInitialAlignmentFile(Project project) {
+    private void createInitialManipulationModel(Project project) {
         project.afterEvaluate(pr -> {
             // these operation need to be performed in afterEvaluate because only then is the group information
             // populated for certain
-            AlignmentUtils.writeUpdatedAlignmentModel(project.getRootDir(), getInitialAlignmentModel(project));
+            AlignmentUtils.addManipulationModel(project.getRootDir(), getInitialAlignmentModel(project));
         });
 
     }

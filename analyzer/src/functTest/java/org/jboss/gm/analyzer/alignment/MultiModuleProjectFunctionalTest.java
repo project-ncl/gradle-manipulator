@@ -7,18 +7,12 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.jboss.gm.analyzer.alignment.TestUtils.copyDirectory;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collection;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.gradle.testkit.runner.BuildResult;
-import org.gradle.testkit.runner.GradleRunner;
-import org.gradle.testkit.runner.TaskOutcome;
-import org.jboss.gm.common.alignment.AlignmentUtils;
 import org.jboss.gm.common.alignment.ManipulationModel;
 import org.junit.Before;
 import org.junit.Rule;
@@ -61,20 +55,8 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException {
-        final File simpleProjectRoot = tempDir.newFolder("multi-module");
-        copyDirectory("multi-module", simpleProjectRoot);
-        assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
+        final ManipulationModel alignmentModel = TestUtils.align(tempDir, "multi-module");
 
-        final BuildResult buildResult = GradleRunner.create()
-                .withProjectDir(simpleProjectRoot)
-                .withArguments(AlignmentTask.NAME)
-                .withDebug(true)
-                .withPluginClasspath()
-                .build();
-
-        assertThat(buildResult.task(":" + AlignmentTask.NAME).getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
-
-        final ManipulationModel alignmentModel = AlignmentUtils.getAlignmentModelAt(simpleProjectRoot.toPath().toFile());
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme");
             assertThat(am.getName()).isEqualTo("root");

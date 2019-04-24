@@ -1,8 +1,12 @@
-plugins {
-    java
-}
+group = "org.jboss.gm.common"
 
-version = "0.1-SNAPSHOT"
+publishing {
+    publications {
+        register("mavenJava", MavenPublication::class) {
+            from(components["java"])
+        }
+    }
+}
 
 repositories {
     mavenCentral()

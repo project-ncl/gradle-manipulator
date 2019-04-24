@@ -6,7 +6,6 @@ import org.gradle.api.Project;
 import org.gradle.api.internal.artifacts.dependencies.DefaultSelfResolvingDependency;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.ProjectVersionFactory;
-import org.jboss.gm.common.alignment.AlignedProject;
 import org.jboss.gm.common.alignment.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +49,7 @@ public class AlignmentTask extends DefaultTask {
                                 currentProjectVersion),
                         deps));
 
-        final AlignedProject alignmentModel = getCurrentAlignmentModel(project);
+        final Module alignmentModel = getCurrentAlignmentModel(project);
         final Module correspondingModule = alignmentModel.findCorrespondingModule(projectName);
 
         correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());

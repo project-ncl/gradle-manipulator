@@ -19,7 +19,6 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.assertj.core.groups.Tuple;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.jboss.gm.common.alignment.AlignedProject;
 import org.jboss.gm.common.alignment.Module;
 
 public final class TestUtils {
@@ -57,7 +56,7 @@ public final class TestUtils {
         return getAlignedTuple(alignment, artifactId, null);
     }
 
-    static Pair<Model, Module> getModelAndCheckGAV(File parentLocationForPom, AlignedProject alignment,
+    static Pair<Model, Module> getModelAndCheckGAV(File parentLocationForPom, Module alignment,
             String relativeGeneratedPomPathAsString)
             throws IOException,
             XmlPullParserException {
@@ -65,7 +64,7 @@ public final class TestUtils {
         return getModelAndCheckGAV(parentLocationForPom, alignment, relativeGeneratedPomPathAsString, false);
     }
 
-    static Pair<Model, Module> getModelAndCheckGAV(File parentLocationForPom, AlignedProject alignment,
+    static Pair<Model, Module> getModelAndCheckGAV(File parentLocationForPom, Module alignment,
             String relativeGeneratedPomPathAsString, boolean external)
             throws IOException,
             XmlPullParserException {

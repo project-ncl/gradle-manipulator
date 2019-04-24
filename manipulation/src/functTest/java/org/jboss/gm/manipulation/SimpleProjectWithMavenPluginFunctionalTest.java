@@ -12,7 +12,6 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
-import org.jboss.gm.common.alignment.AlignedProject;
 import org.jboss.gm.common.alignment.AlignmentUtils;
 import org.jboss.gm.common.alignment.Module;
 import org.junit.Rule;
@@ -36,7 +35,7 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
         TestUtils.copyDirectory("simple-project-with-maven-plugin", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
 
-        final AlignedProject alignment = AlignmentUtils.getAlignmentModelAt(simpleProjectRoot);
+        final Module alignment = AlignmentUtils.getAlignmentModelAt(simpleProjectRoot);
 
         final BuildResult buildResult = GradleRunner.create()
                 .withProjectDir(simpleProjectRoot)

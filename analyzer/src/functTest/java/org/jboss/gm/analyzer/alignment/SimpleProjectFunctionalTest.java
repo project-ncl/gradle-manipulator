@@ -16,8 +16,8 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
-import org.jboss.gm.common.alignment.AlignedProject;
 import org.jboss.gm.common.alignment.AlignmentUtils;
+import org.jboss.gm.common.alignment.Module;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,7 +52,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
 
         assertThat(buildResult.task(":" + AlignmentTask.NAME).getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 
-        final AlignedProject alignmentModel = AlignmentUtils.getAlignmentModelAt(simpleProjectRoot.toPath().toFile());
+        final Module alignmentModel = AlignmentUtils.getAlignmentModelAt(simpleProjectRoot.toPath().toFile());
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
             assertThat(am.getName()).isEqualTo("root");

@@ -10,9 +10,12 @@ import java.util.Set;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
+import org.gradle.api.internal.artifacts.dependencies.DefaultSelfResolvingDependency;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.ProjectVersionFactory;
 import org.jboss.gm.common.alignment.AlignmentModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The actual Gradle task that creates the alignment.json file for the whole project
@@ -21,6 +24,8 @@ import org.jboss.gm.common.alignment.AlignmentModel;
 public class AlignmentTask extends DefaultTask {
 
     static final String NAME = "generateAlignmentMetadata";
+
+    private static final Logger log = LoggerFactory.getLogger(AlignmentTask.class);
 
     /**
      * The idea here is for every project to read the current alignment file from disk,
@@ -54,9 +59,16 @@ public class AlignmentTask extends DefaultTask {
 
     private Collection<ProjectVersionRef> getAllProjectDependencies(Project project) {
         final Set<ProjectVersionRef> result = new LinkedHashSet<>();
-        project.getConfigurations().all(configuration -> configuration.getAllDependencies().forEach(d -> result.add(
-                ProjectVersionFactory.withGAVAndConfiguration(d.getGroup(), d.getName(), d.getVersion(),
-                        configuration.getName()))));
+        project.getConfigurations().all(configuration -> configuration.getAllDependencies()
+                .forEach(dep -> {
+                    if (dep instanceof DefaultSelfResolvingDependency) {
+                        log.warn("Ignoring dependency of type {} on project {}", dep.getClass().getName(), project.getName());
+                    } else {
+                        result.add(
+                                ProjectVersionFactory.withGAVAndConfiguration(dep.getGroup(), dep.getName(), dep.getVersion(),
+                                        configuration.getName()));
+                    }
+                }));
         return result;
     }
 

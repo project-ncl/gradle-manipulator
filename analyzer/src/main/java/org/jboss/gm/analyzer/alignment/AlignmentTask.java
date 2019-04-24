@@ -5,6 +5,7 @@ import static org.jboss.gm.common.alignment.AlignmentUtils.getCurrentAlignmentMo
 import static org.jboss.gm.common.alignment.AlignmentUtils.writeUpdatedAlignmentModel;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 public class AlignmentTask extends DefaultTask {
 
     static final String NAME = "generateAlignmentMetadata";
+    static final Set<String> projectsToAlign = new HashSet<>();
 
     private static final Logger log = LoggerFactory.getLogger(AlignmentTask.class);
 
@@ -55,7 +57,10 @@ public class AlignmentTask extends DefaultTask {
         correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
         updateModuleDependencies(correspondingModule, deps, alignmentResponse);
 
-        writeUpdatedAlignmentModel(project.getRootDir(), alignmentModel);
+        projectsToAlign.remove(projectName);
+        if (projectsToAlign.isEmpty()) {
+            writeUpdatedAlignmentModel(project.getRootDir(), alignmentModel);
+        }
     }
 
     private Collection<ProjectVersionRef> getAllProjectDependencies(Project project) {
@@ -66,9 +71,8 @@ public class AlignmentTask extends DefaultTask {
             } else if (isEmpty(dep.getVersion())) {
                 log.warn("Ignoring empty version on dependency {} on project {}", dep.toString(), project.getName());
             } else {
-                result.add(
-                        ProjectVersionFactory.withGAVAndConfiguration(dep.getGroup(), dep.getName(), dep.getVersion(),
-                                configuration.getName()));
+                result.add(ProjectVersionFactory.withGAVAndConfiguration(dep.getGroup(), dep.getName(), dep.getVersion(),
+                        configuration.getName()));
             }
         }));
         return result;

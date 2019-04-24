@@ -76,7 +76,7 @@ public final class TestUtils {
         if (!external && !relativeGeneratedPomPathAsString.startsWith("build")) {
             final String moduleName = relativeGeneratedPomPathAsString.substring(0,
                     relativeGeneratedPomPathAsString.indexOf('/'));
-            module = alignment.getModules().get(moduleName);
+            module = alignment.getChildren().get(moduleName);
         } else {
             module = alignment;
         }

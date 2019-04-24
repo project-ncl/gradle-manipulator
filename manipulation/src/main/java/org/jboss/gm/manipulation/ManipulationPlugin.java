@@ -22,7 +22,7 @@ public class ManipulationPlugin implements Plugin<Project> {
 
         // get the previously performed alignment
         final ManipulationModel alignmentModel = getCurrentAlignmentModel(project);
-        final ManipulationModel correspondingModule = alignmentModel.findCorrespondingModule(project.getName());
+        final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getName());
 
         // add actions to manipulate project
         project.afterEvaluate(new ProjectChangeVersionAction(correspondingModule));

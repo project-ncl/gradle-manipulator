@@ -50,7 +50,7 @@ public class AlignmentTask extends DefaultTask {
                         deps));
 
         final ManipulationModel alignmentModel = getCurrentAlignmentModel(project);
-        final ManipulationModel correspondingModule = alignmentModel.findCorrespondingModule(projectName);
+        final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(projectName);
 
         correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
         updateModuleDependencies(correspondingModule, deps, alignmentResponse);

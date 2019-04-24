@@ -48,7 +48,7 @@ public class ManipulationModel {
      * Representation of this project children projects if any, keyed by name.
      */
     @JsonProperty
-    private Map<String, ManipulationModel> modules = new HashMap<>(7);
+    private Map<String, ManipulationModel> children = new HashMap<>(7);
 
     /**
      * Required for Jackson
@@ -81,22 +81,22 @@ public class ManipulationModel {
         return group;
     }
 
-    public Map<String, ManipulationModel> getModules() {
-        return modules;
+    public Map<String, ManipulationModel> getChildren() {
+        return children;
     }
 
-    public void addModule(ManipulationModel module) {
-        modules.put(module.getName(), module);
+    public void addChild(ManipulationModel child) {
+        children.put(child.getName(), child);
     }
 
-    public ManipulationModel findCorrespondingModule(String name) {
+    public ManipulationModel findCorrespondingChild(String name) {
         Validate.notEmpty(name, "Supplied module name cannot be empty");
 
         if (getName().equals(name)) {
             return this;
         }
 
-        final ManipulationModel module = modules.get(name);
+        final ManipulationModel module = children.get(name);
         if (module == null) {
             throw new IllegalArgumentException("ManipulationModel " + name + " does not exist");
         }

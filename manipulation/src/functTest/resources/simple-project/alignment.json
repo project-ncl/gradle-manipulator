@@ -13,6 +13,5 @@
       "artifactId": "undertow-core",
       "version": "2.0.15.Final-redhat-00001"
     }
-  },
-  "modules": {}
+  }
 }

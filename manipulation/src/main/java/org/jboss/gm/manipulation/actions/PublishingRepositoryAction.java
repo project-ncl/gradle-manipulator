@@ -6,6 +6,8 @@
  */
 package org.jboss.gm.manipulation.actions;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 import org.aeonbits.owner.ConfigCache;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
@@ -45,26 +47,35 @@ public class PublishingRepositoryAction implements Action<Project> {
     @Override
     public void execute(Project project) {
         if (!project.getPluginManager().hasPlugin("maven-publish")) {
+            project.getLogger().warn("Cannot configure publishing repository, maven-publish plugin was not detected.");
             return;
         }
 
         Configuration config = ConfigCache.getOrCreate(Configuration.class);
 
-        String pncDeployUrl = config.deployUrl();
-        if (pncDeployUrl != null) {
-            project.getPlugins().withType(MavenPublishPlugin.class, plugin -> {
-                project.getExtensions().configure(PublishingExtension.class, publishingExtension -> {
-                    publishingExtension.getRepositories().maven(repository -> {
-                        repository.setName("PNC");
-                        repository.setUrl(pncDeployUrl);
+        if (isEmpty(config.deployUrl())) {
+            project.getLogger().warn("Publishing URL was not configured.");
+            return;
+        }
+
+        if (isEmpty(config.accessToken())) {
+            project.getLogger().warn("No authentication token was configured.");
+        }
+
+        project.getPlugins().withType(MavenPublishPlugin.class, plugin -> {
+            project.getExtensions().configure(PublishingExtension.class, publishingExtension -> {
+                publishingExtension.getRepositories().maven(repository -> {
+                    repository.setName("Manipulator Publishing Repository");
+                    repository.setUrl(config.deployUrl());
+                    if (!isEmpty(config.deployUrl())) {
                         repository.credentials(HttpHeaderCredentials.class, cred -> {
                             cred.setName("Authorization");
-                            cred.setValue("Bearer " + config.accessToken());
+                            cred.setValue("Bearer " + System.getProperty(config.accessToken()));
                         });
                         repository.getAuthentication().create("header", HttpHeaderAuthentication.class);
-                    });
+                    }
                 });
             });
-        }
+        });
     }
 }

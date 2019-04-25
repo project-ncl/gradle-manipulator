@@ -48,6 +48,9 @@ public interface Configuration extends Accessible {
     @Key("AProxDeployUrl")
     String deployUrl();
 
+    @Key("deployPlugin")
+    String deployPlugin();
+
     @Key("accessToken")
     String accessToken();
 

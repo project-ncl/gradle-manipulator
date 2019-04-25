@@ -1,5 +1,13 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static junit.framework.TestCase.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.lang.reflect.Method;
+import java.util.Collection;
+
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
@@ -20,14 +28,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-
-import java.io.File;
-import java.lang.reflect.Method;
-import java.util.Collection;
-
-import static junit.framework.TestCase.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @RunWith(BMUnitRunner.class)
 @BMUnitConfig(verbose = false, bmunitVerbose = true)

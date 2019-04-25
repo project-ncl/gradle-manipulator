@@ -11,8 +11,8 @@ import org.apache.commons.io.FileUtils;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
-import org.jboss.gm.common.alignment.AlignmentUtils;
 import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.alignment.ManipulationUtils;
 import org.junit.rules.TemporaryFolder;
 
 public final class TestUtils {
@@ -39,6 +39,6 @@ public final class TestUtils {
 
         assertThat(buildResult.task(":" + AlignmentTask.NAME).getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 
-        return AlignmentUtils.getAlignmentModelAt(projectRoot.toPath().toFile());
+        return ManipulationUtils.getManipulationModelAt(projectRoot.toPath().toFile());
     }
 }

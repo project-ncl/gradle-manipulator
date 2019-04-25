@@ -12,8 +12,8 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
-import org.jboss.gm.common.alignment.AlignmentUtils;
 import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.alignment.ManipulationUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -28,7 +28,7 @@ public class MultiModuleFunctionalTest {
         final File multiModuleRoot = tempDir.newFolder("multi-module");
         TestUtils.copyDirectory("multi-module", multiModuleRoot);
         assertThat(multiModuleRoot.toPath().resolve("build.gradle")).exists();
-        final ManipulationModel alignment = AlignmentUtils.getAlignmentModelAt(multiModuleRoot);
+        final ManipulationModel alignment = ManipulationUtils.getManipulationModelAt(multiModuleRoot);
 
         final BuildResult buildResult = GradleRunner.create()
                 .withProjectDir(multiModuleRoot)

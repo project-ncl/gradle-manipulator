@@ -2,12 +2,12 @@ package org.jboss.gm.analyzer.alignment;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.jboss.gm.common.alignment.AlignmentUtils;
 import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.alignment.ManipulationUtils;
 
 /**
  * Results in adding a task with name {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME}.
- * It also creates an {@code alignment.json} file located at the root of the project that
+ * It also creates an {@code manipulation.json} file located at the root of the project that
  * is augmented by the {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME} task run on each sub-project
  */
 public class AlignmentPlugin implements Plugin<Project> {
@@ -26,7 +26,7 @@ public class AlignmentPlugin implements Plugin<Project> {
         project.afterEvaluate(pr -> {
             // these operation need to be performed in afterEvaluate because only then is the group information
             // populated for certain
-            AlignmentUtils.addManipulationModel(pr.getRootDir(), getManipulationModel(pr));
+            ManipulationUtils.addManipulationModel(pr.getRootDir(), getManipulationModel(pr));
         });
 
     }

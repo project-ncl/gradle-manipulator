@@ -21,6 +21,10 @@ public class UploadTaskTransformerAction implements Action<Project> {
 
     @Override
     public void execute(Project project) {
+        if (!project.getPluginManager().hasPlugin("maven")) {
+            return;
+        }
+
         project.getTasks().withType(Upload.class).all(upload -> upload.getRepositories()
                 .withType(MavenResolver.class).all(resolver -> {
                     resolver.getPom().withXml(new PomTransformer(alignmentConfiguration));

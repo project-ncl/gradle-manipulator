@@ -17,9 +17,6 @@ public class ManipulationPlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
-        // apply the maven publishing plugin
-        project.getPluginManager().apply(MavenPublishPlugin.class);
-
         // get the previously performed alignment
         final ManipulationModel alignmentModel = getCurrentAlignmentModel(project.getRootDir());
         final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getName());

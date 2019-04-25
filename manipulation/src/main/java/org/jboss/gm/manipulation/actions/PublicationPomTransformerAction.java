@@ -23,6 +23,10 @@ public class PublicationPomTransformerAction implements Action<Project> {
 
     @Override
     public void execute(Project project) {
+        if (!project.getPluginManager().hasPlugin("maven-publish")) {
+            return;
+        }
+
         project.getPlugins().withType(MavenPublishPlugin.class,
                 plugin -> project.getExtensions().configure(PublishingExtension.class, extension -> {
                     extension.getPublications().withType(MavenPublication.class).all(maven -> {

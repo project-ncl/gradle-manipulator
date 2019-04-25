@@ -46,6 +46,10 @@ public class PublishingRepositoryAction implements Action<Project> {
 
     @Override
     public void execute(Project project) {
+        if (!project.getPluginManager().hasPlugin("maven-publish")) {
+            return;
+        }
+
         String pncDeployUrl = System.getProperty(URL_SYSTEM_PROPERTY);
         if (pncDeployUrl != null) {
             project.getPlugins().withType(MavenPublishPlugin.class, plugin -> {

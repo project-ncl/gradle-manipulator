@@ -42,4 +42,4 @@ Now by executing the following command:
 ./gradlew --no-daemon --stacktrace --init-script align.gradle generateAlignmentMetadata -Dda.endpoint.url=http://some.da.server
 ```
 
-you should get the `alignment.json` file in the root of the project.
+you should get the `manipulation.json` file in the root of the project.

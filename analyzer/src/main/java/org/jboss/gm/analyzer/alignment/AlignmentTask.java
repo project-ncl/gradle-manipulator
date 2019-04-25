@@ -1,8 +1,8 @@
 package org.jboss.gm.analyzer.alignment;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.jboss.gm.common.alignment.AlignmentUtils.getCurrentAlignmentModel;
-import static org.jboss.gm.common.alignment.AlignmentUtils.writeUpdatedAlignmentModel;
+import static org.jboss.gm.common.alignment.ManipulationUtils.getCurrentManipulationModel;
+import static org.jboss.gm.common.alignment.ManipulationUtils.writeUpdatedManipulationModel;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The actual Gradle task that creates the alignment.json file for the whole project
+ * The actual Gradle task that creates the manipulation.json file for the whole project
  * (whether it's a single or multi module project)
  */
 public class AlignmentTask extends DefaultTask {
@@ -51,7 +51,7 @@ public class AlignmentTask extends DefaultTask {
                                 currentProjectVersion),
                         deps));
 
-        final ManipulationModel alignmentModel = getCurrentAlignmentModel(project.getRootDir());
+        final ManipulationModel alignmentModel = getCurrentManipulationModel(project.getRootDir());
         final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getPath());
 
         correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
@@ -59,7 +59,7 @@ public class AlignmentTask extends DefaultTask {
 
         projectsToAlign.remove(projectName);
         if (projectsToAlign.isEmpty()) {
-            writeUpdatedAlignmentModel(project.getRootDir(), alignmentModel);
+            writeUpdatedManipulationModel(project.getRootDir(), alignmentModel);
         }
     }
 

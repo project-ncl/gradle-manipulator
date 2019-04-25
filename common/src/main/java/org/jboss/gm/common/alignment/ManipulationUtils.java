@@ -10,22 +10,22 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 
-public final class AlignmentUtils {
-    private static final String ALIGNMENT_FILE_NAME = "alignment.json";
+public final class ManipulationUtils {
+    private static final String MANIPULATION_FILE_NAME = "manipulation.json";
     private static final Map<String, ManipulationModel> cachedModels = new HashMap<>(7);
 
-    private AlignmentUtils() {
+    private ManipulationUtils() {
     }
 
-    public static ManipulationModel getAlignmentModelAt(File path) {
+    public static ManipulationModel getManipulationModelAt(File path) {
         if (!path.isDirectory()) {
             throw new IllegalArgumentException("Path must be a directory. Was: " + path);
         }
-        File alignment = new File(path, ALIGNMENT_FILE_NAME);
-        return getAlignmentModel(alignment);
+        File alignment = new File(path, MANIPULATION_FILE_NAME);
+        return getManipulationModel(alignment);
     }
 
-    private static ManipulationModel getAlignmentModel(File alignment) {
+    private static ManipulationModel getManipulationModel(File alignment) {
         final String absolutePath = getIdentifierFor(alignment);
         ManipulationModel model = cachedModels.get(absolutePath);
         if (model == null) {
@@ -33,7 +33,7 @@ public final class AlignmentUtils {
                 model = SerializationUtils.getObjectMapper().readValue(alignment, ManipulationModel.class);
                 cachedModels.put(absolutePath, model);
             } catch (IOException e) {
-                throw new RuntimeException("Unable to deserialize " + ALIGNMENT_FILE_NAME, e);
+                throw new RuntimeException("Unable to deserialize " + MANIPULATION_FILE_NAME, e);
             }
         }
         return model;
@@ -43,8 +43,8 @@ public final class AlignmentUtils {
         return alignment.getAbsolutePath();
     }
 
-    private static Path getAlignmentFilePath(File rootDir) {
-        return rootDir.toPath().resolve(ALIGNMENT_FILE_NAME);
+    private static Path getManipulationFilePath(File rootDir) {
+        return rootDir.toPath().resolve(MANIPULATION_FILE_NAME);
     }
 
     /**
@@ -54,37 +54,34 @@ public final class AlignmentUtils {
      * 
      * @return
      */
-    public static ManipulationModel getCurrentAlignmentModel(File rootDir) {
-        return getAlignmentModel(getAlignmentFilePath(rootDir).toFile());
+    public static ManipulationModel getCurrentManipulationModel(File rootDir) {
+        return getManipulationModel(getManipulationFilePath(rootDir).toFile());
     }
 
     public static void addManipulationModel(File rootDir, ManipulationModel model) {
-        cachedModels.put(getIdentifierFor(getAlignmentFilePath(rootDir).toFile()), model);
+        cachedModels.put(getIdentifierFor(getManipulationFilePath(rootDir).toFile()), model);
     }
 
     /**
      * Write the model to disk - override any existing file that might exist
-     * TODO verify comment of getCurrentAlignmentModel since this method relies on the same assumption
+     * TODO verify comment of getCurrentManipulationModel since this method relies on the same assumption
      */
-    public static void writeUpdatedAlignmentModel(File rootDir, ManipulationModel updatedAlignmentModel) {
-        final Path alignmentFilePath = AlignmentUtils.getAlignmentFilePath(rootDir);
+    public static void writeUpdatedManipulationModel(File rootDir, ManipulationModel updatedManipulationModel) {
+        final Path manipulationFilePath = ManipulationUtils.getManipulationFilePath(rootDir);
         try {
             // first delete any existing file
-            Files.delete(alignmentFilePath);
+            Files.delete(manipulationFilePath);
         } catch (IOException ignored) {
         }
 
-        writeAlignmentModelToFile(alignmentFilePath, updatedAlignmentModel);
-    }
-
-    private static void writeAlignmentModelToFile(Path alignmentFilePath, ManipulationModel alignmentModel) {
         try {
             FileUtils.writeStringToFile(
-                    alignmentFilePath.toFile(),
-                    SerializationUtils.getObjectMapper().writeValueAsString(alignmentModel),
+                    manipulationFilePath.toFile(),
+                    SerializationUtils.getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(
+                            updatedManipulationModel),
                     StandardCharsets.UTF_8.name());
         } catch (IOException e) {
-            throw new RuntimeException("Unable to write alignment.json in project root", e);
+            throw new RuntimeException("Unable to write manipulation.json in project root", e);
         }
     }
 

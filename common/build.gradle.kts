@@ -8,7 +8,10 @@ dependencies {
     compile("org.apache.commons:commons-lang3:3.8.1")
     compile("commons-io:commons-io:2.6")
     compile("com.fasterxml.jackson.core:jackson-databind:2.9.8")
-    compile("org.commonjava.maven.ext:pom-manipulation-io:3.5.1")
+    compile("org.commonjava.maven.ext:pom-manipulation-io:3.5.1") {
+        exclude ("ch.qos.logback", "logback-classic")
+    }
+    
     testCompile("junit", "junit", "4.12")
 }
 

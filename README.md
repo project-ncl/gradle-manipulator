@@ -15,7 +15,7 @@ The plugins can be tested on real projects like so:
 
 In the root of the project to be tested, create a file named `align.gradle`
 
-The contects of the file are the following:
+The contents of the file are the following:
 
 ```
 import org.jboss.gm.analyzer.alignment.AlignmentPlugin

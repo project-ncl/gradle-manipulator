@@ -1,22 +1,30 @@
 package org.jboss.gm.analyzer.alignment;
 
+import java.util.Collections;
+import java.util.Set;
+
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.ConfigurationConverter;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.commonjava.maven.ext.core.impl.VersionCalculator;
+import org.commonjava.maven.ext.core.state.VersioningState;
 
 /**
  * {@link org.jboss.gm.analyzer.alignment.AlignmentService.ResponseCustomizer} that changes the project version
  *
- * The heavy lifting is actually done by {@link org.jboss.gm.analyzer.alignment.VersionWithSuffixUtils}
+ * The heavy lifting is actually done by {@link org.commonjava.maven.ext.core.impl.VersionCalculator}
  */
 public class UpdateProjectVersionCustomizer implements AlignmentService.ResponseCustomizer {
 
-    private final String projectVersion;
-    private final String suffixName;
-    private final int suffixPaddingCount;
+    private final ProjectVersionRef projectVersion;
 
-    UpdateProjectVersionCustomizer(String projectVersion, String suffixName, int suffixPaddingCount) {
+    private final Configuration configuration;
+
+    UpdateProjectVersionCustomizer(ProjectVersionRef projectVersion, Configuration configuration) {
         this.projectVersion = projectVersion;
-        this.suffixName = suffixName;
-        this.suffixPaddingCount = suffixPaddingCount;
+        this.configuration = configuration;
     }
 
     @Override
@@ -26,37 +34,50 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Response
 
     @Override
     public AlignmentService.Response customize(AlignmentService.Response response) {
-        return new NewProjectVersionCustomizerResponse(response, projectVersion, suffixName, suffixPaddingCount);
+        return new ProjectVersionCustomizerResponse(response, projectVersion, configuration);
     }
 
-    private static class NewProjectVersionCustomizerResponse implements AlignmentService.Response {
-
+    private static class ProjectVersionCustomizerResponse implements AlignmentService.Response {
         private final AlignmentService.Response originalResponse;
-        private final String projectVersion;
-        private final String suffixName;
-        private final int suffixPaddingCount;
+        private final ProjectVersionRef version;
+        private final VersioningState state;
 
-        NewProjectVersionCustomizerResponse(AlignmentService.Response originalResponse, String projectVersion,
-                String suffixName,
-                int suffixPaddingCount) {
+        ProjectVersionCustomizerResponse(AlignmentService.Response originalResponse, ProjectVersionRef version,
+                Configuration configuration) {
             this.originalResponse = originalResponse;
-            this.projectVersion = projectVersion;
-            this.suffixName = suffixName;
-            this.suffixPaddingCount = suffixPaddingCount;
+            this.version = version;
+            this.state = new VersioningState(ConfigurationConverter.getProperties(configuration));
         }
 
         @Override
         public String getNewProjectVersion() {
-            final String projectVersionToUse = originalResponse.getNewProjectVersion() != null
-                    ? originalResponse.getNewProjectVersion()
-                    : projectVersion;
-            return VersionWithSuffixUtils.getNextVersion(projectVersionToUse, suffixName,
-                    suffixPaddingCount);
+            GradleVersionCalculator vc = new GradleVersionCalculator();
+            try {
+                return vc.calculate(version.getGroupId(), version.getArtifactId(), version.getVersionString(), state);
+            } catch (ManipulationException e) {
+                throw new ManipulationUncheckedException(e);
+            }
         }
 
         @Override
         public String getAlignedVersionOfGav(ProjectVersionRef gav) {
             return originalResponse.getAlignedVersionOfGav(gav);
+        }
+
+        private class GradleVersionCalculator extends VersionCalculator {
+            GradleVersionCalculator() {
+                super(null);
+            }
+
+            public String calculate(final String groupId, final String artifactId, final String version,
+                    final VersioningState state) throws ManipulationException {
+                return super.calculate(groupId, artifactId, version, state);
+            }
+
+            protected Set<String> getVersionCandidates(VersioningState state, String groupId, String artifactId) {
+                return (originalResponse.getNewProjectVersion() == null ? Collections.emptySet()
+                        : Collections.singleton(originalResponse.getNewProjectVersion()));
+            }
         }
     }
 }

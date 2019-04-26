@@ -44,7 +44,6 @@ public final class AlignmentServiceFactory {
     private static List<AlignmentService.ResponseCustomizer> getResponseCustomizers(Configuration configuration,
             ProjectVersionRef projectVersionRef) {
         return Arrays.asList(DependencyOverrideCustomizer.fromConfigurationForModule(configuration, projectVersionRef),
-                new UpdateProjectVersionCustomizer(projectVersionRef.getVersionString(), configuration.getString("suffix.name"),
-                        configuration.getInt("suffix.padding.count")));
+                new UpdateProjectVersionCustomizer(projectVersionRef, configuration));
     }
 }

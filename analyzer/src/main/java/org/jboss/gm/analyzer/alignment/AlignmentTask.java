@@ -28,7 +28,7 @@ public class AlignmentTask extends DefaultTask {
     static final String NAME = "generateAlignmentMetadata";
     static final Set<String> projectsToAlign = new HashSet<>();
 
-    private static final Logger log = LoggerFactory.getLogger(AlignmentTask.class);
+    private final Logger logger = getLogger();
 
     /**
      * The idea here is for every project to read the current alignment file from disk,
@@ -40,7 +40,7 @@ public class AlignmentTask extends DefaultTask {
     public void perform() {
         final Project project = getProject();
         final String projectName = project.getName();
-        System.out.println("Starting alignment task for project " + projectName);
+        logger.info("Starting alignment task for project {}", projectName);
 
         final Collection<ProjectVersionRef> deps = getAllProjectDependencies(project);
         final AlignmentService alignmentService = AlignmentServiceFactory.getAlignmentService(project);
@@ -67,9 +67,9 @@ public class AlignmentTask extends DefaultTask {
         final Set<ProjectVersionRef> result = new LinkedHashSet<>();
         project.getConfigurations().all(configuration -> configuration.getAllDependencies().forEach(dep -> {
             if (dep instanceof DefaultSelfResolvingDependency) {
-                log.warn("Ignoring dependency of type {} on project {}", dep.getClass().getName(), project.getName());
+                logger.warn("Ignoring dependency of type {} on project {}", dep.getClass().getName(), project.getName());
             } else if (isEmpty(dep.getVersion())) {
-                log.warn("Ignoring empty version on dependency {} on project {}", dep.toString(), project.getName());
+                logger.warn("Ignoring empty version on dependency {} on project {}", dep.toString(), project.getName());
             } else {
                 result.add(ProjectVersionFactory.withGAVAndConfiguration(dep.getGroup(), dep.getName(), dep.getVersion(),
                         configuration.getName()));

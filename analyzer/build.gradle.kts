@@ -14,8 +14,6 @@ gradlePlugin {
 }
 
 
-val bytemanVersion="4.0.6"
-
 dependencies {
     compile(project(":common"))
     // the shadow configuration is used in order to avoid adding gradle and groovy stuff to the shadowed jar
@@ -23,17 +21,18 @@ dependencies {
     shadow(gradleApi())
     compile("org.apache.commons:commons-configuration2:2.4")
     compile("commons-beanutils:commons-beanutils:1.9.3")
-    compile("org.slf4j:slf4j-simple:1.7.26")
+    compile("org.commonjava.maven.ext:pom-manipulation-core:${extra.get("pmeVersion")}") {
+        exclude ("ch.qos.logback", "logback-classic")
+    }
     testCompile("junit:junit:4.12")
-    testCompile("org.jboss.byteman:byteman:$bytemanVersion")
-    testCompile("org.jboss.byteman:byteman-bmunit:$bytemanVersion")
-    testCompile("org.jboss.byteman:byteman-submit:$bytemanVersion")
-    testCompile("org.jboss.byteman:byteman-install:$bytemanVersion")
-
+    testCompile("com.github.stefanbirkner:system-rules:1.19.0")
+    testCompile("org.jboss.byteman:byteman:${extra.get("bytemanVersion")}")
+    testCompile("org.jboss.byteman:byteman-bmunit:${extra.get("bytemanVersion")}")
+    testCompile("org.jboss.byteman:byteman-submit:${extra.get("bytemanVersion")}")
+    testCompile("org.jboss.byteman:byteman-install:${extra.get("bytemanVersion")}")
     if ( ! JavaVersion.current().isJava9Compatible) {
         testCompile (files ("${System.getProperty("java.home")}/../lib/tools.jar") )
     }
-
     testCompile("org.assertj:assertj-core:3.12.2")
     testCompile("org.mockito:mockito-core:2.27.0")
     testCompile("com.github.tomakehurst:wiremock-jre8:2.23.2")

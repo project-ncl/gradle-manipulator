@@ -90,16 +90,15 @@ public class UpdateProjectVersionCustomizerTest {
             final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
             return input.getVersionString();
         });
-        final String originalProjectVersion = "1.0.0-redhat-001";
-        when(originalResp.getNewProjectVersion()).thenReturn(originalProjectVersion);
-        /*
-         * final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer("1.0.0", "redhat", 3);
-         * final AlignmentService.Response customizedReq = sut.customize(originalResp);
-         * 
-         * assertThat(customizedReq).isNotNull().satisfies(r -> {
-         * assertThat(r.getNewProjectVersion()).isEqualTo("1.0.0.redhat-002");
-         * });
-         */
-    }
+        final ProjectVersionRef pvr = SimpleProjectVersionRef.parse("org:dummy:1.1.0.redhat-00001");
+        when(originalResp.getNewProjectVersion()).thenReturn(pvr.getVersionString());
 
+        Configuration configuration = ConfigurationFactory.getConfiguration();
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(pvr, configuration);
+        final AlignmentService.Response customizedReq = sut.customize(originalResp);
+
+        assertThat(customizedReq).isNotNull().satisfies(r -> {
+            assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002");
+        });
+    }
 }

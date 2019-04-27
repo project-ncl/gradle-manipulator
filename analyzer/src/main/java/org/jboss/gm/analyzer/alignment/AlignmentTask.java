@@ -1,14 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.jboss.gm.common.alignment.ManipulationUtils.getCurrentManipulationModel;
-import static org.jboss.gm.common.alignment.ManipulationUtils.writeUpdatedManipulationModel;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
@@ -17,7 +8,15 @@ import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.ProjectVersionFactory;
 import org.jboss.gm.common.alignment.ManipulationModel;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.jboss.gm.common.alignment.ManipulationUtils.getCurrentManipulationModel;
+import static org.jboss.gm.common.alignment.ManipulationUtils.writeUpdatedManipulationModel;
 
 /**
  * The actual Gradle task that creates the manipulation.json file for the whole project

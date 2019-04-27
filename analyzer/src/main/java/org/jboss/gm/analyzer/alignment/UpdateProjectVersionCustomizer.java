@@ -38,6 +38,7 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Response
     }
 
     private static class ProjectVersionCustomizerResponse implements AlignmentService.Response {
+        private final GradleVersionCalculator vc = new GradleVersionCalculator();
         private final AlignmentService.Response originalResponse;
         private final ProjectVersionRef version;
         private final VersioningState state;
@@ -51,7 +52,6 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Response
 
         @Override
         public String getNewProjectVersion() {
-            GradleVersionCalculator vc = new GradleVersionCalculator();
             try {
                 return vc.calculate(version.getGroupId(), version.getArtifactId(), version.getVersionString(), state);
             } catch (ManipulationException e) {

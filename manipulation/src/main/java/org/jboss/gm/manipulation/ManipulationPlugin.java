@@ -1,7 +1,5 @@
 package org.jboss.gm.manipulation;
 
-import static org.jboss.gm.common.alignment.ManipulationUtils.getCurrentManipulationModel;
-
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.jboss.gm.common.alignment.ManipulationModel;
@@ -11,6 +9,8 @@ import org.jboss.gm.manipulation.actions.ProjectChangeVersionAction;
 import org.jboss.gm.manipulation.actions.PublicationPomTransformerAction;
 import org.jboss.gm.manipulation.actions.PublishingRepositoryAction;
 import org.jboss.gm.manipulation.actions.UploadTaskTransformerAction;
+
+import static org.jboss.gm.common.alignment.ManipulationUtils.getCurrentManipulationModel;
 
 public class ManipulationPlugin implements Plugin<Project> {
 

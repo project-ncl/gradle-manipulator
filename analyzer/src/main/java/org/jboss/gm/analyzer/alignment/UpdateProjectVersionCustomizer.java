@@ -1,15 +1,16 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.util.Collections;
-import java.util.Set;
-
-import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.configuration2.ConfigurationConverter;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.core.impl.VersionCalculator;
 import org.commonjava.maven.ext.core.state.VersioningState;
+import org.jboss.gm.common.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * {@link org.jboss.gm.analyzer.alignment.AlignmentService.ResponseCustomizer} that changes the project version
@@ -19,7 +20,6 @@ import org.commonjava.maven.ext.core.state.VersioningState;
 public class UpdateProjectVersionCustomizer implements AlignmentService.ResponseCustomizer {
 
     private final ProjectVersionRef projectVersion;
-
     private final Configuration configuration;
 
     UpdateProjectVersionCustomizer(ProjectVersionRef projectVersion, Configuration configuration) {
@@ -38,16 +38,21 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Response
     }
 
     private static class ProjectVersionCustomizerResponse implements AlignmentService.Response {
+
+        private final Logger logger = LoggerFactory.getLogger(getClass());
+
         private final GradleVersionCalculator vc = new GradleVersionCalculator();
         private final AlignmentService.Response originalResponse;
         private final ProjectVersionRef version;
         private final VersioningState state;
 
-        ProjectVersionCustomizerResponse(AlignmentService.Response originalResponse, ProjectVersionRef version,
+        public ProjectVersionCustomizerResponse(AlignmentService.Response originalResponse, ProjectVersionRef version,
                 Configuration configuration) {
             this.originalResponse = originalResponse;
             this.version = version;
-            this.state = new VersioningState(ConfigurationConverter.getProperties(configuration));
+            logger.info("Creating versioning state with {} and {}",
+                    configuration.versionIncrementalSuffix(), configuration.versionIncrementalSuffixPadding());
+            this.state = new VersioningState(configuration.getProperties());
         }
 
         @Override

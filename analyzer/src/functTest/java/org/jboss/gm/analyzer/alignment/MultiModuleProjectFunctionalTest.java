@@ -1,5 +1,19 @@
 package org.jboss.gm.analyzer.alignment;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.alignment.ManipulationModel;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collection;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
@@ -8,18 +22,10 @@ import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collection;
-
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.jboss.gm.common.alignment.ManipulationModel;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
 public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
+
+    @Rule
+    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -34,6 +40,8 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         stubDACall(project_root_called, "subproject1", first_dependency_called);
         stubDACall(first_dependency_called, "subproject2", second_dependency_called);
         stubDACall(second_dependency_called, "subproject11", "foo");
+
+        System.setProperty(Configuration.DA, "http://127.0.0.1:" + AbstractWiremockTest.PORT + "/da/rest/v-1");
     }
 
     private void stubDACall(String initialState, String projectName, String nextState) {

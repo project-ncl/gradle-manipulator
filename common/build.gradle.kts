@@ -5,6 +5,7 @@ repositories {
 }
 
 dependencies {
+    compile("org.aeonbits.owner:owner-java8:1.0.10")
     compile("org.apache.commons:commons-lang3:3.8.1")
     compile("commons-io:commons-io:2.6")
     compile("com.fasterxml.jackson.core:jackson-databind:2.9.8")

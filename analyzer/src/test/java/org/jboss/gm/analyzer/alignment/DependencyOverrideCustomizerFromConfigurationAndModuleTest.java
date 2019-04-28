@@ -1,17 +1,17 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
+import org.aeonbits.owner.ConfigFactory;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.jboss.gm.common.Configuration;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.configuration2.MapConfiguration;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 
 public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
 
@@ -19,8 +19,7 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
 
     @Test
     public void noDependencyOverrideProperty() {
-        final Map<String, String> properties = new HashMap<>();
-        final Configuration configuration = new MapConfiguration(properties);
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
 
         final AlignmentService.ResponseCustomizer sut = DependencyOverrideCustomizer.fromConfigurationForModule(configuration,
                 PROJECT);
@@ -30,12 +29,8 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
 
     @Test
     public void erroneousPropertiesDontCauseFailure() {
-        final Map<String, String> properties = new HashMap<String, String>() {
-            {
-                put("dependencyOverride.org.acme", "");
-            }
-        };
-        final Configuration configuration = new MapConfiguration(properties);
+        System.setProperty("dependencyOverride.org.acme", "");
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
 
         final AlignmentService.ResponseCustomizer sut = DependencyOverrideCustomizer.fromConfigurationForModule(configuration,
                 PROJECT);
@@ -60,16 +55,18 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
         final ProjectVersionRef wiremockGav = withGAV("com.github.tomakehurst", "wiremock-jre8",
                 "2.23.2-redhat-00001");
 
-        final Map<String, String> properties = new HashMap<String, String>() {
-            {
-                put("dependencyOverride.org.hibernate:hibernate-core@*", "5.3.7.Final-redhat-00001"); // should result in overriding only hibernate-core dependency
-                put("dependencyOverride.com.fasterxml.jackson.core:*@*", "2.9.5-redhat-00001"); // should result in overriding all jackson dependencies
-                put("dependencyOverride.io.undertow:undertow-servlet@*", "2.0.14.Final-redhat-00001"); // should NOT result in overriding the undertow dependency since the artifact doesn't match
-                put("dependencyOverride.org.mockito:*@org.acme:test", "2.27.0-redhat-00002"); // should result in overriding the mockito dependency
-                put("dependencyOverride.com.github.tomakehurst:*@org.acme:other", ""); // should NOT result overriding the wiremock dependency since the module doesn't match
-            }
-        };
-        final Configuration configuration = new MapConfiguration(properties);
+        System.setProperty("dependencyOverride.org.hibernate:hibernate-core@*",
+                "5.3.7.Final-redhat-00001"); // should result in overriding only hibernate-core dependency
+        System.setProperty("dependencyOverride.com.fasterxml.jackson.core:*@*",
+                "2.9.5-redhat-00001"); // should result in overriding all jackson dependencies
+        System.setProperty("dependencyOverride.io.undertow:undertow-servlet@*",
+                "2.0.14.Final-redhat-00001"); // should NOT result in overriding the undertow dependency since the artifact doesn't match
+        System.setProperty("dependencyOverride.org.mockito:*@org.acme:test",
+                "2.27.0-redhat-00002"); // should result in overriding the mockito dependency
+        System.setProperty("dependencyOverride.com.github.tomakehurst:*@org.acme:other",
+                ""); // should NOT result overriding the wiremock dependency since the module doesn't match
+
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
 
         final AlignmentService.ResponseCustomizer sut = DependencyOverrideCustomizer.fromConfigurationForModule(configuration,
                 PROJECT);

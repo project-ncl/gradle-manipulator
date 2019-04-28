@@ -1,5 +1,4 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.gradle.api.publish.PublishingExtension
 
 plugins {
     id("com.diffplug.gradle.spotless") version "3.21.0"

@@ -1,13 +1,14 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.commons.configuration2.Configuration;
+import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.gradle.api.Project;
+import org.jboss.gm.common.Configuration;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This is what {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME} task uses to retrieve a fully wired
@@ -15,17 +16,15 @@ import org.gradle.api.Project;
  */
 public final class AlignmentServiceFactory {
 
-    private static final String DA_ENDPOINT_URL_PROPERTY = "da.endpoint.url";
-
     private AlignmentServiceFactory() {
     }
 
     public static AlignmentService getAlignmentService(Project project) {
-        final Configuration configuration = ConfigurationFactory.getConfiguration();
-        final String daEndpointUrl = configuration.getString(DA_ENDPOINT_URL_PROPERTY);
+        final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
+        final String daEndpointUrl = configuration.daEndpoint();
         if (daEndpointUrl == null) {
             throw new IllegalArgumentException(
-                    String.format("'%s' must be configured in order for alignment to work", DA_ENDPOINT_URL_PROPERTY));
+                    String.format("'%s' must be configured in order for alignment to work", Configuration.DA));
         }
 
         final ProjectVersionRef projectVersionRef = new SimpleProjectVersionRef(project.getGroup().toString(),

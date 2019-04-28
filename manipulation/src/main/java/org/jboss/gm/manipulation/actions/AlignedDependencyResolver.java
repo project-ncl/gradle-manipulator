@@ -6,15 +6,15 @@
  */
 package org.jboss.gm.manipulation.actions;
 
-import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
-
-import java.util.Map;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.DependencyResolveDetails;
 import org.gradle.api.artifacts.ModuleVersionSelector;
 import org.jboss.gm.common.alignment.ManipulationModel;
+
+import java.util.Map;
+
+import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>

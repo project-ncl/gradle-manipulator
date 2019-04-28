@@ -1,18 +1,19 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import org.apache.commons.configuration2.Configuration;
+import org.aeonbits.owner.ConfigFactory;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.jboss.gm.common.Configuration;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.rules.TestRule;
 import org.mockito.stubbing.Answer;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class UpdateProjectVersionCustomizerTest {
 
@@ -30,7 +31,7 @@ public class UpdateProjectVersionCustomizerTest {
         when(originalResp.getNewProjectVersion()).thenReturn(null);
 
         ProjectVersionRef pvr = SimpleProjectVersionRef.parse("org:dummy:1.0.0");
-        Configuration configuration = ConfigurationFactory.getConfiguration();
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(pvr, configuration);
         final AlignmentService.Response customizedReq = sut.customize(originalResp);
 
@@ -50,7 +51,7 @@ public class UpdateProjectVersionCustomizerTest {
         when(originalResp.getNewProjectVersion()).thenReturn(null);
 
         ProjectVersionRef pvr = SimpleProjectVersionRef.parse("org:dummy:1.1");
-        Configuration configuration = ConfigurationFactory.getConfiguration();
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(pvr, configuration);
         final AlignmentService.Response customizedReq = sut.customize(originalResp);
 
@@ -73,7 +74,7 @@ public class UpdateProjectVersionCustomizerTest {
         when(originalResp.getNewProjectVersion()).thenReturn(null);
 
         ProjectVersionRef pvr = SimpleProjectVersionRef.parse("org:dummy:1.1");
-        Configuration configuration = ConfigurationFactory.getConfiguration();
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(pvr, configuration);
         final AlignmentService.Response customizedReq = sut.customize(originalResp);
 
@@ -93,7 +94,7 @@ public class UpdateProjectVersionCustomizerTest {
         final ProjectVersionRef pvr = SimpleProjectVersionRef.parse("org:dummy:1.1.0.redhat-00001");
         when(originalResp.getNewProjectVersion()).thenReturn(pvr.getVersionString());
 
-        Configuration configuration = ConfigurationFactory.getConfiguration();
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(pvr, configuration);
         final AlignmentService.Response customizedReq = sut.customize(originalResp);
 

@@ -1,16 +1,18 @@
 package org.jboss.gm.analyzer.alignment;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.core.util.PropertiesUtils;
+import org.jboss.gm.common.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import org.apache.commons.configuration2.Configuration;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * {@link org.jboss.gm.analyzer.alignment.AlignmentService.RequestCustomizer} that removes dependencies from a
@@ -43,12 +45,12 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
 
     public static AlignmentService.RequestCustomizer fromConfigurationForModule(Configuration configuration,
             ProjectRef projectRef) {
-        final Configuration dependencyExclusionConfiguration = configuration.subset("dependencyExclusion");
-        if (dependencyExclusionConfiguration.isEmpty()) {
+        Map<String, String> prefixed = PropertiesUtils.getPropertiesByPrefix(configuration.getProperties(),
+                "dependencyExclusion.");
+        if (prefixed.isEmpty()) {
             return AlignmentService.RequestCustomizer.NOOP;
         }
-
-        final Iterator<String> keys = dependencyExclusionConfiguration.getKeys();
+        final Iterator<String> keys = prefixed.keySet().iterator();
         //the idea is to start with a predicate that passes all artifacts and add one predicate per configured exclusion
         final List<Predicate> predicates = new ArrayList<>();
         while (keys.hasNext()) {

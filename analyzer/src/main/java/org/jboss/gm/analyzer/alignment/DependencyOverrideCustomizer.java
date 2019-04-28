@@ -1,16 +1,17 @@
 package org.jboss.gm.analyzer.alignment;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.core.util.PropertiesUtils;
+import org.jboss.gm.common.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
-
-import org.apache.commons.configuration2.Configuration;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * {@link org.jboss.gm.analyzer.alignment.AlignmentService.ResponseCustomizer} that changes the versions of
@@ -38,14 +39,14 @@ public class DependencyOverrideCustomizer implements AlignmentService.ResponseCu
 
     public static AlignmentService.ResponseCustomizer fromConfigurationForModule(Configuration configuration,
             ProjectRef projectRef) {
-        final Configuration dependencyExclusionConfiguration = configuration.subset("dependencyOverride");
-        if (dependencyExclusionConfiguration.isEmpty()) {
+        final Map<String, String> prefixed = PropertiesUtils.getPropertiesByPrefix(configuration.getProperties(),
+                "dependencyOverride.");
+        if (prefixed.isEmpty()) {
             return AlignmentService.ResponseCustomizer.NOOP;
         }
 
         final Map<ProjectRef, String> overrideMap = new LinkedHashMap<>();
-
-        final Iterator<String> keys = dependencyExclusionConfiguration.getKeys();
+        final Iterator<String> keys = prefixed.keySet().iterator();
         //the idea is to create one DependencyOverrideCustomizer per configuration property
         while (keys.hasNext()) {
             final String key = keys.next();
@@ -53,7 +54,7 @@ public class DependencyOverrideCustomizer implements AlignmentService.ResponseCu
             try {
                 final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
                 if (keyParseResult.matchesModule(projectRef)) {
-                    final String overrideVersion = dependencyExclusionConfiguration.getString(key);
+                    final String overrideVersion = prefixed.get(key);
                     log.debug("Overriding dependency {} from in module {} with version {}",
                             keyParseResult.getDependency(), projectRef, overrideVersion);
                     overrideMap.put(keyParseResult.getDependency(), overrideVersion);

@@ -1,7 +1,13 @@
 package org.jboss.gm.manipulation;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.assertj.core.groups.Tuple;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.jboss.gm.common.alignment.ManipulationModel;
 
 import java.io.File;
 import java.io.FileReader;
@@ -12,14 +18,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.assertj.core.groups.Tuple;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.jboss.gm.common.alignment.ManipulationModel;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 public final class TestUtils {
 

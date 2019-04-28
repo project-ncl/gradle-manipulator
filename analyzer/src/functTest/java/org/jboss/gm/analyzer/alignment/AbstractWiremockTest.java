@@ -1,16 +1,15 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 
 public abstract class AbstractWiremockTest {
 
-    private static final int PORT = 8089;
+    static final int PORT = 8089;
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(PORT);

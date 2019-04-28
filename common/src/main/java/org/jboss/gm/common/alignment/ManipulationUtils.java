@@ -1,5 +1,7 @@
 package org.jboss.gm.common.alignment;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -7,8 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.io.FileUtils;
 
 public final class ManipulationUtils {
     private static final String MANIPULATION_FILE_NAME = "manipulation.json";

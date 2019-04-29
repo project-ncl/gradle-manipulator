@@ -11,10 +11,14 @@ allprojects {
 
     repositories {
         mavenCentral()
+        mavenLocal()
     }
 }
 
 subprojects {
+
+    extra["bytemanVersion"] = "4.0.6"
+    extra["pmeVersion"] = "3.6"
 
     apply(plugin = "com.diffplug.gradle.spotless")
 

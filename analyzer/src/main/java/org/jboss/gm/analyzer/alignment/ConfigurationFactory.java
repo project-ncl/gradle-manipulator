@@ -26,18 +26,16 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
  */
 public final class ConfigurationFactory {
 
-    private static CompositeConfiguration configuration;
-
     private ConfigurationFactory() {
     }
 
+    // TODO: Prevent duplicate values being stored
     public static Configuration getConfiguration() {
-        if (configuration == null) {
-            configuration = new CompositeConfiguration();
-            configuration.addConfiguration(new ConvertingEnvironmentConfiguration());
-            configuration.addConfiguration(new SystemConfiguration());
-            configuration.addConfiguration(propertiesConfiguration());
-        }
+        CompositeConfiguration configuration = new CompositeConfiguration();
+        configuration.addConfiguration(new ConvertingEnvironmentConfiguration());
+        configuration.addConfiguration(new SystemConfiguration());
+        configuration.addConfiguration(propertiesConfiguration());
+
         return configuration;
     }
 

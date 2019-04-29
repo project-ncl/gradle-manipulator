@@ -1,18 +1,23 @@
 package org.jboss.gm.common;
 
-import org.aeonbits.owner.Accessible;
-import org.aeonbits.owner.Config;
-import org.aeonbits.owner.Config.Sources;
-import org.aeonbits.owner.Converter;
-import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import org.aeonbits.owner.Accessible;
+import org.aeonbits.owner.Config;
+import org.aeonbits.owner.Config.Sources;
+import org.aeonbits.owner.Converter;
+import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
 
+/**
+ * This class is used to hold all configuration values for the two plugins. The naming scheme of
+ * the configuration variables has been chosen to match the
+ * <a href=https://release-engineering.github.io/pom-manipulation-ext/#feature-guide>PME</a> naming.
+ */
 @Sources({ "system:properties", "system:env" })
 public interface Configuration extends Accessible {
     /**
@@ -54,6 +59,13 @@ public interface Configuration extends Accessible {
     @DefaultValue("5")
     int versionIncrementalSuffixPadding();
 
+    /**
+     * This value is used to represent the dependency configuration. While PME supports
+     * BOM and REST configs ; currently within Gradle only REST is supported. If this
+     * value is set to "" (or "NONE")
+     * 
+     * @return
+     */
     @Key("dependencySource")
     @ConverterClass(DependencyConverter.class)
     @DefaultValue("REST")
@@ -75,7 +87,7 @@ public interface Configuration extends Accessible {
             if (isEmpty(input)) {
                 return DependencyPrecedence.NONE;
             }
-            return DependencyPrecedence.valueOf(input);
+            return DependencyPrecedence.valueOf(input.toUpperCase());
         }
     }
 }

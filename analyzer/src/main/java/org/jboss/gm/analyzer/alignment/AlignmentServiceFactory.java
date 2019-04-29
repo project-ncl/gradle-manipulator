@@ -1,14 +1,14 @@
 package org.jboss.gm.analyzer.alignment;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.gradle.api.Project;
 import org.jboss.gm.common.Configuration;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * This is what {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME} task uses to retrieve a fully wired
@@ -21,15 +21,9 @@ public final class AlignmentServiceFactory {
 
     public static AlignmentService getAlignmentService(Project project) {
         final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
-        final String daEndpointUrl = configuration.daEndpoint();
-        if (daEndpointUrl == null) {
-            throw new IllegalArgumentException(
-                    String.format("'%s' must be configured in order for alignment to work", Configuration.DA));
-        }
-
         final ProjectVersionRef projectVersionRef = new SimpleProjectVersionRef(project.getGroup().toString(),
                 project.getName(), project.getVersion().toString());
-        return new WithCustomizersDelegatingAlignmentService(new DAAlignmentService(daEndpointUrl),
+        return new WithCustomizersDelegatingAlignmentService(new DAAlignmentService(configuration),
                 getRequestCustomizers(configuration, projectVersionRef),
                 getResponseCustomizers(configuration, projectVersionRef));
     }

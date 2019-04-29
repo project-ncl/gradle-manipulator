@@ -6,12 +6,13 @@
  */
 package org.jboss.gm.common.alignment;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang3.Validate;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Contains the information extracted from a gradle project and its sub-project required to perform alignment and version

@@ -1,5 +1,10 @@
 package org.jboss.gm.common.alignment;
 
+import java.io.IOException;
+
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.jboss.gm.common.ProjectVersionFactory;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -11,10 +16,6 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.jboss.gm.common.ProjectVersionFactory;
-
-import java.io.IOException;
 
 public final class SerializationUtils {
 
@@ -43,7 +44,7 @@ public final class SerializationUtils {
 
         @Override
         public ProjectVersionRef deserialize(JsonParser p, DeserializationContext ctxt)
-                throws IOException, JsonProcessingException {
+                throws IOException {
             JsonNode node = p.getCodec().readTree(p);
             final String groupId = node.get(GROUP_ID).asText();
             final String artifactId = node.get(ARTIFACT_ID).asText();

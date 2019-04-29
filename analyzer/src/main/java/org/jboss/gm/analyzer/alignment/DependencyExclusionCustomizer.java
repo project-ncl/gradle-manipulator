@@ -1,18 +1,18 @@
 package org.jboss.gm.analyzer.alignment;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.core.util.PropertiesUtils;
-import org.jboss.gm.common.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.core.util.PropertiesUtils;
+import org.jboss.gm.common.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link org.jboss.gm.analyzer.alignment.AlignmentService.RequestCustomizer} that removes dependencies from a

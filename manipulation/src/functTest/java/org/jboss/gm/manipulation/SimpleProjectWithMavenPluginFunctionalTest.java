@@ -1,5 +1,11 @@
 package org.jboss.gm.manipulation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
@@ -11,12 +17,6 @@ import org.jboss.gm.common.alignment.ManipulationUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class SimpleProjectWithMavenPluginFunctionalTest {
 

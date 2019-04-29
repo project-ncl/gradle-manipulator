@@ -1,16 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.jboss.gm.common.alignment.ManipulationModel;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collection;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
@@ -18,7 +7,24 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collection;
+
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.alignment.ManipulationModel;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
+
 public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
+
+    @Rule
+    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -30,6 +36,8 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json;charset=utf-8")
                         .withBody(readSampleDAResponse("simple-project-da-response.json"))));
+
+        System.setProperty(Configuration.DA, "http://127.0.0.1:" + AbstractWiremockTest.PORT + "/da/rest/v-1");
     }
 
     @Test

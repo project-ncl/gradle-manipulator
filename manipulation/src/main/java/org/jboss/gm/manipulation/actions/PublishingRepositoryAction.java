@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2019 Red Hat, Inc. and/or its affiliates.
  * <p>
  * Licensed under the Eclipse Public License version 1.0, available at
@@ -6,12 +6,14 @@
  */
 package org.jboss.gm.manipulation.actions;
 
+import org.aeonbits.owner.ConfigCache;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.credentials.HttpHeaderCredentials;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
 import org.gradle.authentication.http.HttpHeaderAuthentication;
+import org.jboss.gm.common.Configuration;
 
 /**
  * Adds a publishing repository specific to PNC environment.
@@ -40,17 +42,15 @@ import org.gradle.authentication.http.HttpHeaderAuthentication;
  */
 public class PublishingRepositoryAction implements Action<Project> {
 
-    public static final String URL_SYSTEM_PROPERTY = "AProxDeployUrl";
-
-    public static final String ACCESS_TOKEN_SYSTEM_PROPERTY = "accessToken";
-
     @Override
     public void execute(Project project) {
         if (!project.getPluginManager().hasPlugin("maven-publish")) {
             return;
         }
 
-        String pncDeployUrl = System.getProperty(URL_SYSTEM_PROPERTY);
+        Configuration config = ConfigCache.getOrCreate(Configuration.class);
+
+        String pncDeployUrl = config.deployUrl();
         if (pncDeployUrl != null) {
             project.getPlugins().withType(MavenPublishPlugin.class, plugin -> {
                 project.getExtensions().configure(PublishingExtension.class, publishingExtension -> {
@@ -59,7 +59,7 @@ public class PublishingRepositoryAction implements Action<Project> {
                         repository.setUrl(pncDeployUrl);
                         repository.credentials(HttpHeaderCredentials.class, cred -> {
                             cred.setName("Authorization");
-                            cred.setValue("Bearer " + System.getProperty(ACCESS_TOKEN_SYSTEM_PROPERTY));
+                            cred.setValue("Bearer " + config.accessToken());
                         });
                         repository.getAuthentication().create("header", HttpHeaderAuthentication.class);
                     });

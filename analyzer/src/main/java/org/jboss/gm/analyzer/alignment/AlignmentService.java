@@ -1,8 +1,8 @@
 package org.jboss.gm.analyzer.alignment;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-
 import java.util.Collection;
+
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
 /**
  * Used by {@link org.jboss.gm.analyzer.alignment.AlignmentTask} in order to perform the alignment

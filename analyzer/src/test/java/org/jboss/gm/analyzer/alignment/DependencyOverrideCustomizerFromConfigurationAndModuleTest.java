@@ -1,17 +1,17 @@
 package org.jboss.gm.analyzer.alignment;
 
-import org.aeonbits.owner.ConfigFactory;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.jboss.gm.common.Configuration;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
+import org.aeonbits.owner.ConfigFactory;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.jboss.gm.common.Configuration;
+import org.junit.Test;
 
 public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
 

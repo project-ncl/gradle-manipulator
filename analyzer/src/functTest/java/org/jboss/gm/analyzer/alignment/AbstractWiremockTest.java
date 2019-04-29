@@ -1,11 +1,12 @@
 package org.jboss.gm.analyzer.alignment;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+
 import org.apache.commons.io.FileUtils;
 import org.junit.Rule;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
 
 public abstract class AbstractWiremockTest {
 

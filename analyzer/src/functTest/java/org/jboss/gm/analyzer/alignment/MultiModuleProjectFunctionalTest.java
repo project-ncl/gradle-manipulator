@@ -1,5 +1,17 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collection;
+
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.alignment.ManipulationModel;
@@ -9,18 +21,6 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collection;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
 

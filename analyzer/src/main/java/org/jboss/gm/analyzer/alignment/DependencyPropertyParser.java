@@ -1,9 +1,9 @@
 package org.jboss.gm.analyzer.alignment;
 
+import java.util.function.Predicate;
+
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
-
-import java.util.function.Predicate;
 
 /**
  * Utility class that is meant to parse properties like dependencyOverride and dependencyExclusion

@@ -11,17 +11,24 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
+import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.jboss.gm.common.Configuration;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.rules.TestRule;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 
 public class DAAlignmentServiceWiremockTest {
 
     private static final int PORT = 8089;
+
+    @Rule
+    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(PORT);
@@ -37,7 +44,11 @@ public class DAAlignmentServiceWiremockTest {
 
     @Test
     public void alignmentWorksAsExpected() {
-        final DAAlignmentService sut = new DAAlignmentService(String.format("http://localhost:%d/da/rest/v-1", PORT));
+
+        System.setProperty(Configuration.DA, String.format("http://localhost:%d/da/rest/v-1", PORT));
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
+
+        final DAAlignmentService sut = new DAAlignmentService(configuration);
 
         final ProjectVersionRef projectGav = withGAV("org.acme", "dummy", "1.0.0");
         final ProjectVersionRef hibernateGav = withGAV("org.hibernate", "hibernate-core", "5.3.7.Final");

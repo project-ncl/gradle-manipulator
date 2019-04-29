@@ -14,8 +14,10 @@ repositories {
 
 dependencies {
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
-    compile group: 'org.hibernate', name: 'hibernate-core', version: '5.3.7.Final'
-    compile group: 'io.undertow', name: 'undertow-core', version: '2.0.15.Final'
+    // we use fake initial dependencies that should get aligned with existing versions so that if dependency override works,
+    // the test project properly compiles
+    compile group: 'org.hibernate', name: 'hibernate-core', version: '1.2.3.Hibernate'
+    compile group: 'io.undertow', name: 'undertow-core', version: '4.5.6.Undertow'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 

@@ -37,7 +37,6 @@ val functionalTest = task<Test>("functionalTest") {
     testClassesDirs = sourceSets["functionalTest"].output.classesDirs
     classpath = sourceSets["functionalTest"].runtimeClasspath
     mustRunAfter(tasks["test"])
-    environment("BYPASS_ALIGNER", "true")
 }
 
 tasks.check { dependsOn(functionalTest) }

@@ -7,15 +7,15 @@
       "name": "subproject1",
       "version": "1.1.2-redhat-00004",
       "alignedDependencies": {
-        "org.springframework:spring-context:5.1.6.RELEASE": {
+        "org.springframework:spring-context:0.0.0.spring": {
           "groupId": "org.springframework",
           "artifactId": "spring-context",
-          "version": "5.1.6.RELEASE-redhat-00005"
+          "version": "5.1.6.RELEASE"
         },
-        "org.hibernate:hibernate-core:5.4.2.Final": {
+        "org.hibernate:hibernate-core:0.0.0.hibernate": {
           "groupId": "org.hibernate",
           "artifactId": "hibernate-core",
-          "version": "5.4.2.Final-redhat-00001"
+          "version": "5.4.2.Final"
         }
       }
     },
@@ -23,10 +23,10 @@
       "name": "subproject2",
       "version": "1.1.2-redhat-00004",
       "alignedDependencies": {
-        "org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1": {
+        "org.jboss.resteasy:resteasy-jaxrs:0.0.0.resteasy": {
           "groupId": "org.jboss.resteasy",
           "artifactId": "resteasy-jaxrs",
-          "version": "3.6.3.SP1-redhat-00001"
+          "version": "3.6.3.SP1"
         }
       }
     }

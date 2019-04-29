@@ -1,16 +1,16 @@
 package org.jboss.gm.analyzer.alignment;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.core.state.DependencyState;
-import org.commonjava.maven.ext.io.rest.DefaultTranslator;
-import org.commonjava.maven.ext.io.rest.Translator;
-import org.jboss.gm.common.Configuration;
+import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence.NONE;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence.NONE;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.core.state.DependencyState;
+import org.commonjava.maven.ext.io.rest.DefaultTranslator;
+import org.commonjava.maven.ext.io.rest.Translator;
+import org.jboss.gm.common.Configuration;
 
 /**
  * An implementation of {@link org.jboss.gm.analyzer.alignment.AlignmentService} that uses the Dependency Analyzer service

@@ -1,5 +1,8 @@
 package org.jboss.gm.analyzer.alignment;
 
+import java.util.Collections;
+import java.util.Set;
+
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -8,9 +11,6 @@ import org.commonjava.maven.ext.core.state.VersioningState;
 import org.jboss.gm.common.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collections;
-import java.util.Set;
 
 /**
  * {@link org.jboss.gm.analyzer.alignment.AlignmentService.ResponseCustomizer} that changes the project version

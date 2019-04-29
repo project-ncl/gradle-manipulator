@@ -1,12 +1,16 @@
 package org.jboss.gm.analyzer.alignment;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.Translator;
+import org.jboss.gm.common.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence.NONE;
 
 /**
  * An implementation of {@link org.jboss.gm.analyzer.alignment.AlignmentService} that uses the Dependency Analyzer service
@@ -18,7 +22,16 @@ public class DAAlignmentService implements AlignmentService {
 
     private final Translator restEndpoint;
 
-    public DAAlignmentService(String endpointUrl) {
+    private final DependencyState.DependencyPrecedence dependencySource;
+
+    public DAAlignmentService(Configuration configuration) {
+        final String endpointUrl = configuration.daEndpoint();
+        if (endpointUrl == null) {
+            throw new IllegalArgumentException(
+                    String.format("'%s' must be configured in order for alignment to work", Configuration.DA));
+        }
+        dependencySource = configuration.dependencyConfiguration();
+
         //TODO: the parameters needs to be verified
         restEndpoint = new DefaultTranslator(
                 endpointUrl,
@@ -34,7 +47,10 @@ public class DAAlignmentService implements AlignmentService {
         final List<ProjectVersionRef> translateRequest = new ArrayList<>(request.getDependencies().size() + 1);
         final ProjectVersionRef refOfProject = request.getProject();
         translateRequest.add(refOfProject);
-        translateRequest.addAll(request.getDependencies());
+
+        if (dependencySource != NONE) {
+            translateRequest.addAll(request.getDependencies());
+        }
 
         final Map<ProjectVersionRef, String> translationMap = restEndpoint.translateVersions(translateRequest);
 

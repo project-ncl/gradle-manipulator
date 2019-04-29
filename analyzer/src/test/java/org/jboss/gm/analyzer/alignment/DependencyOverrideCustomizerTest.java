@@ -1,18 +1,18 @@
 package org.jboss.gm.analyzer.alignment;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
-import org.junit.Test;
-import org.mockito.stubbing.Answer;
-
-import java.util.HashMap;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import java.util.HashMap;
+
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
+import org.junit.Test;
+import org.mockito.stubbing.Answer;
 
 public class DependencyOverrideCustomizerTest {
 

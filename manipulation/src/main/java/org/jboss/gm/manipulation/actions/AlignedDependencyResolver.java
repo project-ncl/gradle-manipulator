@@ -6,15 +6,15 @@
  */
 package org.jboss.gm.manipulation.actions;
 
+import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
+
+import java.util.Map;
+
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.DependencyResolveDetails;
 import org.gradle.api.artifacts.ModuleVersionSelector;
 import org.jboss.gm.common.alignment.ManipulationModel;
-
-import java.util.Map;
-
-import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
@@ -22,35 +22,20 @@ import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 public class AlignedDependencyResolver implements Action<DependencyResolveDetails> {
     private final ManipulationModel module;
 
-    private static final boolean BYPASS;
-
-    static {
-        boolean bypass = false;
-        try {
-            final String property = System.getenv("BYPASS_ALIGNER");
-            bypass = Boolean.parseBoolean(property);
-        } catch (Exception e) {
-            // ignore
-        }
-        BYPASS = bypass;
-    }
-
     public AlignedDependencyResolver(ManipulationModel module) {
         this.module = module;
     }
 
     @Override
     public void execute(DependencyResolveDetails resolveDetails) {
-        if (!BYPASS) {
-            final ModuleVersionSelector requested = resolveDetails.getRequested();
-            final ProjectVersionRef requestedGAV = withGAV(requested.getGroup(), requested.getName(), requested.getVersion());
+        final ModuleVersionSelector requested = resolveDetails.getRequested();
+        final ProjectVersionRef requestedGAV = withGAV(requested.getGroup(), requested.getName(), requested.getVersion());
 
-            final Map<String, ProjectVersionRef> alignedDependencies = module.getAlignedDependencies();
-            final String key = requestedGAV.toString();
-            final ProjectVersionRef aligned = alignedDependencies.get(key);
-            if (aligned != null) {
-                resolveDetails.because(key + " is aligned to " + aligned.toString()).useVersion(aligned.getVersionString());
-            }
+        final Map<String, ProjectVersionRef> alignedDependencies = module.getAlignedDependencies();
+        final String key = requestedGAV.toString();
+        final ProjectVersionRef aligned = alignedDependencies.get(key);
+        if (aligned != null) {
+            resolveDetails.because(key + " is aligned to " + aligned.toString()).useVersion(aligned.getVersionString());
         }
     }
 }

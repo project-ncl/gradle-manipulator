@@ -6,11 +6,11 @@
  */
 package org.jboss.gm.analyzer.alignment;
 
-import org.jboss.gm.common.alignment.ManipulationModel;
-import org.junit.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import org.jboss.gm.common.alignment.ManipulationModel;
+import org.junit.Test;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>

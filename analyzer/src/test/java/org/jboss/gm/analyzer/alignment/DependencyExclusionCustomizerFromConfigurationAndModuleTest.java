@@ -1,5 +1,10 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
+
+import java.util.Arrays;
+
 import org.aeonbits.owner.ConfigFactory;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -9,11 +14,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.rules.TestRule;
-
-import java.util.Arrays;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 
 public class DependencyExclusionCustomizerFromConfigurationAndModuleTest {
 

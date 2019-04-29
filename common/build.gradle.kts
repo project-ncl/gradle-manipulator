@@ -12,6 +12,9 @@ dependencies {
     compile("org.commonjava.maven.ext:pom-manipulation-io:${extra.get("pmeVersion")}") {
         exclude ("ch.qos.logback", "logback-classic")
     }
+    compile("org.commonjava.maven.ext:pom-manipulation-core:${extra.get("pmeVersion")}") {
+        exclude ("ch.qos.logback", "logback-classic")
+    }
 
     testCompile("junit", "junit", "4.12")
 }

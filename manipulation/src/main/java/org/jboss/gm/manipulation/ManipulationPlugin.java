@@ -10,6 +10,7 @@ import org.gradle.api.Project;
 import org.gradle.api.plugins.MavenPlugin;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
 import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.alignment.ManifestUtils;
 import org.jboss.gm.common.alignment.ManipulationModel;
 import org.jboss.gm.manipulation.actions.ManifestUpdateAction;
 import org.jboss.gm.manipulation.actions.MavenPublicationRepositoryAction;
@@ -27,7 +28,11 @@ public class ManipulationPlugin implements Plugin<Project> {
     private static final String LEGACY_MAVEN_PLUGIN = "maven";
     private static final String MAVEN_PUBLISH_PLUGIN = "maven-publish";
 
-    private static final Logger log = LoggerFactory.getLogger(ManipulationPlugin.class);
+    static {
+        System.out.println("Injecting ManipulationPlugin ; version " + ManifestUtils.getManifestInformation());
+    }
+
+    private final Logger logger = LoggerFactory.getLogger(ManipulationPlugin.class);
 
     @Override
     public void apply(Project project) {
@@ -54,7 +59,7 @@ public class ManipulationPlugin implements Plugin<Project> {
             Configuration config = ConfigCache.getOrCreate(Configuration.class);
             String deployPlugin = config.deployPlugin();
             if (!isEmpty(deployPlugin)) {
-                log.info("Enforcing artifact deployment plugin `{}`.", deployPlugin);
+                logger.info("Enforcing artifact deployment plugin `{}`.", deployPlugin);
             }
 
             // if enforced plugin is not configured in the project, apply it
@@ -79,15 +84,15 @@ public class ManipulationPlugin implements Plugin<Project> {
             }
 
             if (LEGACY_MAVEN_PLUGIN.equals(deployPlugin)) {
-                log.info("Configuring `maven` plugin");
+                logger.info("Configuring `maven` plugin");
                 evaluatedProject.afterEvaluate(new UploadTaskTransformerAction(correspondingModule));
                 evaluatedProject.afterEvaluate(new MavenPublicationRepositoryAction());
             } else if (MAVEN_PUBLISH_PLUGIN.equals(deployPlugin)) {
-                log.info("Configuring `maven-publish` plugin");
+                logger.info("Configuring `maven-publish` plugin");
                 evaluatedProject.afterEvaluate(new PublishingRepositoryAction());
                 evaluatedProject.afterEvaluate(new PublishingPomTransformerAction(correspondingModule));
             } else {
-                log.warn("No publishing plugin was configured!");
+                logger.warn("No publishing plugin was configured!");
             }
         });
     }

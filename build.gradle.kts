@@ -1,8 +1,12 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import java.text.SimpleDateFormat
+import java.util.*
 
 plugins {
+    java
     id("com.diffplug.gradle.spotless") version "3.21.0"
     id("com.github.johnrengelman.shadow") version "5.0.0"
+    id("net.nemerosa.versioning") version "2.8.2"
 }
 
 allprojects {
@@ -20,6 +24,7 @@ subprojects {
     extra["pmeVersion"] = "3.6"
 
     apply(plugin = "com.diffplug.gradle.spotless")
+    apply(plugin = "net.nemerosa.versioning")
 
     spotless {
         java {
@@ -32,9 +37,10 @@ subprojects {
         dependsOn("spotlessApply")
     }
 
-    if (project.name.equals("common")) {
+    if (project.name == "common") {
         apply(plugin = "java-library")
     } else {
+        apply(plugin = "java")
         apply(plugin = "maven-publish")
         apply(plugin = "java-gradle-plugin")
         apply(plugin = "com.github.johnrengelman.shadow")
@@ -70,6 +76,19 @@ subprojects {
                 create<MavenPublication>("shadow") {
                     project.shadow.component(this)
                 }
+            }
+        }
+    }
+    tasks {
+        "jar"(Jar::class) {
+            this.manifest {
+                attributes["Built-By"]=System.getProperty("user.name")
+                attributes["Build-Timestamp"]= SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(Date())
+                attributes["Scm-Revision"]=versioning.info.commit
+                attributes["Created-By"]="Gradle ${gradle.gradleVersion}"
+                attributes["Build-Jdk"]=System.getProperty("java.version") + " ; " + System.getProperty("java.vendor") + " ; " + System.getProperty("java.vm.version")
+                attributes["Build-OS"]=System.getProperty("os.name") + " ; " + System.getProperty("os.arch") + " ; " + System.getProperty("os.version")
+                attributes["Implementation-Version"]="${project.version}"
             }
         }
     }

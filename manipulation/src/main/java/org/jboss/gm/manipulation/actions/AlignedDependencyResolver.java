@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 public class AlignedDependencyResolver implements Action<DependencyResolveDetails> {
     private final ManipulationModel module;
 
-    private static final Logger log = LoggerFactory.getLogger(AlignedDependencyResolver.class);
+    private static final Logger logger = LoggerFactory.getLogger(AlignedDependencyResolver.class);
 
     public AlignedDependencyResolver(ManipulationModel module) {
         this.module = module;
@@ -30,7 +30,7 @@ public class AlignedDependencyResolver implements Action<DependencyResolveDetail
         final ModuleVersionSelector requested = resolveDetails.getRequested();
         if (isEmpty(requested.getVersion())) {
             // this is the case with managed dependencies, where version is provided at resolution time
-            log.warn("Ignoring dependency with empty version {}:{}.", requested.getGroup(), requested.getName());
+            logger.warn("Ignoring dependency with empty version {}:{}.", requested.getGroup(), requested.getName());
             return;
         }
 

@@ -8,7 +8,6 @@ import org.jboss.gm.common.ProjectVersionFactory;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,17 +25,18 @@ public final class SerializationUtils {
     private SerializationUtils() {
     }
 
-    private static ObjectMapper mapper;
+    private static final ObjectMapper mapper;
+
+    static {
+        mapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(ProjectVersionRef.class, new ProjectVersionRefDeserializer());
+        module.addSerializer(ProjectVersionRef.class, new ProjectVersionRefSerializer());
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+        mapper.registerModule(module);
+    }
 
     public static ObjectMapper getObjectMapper() {
-        if (mapper == null) {
-            mapper = new ObjectMapper();
-            SimpleModule module = new SimpleModule();
-            module.addDeserializer(ProjectVersionRef.class, new ProjectVersionRefDeserializer());
-            module.addSerializer(ProjectVersionRef.class, new ProjectVersionRefSerializer());
-            mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-            mapper.registerModule(module);
-        }
         return mapper;
     }
 

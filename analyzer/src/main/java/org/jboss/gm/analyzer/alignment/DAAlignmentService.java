@@ -3,6 +3,7 @@ package org.jboss.gm.analyzer.alignment;
 import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence.NONE;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +12,8 @@ import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.Translator;
 import org.jboss.gm.common.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An implementation of {@link org.jboss.gm.analyzer.alignment.AlignmentService} that uses the Dependency Analyzer service
@@ -19,6 +22,8 @@ import org.jboss.gm.common.Configuration;
  * The heavy lifting is done by {@link org.commonjava.maven.ext.io.rest.DefaultTranslator}
  */
 public class DAAlignmentService implements AlignmentService {
+
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final Translator restEndpoint;
 
@@ -46,11 +51,14 @@ public class DAAlignmentService implements AlignmentService {
     public Response align(Request request) {
         final List<ProjectVersionRef> translateRequest = new ArrayList<>(request.getDependencies().size() + 1);
         final ProjectVersionRef refOfProject = request.getProject();
-        translateRequest.add(refOfProject);
 
-        if (dependencySource != NONE) {
-            translateRequest.addAll(request.getDependencies());
+        if (dependencySource == NONE) {
+            logger.warn("No dependencySource configured ; unable to call endpoint");
+            return new Response(refOfProject, Collections.emptyMap());
         }
+
+        translateRequest.add(refOfProject);
+        translateRequest.addAll(request.getDependencies());
 
         final Map<ProjectVersionRef, String> translationMap = restEndpoint.translateVersions(translateRequest);
 

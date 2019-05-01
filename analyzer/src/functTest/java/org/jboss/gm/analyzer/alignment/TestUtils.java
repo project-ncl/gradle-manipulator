@@ -13,21 +13,16 @@ import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.jboss.gm.common.alignment.ManipulationModel;
 import org.jboss.gm.common.alignment.ManipulationUtils;
-import org.junit.rules.TemporaryFolder;
 
 public final class TestUtils {
 
     private TestUtils() {
     }
 
-    public static void copyDirectory(String classpathResource, File target) throws URISyntaxException, IOException {
-        FileUtils.copyDirectory(Paths
-                .get(TestUtils.class.getClassLoader().getResource(classpathResource).toURI()).toFile(), target);
-    }
+    static ManipulationModel align(File projectRoot, String projectDirName) throws IOException, URISyntaxException {
 
-    static ManipulationModel align(TemporaryFolder tempDir, String projectDirName) throws IOException, URISyntaxException {
-        final File projectRoot = tempDir.newFolder(projectDirName);
-        copyDirectory(projectDirName, projectRoot);
+        FileUtils.copyDirectory(Paths
+                .get(TestUtils.class.getClassLoader().getResource(projectDirName).toURI()).toFile(), projectRoot);
         assertThat(projectRoot.toPath().resolve("build.gradle")).exists();
 
         final BuildResult buildResult = GradleRunner.create()

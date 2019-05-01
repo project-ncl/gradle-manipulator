@@ -1,0 +1,22 @@
+/**
+ * This file is injected by the Gradle Manipulation Tool during the analysis phase
+ */
+
+buildscript {
+    repositories {
+        mavenCentral()
+        // Maven local isn't required for production but its useful during development.
+        mavenLocal()
+    }
+
+    dependencies {
+        classpath "org.jboss.gm.manipulation:manipulation:${project.version}"
+    }
+}
+
+// If we are not running the analyse plugin then apply the manipulation plugin.
+// This avoids issues with rerunning in local environments.
+if (!project.hasProperty("gmeAnalyse")) {
+    logger.info("Applying plugin org.jboss.gm.manipulation.ManipulationPlugin")
+    apply plugin: org.jboss.gm.manipulation.ManipulationPlugin
+}

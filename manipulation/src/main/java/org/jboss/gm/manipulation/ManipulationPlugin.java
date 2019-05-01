@@ -33,7 +33,7 @@ public class ManipulationPlugin implements Plugin<Project> {
     }
 
     private final Logger logger = LoggerFactory.getLogger(ManipulationPlugin.class);
-
+    
     @Override
     public void apply(Project project) {
         // get the previously performed alignment

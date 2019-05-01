@@ -17,6 +17,7 @@ dependencies {
     }
 
     testCompile("junit", "junit", "4.12")
+    testCompile("com.github.stefanbirkner:system-rules:1.19.0")
 }
 
 configure<JavaPluginConvention> {

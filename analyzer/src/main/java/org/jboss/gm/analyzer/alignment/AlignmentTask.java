@@ -4,6 +4,12 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.jboss.gm.common.alignment.ManipulationUtils.getCurrentManipulationModel;
 import static org.jboss.gm.common.alignment.ManipulationUtils.writeUpdatedManipulationModel;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -16,14 +22,17 @@ import org.gradle.api.internal.artifacts.dependencies.DefaultSelfResolvingDepend
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.ProjectVersionFactory;
 import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.alignment.Utils;
 import org.slf4j.Logger;
 
 /**
- * The actual Gradle task that creates the manipulation.json file for the whole project
+ * The actual Gradle task that creates the {@code manipulation.json} file for the whole project
  * (whether it's a single or multi module project)
  */
 public class AlignmentTask extends DefaultTask {
 
+    static final String LOAD_GME = "apply from: \"gme.gradle\"";
+    static final String GME = "gme.gradle";
     static final String NAME = "generateAlignmentMetadata";
     static final Set<String> projectsToAlign = new HashSet<>();
 
@@ -58,7 +67,43 @@ public class AlignmentTask extends DefaultTask {
 
         projectsToAlign.remove(projectName);
         if (projectsToAlign.isEmpty()) {
+
             writeUpdatedManipulationModel(project.getRootDir(), alignmentModel);
+
+            try {
+                writeMarkerFile(project.getRootDir());
+            } catch (IOException e) {
+                throw new RuntimeException("Exception writing marker file");
+            }
+        }
+    }
+
+    private void writeMarkerFile(File rootDir) throws IOException {
+        File gmeGradle = new File(rootDir, GME);
+        File rootGradle = new File(rootDir, Project.DEFAULT_BUILD_FILE);
+
+        // TODO: Always replace or only in certain circumstances?
+        if (!gmeGradle.exists()) {
+            Files.copy(getClass().getResourceAsStream("/gme.gradle"), gmeGradle.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        if (rootGradle.exists()) {
+
+            String line = Utils.getLastLine(rootGradle);
+            logger.debug("Read line '{}' from build.gradle", line);
+
+            if (!line.trim().equals(LOAD_GME)) {
+                // Haven't appended it before.
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(rootGradle, true))) {
+                    // Ensure the marker is on a line by itself.
+                    writer.newLine();
+                    writer.write(LOAD_GME);
+                    writer.newLine();
+                    writer.flush();
+                }
+            }
+        } else {
+            logger.warn("Unable to find build.gradle in {} to modify.", rootDir);
         }
     }
 
@@ -88,5 +133,4 @@ public class AlignmentTask extends DefaultTask {
             }
         });
     }
-
 }

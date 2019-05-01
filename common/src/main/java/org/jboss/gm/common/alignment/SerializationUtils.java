@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
-public final class SerializationUtils {
+final class SerializationUtils {
 
     private static final String GROUP_ID = "groupId";
     private static final String ARTIFACT_ID = "artifactId";
@@ -40,7 +40,7 @@ public final class SerializationUtils {
         return mapper;
     }
 
-    public static class ProjectVersionRefDeserializer extends JsonDeserializer<ProjectVersionRef> {
+    private static class ProjectVersionRefDeserializer extends JsonDeserializer<ProjectVersionRef> {
 
         @Override
         public ProjectVersionRef deserialize(JsonParser p, DeserializationContext ctxt)
@@ -54,7 +54,7 @@ public final class SerializationUtils {
         }
     }
 
-    public static class ProjectVersionRefSerializer extends JsonSerializer<ProjectVersionRef> {
+    private static class ProjectVersionRefSerializer extends JsonSerializer<ProjectVersionRef> {
 
         @Override
         public void serialize(ProjectVersionRef value, JsonGenerator gen, SerializerProvider serializers) throws IOException {

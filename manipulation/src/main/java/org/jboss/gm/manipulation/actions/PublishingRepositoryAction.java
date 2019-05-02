@@ -1,9 +1,3 @@
-/*
- * Copyright 2019 Red Hat, Inc. and/or its affiliates.
- * <p>
- * Licensed under the Eclipse Public License version 1.0, available at
- * http://www.eclipse.org/legal/epl-v10.html
- */
 package org.jboss.gm.manipulation.actions;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -70,7 +64,7 @@ public class PublishingRepositoryAction implements Action<Project> {
                     if (!isEmpty(config.deployUrl())) {
                         repository.credentials(HttpHeaderCredentials.class, cred -> {
                             cred.setName("Authorization");
-                            cred.setValue("Bearer " + System.getProperty(config.accessToken()));
+                            cred.setValue("Bearer " + config.accessToken());
                         });
                         repository.getAuthentication().create("header", HttpHeaderAuthentication.class);
                     }

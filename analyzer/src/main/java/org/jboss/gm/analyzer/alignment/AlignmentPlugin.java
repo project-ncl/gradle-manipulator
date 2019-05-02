@@ -2,6 +2,7 @@ package org.jboss.gm.analyzer.alignment;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.jboss.gm.common.alignment.ManifestUtils;
 import org.jboss.gm.common.alignment.ManipulationModel;
 import org.jboss.gm.common.alignment.ManipulationUtils;
 
@@ -12,8 +13,13 @@ import org.jboss.gm.common.alignment.ManipulationUtils;
  */
 public class AlignmentPlugin implements Plugin<Project> {
 
+    static {
+        System.out.println("Injecting AlignmentPlugin ; version " + ManifestUtils.getManifestInformation());
+    }
+
     @Override
     public void apply(Project project) {
+
         // we need to create an empty alignment file at the project root
         // this file will then be populated by the alignment task of each project
         if (project.getRootProject() == project) {

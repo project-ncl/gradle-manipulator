@@ -13,11 +13,11 @@ import org.jboss.gm.common.alignment.ManipulationModel;
  * Applies PomTransformer, that overrides dependencies versions according to given configuration, to all maven
  * publications.
  */
-public class PublicationPomTransformerAction implements Action<Project> {
+public class PublishingPomTransformerAction implements Action<Project> {
 
     private ManipulationModel alignmentConfiguration;
 
-    public PublicationPomTransformerAction(ManipulationModel alignmentConfiguration) {
+    public PublishingPomTransformerAction(ManipulationModel alignmentConfiguration) {
         this.alignmentConfiguration = alignmentConfiguration;
     }
 

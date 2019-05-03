@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.model.Model;
@@ -16,12 +18,20 @@ import org.jboss.gm.common.alignment.ManipulationModel;
 import org.jboss.gm.common.alignment.ManipulationUtils;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
 
 public class SimpleProjectWithMavenPluginFunctionalTest {
 
+    private static final String ARTIFACT_NAME = "root-1.0.1-redhat-00001";
+    private static final Path PATH_IN_REPOSITORY = Paths.get("org/acme/root/1.0.1-redhat-00001/");
+
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
 
     @Test
     public void ensureProperPomGenerated() throws IOException, URISyntaxException, XmlPullParserException {
@@ -31,6 +41,9 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
         final File m2Directory = tempDir.newFolder(".m2");
         System.setProperty("maven.repo.local", m2Directory.getAbsolutePath());
 
+        final File publishDirectory = tempDir.newFolder("publishDirectory");
+        System.setProperty("AProxDeployUrl", "file://" + publishDirectory.getAbsolutePath());
+
         final File simpleProjectRoot = tempDir.newFolder("simple-project-with-maven-plugin");
         TestUtils.copyDirectory("simple-project-with-maven-plugin", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
@@ -39,14 +52,28 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
 
         final BuildResult buildResult = GradleRunner.create()
                 .withProjectDir(simpleProjectRoot)
-                .withArguments("install")
-                .withDebug(true)
+                .withArguments("uploadArchives", "--stacktrace", "--info")
                 .withPluginClasspath()
+                .forwardOutput()
                 .build();
         assertThat(buildResult.task(":install").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
+        assertThat(buildResult.task(":uploadArchives").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 
-        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(m2Directory, alignment,
-                "org/acme/root/1.0.1-redhat-00001/root-1.0.1-redhat-00001.pom", true);
+        final String repoPathToPom = PATH_IN_REPOSITORY.resolve(ARTIFACT_NAME + ".pom").toString();
+
+        // verify installed artifacts
+        verifyArtifacts(m2Directory);
+        verifyPom(m2Directory, repoPathToPom, alignment);
+
+        // verify published artifacts
+        verifyArtifacts(publishDirectory);
+        verifyPom(publishDirectory, repoPathToPom, alignment);
+    }
+
+    private void verifyPom(File repoDirectory, String pathToPom, ManipulationModel alignment)
+            throws IOException, XmlPullParserException {
+        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(repoDirectory, alignment,
+                pathToPom, true);
         final ManipulationModel module = modelAndModule.getRight();
         assertThat(modelAndModule.getLeft().getDependencies())
                 .extracting("artifactId", "version")
@@ -55,5 +82,13 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
                         TestUtils.getAlignedTuple(module, "hibernate-core"),
                         TestUtils.getAlignedTuple(module, "undertow-core"),
                         TestUtils.getAlignedTuple(module, "junit", "4.12"));
+        assertThat(modelAndModule.getLeft().getOrganization().getName()).isEqualTo("JBoss");
+        assertThat(modelAndModule.getLeft().getLicenses().get(0).getName()).isEqualTo("Apache License, Version 2.0");
+    }
+
+    private void verifyArtifacts(File repoDirectory) {
+        Path pathToArtifacts = repoDirectory.toPath().resolve(PATH_IN_REPOSITORY);
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile().exists()).isTrue();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar").toFile().exists()).isTrue();
     }
 }

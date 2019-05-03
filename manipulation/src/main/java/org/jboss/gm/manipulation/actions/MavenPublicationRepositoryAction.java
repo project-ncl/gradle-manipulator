@@ -19,13 +19,16 @@ public class MavenPublicationRepositoryAction implements Action<Project> {
 
     @Override
     public void execute(Project project) {
-        Configuration config = ConfigCache.getOrCreate(Configuration.class);
+        if (!project.getPluginManager().hasPlugin("maven")) {
+            project.getLogger().warn("Legacy `maven` plugin not detected, skipping publishing repository creation.");
+        }
 
         Upload uploadArchives = project.getTasks().withType(Upload.class).findByName("uploadArchives");
         if (uploadArchives == null) {
-            project.getLogger().warn("'uploadArchives' task not found, publication repository will not be configured.");
-            return;
+            uploadArchives = project.getTasks().create("uploadArchives", Upload.class);
         }
+
+        Configuration config = ConfigCache.getOrCreate(Configuration.class);
 
         if (isEmpty(config.deployUrl())) {
             project.getLogger().warn("Publishing URL was not configured.");
@@ -49,7 +52,6 @@ public class MavenPublicationRepositoryAction implements Action<Project> {
             }
         });
 
-        // TODO: test
         // TODO: investigate better way of doing this
         // We assume that "install" task generates project's POM. We want this POM to be published by "uploadArchives"
         // task. To do that, reference to this file must be added to "uploadArchives" configuration artifacts, but

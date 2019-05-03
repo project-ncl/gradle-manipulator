@@ -8,8 +8,7 @@ import org.jboss.gm.common.alignment.ManipulationUtils;
 
 /**
  * Results in adding a task with name {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME}.
- * It also creates an {@code manipulation.json} file located at the root of the project that
- * is augmented by the {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME} task run on each sub-project
+ * It scans the project(s) and creates the manipulation models.
  */
 public class AlignmentPlugin implements Plugin<Project> {
 

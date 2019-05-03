@@ -4,16 +4,23 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.gradle.api.Project;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.alignment.Utils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,7 +49,11 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void ensureAlignmentFileCreated() throws IOException, URISyntaxException {
-        final ManipulationModel alignmentModel = TestUtils.align(tempDir, "simple-project");
+        final File projectRoot = tempDir.newFolder("simple-project");
+        final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
+
+        assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
+        assertEquals(AlignmentTask.LOAD_GME, Utils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");

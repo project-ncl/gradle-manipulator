@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.aeonbits.owner.ConfigCache;
+import org.apache.commons.lang3.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.gradle.api.Project;
@@ -20,7 +21,12 @@ public final class AlignmentServiceFactory {
     }
 
     public static AlignmentService getAlignmentService(Project project) {
-        final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
+        if (StringUtils.isEmpty(project.getVersion().toString())) {
+            throw new RuntimeException("Project version is empty. Unable to continue.");
+        }
+
+        Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
+
         final ProjectVersionRef projectVersionRef = new SimpleProjectVersionRef(project.getGroup().toString(),
                 project.getName(), project.getVersion().toString());
         return new WithCustomizersDelegatingAlignmentService(new DAAlignmentService(configuration),

@@ -52,7 +52,7 @@ public final class ManipulationUtils {
      * Is assumes that a task for various projects is never called in parallel
      * TODO verify that the non-parallel run assumption holds
      * 
-     * @return
+     * @return a valid ManipulationModel.
      */
     public static ManipulationModel getCurrentManipulationModel(File rootDir) {
         return getManipulationModel(getManipulationFilePath(rootDir).toFile());

@@ -13,7 +13,6 @@ gradlePlugin {
     }
 }
 
-
 dependencies {
     compile(project(":common"))
     // the shadow configuration is used in order to avoid adding gradle and groovy stuff to the shadowed jar
@@ -58,3 +57,11 @@ val functionalTest = task<Test>("functionalTest") {
 }
 
 tasks.check { dependsOn(functionalTest) }
+
+tasks {
+    "processResources"(ProcessResources::class) {
+         filesMatching("gme.gradle") {
+            expand(project.properties)
+        }
+    }
+}

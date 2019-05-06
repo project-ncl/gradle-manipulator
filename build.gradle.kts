@@ -75,12 +75,18 @@ subprojects {
             from(sourceSets.main.get().allSource)
         }
 
+        val javadocJar by tasks.registering(Jar::class) {
+            classifier = "javadoc"
+            from(tasks["javadoc"])
+        }
+
         // configure publishing of the shadowJar
         configure<PublishingExtension> {
             publications {
                 create<MavenPublication>("shadow") {
                     project.shadow.component(this)
                     artifact(sourcesJar.get())
+                    artifact(javadocJar.get())
                 }
             }
         }

@@ -70,11 +70,17 @@ subprojects {
             classifier = ""
         }
 
+        val sourcesJar by tasks.registering(Jar::class) {
+            classifier = "sources"
+            from(sourceSets.main.get().allSource)
+        }
+
         // configure publishing of the shadowJar
         configure<PublishingExtension> {
             publications {
                 create<MavenPublication>("shadow") {
                     project.shadow.component(this)
+                    artifact(sourcesJar.get())
                 }
             }
         }

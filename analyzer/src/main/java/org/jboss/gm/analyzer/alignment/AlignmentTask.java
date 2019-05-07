@@ -37,13 +37,7 @@ public class AlignmentTask extends DefaultTask {
     static final Set<String> projectsToAlign = new HashSet<>();
 
     private final Logger logger = getLogger();
-
-    /**
-     * The idea here is for every project to read the current alignment file from disk,
-     * add the dependency alignment info for the specific project which for which the task was ran
-     * and write the updated model back to disk
-     * TODO the idea described above is probably very inefficient so we probably want to explore ways to do it better
-     */
+    
     @TaskAction
     public void perform() {
         final Project project = getProject();

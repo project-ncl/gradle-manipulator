@@ -20,9 +20,7 @@ dependencies {
     shadow(gradleApi())
 
     compile("commons-beanutils:commons-beanutils:1.9.3")
-    compile("org.commonjava.maven.ext:pom-manipulation-core:${extra.get("pmeVersion")}") {
-        exclude ("ch.qos.logback", "logback-classic")
-    }
+    compile("org.commonjava.maven.ext:pom-manipulation-core:${extra.get("pmeVersion")}")
     testCompile("junit:junit:4.12")
     testCompile("com.github.stefanbirkner:system-rules:1.19.0")
     testCompile("org.jboss.byteman:byteman:${extra.get("bytemanVersion")}")

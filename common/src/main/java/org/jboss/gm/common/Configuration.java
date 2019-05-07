@@ -6,11 +6,13 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 
 import org.aeonbits.owner.Accessible;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.Converter;
+import org.apache.commons.codec.binary.Base32;
 import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
 
 /**
@@ -20,6 +22,7 @@ import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
  */
 @Sources({ "system:properties", "system:env" })
 public interface Configuration extends Accessible {
+
     /**
      * Cache is indexed to object instance : Properties - while in production
      * usage there should only be one instance, using this allows for easier testing.
@@ -61,6 +64,16 @@ public interface Configuration extends Accessible {
     @Key("versionIncrementalSuffixPadding")
     @DefaultValue("5")
     int versionIncrementalSuffixPadding();
+
+    @Key("restRepositoryGroup")
+    String restRepositoryGroup();
+
+    @Key("restMaxSize")
+    @DefaultValue("0")
+    int restMaxSize();
+
+    @Key("log-context")
+    String logContext();
 
     /**
      * This value is used to represent the dependency configuration. While PME supports

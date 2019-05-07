@@ -37,7 +37,7 @@ public class AlignmentTask extends DefaultTask {
     static final Set<String> projectsToAlign = new HashSet<>();
 
     private final Logger logger = getLogger();
-    
+
     @TaskAction
     public void perform() {
         final Project project = getProject();

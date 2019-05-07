@@ -1,12 +1,15 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence.NONE;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
+import org.apache.commons.codec.binary.Base32;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
@@ -38,13 +41,14 @@ public class DAAlignmentService implements AlignmentService {
         dependencySource = configuration.dependencyConfiguration();
 
         //TODO: the parameters needs to be verified
-        restEndpoint = new DefaultTranslator(
+        restEndpoint = new GradleDefaultTranslator(
                 endpointUrl,
                 Translator.RestProtocol.CURRENT,
-                0,
+                configuration.restMaxSize(),
                 DefaultTranslator.CHUNK_SPLIT_COUNT,
-                "",
-                "");
+                configuration.restRepositoryGroup(),
+                configuration.versionIncrementalSuffix(),
+                configuration.logContext());
     }
 
     @Override
@@ -60,7 +64,10 @@ public class DAAlignmentService implements AlignmentService {
         translateRequest.add(refOfProject);
         translateRequest.addAll(request.getDependencies());
 
+        logger.debug("Passing {} GAVs following into the REST client api {} ", translateRequest.size(), translateRequest);
+        logger.info("Calling REST client...");
         final Map<ProjectVersionRef, String> translationMap = restEndpoint.translateVersions(translateRequest);
+        logger.info("REST Client returned {} ", translationMap);
 
         return new Response(refOfProject, translationMap);
     }
@@ -83,6 +90,34 @@ public class DAAlignmentService implements AlignmentService {
         @Override
         public String getAlignedVersionOfGav(ProjectVersionRef gav) {
             return translationMap.get(gav);
+        }
+    }
+
+    class GradleDefaultTranslator extends DefaultTranslator {
+        private final Random RANDOM = new Random();
+
+        private final String logContext;
+
+        GradleDefaultTranslator(String endpointUrl, RestProtocol current, int restMaxSize, int restMinSize,
+                String repositoryGroup, String incrementalSerialSuffix, String logContext) {
+            super(endpointUrl, current, restMaxSize, restMinSize, repositoryGroup, incrementalSerialSuffix);
+            this.logContext = logContext;
+        }
+
+        @Override
+        protected String getHeaderContext() {
+            String headerContext;
+
+            if (isNotEmpty(logContext)) {
+                headerContext = logContext;
+            } else {
+                // If we have no MDC PME has been used as the entry point. Dummy one up for DA.
+                byte[] randomBytes = new byte[20];
+                RANDOM.nextBytes(randomBytes);
+                headerContext = "pme-" + new Base32().encodeAsString(randomBytes);
+            }
+
+            return headerContext;
         }
     }
 }

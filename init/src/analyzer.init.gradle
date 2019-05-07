@@ -7,27 +7,23 @@ initscript {
     }
     dependencies {
         classpath 'org.jboss.gm.analyzer:analyzer:0.1-SNAPSHOT'
-        }
+    }
 }
 
-allprojects {
 
+allprojects {
     // Quieten down logging from other parts of Gradle/Tasks.
     gradle.taskGraph.beforeTask { Task task ->
         if ( "generateAlignmentMetadata" == task.name ) {
-            logger.context.level = LogLevel.INFO
+            logger.context.level = gradle.startParameter.logLevel
         }
     }
     gradle.taskGraph.afterTask { Task task ->
         logger.context.level = LogLevel.QUIET
     }
-    gradle.startParameter.logLevel = LogLevel.QUIET
     logger.context.level = LogLevel.QUIET
     
-    
-    
     ext.gmeAnalyse = true
-
-    apply plugin: org.jboss.gm.analyzer.alignment.AlignmentPlugin
     
+    apply plugin: org.jboss.gm.analyzer.alignment.AlignmentPlugin
 }

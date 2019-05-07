@@ -21,7 +21,7 @@ allprojects {
 subprojects {
 
     extra["bytemanVersion"] = "4.0.6"
-    extra["pmeVersion"] = "3.6"
+    extra["pmeVersion"] = "3.7-SNAPSHOT"
 
     apply(plugin = "com.diffplug.gradle.spotless")
     apply(plugin = "net.nemerosa.versioning")
@@ -64,7 +64,6 @@ subprojects {
         val shadowJar = tasks["shadowJar"] as ShadowJar
         build.dependsOn(shadowJar)
 
-
         tasks.withType<ShadowJar>() {
             // ensure that a single jar is built which is the shadowed one
             classifier = ""
@@ -94,6 +93,17 @@ subprojects {
             }
         }
     }
+
+    // Exclude logback from dependency tree/
+    configurations {
+        "compile" {
+            exclude(group="ch.qos.logback", module="logback-classic")
+        }
+        "compile" {
+            exclude(group="ch.qos.logback", module="logback-core")
+        }
+    }
+
     tasks {
         "jar"(Jar::class) {
             this.manifest {

@@ -1,0 +1,28 @@
+plugins {
+    // including this plugin directly instead of by an init script, which allows to use the freshly build version
+    id 'org.jboss.gm.analyzer'
+    id 'java'
+    id "nebula.dependency-recommender" version "5.1.0"
+}
+
+
+apply plugin: "nebula.dependency-recommender"
+
+sourceCompatibility = 1.8
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencyRecommendations {
+    mavenBom module: "org.springframework.boot:spring-boot-dependencies:1.5.19.RELEASE"
+}
+
+dependencies {
+    // define dependencies without versions
+    implementation("org.springframework:spring-core")
+    
+    // define dependency not in BOM
+    implementation("io.smallrye:smallrye-fault-tolerance:2.0.4")
+}

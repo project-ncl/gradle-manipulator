@@ -1,0 +1,22 @@
+[
+  {
+    "bestMatchVersion": "4.3.22.RELEASE-redhat-1",
+    "availableVersions": [
+      "4.3.22.RELEASE-redhat-1"
+    ],
+    "blacklisted": false,
+    "whitelisted": [],
+    "version": "4.3.22.RELEASE",
+    "groupId": "org.springframework",
+    "artifactId": "spring-core"
+  },
+  {
+    "bestMatchVersion": null,
+    "availableVersions": [],
+    "blacklisted": false,
+    "whitelisted": [],
+    "version": "1.0.0",
+    "groupId": "org.acme",
+    "artifactId": "root"
+  }
+]

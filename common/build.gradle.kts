@@ -1,10 +1,6 @@
 
 group = "org.jboss.gm.common"
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     compile("org.aeonbits.owner:owner-java8:1.0.10")
     compile("org.apache.commons:commons-lang3:3.8.1")

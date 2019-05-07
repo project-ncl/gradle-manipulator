@@ -68,6 +68,9 @@ subprojects {
         tasks.withType<ShadowJar>() {
             // ensure that a single jar is built which is the shadowed one
             classifier = ""
+            dependencies {
+                exclude(dependency("org.slf4j:slf4j-api:1.7.25"))
+            }
         }
 
         val sourcesJar by tasks.registering(Jar::class) {

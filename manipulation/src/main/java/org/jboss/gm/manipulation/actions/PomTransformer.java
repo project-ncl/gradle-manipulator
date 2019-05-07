@@ -3,6 +3,7 @@ package org.jboss.gm.manipulation.actions;
 import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.gradle.api.Action;
 import org.gradle.api.XmlProvider;
 import org.jboss.gm.common.alignment.ManipulationModel;
@@ -22,9 +23,12 @@ public class PomTransformer implements Action<XmlProvider> {
     private static final String ARTIFACTID = "artifactId";
 
     private final ManipulationModel alignmentConfiguration;
+    private final ResolvedDependenciesRepository resolvedDependenciesRepository;
 
-    public PomTransformer(ManipulationModel alignmentConfiguration) {
+    public PomTransformer(ManipulationModel alignmentConfiguration,
+            ResolvedDependenciesRepository resolvedDependenciesRepository) {
         this.alignmentConfiguration = alignmentConfiguration;
+        this.resolvedDependenciesRepository = resolvedDependenciesRepository;
     }
 
     @Override
@@ -76,14 +80,24 @@ public class PomTransformer implements Action<XmlProvider> {
                     }
                 }
             }
-            if (group == null || name == null || version == null) {
+            if (group == null || name == null) {
                 continue;
+            }
+            if (version == null) {
+                version = resolvedDependenciesRepository.get(new SimpleProjectRef(group, name));
+                if (version == null) {
+                    continue;
+                }
             }
 
             // modify version
             final ProjectVersionRef initial = withGAV(group, name, version);
             final ProjectVersionRef aligned = alignmentConfiguration.getAlignedDependencies().get(initial.toString());
             if (aligned != null) {
+                if (versionNode == null) {
+                    versionNode = dependencyNode.getOwnerDocument().createElement("version");
+                    dependencyNode.appendChild(versionNode);
+                }
                 versionNode.setTextContent(aligned.getVersionString());
             }
         }

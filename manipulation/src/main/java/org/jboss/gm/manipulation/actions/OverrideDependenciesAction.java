@@ -10,8 +10,9 @@ import org.jboss.gm.common.alignment.ManipulationModel;
 public class OverrideDependenciesAction implements Action<Project> {
     private final AlignedDependencyResolver resolver;
 
-    public OverrideDependenciesAction(ManipulationModel correspondingModule) {
-        this.resolver = new AlignedDependencyResolver(correspondingModule);
+    public OverrideDependenciesAction(ManipulationModel correspondingModule,
+            ResolvedDependenciesRepository resolvedDependenciesRepository) {
+        this.resolver = new AlignedDependencyResolver(correspondingModule, resolvedDependenciesRepository);
     }
 
     @Override

@@ -15,10 +15,13 @@ import org.jboss.gm.common.alignment.ManipulationModel;
  */
 public class PublishingPomTransformerAction implements Action<Project> {
 
-    private ManipulationModel alignmentConfiguration;
+    private final ManipulationModel alignmentConfiguration;
+    private final ResolvedDependenciesRepository resolvedDependenciesRepository;
 
-    public PublishingPomTransformerAction(ManipulationModel alignmentConfiguration) {
+    public PublishingPomTransformerAction(ManipulationModel alignmentConfiguration,
+            ResolvedDependenciesRepository resolvedDependenciesRepository) {
         this.alignmentConfiguration = alignmentConfiguration;
+        this.resolvedDependenciesRepository = resolvedDependenciesRepository;
     }
 
     @Override
@@ -31,7 +34,7 @@ public class PublishingPomTransformerAction implements Action<Project> {
                 plugin -> project.getExtensions().configure(PublishingExtension.class, extension -> {
                     extension.getPublications().withType(MavenPublication.class).all(maven -> {
                         if (maven.getPom() != null) {
-                            maven.getPom().withXml(new PomTransformer(alignmentConfiguration));
+                            maven.getPom().withXml(new PomTransformer(alignmentConfiguration, resolvedDependenciesRepository));
                         }
                     });
                 }));

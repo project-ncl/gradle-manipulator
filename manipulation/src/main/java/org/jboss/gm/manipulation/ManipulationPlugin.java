@@ -3,7 +3,10 @@ package org.jboss.gm.manipulation;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.jboss.gm.common.alignment.ManipulationUtils.getCurrentManipulationModel;
 
+import java.lang.reflect.Method;
+
 import org.aeonbits.owner.ConfigCache;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -19,6 +22,7 @@ import org.jboss.gm.manipulation.actions.ProjectChangeVersionAction;
 import org.jboss.gm.manipulation.actions.PublishingArtifactsAction;
 import org.jboss.gm.manipulation.actions.PublishingPomTransformerAction;
 import org.jboss.gm.manipulation.actions.PublishingRepositoryAction;
+import org.jboss.gm.manipulation.actions.ResolvedDependenciesRepository;
 import org.jboss.gm.manipulation.actions.UploadTaskTransformerAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,18 +44,51 @@ public class ManipulationPlugin implements Plugin<Project> {
         final ManipulationModel alignmentModel = getCurrentManipulationModel(project.getRootDir());
         final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getName());
 
+        final ResolvedDependenciesRepository resolvedDependenciesRepository = new ResolvedDependenciesRepository();
+
+        project.afterEvaluate(p -> {
+            // dependencyManagement is the extension that the Spring Dependency Management Plugin registers
+            final Object obj = p.getExtensions().findByName("dependencyManagement");
+            if (obj != null) {
+                if (isDependencyManagementPluginPomCustomizationEnabled(obj)) {
+                    throw new InvalidUserDataException(
+                            "The ManipulationPlugin cannot be used together with the Spring Dependency Management unless the latter has disabled generatedPomCustomization");
+                }
+            }
+        });
+
         // add actions to manipulate project
         project.afterEvaluate(new ProjectChangeVersionAction(correspondingModule));
-        project.afterEvaluate(new OverrideDependenciesAction(correspondingModule));
+        project.afterEvaluate(new OverrideDependenciesAction(correspondingModule, resolvedDependenciesRepository));
         project.afterEvaluate(new ManifestUpdateAction(correspondingModule));
 
-        configurePublishingTask(project, correspondingModule);
+        configurePublishingTask(project, correspondingModule, resolvedDependenciesRepository);
+    }
+
+    // Ensure that if the Spring Dependency Management plugin is applied,
+    // that it's configured to not generate a "dependencyManagement" section in the generated bom
+    // This is needed because if we don't do it, the "dependencyManagement" section (which is a bom inclusion) will override our dependencies
+    // On the implementation side of things, we need to use reflection because we can get a nasty classloader errors
+    // when trying to cast the object to the known type
+    private boolean isDependencyManagementPluginPomCustomizationEnabled(Object obj) {
+        try {
+            final Method getPomCustomizationSettingsMethod = obj.getClass().getMethod("getPomCustomizationSettings");
+            final Object getPomCustomizationSettingsObj = getPomCustomizationSettingsMethod.invoke(obj);
+            final Method isEnabledMethod = getPomCustomizationSettingsObj.getClass().getMethod("isEnabled");
+            return (boolean) isEnabledMethod.invoke(getPomCustomizationSettingsObj);
+        } catch (Exception e) {
+            logger.error(
+                    "ManipulationPlugin is being used with an unsupported version of the Spring Dependency Management Plugin",
+                    e);
+            throw new ManipulationUncheckedException(e);
+        }
     }
 
     /**
      * TODO: add functional tests for publishing
      */
-    private void configurePublishingTask(Project project, ManipulationModel correspondingModule) {
+    private void configurePublishingTask(Project project, ManipulationModel correspondingModule,
+            ResolvedDependenciesRepository resolvedDependenciesRepository) {
         project.afterEvaluate(evaluatedProject -> {
             // we need to determine which plugin to configure for publication
 
@@ -85,12 +122,14 @@ public class ManipulationPlugin implements Plugin<Project> {
 
             if (LEGACY_MAVEN_PLUGIN.equals(deployPlugin)) {
                 logger.info("Configuring `maven` plugin");
-                evaluatedProject.afterEvaluate(new UploadTaskTransformerAction(correspondingModule));
+                evaluatedProject
+                        .afterEvaluate(new UploadTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
                 evaluatedProject.afterEvaluate(new MavenPublicationRepositoryAction());
             } else if (MAVEN_PUBLISH_PLUGIN.equals(deployPlugin)) {
                 logger.info("Configuring `maven-publish` plugin");
                 evaluatedProject.afterEvaluate(new PublishingRepositoryAction());
-                evaluatedProject.afterEvaluate(new PublishingPomTransformerAction(correspondingModule));
+                evaluatedProject
+                        .afterEvaluate(new PublishingPomTransformerAction(correspondingModule, resolvedDependenciesRepository));
             } else {
                 logger.warn("No publishing plugin was configured!");
             }

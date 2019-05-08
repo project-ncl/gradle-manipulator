@@ -31,7 +31,11 @@ import org.junit.runner.RunWith;
 
 @RunWith(BMUnitRunner.class)
 @BMUnitConfig(verbose = false, bmunitVerbose = true)
-@BMRule(name = "handle-injectIntoNewInstance", targetClass = "org.gradle.api.internal.AbstractTask", targetMethod = "injectIntoNewInstance(ProjectInternal, TaskIdentity, Callable)", targetLocation = "AFTER INVOKE set", action = "RETURN null")
+@BMRule(name = "handle-injectIntoNewInstance",
+        targetClass = "org.gradle.api.internal.AbstractTask",
+        targetMethod = "injectIntoNewInstance(ProjectInternal, TaskIdentity, Callable)",
+        targetLocation = "AFTER INVOKE set",
+        action = "RETURN null")
 public class AlignmentTaskEmptyVersionTest {
 
     @Rule

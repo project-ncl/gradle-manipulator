@@ -5,6 +5,8 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.jar.Manifest;
 
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+
 public class ManifestUtils {
     /**
      * Retrieves the Version and SHA this was built with.
@@ -31,7 +33,7 @@ public class ManifestUtils {
                 }
             }
         } catch (final IOException e) {
-            throw new RuntimeException("Error retrieving information from manifest", e);
+            throw new ManipulationUncheckedException("Error retrieving information from manifest", e);
         }
 
         return result;

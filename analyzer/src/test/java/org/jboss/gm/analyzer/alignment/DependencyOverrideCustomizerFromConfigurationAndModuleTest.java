@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.gradle.api.InvalidUserDataException;
 import org.jboss.gm.common.Configuration;
 import org.junit.Test;
 
@@ -27,15 +28,12 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
         assertThat(sut).isSameAs(AlignmentService.ResponseCustomizer.NOOP);
     }
 
-    @Test
-    public void erroneousPropertiesDontCauseFailure() {
+    @Test(expected = InvalidUserDataException.class)
+    public void erroneousPropertiesCauseFailure() {
         System.setProperty("dependencyOverride.org.acme", "");
         final Configuration configuration = ConfigFactory.create(Configuration.class);
 
-        final AlignmentService.ResponseCustomizer sut = DependencyOverrideCustomizer.fromConfigurationForModule(configuration,
-                PROJECT);
-
-        assertThat(sut).isSameAs(AlignmentService.ResponseCustomizer.NOOP);
+        DependencyOverrideCustomizer.fromConfigurationForModule(configuration, PROJECT);
     }
 
     @Test

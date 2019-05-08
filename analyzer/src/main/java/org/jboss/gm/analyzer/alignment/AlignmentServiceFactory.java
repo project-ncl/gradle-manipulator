@@ -8,6 +8,7 @@ import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.lang3.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.api.Project;
 import org.jboss.gm.common.Configuration;
 
@@ -20,9 +21,9 @@ public final class AlignmentServiceFactory {
     private AlignmentServiceFactory() {
     }
 
-    public static AlignmentService getAlignmentService(Project project) {
+    public static AlignmentService getAlignmentService(Project project) throws ManipulationException {
         if (StringUtils.isEmpty(project.getVersion().toString())) {
-            throw new RuntimeException("Project version is empty. Unable to continue.");
+            throw new ManipulationException("Project version is empty. Unable to continue.");
         }
 
         Configuration configuration = ConfigCache.getOrCreate(Configuration.class);

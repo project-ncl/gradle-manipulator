@@ -51,16 +51,12 @@ public class DependencyOverrideCustomizer implements AlignmentService.ResponseCu
         while (keys.hasNext()) {
             final String key = keys.next();
 
-            try {
-                final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
-                if (keyParseResult.matchesModule(projectRef)) {
-                    final String overrideVersion = prefixed.get(key);
-                    log.debug("Overriding dependency {} from in module {} with version {}",
-                            keyParseResult.getDependency(), projectRef, overrideVersion);
-                    overrideMap.put(keyParseResult.getDependency(), overrideVersion);
-                }
-            } catch (RuntimeException e) {
-                log.debug("Unable to parse key {}", key, e);
+            final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
+            if (keyParseResult.matchesModule(projectRef)) {
+                final String overrideVersion = prefixed.get(key);
+                log.debug("Overriding dependency {} from in module {} with version {}",
+                        keyParseResult.getDependency(), projectRef, overrideVersion);
+                overrideMap.put(keyParseResult.getDependency(), overrideVersion);
             }
         }
 

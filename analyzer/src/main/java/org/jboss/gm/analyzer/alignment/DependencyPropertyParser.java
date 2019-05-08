@@ -4,6 +4,7 @@ import java.util.function.Predicate;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
+import org.gradle.api.InvalidUserDataException;
 
 /**
  * Utility class that is meant to parse properties like dependencyOverride and dependencyExclusion
@@ -18,13 +19,13 @@ final class DependencyPropertyParser {
 
     public static Result parse(String key) {
         if (!key.contains("@")) {
-            throw new IllegalArgumentException(
+            throw new InvalidUserDataException(
                     "Property '" + key + "' is not a properly formatted key since it does not contain '@'");
         }
 
         final String[] artifactAndModule = key.split("@");
         if (artifactAndModule.length != 2) {
-            throw new IllegalArgumentException(
+            throw new InvalidUserDataException(
                     "Property '" + key + "' is not a properly formatted key since it is not properly split by '@'");
         }
 

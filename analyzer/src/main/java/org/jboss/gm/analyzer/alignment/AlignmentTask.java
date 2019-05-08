@@ -16,6 +16,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.internal.artifacts.dependencies.DefaultSelfResolvingDependency;
@@ -44,31 +46,32 @@ public class AlignmentTask extends DefaultTask {
         final String projectName = project.getName();
         logger.info("Starting alignment task for project {}", projectName);
 
-        final Collection<ProjectVersionRef> deps = getAllProjectDependencies(project);
-        final AlignmentService alignmentService = AlignmentServiceFactory.getAlignmentService(project);
-        final String currentProjectVersion = project.getVersion().toString();
-        final AlignmentService.Response alignmentResponse = alignmentService.align(
-                new AlignmentService.Request(
-                        ProjectVersionFactory.withGAV(project.getGroup().toString(), projectName,
-                                currentProjectVersion),
-                        deps));
+        try {
+            final Collection<ProjectVersionRef> deps = getAllProjectDependencies(project);
+            final AlignmentService alignmentService = AlignmentServiceFactory.getAlignmentService(project);
+            final String currentProjectVersion = project.getVersion().toString();
+            final AlignmentService.Response alignmentResponse = alignmentService.align(
+                    new AlignmentService.Request(
+                            ProjectVersionFactory.withGAV(project.getGroup().toString(), projectName,
+                                    currentProjectVersion),
+                            deps));
 
-        final ManipulationModel alignmentModel = getCurrentManipulationModel(project.getRootDir());
-        final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getPath());
+            final ManipulationModel alignmentModel = getCurrentManipulationModel(project.getRootDir());
+            final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getPath());
 
-        correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
-        updateModuleDependencies(correspondingModule, deps, alignmentResponse);
+            correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
+            updateModuleDependencies(correspondingModule, deps, alignmentResponse);
 
-        projectsToAlign.remove(projectName);
-        if (projectsToAlign.isEmpty()) {
+            projectsToAlign.remove(projectName);
+            if (projectsToAlign.isEmpty()) {
 
-            writeUpdatedManipulationModel(project.getRootDir(), alignmentModel);
-
-            try {
+                writeUpdatedManipulationModel(project.getRootDir(), alignmentModel);
                 writeMarkerFile(project.getRootDir());
-            } catch (IOException e) {
-                throw new RuntimeException("Exception writing marker file");
             }
+        } catch (ManipulationException e) {
+            throw new ManipulationUncheckedException(e);
+        } catch (IOException e) {
+            throw new ManipulationUncheckedException("Failed to write marker file", e);
         }
     }
 

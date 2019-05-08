@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 
 public final class ManipulationUtils {
     private static final String MANIPULATION_FILE_NAME = "manipulation.json";
@@ -17,9 +19,9 @@ public final class ManipulationUtils {
     private ManipulationUtils() {
     }
 
-    public static ManipulationModel getManipulationModelAt(File path) {
+    public static ManipulationModel getManipulationModelAt(File path) throws IOException {
         if (!path.isDirectory()) {
-            throw new IllegalArgumentException("Path must be a directory. Was: " + path);
+            throw new IOException("Path must be a directory. Was: " + path);
         }
         File alignment = new File(path, MANIPULATION_FILE_NAME);
         return getManipulationModel(alignment);
@@ -33,7 +35,7 @@ public final class ManipulationUtils {
                 model = SerializationUtils.getObjectMapper().readValue(alignment, ManipulationModel.class);
                 cachedModels.put(absolutePath, model);
             } catch (IOException e) {
-                throw new RuntimeException("Unable to deserialize " + MANIPULATION_FILE_NAME, e);
+                throw new ManipulationUncheckedException("Unable to deserialize " + MANIPULATION_FILE_NAME, e);
             }
         }
         return model;
@@ -66,7 +68,8 @@ public final class ManipulationUtils {
      * Write the model to disk - override any existing file that might exist
      * TODO verify comment of getCurrentManipulationModel since this method relies on the same assumption
      */
-    public static void writeUpdatedManipulationModel(File rootDir, ManipulationModel updatedManipulationModel) {
+    public static void writeUpdatedManipulationModel(File rootDir, ManipulationModel updatedManipulationModel)
+            throws ManipulationException {
         final Path manipulationFilePath = ManipulationUtils.getManipulationFilePath(rootDir);
         try {
             // first delete any existing file
@@ -81,7 +84,7 @@ public final class ManipulationUtils {
                             updatedManipulationModel),
                     StandardCharsets.UTF_8.name());
         } catch (IOException e) {
-            throw new RuntimeException("Unable to write manipulation.json in project root", e);
+            throw new ManipulationException("Unable to write manipulation.json in project root", e);
         }
     }
 

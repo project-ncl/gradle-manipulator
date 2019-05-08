@@ -12,8 +12,6 @@ import static org.assertj.core.api.Assertions.tuple;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collection;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -37,7 +35,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Before
-    public void setup() {
+    public void setup() throws IOException, URISyntaxException {
         stubFor(post(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
                 .willReturn(aResponse()
                         .withStatus(200)

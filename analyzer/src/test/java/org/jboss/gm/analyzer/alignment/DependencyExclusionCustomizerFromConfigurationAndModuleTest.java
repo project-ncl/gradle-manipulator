@@ -9,6 +9,7 @@ import org.aeonbits.owner.ConfigFactory;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
+import org.gradle.api.InvalidUserDataException;
 import org.jboss.gm.common.Configuration;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,15 +33,12 @@ public class DependencyExclusionCustomizerFromConfigurationAndModuleTest {
         assertThat(sut).isSameAs(AlignmentService.RequestCustomizer.NOOP);
     }
 
-    @Test
-    public void erroneousPropertiesDontCauseFailure() {
+    @Test(expected = InvalidUserDataException.class)
+    public void erroneousPropertiesCauseFailure() {
         System.setProperty("dependencyExclusion.org.acme", "");
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
-        final AlignmentService.RequestCustomizer sut = DependencyExclusionCustomizer.fromConfigurationForModule(configuration,
-                PROJECT);
-
-        assertThat(sut).isSameAs(AlignmentService.RequestCustomizer.NOOP);
+        DependencyExclusionCustomizer.fromConfigurationForModule(configuration, PROJECT);
     }
 
     @Test

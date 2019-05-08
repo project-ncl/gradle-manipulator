@@ -19,3 +19,12 @@ Restart you IDE, open the *Preferences* window again and navigate to _Other Sett
 Select _Use the Eclipse Code Formatter_, then change the _Eclipse Java Formatter Config File_ to point to the
 `eclipse-format.xml` file in the `ide-config` directory. Make sure the _Optimize Imports_ box is ticked, and
 select the `eclipse.importorder` file as the import order config file.
+
+### Recommendations
+
+#### Exceptions
+
+* Internal code may use checked exceptions such as `ManipulationException`.
+* All external invocation points cannot throw a checked exception so must use an unchecked exception (e.g. `ManipulationUncheckedException`.
+* The `org.gradle.api.InvalidUserDataException` can be used for configuration errors.
+* Avoid throwing `RuntimeException` ; rather, use a more explicit exception.

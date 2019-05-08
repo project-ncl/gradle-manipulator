@@ -56,16 +56,12 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
         while (keys.hasNext()) {
             final String key = keys.next();
 
-            try {
-                final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
-                if (keyParseResult.matchesModule(projectRef)) {
-                    log.debug("Excluding dependency {} from alignment of module {}", keyParseResult.getDependency(),
-                            projectRef);
-                    // if the key matches this module, add a predicate that rejects the artifact that was configured in the property
-                    predicates.add(new DependencyExclusionPredicate(keyParseResult.getDependency()));
-                }
-            } catch (RuntimeException e) {
-                log.debug("Unable to parse key {}", key, e);
+            final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
+            if (keyParseResult.matchesModule(projectRef)) {
+                log.debug("Excluding dependency {} from alignment of module {}", keyParseResult.getDependency(),
+                        projectRef);
+                // if the key matches this module, add a predicate that rejects the artifact that was configured in the property
+                predicates.add(new DependencyExclusionPredicate(keyParseResult.getDependency()));
             }
         }
 

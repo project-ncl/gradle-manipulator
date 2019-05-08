@@ -7,6 +7,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -34,7 +36,7 @@ public class DAAlignmentServiceWiremockTest {
     public WireMockRule wireMockRule = new WireMockRule(PORT);
 
     @Before
-    public void setup() {
+    public void setup() throws IOException, URISyntaxException {
         stubFor(post(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
                 .willReturn(aResponse()
                         .withStatus(200)
@@ -69,14 +71,10 @@ public class DAAlignmentServiceWiremockTest {
         });
     }
 
-    private String readSampleDAResponse() {
-        try {
-            return FileUtils.readFileToString(
-                    Paths.get(DAAlignmentServiceWiremockTest.class.getClassLoader().getResource("sample-da-response.json")
-                            .toURI()).toFile(),
-                    StandardCharsets.UTF_8.name());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    private String readSampleDAResponse() throws URISyntaxException, IOException {
+        return FileUtils.readFileToString(
+                Paths.get(DAAlignmentServiceWiremockTest.class.getClassLoader().getResource("sample-da-response.json")
+                        .toURI()).toFile(),
+                StandardCharsets.UTF_8.name());
     }
 }

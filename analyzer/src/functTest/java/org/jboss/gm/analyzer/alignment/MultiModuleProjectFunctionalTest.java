@@ -36,7 +36,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Before
-    public void setup() {
+    public void setup() throws IOException, URISyntaxException {
         final String project_root_called = "project root called";
         final String first_dependency_called = "first module called";
         final String second_dependency_called = "second module called";
@@ -49,7 +49,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         System.setProperty(Configuration.DA, "http://127.0.0.1:" + AbstractWiremockTest.PORT + "/da/rest/v-1");
     }
 
-    private void stubDACall(String initialState, String projectName, String nextState) {
+    private void stubDACall(String initialState, String projectName, String nextState) throws IOException, URISyntaxException {
         stubFor(post(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
                 .inScenario("multi-module")
                 .whenScenarioStateIs(initialState)

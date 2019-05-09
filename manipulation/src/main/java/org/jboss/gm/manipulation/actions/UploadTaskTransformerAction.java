@@ -13,10 +13,13 @@ import org.jboss.gm.common.alignment.ManipulationModel;
  */
 public class UploadTaskTransformerAction implements Action<Project> {
 
-    private ManipulationModel alignmentConfiguration;
+    private final ManipulationModel alignmentConfiguration;
+    private final ResolvedDependenciesRepository resolvedDependenciesRepository;
 
-    public UploadTaskTransformerAction(ManipulationModel alignmentConfiguration) {
+    public UploadTaskTransformerAction(ManipulationModel alignmentConfiguration,
+            ResolvedDependenciesRepository resolvedDependenciesRepository) {
         this.alignmentConfiguration = alignmentConfiguration;
+        this.resolvedDependenciesRepository = resolvedDependenciesRepository;
     }
 
     @Override
@@ -27,7 +30,7 @@ public class UploadTaskTransformerAction implements Action<Project> {
 
         project.getTasks().withType(Upload.class).all(upload -> upload.getRepositories()
                 .withType(MavenResolver.class).all(resolver -> {
-                    resolver.getPom().withXml(new PomTransformer(alignmentConfiguration));
+                    resolver.getPom().withXml(new PomTransformer(alignmentConfiguration, resolvedDependenciesRepository));
                 }));
     }
 }

@@ -64,7 +64,7 @@ public class DAAlignmentService implements AlignmentService {
         translateRequest.add(refOfProject);
         translateRequest.addAll(request.getDependencies());
 
-        logger.debug("Passing {} GAVs following into the REST client api {} ", translateRequest.size(), translateRequest);
+        logger.info("Passing {} GAVs following into the REST client api {} ", translateRequest.size(), translateRequest);
         logger.info("Calling REST client...");
         final Map<ProjectVersionRef, String> translationMap = restEndpoint.translateVersions(translateRequest);
         logger.info("REST Client returned {} ", translationMap);

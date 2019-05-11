@@ -64,10 +64,12 @@ public class AlignmentTaskEmptyVersionTest {
     public void testProject() throws Exception {
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
-        p.apply(configuration -> configuration.plugin("java"));
 
-        p.getDependencies().add("compile", "org.apache.commons:commons-configuration2:2.4");
-        p.getDependencies().add("compile", "org.apache.commons:dummy-artifact");
+        p.apply(configuration -> configuration.plugin("base"));
+
+        p.getRepositories().mavenCentral();
+        p.getDependencies().add("default", "org.apache.commons:commons-configuration2:2.4");
+        p.getDependencies().add("default", "org.apache.commons:dummy-artifact");
 
         AlignmentTask at = new AlignmentTask();
 

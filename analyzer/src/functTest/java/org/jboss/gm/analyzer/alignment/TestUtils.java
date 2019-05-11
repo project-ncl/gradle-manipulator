@@ -27,11 +27,13 @@ public final class TestUtils {
 
         final BuildResult buildResult = GradleRunner.create()
                 .withProjectDir(projectRoot)
-                .withArguments(AlignmentTask.NAME)
+                .withArguments("--info", AlignmentTask.NAME)
                 .withDebug(true)
+                .forwardOutput()
                 .withPluginClasspath()
                 .build();
 
+        System.err.println ("### Build result output " + buildResult.getOutput());
         assertThat(buildResult.task(":" + AlignmentTask.NAME).getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 
         return ManipulationUtils.getManipulationModelAt(projectRoot.toPath().toFile());

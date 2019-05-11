@@ -33,7 +33,6 @@ public final class TestUtils {
                 .withPluginClasspath()
                 .build();
 
-        System.err.println ("### Build result output " + buildResult.getOutput());
         assertThat(buildResult.task(":" + AlignmentTask.NAME).getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 
         return ManipulationUtils.getManipulationModelAt(projectRoot.toPath().toFile());

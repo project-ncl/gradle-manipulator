@@ -1,7 +1,16 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.jboss.gm.common.alignment.ManipulationUtils.getCurrentManipulationModel;
-import static org.jboss.gm.common.alignment.ManipulationUtils.writeUpdatedManipulationModel;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.gradle.api.DefaultTask;
+import org.gradle.api.Project;
+import org.gradle.api.artifacts.LenientConfiguration;
+import org.gradle.api.tasks.TaskAction;
+import org.jboss.gm.common.ProjectVersionFactory;
+import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.alignment.Utils;
+import org.slf4j.Logger;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -14,18 +23,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
-import org.gradle.api.DefaultTask;
-import org.gradle.api.Project;
-import org.gradle.api.artifacts.LenientConfiguration;
-import org.gradle.api.tasks.TaskAction;
-import org.jboss.gm.common.ProjectVersionFactory;
-import org.jboss.gm.common.alignment.ManipulationModel;
-import org.jboss.gm.common.alignment.Utils;
-import org.slf4j.Logger;
+import static org.jboss.gm.common.alignment.ManipulationUtils.getCurrentManipulationModel;
+import static org.jboss.gm.common.alignment.ManipulationUtils.writeUpdatedManipulationModel;
 
 /**
  * The actual Gradle task that creates the {@code manipulation.json} file for the whole project
@@ -113,26 +112,22 @@ public class AlignmentTask extends DefaultTask {
                 LenientConfiguration lenient = configuration.getResolvedConfiguration().getLenientConfiguration();
 
                 if (lenient.getUnresolvedModuleDependencies().size() > 0) {
+                    // TODO: Should this be an error?
                     logger.warn("For configuration {}; unable to resolve all dependencies: {}", configuration,
                             lenient.getUnresolvedModuleDependencies());
                 }
 
                 lenient.getFirstLevelModuleDependencies().forEach(dep -> {
-                    // TODO: I don't think this is ever possible? If it is then the resolving doesn't work?
-                    if (StringUtils.isEmpty(dep.getModuleVersion())) {
-                        logger.error("Empty version on dependency {} on project {}", dep.toString(), project.getName());
-                        throw new ManipulationUncheckedException("Empty version on dependency " + dep);
-                    } else {
-                        ProjectVersionRef pvr = ProjectVersionFactory.withGAVAndConfiguration(dep.getModuleGroup(),
-                                dep.getModuleName(),
-                                dep.getModuleVersion(), configuration.getName());
+                    ProjectVersionRef pvr = ProjectVersionFactory.withGAVAndConfiguration(dep.getModuleGroup(),
+                            dep.getModuleName(),
+                            dep.getModuleVersion(), configuration.getName());
 
-                        if (result.add(pvr)) {
-                            logger.info("Adding dependency to scan {} ", pvr);
-                        }
+                    if (result.add(pvr)) {
+                        logger.info("Adding dependency to scan {} ", pvr);
                     }
                 });
             } else {
+                // TODO: Why are certain configurations not resolvable?
                 logger.warn("Unable to resolve configuration {} for project {}", configuration, project);
             }
         });

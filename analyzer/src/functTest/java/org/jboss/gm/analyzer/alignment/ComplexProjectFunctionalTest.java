@@ -1,22 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.gradle.api.Project;
-import org.jboss.gm.common.Configuration;
-import org.jboss.gm.common.alignment.ManipulationModel;
-import org.jboss.gm.common.alignment.Utils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.rules.TemporaryFolder;
-import org.junit.rules.TestRule;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collection;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
@@ -26,7 +9,28 @@ import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collection;
+
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.gradle.api.Project;
+import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.alignment.Utils;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.contrib.java.lang.system.SystemOutRule;
+import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
+
 public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().muteForSuccessfulTests();
 
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();

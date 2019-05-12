@@ -16,6 +16,8 @@ public class AlignmentPlugin implements Plugin<Project> {
         System.out.println("Injecting AlignmentPlugin ; version " + ManifestUtils.getManifestInformation());
     }
 
+    private AlignmentTask task;
+
     @Override
     public void apply(Project project) {
 
@@ -24,7 +26,7 @@ public class AlignmentPlugin implements Plugin<Project> {
         if (project.getRootProject() == project) {
             createInitialManipulationModel(project);
         }
-        project.getTasks().create(AlignmentTask.NAME, AlignmentTask.class);
+        task = project.getTasks().create(AlignmentTask.NAME, AlignmentTask.class);
     }
 
     private void createInitialManipulationModel(Project project) {
@@ -39,7 +41,7 @@ public class AlignmentPlugin implements Plugin<Project> {
     private ManipulationModel getManipulationModel(Project project) {
         final String name = project.getName();
         final ManipulationModel alignmentModel = new ManipulationModel(name, project.getGroup().toString());
-        AlignmentTask.projectsToAlign.add(name);
+        task.addProject(name);
         project.getChildProjects().forEach((n, p) -> alignmentModel.addChild(getManipulationModel(p)));
         return alignmentModel;
     }

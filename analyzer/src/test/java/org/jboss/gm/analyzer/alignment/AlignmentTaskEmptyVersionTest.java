@@ -26,11 +26,13 @@ import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
 @RunWith(BMUnitRunner.class)
-@BMUnitConfig(verbose = false, bmunitVerbose = true)
+@BMUnitConfig(bmunitVerbose = true)
 @BMRule(name = "handle-injectIntoNewInstance",
         targetClass = "org.gradle.api.internal.AbstractTask",
         targetMethod = "injectIntoNewInstance(ProjectInternal, TaskIdentity, Callable)",
@@ -40,6 +42,9 @@ public class AlignmentTaskEmptyVersionTest {
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
 
     /**
      * We can't just create a new AlignmentTask as the base AbstractTask has checks to
@@ -63,6 +68,9 @@ public class AlignmentTaskEmptyVersionTest {
     @Test
     public void testProject() throws Exception {
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
+
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
 
         p.apply(configuration -> configuration.plugin("base"));

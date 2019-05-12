@@ -1,16 +1,7 @@
 package org.jboss.gm.analyzer.alignment;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
-import org.gradle.api.DefaultTask;
-import org.gradle.api.Project;
-import org.gradle.api.artifacts.LenientConfiguration;
-import org.gradle.api.tasks.TaskAction;
-import org.jboss.gm.common.ProjectVersionFactory;
-import org.jboss.gm.common.alignment.ManipulationModel;
-import org.jboss.gm.common.alignment.Utils;
-import org.slf4j.Logger;
+import static org.jboss.gm.common.alignment.ManipulationUtils.getCurrentManipulationModel;
+import static org.jboss.gm.common.alignment.ManipulationUtils.writeUpdatedManipulationModel;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,8 +14,19 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static org.jboss.gm.common.alignment.ManipulationUtils.getCurrentManipulationModel;
-import static org.jboss.gm.common.alignment.ManipulationUtils.writeUpdatedManipulationModel;
+import org.aeonbits.owner.ConfigCache;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.gradle.api.DefaultTask;
+import org.gradle.api.Project;
+import org.gradle.api.artifacts.LenientConfiguration;
+import org.gradle.api.tasks.TaskAction;
+import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.ProjectVersionFactory;
+import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.alignment.Utils;
+import org.slf4j.Logger;
 
 /**
  * The actual Gradle task that creates the {@code manipulation.json} file for the whole project
@@ -35,9 +37,14 @@ public class AlignmentTask extends DefaultTask {
     static final String LOAD_GME = "apply from: \"gme.gradle\"";
     static final String GME = "gme.gradle";
     static final String NAME = "generateAlignmentMetadata";
-    static final Set<String> projectsToAlign = new HashSet<>();
+
+    private final Set<String> projectsToAlign = new HashSet<>();
 
     private final Logger logger = getLogger();
+
+    void addProject(String project) {
+        projectsToAlign.add(project);
+    }
 
     @TaskAction
     public void perform() {
@@ -104,6 +111,8 @@ public class AlignmentTask extends DefaultTask {
     }
 
     private Collection<ProjectVersionRef> getAllProjectDependencies(Project project) {
+        Configuration internalConfig = ConfigCache.getOrCreate(Configuration.class);
+
         final Set<ProjectVersionRef> result = new LinkedHashSet<>();
         project.getConfigurations().all(configuration -> {
 
@@ -112,9 +121,15 @@ public class AlignmentTask extends DefaultTask {
                 LenientConfiguration lenient = configuration.getResolvedConfiguration().getLenientConfiguration();
 
                 if (lenient.getUnresolvedModuleDependencies().size() > 0) {
-                    // TODO: Should this be an error?
-                    logger.warn("For configuration {}; unable to resolve all dependencies: {}", configuration,
-                            lenient.getUnresolvedModuleDependencies());
+                    if (internalConfig.ignoreUnresolvableDependencies()) {
+                        logger.warn("For configuration {}; ignoring all unresolvable dependencies: {}", configuration.getName(),
+                                lenient.getUnresolvedModuleDependencies());
+                    } else {
+                        logger.error("For configuration {}; unable to resolve all dependencies: {}", configuration.getName(),
+                                lenient.getUnresolvedModuleDependencies());
+                        throw new ManipulationUncheckedException("For configuration " + configuration.getName()
+                                + ", unable to resolve all project dependencies: " + lenient.getUnresolvedModuleDependencies());
+                    }
                 }
 
                 lenient.getFirstLevelModuleDependencies().forEach(dep -> {
@@ -128,7 +143,7 @@ public class AlignmentTask extends DefaultTask {
                 });
             } else {
                 // TODO: Why are certain configurations not resolvable?
-                logger.warn("Unable to resolve configuration {} for project {}", configuration, project);
+                logger.warn("Unable to resolve configuration {} for project {}", configuration.getName(), project);
             }
         });
 

@@ -59,10 +59,10 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.jboss.gm.analyzer.functest");
-            assertThat(am.getName()).isEqualTo("root");
-            assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
+            assertThat(am.getName()).isEqualTo("complex");
+            assertThat(am.findCorrespondingChild("complex")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("1.0.0.redhat-00004");
-                assertThat(root.getName()).isEqualTo("root");
+                assertThat(root.getName()).isEqualTo("complex");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")

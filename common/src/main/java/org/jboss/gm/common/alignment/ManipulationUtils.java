@@ -14,6 +14,7 @@ import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 
 public final class ManipulationUtils {
     private static final String MANIPULATION_FILE_NAME = "manipulation.json";
+
     private static final Map<String, ManipulationModel> cachedModels = new HashMap<>(7);
 
     private ManipulationUtils() {

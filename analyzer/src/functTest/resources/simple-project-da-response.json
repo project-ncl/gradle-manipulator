@@ -54,12 +54,12 @@
     "artifactId": "undertow-core"
   },
   {
-    "bestMatchVersion": null,
+    "bestMatchVersion": "1.0.1.redhat.00001",
     "availableVersions": [],
     "blacklisted": false,
     "whitelisted": [],
     "version": "1.0.0",
-    "groupId": "org.acme",
-    "artifactId": "root"
+    "groupId": "org.jboss.gm.analyzer.functest",
+    "artifactId": "invalid"
   }
 ]

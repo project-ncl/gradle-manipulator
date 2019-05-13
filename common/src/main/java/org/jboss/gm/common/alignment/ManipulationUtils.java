@@ -52,8 +52,7 @@ public final class ManipulationUtils {
     /**
      * This is meant to be called from as part of a Gradle task that is executed for each project/subproject of the build
      * Is assumes that a task for various projects is never called in parallel
-     * TODO verify that the non-parallel run assumption holds
-     * 
+     *
      * @return a valid ManipulationModel.
      */
     public static ManipulationModel getCurrentManipulationModel(File rootDir) {
@@ -66,7 +65,6 @@ public final class ManipulationUtils {
 
     /**
      * Write the model to disk - override any existing file that might exist
-     * TODO verify comment of getCurrentManipulationModel since this method relies on the same assumption
      */
     public static void writeUpdatedManipulationModel(File rootDir, ManipulationModel updatedManipulationModel)
             throws ManipulationException {

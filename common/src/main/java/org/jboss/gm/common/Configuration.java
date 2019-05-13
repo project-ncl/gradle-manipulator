@@ -6,13 +6,12 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 
 import org.aeonbits.owner.Accessible;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.Converter;
-import org.apache.commons.codec.binary.Base32;
+import org.aeonbits.owner.Reloadable;
 import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
 
 /**
@@ -75,12 +74,14 @@ public interface Configuration extends Accessible {
     @Key("log-context")
     String logContext();
 
+    @Key("ignoreUnresolvableDependencies")
+    @DefaultValue("false")
+    boolean ignoreUnresolvableDependencies();
+
     /**
      * This value is used to represent the dependency configuration. While PME supports
      * BOM and REST configs ; currently within Gradle only REST is supported. If this
      * value is set to "" (or "NONE")
-     * 
-     * @return
      */
     @Key("dependencySource")
     @ConverterClass(DependencyConverter.class)

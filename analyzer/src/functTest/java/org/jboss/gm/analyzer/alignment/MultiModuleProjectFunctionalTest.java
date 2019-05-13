@@ -24,10 +24,14 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
 public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().muteForSuccessfulTests();
 
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
@@ -62,6 +66,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException {
+
         final File projectRoot = tempDir.newFolder("multi-module");
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 

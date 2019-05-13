@@ -1,18 +1,19 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.commons.io.FileUtils;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.gradle.testkit.runner.BuildResult;
+import org.gradle.testkit.runner.GradleRunner;
+import org.gradle.testkit.runner.TaskOutcome;
+import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.alignment.ManipulationUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
-import org.apache.commons.io.FileUtils;
-import org.gradle.testkit.runner.BuildResult;
-import org.gradle.testkit.runner.GradleRunner;
-import org.gradle.testkit.runner.TaskOutcome;
-import org.jboss.gm.common.alignment.ManipulationModel;
-import org.jboss.gm.common.alignment.ManipulationUtils;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public final class TestUtils {
 
@@ -20,20 +21,40 @@ public final class TestUtils {
     }
 
     static ManipulationModel align(File projectRoot, String projectDirName) throws IOException, URISyntaxException {
+        return align(projectRoot, projectDirName, false);
+    }
+
+    static ManipulationModel align(File projectRoot, String projectDirName, boolean expectFailure)
+            throws IOException, URISyntaxException {
 
         FileUtils.copyDirectory(Paths
                 .get(TestUtils.class.getClassLoader().getResource(projectDirName).toURI()).toFile(), projectRoot);
         assertThat(projectRoot.toPath().resolve("build.gradle")).exists();
 
-        final BuildResult buildResult = GradleRunner.create()
+        final BuildResult buildResult;
+        final TaskOutcome outcome;
+
+        final GradleRunner runner = GradleRunner.create()
                 .withProjectDir(projectRoot)
-                .withArguments(AlignmentTask.NAME)
+                .withArguments("--info", AlignmentTask.NAME)
                 .withDebug(true)
-                .withPluginClasspath()
-                .build();
+                .forwardOutput()
+                .withPluginClasspath();
 
-        assertThat(buildResult.task(":" + AlignmentTask.NAME).getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
+        if (expectFailure) {
+            buildResult = runner.buildAndFail();
+            outcome = TaskOutcome.FAILED;
+        } else {
+            outcome = TaskOutcome.SUCCESS;
+            buildResult = runner.build();
+        }
 
-        return ManipulationUtils.getManipulationModelAt(projectRoot.toPath().toFile());
+        assertThat(buildResult.task(":" + AlignmentTask.NAME).getOutcome()).isEqualTo(outcome);
+
+        if (expectFailure) {
+            throw new ManipulationUncheckedException(buildResult.getOutput());
+        } else {
+            return ManipulationUtils.getManipulationModelAt(projectRoot.toPath().toFile());
+        }
     }
 }

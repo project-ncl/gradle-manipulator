@@ -27,10 +27,10 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
-public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
+public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule();// .muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule().muteForSuccessfulTests();
 
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
@@ -44,31 +44,32 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("simple-project-da-response.json"))));
+                        .withBody(readSampleDAResponse("complex-project-da-response.json"))));
 
         System.setProperty(Configuration.DA, "http://127.0.0.1:" + AbstractWiremockTest.PORT + "/da/rest/v-1");
     }
 
     @Test
     public void ensureAlignmentFileCreated() throws IOException, URISyntaxException {
-        final File projectRoot = tempDir.newFolder("simple-project");
+        final File projectRoot = tempDir.newFolder("complex-project");
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.LOAD_GME, Utils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
-            assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
-            assertThat(am.getName()).isEqualTo("root");
-            assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
-                assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00001");
-                assertThat(root.getName()).isEqualTo("root");
+            assertThat(am.getGroup()).isEqualTo("org.jboss.gm.analyzer.functest");
+            assertThat(am.getName()).isEqualTo("complex");
+            assertThat(am.findCorrespondingChild("complex")).satisfies(root -> {
+                assertThat(root.getVersion()).isEqualTo("1.0.0.redhat-00004");
+                assertThat(root.getName()).isEqualTo("complex");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
                         .containsOnly(
-                                tuple("undertow-core", "2.0.15.Final-redhat-00001"),
-                                tuple("hibernate-core", "5.3.7.Final-redhat-00001"));
+                                tuple("undertow-core", "2.0.20.Final-redhat-00001"),
+                                tuple("spring-boot-dependencies", "2.1.4.RELEASE.redhat-3"),
+                                tuple("hibernate-core", "5.3.9.Final-redhat-00001"));
             });
         });
     }

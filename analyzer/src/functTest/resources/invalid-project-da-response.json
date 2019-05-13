@@ -1,0 +1,20 @@
+[
+  {
+    "bestMatchVersion": "2.0.20.Final-redhat-00001",
+    "availableVersions": [],
+    "blacklisted": false,
+    "whitelisted": [],
+    "version": "2.0.20.Final",
+    "groupId": "io.undertow",
+    "artifactId": "undertow-core"
+  },
+  {
+    "bestMatchVersion": "1.0.1.redhat-00001",
+    "availableVersions": [],
+    "blacklisted": false,
+    "whitelisted": [],
+    "version": "1.0.0",
+    "groupId": "org.jboss.gm.analyzer.functest",
+    "artifactId": "invalid"
+  }
+]

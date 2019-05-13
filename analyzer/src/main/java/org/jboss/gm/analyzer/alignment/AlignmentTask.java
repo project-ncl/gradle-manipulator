@@ -1,6 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.jboss.gm.common.alignment.ManipulationUtils.getCurrentManipulationModel;
 import static org.jboss.gm.common.alignment.ManipulationUtils.writeUpdatedManipulationModel;
 
@@ -15,17 +14,15 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
+import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.result.DependencyResult;
-import org.gradle.api.artifacts.result.ResolutionResult;
-import org.gradle.api.internal.artifacts.dependencies.DefaultSelfResolvingDependency;
-import org.gradle.api.internal.artifacts.result.DefaultResolvedDependencyResult;
+import org.gradle.api.artifacts.LenientConfiguration;
 import org.gradle.api.tasks.TaskAction;
+import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ProjectVersionFactory;
 import org.jboss.gm.common.alignment.ManipulationModel;
 import org.jboss.gm.common.alignment.Utils;
@@ -40,9 +37,14 @@ public class AlignmentTask extends DefaultTask {
     static final String LOAD_GME = "apply from: \"gme.gradle\"";
     static final String GME = "gme.gradle";
     static final String NAME = "generateAlignmentMetadata";
-    static final Set<String> projectsToAlign = new HashSet<>();
+
+    private final Set<String> projectsToAlign = new HashSet<>();
 
     private final Logger logger = getLogger();
+
+    void addProject(String project) {
+        projectsToAlign.add(project);
+    }
 
     @TaskAction
     public void perform() {
@@ -109,56 +111,43 @@ public class AlignmentTask extends DefaultTask {
     }
 
     private Collection<ProjectVersionRef> getAllProjectDependencies(Project project) {
+        Configuration internalConfig = ConfigCache.getOrCreate(Configuration.class);
+
         final Set<ProjectVersionRef> result = new LinkedHashSet<>();
         project.getConfigurations().all(configuration -> {
-            final ResolutionResult resolutionResult = configuration.getIncoming()
-                    .getResolutionResult();//force dependency resolution - this is needed later on if we encounter deps with no version
-            configuration.getAllDependencies().forEach(dep -> {
-                if (dep instanceof DefaultSelfResolvingDependency) {
-                    logger.warn("Ignoring dependency of type {} on project {}", dep.getClass().getName(), project.getName());
-                } else if (isEmpty(dep.getVersion())) {
-                    // look up resolved dependency with a toString hack
-                    boolean found = false;
-                    final Set<? extends DependencyResult> resolvedDependencies = getAllDependenciesFromResolutionResult(
-                            resolutionResult);
-                    for (DependencyResult resolvedDependency : resolvedDependencies) {
-                        if (!(resolvedDependency instanceof DefaultResolvedDependencyResult)) {
-                            continue;
-                        }
 
-                        final String resolvedDependencyDisplayName = ((DefaultResolvedDependencyResult) resolvedDependency)
-                                .getSelected()
-                                .getId().getDisplayName();
-                        // the display name should be something like: "org.example:somelib:1.2.3"
-                        if (resolvedDependencyDisplayName.startsWith(dep.getGroup() + ":" + dep.getName()) && StringUtils
-                                .countMatches(resolvedDependencyDisplayName, ":") == 2) {
-                            final int i = resolvedDependencyDisplayName.lastIndexOf(":");
-                            if (i != -1) {
-                                result.add(ProjectVersionFactory.withGAVAndConfiguration(dep.getGroup(), dep.getName(),
-                                        resolvedDependencyDisplayName.substring(i + 1),
-                                        configuration.getName()));
-                                found = true;
-                            }
-                        }
+            if (configuration.isCanBeResolved()) {
+
+                LenientConfiguration lenient = configuration.getResolvedConfiguration().getLenientConfiguration();
+
+                if (lenient.getUnresolvedModuleDependencies().size() > 0) {
+                    if (internalConfig.ignoreUnresolvableDependencies()) {
+                        logger.warn("For configuration {}; ignoring all unresolvable dependencies: {}", configuration.getName(),
+                                lenient.getUnresolvedModuleDependencies());
+                    } else {
+                        logger.error("For configuration {}; unable to resolve all dependencies: {}", configuration.getName(),
+                                lenient.getUnresolvedModuleDependencies());
+                        throw new ManipulationUncheckedException("For configuration " + configuration.getName()
+                                + ", unable to resolve all project dependencies: " + lenient.getUnresolvedModuleDependencies());
                     }
-                    if (!found) {
-                        logger.warn("Ignoring empty version on dependency {} on project {}", dep.toString(), project.getName());
-                    }
-                } else {
-                    result.add(ProjectVersionFactory.withGAVAndConfiguration(dep.getGroup(), dep.getName(), dep.getVersion(),
-                            configuration.getName()));
                 }
-            });
-        });
-        return result;
-    }
 
-    private Set<? extends DependencyResult> getAllDependenciesFromResolutionResult(ResolutionResult resolutionResult) {
-        try {
-            return resolutionResult.getAllDependencies();
-        } catch (Exception e) {
-            return new HashSet<>();
-        }
+                lenient.getFirstLevelModuleDependencies().forEach(dep -> {
+                    ProjectVersionRef pvr = ProjectVersionFactory.withGAVAndConfiguration(dep.getModuleGroup(),
+                            dep.getModuleName(),
+                            dep.getModuleVersion(), configuration.getName());
+
+                    if (result.add(pvr)) {
+                        logger.info("Adding dependency to scan {} ", pvr);
+                    }
+                });
+            } else {
+                // TODO: Why are certain configurations not resolvable?
+                logger.warn("Unable to resolve configuration {} for project {}", configuration.getName(), project);
+            }
+        });
+
+        return result;
     }
 
     private void updateModuleDependencies(ManipulationModel correspondingModule,

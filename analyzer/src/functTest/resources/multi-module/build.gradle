@@ -9,8 +9,11 @@ allprojects {
     apply plugin: 'org.jboss.gm.analyzer'
 }
 
-repositories {
-    mavenCentral()
+// Ensure every project has access to Maven Central.
+allprojects {
+    repositories {
+        mavenCentral()
+    }
 }
 
 project(':subproject1') {

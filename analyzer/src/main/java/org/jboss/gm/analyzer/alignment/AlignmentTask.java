@@ -16,9 +16,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigCache;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.DefaultTask;
@@ -26,6 +25,7 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.LenientConfiguration;
 import org.gradle.api.artifacts.ModuleVersionSelector;
 import org.gradle.api.artifacts.ProjectDependency;
+import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ProjectVersionFactory;
@@ -125,18 +125,19 @@ public class AlignmentTask extends DefaultTask {
 
                 // using getAllDependencies here instead of getDependencies because the later
                 // was returning an empty array for the root project of SpringLikeLayoutFunctionalTest
-                final Set<ProjectRef> allProjectDependencies = configuration.getAllDependencies()
+                final Set<ProjectDependency> allProjectDependencies = configuration.getAllDependencies()
                         .stream()
                         .filter(d -> ProjectDependency.class.isAssignableFrom(d.getClass()))
-                        .map(d -> new SimpleProjectRef(d.getGroup(), d.getName()))
+                        .map(ProjectDependency.class::cast)
                         .collect(Collectors.toSet());
 
                 LenientConfiguration lenient = configuration.getResolvedConfiguration().getLenientConfiguration();
 
                 // We don't care about modules of the project being unresolvable at this stage. Had we not excluded them,
                 // we would get false negatives
-                final Set<SimpleProjectRef> unresolvedDependencies = getUnresolvedDependenciesExcludingProjectDependencies(
+                final Set<UnresolvedDependency> unresolvedDependencies = getUnresolvedDependenciesExcludingProjectDependencies(
                         lenient, allProjectDependencies);
+                
                 if (unresolvedDependencies.size() > 0) {
                     if (internalConfig.ignoreUnresolvableDependencies()) {
                         logger.warn("For configuration {}; ignoring all unresolvable dependencies: {}", configuration.getName(),
@@ -167,16 +168,24 @@ public class AlignmentTask extends DefaultTask {
         return result;
     }
 
-    private Set<SimpleProjectRef> getUnresolvedDependenciesExcludingProjectDependencies(LenientConfiguration lenient,
-            Set<ProjectRef> allProjectModules) {
+    private Set<UnresolvedDependency> getUnresolvedDependenciesExcludingProjectDependencies(LenientConfiguration lenient,
+            Set<ProjectDependency> allProjectModules) {
         return lenient.getUnresolvedModuleDependencies()
                 .stream()
-                .map(d -> {
-                    final ModuleVersionSelector selector = d.getSelector();
-                    return new SimpleProjectRef(selector.getGroup(), selector.getName());
-                })
-                .filter(p -> !allProjectModules.contains(p))
+                .filter(d -> !compareTo(d, allProjectModules))
                 .collect(Collectors.toSet());
+    }
+
+    private boolean compareTo(UnresolvedDependency unresolvedDependency, Set<ProjectDependency> projectDependencies) {
+        ModuleVersionSelector moduleVersionSelector = unresolvedDependency.getSelector();
+        for (ProjectDependency projectDependency : projectDependencies) {
+            if (StringUtils.equals(moduleVersionSelector.getGroup(), projectDependency.getGroup()) &&
+                    StringUtils.equals(moduleVersionSelector.getName(), projectDependency.getName()) &&
+                    StringUtils.equals(moduleVersionSelector.getVersion(), projectDependency.getVersion())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void updateModuleDependencies(ManipulationModel correspondingModule,

@@ -1,0 +1,99 @@
+buildscript {
+    repositories {
+        maven { url "https://repo.spring.io/plugins-release" }
+    }
+    dependencies {
+        classpath("io.spring.gradle:propdeps-plugin:0.0.9.RELEASE")
+    }
+}
+
+
+plugins {
+    id "io.spring.dependency-management" version "1.0.5.RELEASE" apply false
+    id "org.jetbrains.kotlin.jvm" version "1.2.71" apply false
+    id 'org.jboss.gm.analyzer'
+}
+
+configure(allprojects) { project ->
+    group = 'org.acme'
+
+    apply plugin: 'java'
+    apply plugin: "kotlin"
+    apply plugin: 'org.jboss.gm.analyzer'
+    apply plugin: "io.spring.dependency-management"
+
+    dependencyManagement {
+        resolutionStrategy {
+            cacheChangingModulesFor 0, "seconds"
+        }
+        applyMavenExclusions = false
+        generatedPomCustomization {
+            enabled = false
+        }
+    }
+
+    configurations.all {
+        // Check for updates every build
+        resolutionStrategy.cacheChangingModulesFor 0, "seconds"
+
+        // Consistent slf4j version (e.g. clashes between slf4j versions)
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == "org.slf4j") {
+                details.useVersion "1.7.26"
+            }
+        }
+
+    }
+
+    compileJava {
+        sourceCompatibility = 1.8  // can be switched to 11 for testing
+        targetCompatibility = 1.8
+        options.encoding = "UTF-8"
+    }
+
+    compileTestJava {
+        sourceCompatibility = 1.8  // can be switched to 11 for testing
+        targetCompatibility = 1.8
+        options.encoding = "UTF-8"
+        options.compilerArgs += "-parameters"
+    }
+
+    compileKotlin {
+        kotlinOptions {
+            jvmTarget = "1.8"
+            freeCompilerArgs = ["-Xjsr305=strict"]
+            apiVersion = "1.1"
+            languageVersion = "1.1"
+        }
+    }
+
+    compileTestKotlin {
+        kotlinOptions {
+            jvmTarget = "1.8"
+            freeCompilerArgs = ["-Xjsr305=strict"]
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        testCompile("junit:junit:4.12") {
+            exclude group: "org.hamcrest", module: "hamcrest-core"
+        }
+    }
+}
+
+configure(subprojects) { subproject ->
+    apply from: "${rootProject.projectDir}/gradle/publish-maven.gradle"
+}
+
+configure(rootProject) {
+    description = "Root project"
+
+    dependencies { 
+        testCompile(project(":subproject1"))
+        testCompile(project(":subproject2"))
+    }
+}

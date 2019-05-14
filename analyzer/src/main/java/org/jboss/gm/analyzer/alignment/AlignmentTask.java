@@ -13,14 +13,19 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigCache;
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.LenientConfiguration;
+import org.gradle.api.artifacts.ModuleVersionSelector;
+import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ProjectVersionFactory;
@@ -118,17 +123,29 @@ public class AlignmentTask extends DefaultTask {
 
             if (configuration.isCanBeResolved()) {
 
+                // using getAllDependencies here instead of getDependencies because the later
+                // was returning an empty array for the root project of SpringLikeLayoutFunctionalTest
+                final Set<ProjectRef> allProjectDependencies = configuration.getAllDependencies()
+                        .stream()
+                        .filter(d -> ProjectDependency.class.isAssignableFrom(d.getClass()))
+                        .map(d -> new SimpleProjectRef(d.getGroup(), d.getName()))
+                        .collect(Collectors.toSet());
+
                 LenientConfiguration lenient = configuration.getResolvedConfiguration().getLenientConfiguration();
 
-                if (lenient.getUnresolvedModuleDependencies().size() > 0) {
+                // We don't care about modules of the project being unresolvable at this stage. Had we not excluded them,
+                // we would get false negatives
+                final Set<SimpleProjectRef> unresolvedDependencies = getUnresolvedDependenciesExcludingProjectDependencies(
+                        lenient, allProjectDependencies);
+                if (unresolvedDependencies.size() > 0) {
                     if (internalConfig.ignoreUnresolvableDependencies()) {
                         logger.warn("For configuration {}; ignoring all unresolvable dependencies: {}", configuration.getName(),
-                                lenient.getUnresolvedModuleDependencies());
+                                unresolvedDependencies);
                     } else {
                         logger.error("For configuration {}; unable to resolve all dependencies: {}", configuration.getName(),
                                 lenient.getUnresolvedModuleDependencies());
                         throw new ManipulationUncheckedException("For configuration " + configuration.getName()
-                                + ", unable to resolve all project dependencies: " + lenient.getUnresolvedModuleDependencies());
+                                + ", unable to resolve all project dependencies: " + unresolvedDependencies);
                     }
                 }
 
@@ -148,6 +165,18 @@ public class AlignmentTask extends DefaultTask {
         });
 
         return result;
+    }
+
+    private Set<SimpleProjectRef> getUnresolvedDependenciesExcludingProjectDependencies(LenientConfiguration lenient,
+            Set<ProjectRef> allProjectModules) {
+        return lenient.getUnresolvedModuleDependencies()
+                .stream()
+                .map(d -> {
+                    final ModuleVersionSelector selector = d.getSelector();
+                    return new SimpleProjectRef(selector.getGroup(), selector.getName());
+                })
+                .filter(p -> !allProjectModules.contains(p))
+                .collect(Collectors.toSet());
     }
 
     private void updateModuleDependencies(ManipulationModel correspondingModule,

@@ -19,13 +19,16 @@ public class MavenPublicationRepositoryAction implements Action<Project> {
 
     @Override
     public void execute(Project project) {
-        Configuration config = ConfigCache.getOrCreate(Configuration.class);
+        if (!project.getPluginManager().hasPlugin("maven")) {
+            project.getLogger().warn("Legacy `maven` plugin not detected, skipping publishing repository creation.");
+        }
 
         Upload uploadArchives = project.getTasks().withType(Upload.class).findByName("uploadArchives");
         if (uploadArchives == null) {
-            project.getLogger().warn("'uploadArchives' task not found, publication repository will not be configured.");
-            return;
+            uploadArchives = project.getTasks().create("uploadArchives", Upload.class);
         }
+
+        Configuration config = ConfigCache.getOrCreate(Configuration.class);
 
         if (isEmpty(config.deployUrl())) {
             project.getLogger().warn("Publishing URL was not configured.");
@@ -36,6 +39,7 @@ public class MavenPublicationRepositoryAction implements Action<Project> {
             project.getLogger().warn("No authentication token was configured.");
         }
 
+        // add a maven repository and configure authentication token
         uploadArchives.getRepositories().maven(mavenArtifactRepository -> {
             mavenArtifactRepository.setName("Manipulator Publishing Repository");
             mavenArtifactRepository.setUrl(config.deployUrl());
@@ -47,5 +51,36 @@ public class MavenPublicationRepositoryAction implements Action<Project> {
                 mavenArtifactRepository.getAuthentication().create("header", HttpHeaderAuthentication.class);
             }
         });
+
+        // TODO: investigate better way of doing this
+        // We assume that "install" task generates project's POM. We want this POM to be published by "uploadArchives"
+        // task. To do that, reference to this file must be added to "uploadArchives" configuration artifacts, but
+        // not to "install" configuration artifacts. By default, the two tasks share the same configuration ("archives").
+        // We therefore create two distinct configurations, copy artifacts from the original configuration to the new
+        // ones, and assign them to the respective tasks. Reference to generated POM will then be added to configuration
+        // used by "uploadArchives" task.
+
+        // ensure that the "install" task is automatically invoked before the "uploadArchives"
+        uploadArchives.dependsOn("install");
+
+        // create two new configurations and copy over the original artifacts
+        org.gradle.api.artifacts.Configuration archives = project.getConfigurations().getByName("archives");
+        org.gradle.api.artifacts.Configuration installArchives = project.getConfigurations().create("installArchives");
+        installArchives.getArtifacts().addAll(archives.getArtifacts());
+        org.gradle.api.artifacts.Configuration publishArchives = project.getConfigurations().create("publishArchives");
+        publishArchives.getArtifacts().addAll(archives.getArtifacts());
+
+        // add an artifact referencing the POM
+        project.getArtifacts().add("publishArchives",
+                project.file(project.getBuildDir().toPath().resolve("poms/pom-default.xml")),
+                configurablePublishArtifact -> {
+                    configurablePublishArtifact.setName(project.getName());
+                    configurablePublishArtifact.setExtension("pom");
+                });
+
+        // configure "install" and "uploadArchives" to use the new configurations
+        Upload install = project.getTasks().withType(Upload.class).getByName("install");
+        install.setConfiguration(installArchives);
+        uploadArchives.setConfiguration(publishArchives);
     }
 }

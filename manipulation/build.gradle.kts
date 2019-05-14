@@ -20,6 +20,7 @@ dependencies {
     shadow(gradleApi())
     testCompile("junit:junit:4.12")
     testCompile("org.assertj:assertj-core:3.12.2")
+    testCompile("com.github.stefanbirkner:system-rules:1.19.0")
 }
 
 // separate source set and task for functional tests

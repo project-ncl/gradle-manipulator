@@ -25,6 +25,7 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.LenientConfiguration;
 import org.gradle.api.artifacts.ModuleVersionSelector;
+import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ProjectVersionFactory;
@@ -117,23 +118,25 @@ public class AlignmentTask extends DefaultTask {
     private Collection<ProjectVersionRef> getAllProjectDependencies(Project project) {
         Configuration internalConfig = ConfigCache.getOrCreate(Configuration.class);
 
-        final Set<ProjectRef> allProjectModules = project.getRootProject().getAllprojects().stream()
-                .map(p -> new SimpleProjectRef(
-                        "".equals(p.getGroup().toString()) ? "unset-needed-for-test" : p.getGroup().toString(),
-                        p.getName()))
-                .collect(Collectors.toSet());
-
         final Set<ProjectVersionRef> result = new LinkedHashSet<>();
         project.getConfigurations().all(configuration -> {
 
             if (configuration.isCanBeResolved()) {
 
+                // using getAllDependencies here instead of getDependencies because the later
+                // was returning an empty array for the root project of SpringLikeLayoutFunctionalTest
+                final Set<ProjectRef> allProjectDependencies = configuration.getAllDependencies()
+                        .stream()
+                        .filter(d -> ProjectDependency.class.isAssignableFrom(d.getClass()))
+                        .map(d -> new SimpleProjectRef(d.getGroup(), d.getName()))
+                        .collect(Collectors.toSet());
+
                 LenientConfiguration lenient = configuration.getResolvedConfiguration().getLenientConfiguration();
 
                 // We don't care about modules of the project being unresolvable at this stage. Had we not excluded them,
                 // we would get false negatives
-                final Set<SimpleProjectRef> unresolvedDependencies = getUnresolvedDependenciesExcludingProjectModules(
-                        lenient, allProjectModules);
+                final Set<SimpleProjectRef> unresolvedDependencies = getUnresolvedDependenciesExcludingProjectDependencies(
+                        lenient, allProjectDependencies);
                 if (unresolvedDependencies.size() > 0) {
                     if (internalConfig.ignoreUnresolvableDependencies()) {
                         logger.warn("For configuration {}; ignoring all unresolvable dependencies: {}", configuration.getName(),
@@ -164,7 +167,7 @@ public class AlignmentTask extends DefaultTask {
         return result;
     }
 
-    private Set<SimpleProjectRef> getUnresolvedDependenciesExcludingProjectModules(LenientConfiguration lenient,
+    private Set<SimpleProjectRef> getUnresolvedDependenciesExcludingProjectDependencies(LenientConfiguration lenient,
             Set<ProjectRef> allProjectModules) {
         return lenient.getUnresolvedModuleDependencies()
                 .stream()

@@ -24,6 +24,10 @@ public class ManifestUpdateAction implements Action<Project> {
     @Override
     public void execute(Project project) {
         project.getTasks().withType(Jar.class, jar -> {
+            // always change the implementation version if it exists
+            if (jar.getManifest().getAttributes().containsKey("Implementation-Version")) {
+                jar.getManifest().getAttributes().put("Implementation-Version", alignmentConfiguration.getVersion());
+            }
             if (jar.getManifest() instanceof OsgiManifest) {
                 OsgiManifest manifest = (OsgiManifest) jar.getManifest();
                 if (manifest.getInstructions().containsKey("Implementation-Version")) {

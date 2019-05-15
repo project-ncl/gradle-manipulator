@@ -6,7 +6,7 @@ initscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.jboss.gm.analyzer:analyzer:0.1-SNAPSHOT'
+        classpath "org.jboss.gm.analyzer:analyzer:${project.version}"
     }
 }
 

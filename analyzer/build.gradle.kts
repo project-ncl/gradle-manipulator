@@ -4,11 +4,20 @@ java {
     sourceCompatibility = JavaVersion.VERSION_1_8
 }
 
+
+pluginBundle {
+    description = "Plugin that that generates alignment metadata at \${project.rootDir}/manipulation.json"
+    website = "https://project-ncl.github.io/gradle-manipulator/"
+    vcsUrl = "https://github.com/project-ncl/gradle-manipulator/tree/master/analyzer"
+    tags = listOf("versions", "alignment")
+}
+
 gradlePlugin {
     plugins {
         create("alignmentPlugin") {
             id = "org.jboss.gm.analyzer"
             implementationClass = "org.jboss.gm.analyzer.alignment.AlignmentPlugin"
+            displayName = "gme-analyzer"
         }
     }
 }
@@ -57,8 +66,12 @@ val functionalTest = task<Test>("functionalTest") {
 tasks.check { dependsOn(functionalTest) }
 
 tasks {
+    //this is done in order to use the proper version in the init gradle files
     "processResources"(ProcessResources::class) {
-         filesMatching("gme.gradle") {
+        filesMatching("gme.gradle") {
+            expand(project.properties)
+        }
+        filesMatching("analyzer.init.gradle") {
             expand(project.properties)
         }
     }

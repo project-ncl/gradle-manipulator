@@ -7,11 +7,10 @@ plugins {
     id("com.diffplug.gradle.spotless") version "3.21.0"
     id("com.github.johnrengelman.shadow") version "5.0.0"
     id("net.nemerosa.versioning") version "2.8.2"
+    id("com.gradle.plugin-publish") version "0.10.1"
 }
 
 allprojects {
-    version = "0.1-SNAPSHOT"
-
     repositories {
         mavenCentral()
         mavenLocal()
@@ -47,6 +46,7 @@ subprojects {
         apply(plugin = "maven-publish")
         apply(plugin = "java-gradle-plugin")
         apply(plugin = "com.github.johnrengelman.shadow")
+        apply(plugin = "com.gradle.plugin-publish")
 
         /**
          * The configuration below has been created by reading the documentation at:
@@ -73,6 +73,8 @@ subprojects {
             dependencies {
                 exclude(dependency("org.slf4j:slf4j-api:1.7.25"))
             }
+            // no need to analyzer.init.gradle in the jar since it will never be used from inside the plugin itself
+            exclude("analyzer.init.gradle")
         }
 
         val sourcesJar by tasks.registering(Jar::class) {
@@ -92,6 +94,13 @@ subprojects {
                     project.shadow.component(this)
                     artifact(sourcesJar.get())
                     artifact(javadocJar.get())
+                    // we publish the init gradle file to make it easy for tools that use
+                    // the plugin to set it up without having to create their own init gradle file
+                    if (project.name == "analyzer") {
+                        artifact("${sourceSets.main.get().output.resourcesDir}/analyzer.init.gradle", {
+                            extension = "init.gradle"
+                        })
+                    }
                 }
             }
         }

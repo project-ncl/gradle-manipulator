@@ -28,3 +28,20 @@ select the `eclipse.importorder` file as the import order config file.
 * All external invocation points cannot throw a checked exception so must use an unchecked exception (e.g. `ManipulationUncheckedException`.
 * The `org.gradle.api.InvalidUserDataException` can be used for configuration errors.
 * Avoid throwing `RuntimeException` ; rather, use a more explicit exception.
+
+### Releasing
+
+The project has been configured to release both plugins to the Gradle Portal.
+
+#### Prerequisites
+
+* Sign up for a Gradle account (see details [here](https://guides.gradle.org/publishing-plugins-to-gradle-plugin-portal/#create_an_account_on_the_gradle_plugin_portal))
+* Create the required `$HOME/.gradle/gradle.properties` locally with data from the API key (which can be found in your gradle account)
+
+#### Release command
+
+The plugins can be released using the following command:
+
+
+	./gradlew publishPlugins -Pversion=whatever
+ 	     

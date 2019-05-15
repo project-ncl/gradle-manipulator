@@ -4,11 +4,19 @@ java {
     sourceCompatibility = JavaVersion.VERSION_1_8
 }
 
+pluginBundle {
+    description = "Plugin that reads the alignment data from \${project.rootDir}/manipulation.json and configures build and publishing to use those versions"
+    website = "https://project-ncl.github.io/gradle-manipulator/"
+    vcsUrl = "https://github.com/project-ncl/gradle-manipulator/tree/master/manipulation/tree/master/analyzer"
+    tags = listOf("versions", "manipulation")
+}
+
 gradlePlugin {
     plugins {
         create("manipulationPlugin") {
             id = "org.jboss.gm.manipulation"
             implementationClass = "org.jboss.gm.manipulation.ManipulationPlugin"
+            displayName = "gme-manipulation"
         }
     }
 }

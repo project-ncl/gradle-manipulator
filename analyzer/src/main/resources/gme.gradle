@@ -14,9 +14,11 @@ buildscript {
     }
 }
 
-// If we are not running the analyse plugin then apply the manipulation plugin.
-// This avoids issues with rerunning in local environments.
-if (!project.hasProperty("gmeAnalyse")) {
-    logger.info("Applying plugin org.jboss.gm.manipulation.ManipulationPlugin")
-    apply plugin: org.jboss.gm.manipulation.ManipulationPlugin
+allprojects {
+    // If we are not running the analyse plugin then apply the manipulation plugin.
+    // This avoids issues with rerunning in local environments.
+    if (!project.hasProperty("gmeAnalyse")) {
+        logger.info("Applying plugin org.jboss.gm.manipulation.ManipulationPlugin")
+        apply plugin: org.jboss.gm.manipulation.ManipulationPlugin
+    }
 }

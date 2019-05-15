@@ -137,7 +137,7 @@ public class AlignmentTask extends DefaultTask {
                 // we would get false negatives
                 final Set<UnresolvedDependency> unresolvedDependencies = getUnresolvedDependenciesExcludingProjectDependencies(
                         lenient, allProjectDependencies);
-                
+
                 if (unresolvedDependencies.size() > 0) {
                     if (internalConfig.ignoreUnresolvableDependencies()) {
                         logger.warn("For configuration {}; ignoring all unresolvable dependencies: {}", configuration.getName(),

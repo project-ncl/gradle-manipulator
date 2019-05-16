@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,13 +42,7 @@ public class AlignmentTask extends DefaultTask {
     static final String GME = "gme.gradle";
     static final String NAME = "generateAlignmentMetadata";
 
-    private final Set<String> projectsToAlign = new HashSet<>();
-
     private final Logger logger = getLogger();
-
-    void addProject(String project) {
-        projectsToAlign.add(project);
-    }
 
     @TaskAction
     public void perform() {
@@ -73,8 +66,9 @@ public class AlignmentTask extends DefaultTask {
             correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
             updateModuleDependencies(correspondingModule, deps, alignmentResponse);
 
+            final Set<String> projectsToAlign = AlignmentPlugin.getProjectsToAlign(project);
             projectsToAlign.remove(projectName);
-            if (projectsToAlign.isEmpty()) {
+            if (projectsToAlign.isEmpty()) { // when the set is empty, we know that this was the last alignment task to execute
 
                 writeUpdatedManipulationModel(project.getRootDir(), alignmentModel);
                 writeMarkerFile(project.getRootDir());

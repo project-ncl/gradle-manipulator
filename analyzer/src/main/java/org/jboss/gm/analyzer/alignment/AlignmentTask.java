@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -71,7 +72,7 @@ public class AlignmentTask extends DefaultTask {
             final Set<String> projectsToAlign = AlignmentPlugin.getProjectsToAlign(project);
             projectsToAlign.remove(projectName);
             if (projectsToAlign.isEmpty()) { // when the set is empty, we know that this was the last alignment task to execute
-
+                makeProjectVersionConsistent(alignmentModel);
                 writeUpdatedManipulationModel(project.getRootDir(), alignmentModel);
                 writeMarkerFile(project.getRootDir());
             }
@@ -80,6 +81,31 @@ public class AlignmentTask extends DefaultTask {
         } catch (IOException e) {
             throw new ManipulationUncheckedException("Failed to write marker file", e);
         }
+    }
+
+    private void makeProjectVersionConsistent(ManipulationModel alignmentModel) {
+        updateVersion(alignmentModel, getVersionToUse(alignmentModel));
+    }
+
+    private void updateVersion(ManipulationModel alignmentModel, String versionToUse) {
+        alignmentModel.setVersion(versionToUse);
+        final Map<String, ManipulationModel> children = alignmentModel.getChildren();
+        for (ManipulationModel child : children.values()) {
+            updateVersion(child, versionToUse);
+        }
+    }
+
+    // in order to make sure that all modules use the same version suffix
+    // we just use the maximum version we encounter
+    private String getVersionToUse(ManipulationModel alignmentModel) {
+        String versionToUse = alignmentModel.getVersion();
+        for (ManipulationModel child : alignmentModel.getChildren().values()) {
+            final String childVersionToUse = getVersionToUse(child);
+            if (childVersionToUse.compareTo(versionToUse) > 0) { //comparing the string here yields the proper result due to the nature of the suffix
+                versionToUse = childVersionToUse;
+            }
+        }
+        return versionToUse;
     }
 
     private void writeMarkerFile(File rootDir) throws IOException {

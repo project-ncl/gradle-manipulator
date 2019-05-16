@@ -3,7 +3,6 @@
 initscript {
     repositories {
         mavenLocal()
-        mavenCentral()
     }
     dependencies {
         classpath "org.jboss.gm.analyzer:analyzer:${project.version}"
@@ -22,8 +21,8 @@ allprojects {
         logger.context.level = LogLevel.QUIET
     }
     logger.context.level = LogLevel.QUIET
-    
+
     ext.gmeAnalyse = true
-    
+
     apply plugin: org.jboss.gm.analyzer.alignment.AlignmentPlugin
 }

@@ -24,6 +24,10 @@ public class ManifestUpdateAction implements Action<Project> {
     @Override
     public void execute(Project project) {
         project.getTasks().withType(Jar.class, jar -> {
+            if (jar.getManifest() == null) {
+                project.getLogger().debug("Manifest is not defined for project {}", project.getName());
+                return;
+            }
             // always change the implementation version if it exists
             if (jar.getManifest().getAttributes().containsKey("Implementation-Version")) {
                 jar.getManifest().getAttributes().put("Implementation-Version", alignmentConfiguration.getVersion());

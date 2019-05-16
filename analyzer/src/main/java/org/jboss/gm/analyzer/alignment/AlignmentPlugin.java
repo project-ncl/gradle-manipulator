@@ -1,5 +1,9 @@
 package org.jboss.gm.analyzer.alignment;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.jboss.gm.common.alignment.ManifestUtils;
@@ -12,11 +16,11 @@ import org.jboss.gm.common.alignment.ManipulationUtils;
  */
 public class AlignmentPlugin implements Plugin<Project> {
 
+    private static final String PROJECTS_TO_ALIGN = "projectsToAlign";
+
     static {
         System.out.println("Injecting AlignmentPlugin ; version " + ManifestUtils.getManifestInformation());
     }
-
-    private AlignmentTask task;
 
     @Override
     public void apply(Project project) {
@@ -26,14 +30,21 @@ public class AlignmentPlugin implements Plugin<Project> {
         if (project.getRootProject() == project) {
             createInitialManipulationModel(project);
         }
-        task = project.getTasks().create(AlignmentTask.NAME, AlignmentTask.class);
+
+        project.getTasks().create(AlignmentTask.NAME, AlignmentTask.class);
+
+        // will be built up to contain all the projects that need alignment
+        // the same reference is passed to each task
+        // and is used to make sure that the result of alignment is only written once (by the last alignment task to be performed)
+        AdditionalPropertiesUtil.setPropertyIfMissing(project, PROJECTS_TO_ALIGN, Collections.synchronizedSet(new HashSet<>()));
     }
 
     private void createInitialManipulationModel(Project project) {
         project.afterEvaluate(pr -> {
             // these operation need to be performed in afterEvaluate because only then is the group information
             // populated for certain
-            ManipulationUtils.addManipulationModel(pr.getRootDir(), getManipulationModel(pr));
+            ManipulationUtils.addManipulationModel(pr.getRootDir(), getManipulationModel(pr),
+                    new AdditionalPropertiesManipulationModelCache(project));
         });
 
     }
@@ -41,8 +52,12 @@ public class AlignmentPlugin implements Plugin<Project> {
     private ManipulationModel getManipulationModel(Project project) {
         final String name = project.getName();
         final ManipulationModel alignmentModel = new ManipulationModel(name, project.getGroup().toString());
-        task.addProject(name);
+        getProjectsToAlign(project).add(name);
         project.getChildProjects().forEach((n, p) -> alignmentModel.addChild(getManipulationModel(p)));
         return alignmentModel;
+    }
+
+    static Set<String> getProjectsToAlign(Project project) {
+        return (Set<String>) AdditionalPropertiesUtil.getProperty(project, AlignmentPlugin.PROJECTS_TO_ALIGN);
     }
 }

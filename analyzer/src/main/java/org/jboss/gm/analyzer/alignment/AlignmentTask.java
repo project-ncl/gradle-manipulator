@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,6 +29,7 @@ import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ProjectVersionFactory;
 import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.alignment.ManipulationUtils;
 import org.jboss.gm.common.alignment.Utils;
 import org.slf4j.Logger;
 
@@ -43,13 +43,7 @@ public class AlignmentTask extends DefaultTask {
     static final String GME = "gme.gradle";
     static final String NAME = "generateAlignmentMetadata";
 
-    private final Set<String> projectsToAlign = new HashSet<>();
-
     private final Logger logger = getLogger();
-
-    void addProject(String project) {
-        projectsToAlign.add(project);
-    }
 
     @TaskAction
     public void perform() {
@@ -67,14 +61,16 @@ public class AlignmentTask extends DefaultTask {
                                     currentProjectVersion),
                             deps));
 
-            final ManipulationModel alignmentModel = getCurrentManipulationModel(project.getRootDir());
+            final ManipulationModel alignmentModel = ManipulationUtils.getCurrentManipulationModel(project.getRootDir(),
+                    new AdditionalPropertiesManipulationModelCache(project));
             final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getPath());
 
             correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
             updateModuleDependencies(correspondingModule, deps, alignmentResponse);
 
+            final Set<String> projectsToAlign = AlignmentPlugin.getProjectsToAlign(project);
             projectsToAlign.remove(projectName);
-            if (projectsToAlign.isEmpty()) {
+            if (projectsToAlign.isEmpty()) { // when the set is empty, we know that this was the last alignment task to execute
 
                 writeUpdatedManipulationModel(project.getRootDir(), alignmentModel);
                 writeMarkerFile(project.getRootDir());

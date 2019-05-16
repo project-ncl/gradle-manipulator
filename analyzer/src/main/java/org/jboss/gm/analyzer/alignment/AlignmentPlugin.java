@@ -2,7 +2,6 @@ package org.jboss.gm.analyzer.alignment;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.gradle.api.Plugin;
@@ -44,7 +43,8 @@ public class AlignmentPlugin implements Plugin<Project> {
         project.afterEvaluate(pr -> {
             // these operation need to be performed in afterEvaluate because only then is the group information
             // populated for certain
-            ManipulationUtils.addManipulationModel(pr.getRootDir(), getManipulationModel(pr));
+            ManipulationUtils.addManipulationModel(pr.getRootDir(), getManipulationModel(pr),
+                    new AdditionalPropertiesManipulationModelCache(project));
         });
 
     }

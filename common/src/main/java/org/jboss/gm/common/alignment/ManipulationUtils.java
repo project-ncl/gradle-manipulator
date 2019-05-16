@@ -15,8 +15,6 @@ import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 public final class ManipulationUtils {
     private static final String MANIPULATION_FILE_NAME = "manipulation.json";
 
-    private static final Map<String, ManipulationModel> cachedModels = new HashMap<>(7);
-
     private ManipulationUtils() {
     }
 
@@ -25,16 +23,16 @@ public final class ManipulationUtils {
             throw new IOException("Path must be a directory. Was: " + path);
         }
         File alignment = new File(path, MANIPULATION_FILE_NAME);
-        return getManipulationModel(alignment);
+        return getManipulationModel(alignment, ManipulationModelCache.NOOP);
     }
 
-    private static ManipulationModel getManipulationModel(File alignment) {
+    private static ManipulationModel getManipulationModel(File alignment, ManipulationModelCache manipulationModelCache) {
         final String absolutePath = getIdentifierFor(alignment);
-        ManipulationModel model = cachedModels.get(absolutePath);
+        ManipulationModel model = manipulationModelCache.get(absolutePath);
         if (model == null) {
             try {
                 model = SerializationUtils.getObjectMapper().readValue(alignment, ManipulationModel.class);
-                cachedModels.put(absolutePath, model);
+                manipulationModelCache.put(absolutePath, model);
             } catch (IOException e) {
                 throw new ManipulationUncheckedException("Unable to deserialize " + MANIPULATION_FILE_NAME, e);
             }
@@ -57,11 +55,16 @@ public final class ManipulationUtils {
      * @return a valid ManipulationModel.
      */
     public static ManipulationModel getCurrentManipulationModel(File rootDir) {
-        return getManipulationModel(getManipulationFilePath(rootDir).toFile());
+        return getManipulationModel(getManipulationFilePath(rootDir).toFile(), ManipulationModelCache.NOOP);
     }
 
-    public static void addManipulationModel(File rootDir, ManipulationModel model) {
-        cachedModels.put(getIdentifierFor(getManipulationFilePath(rootDir).toFile()), model);
+    public static ManipulationModel getCurrentManipulationModel(File rootDir, ManipulationModelCache manipulationModelCache) {
+        return getManipulationModel(getManipulationFilePath(rootDir).toFile(), manipulationModelCache);
+    }
+
+    public static void addManipulationModel(File rootDir, ManipulationModel model,
+            ManipulationModelCache manipulationModelCache) {
+        manipulationModelCache.put(getIdentifierFor(getManipulationFilePath(rootDir).toFile()), model);
     }
 
     /**

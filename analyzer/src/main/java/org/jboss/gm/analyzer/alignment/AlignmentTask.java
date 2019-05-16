@@ -29,6 +29,7 @@ import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ProjectVersionFactory;
 import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.alignment.ManipulationUtils;
 import org.jboss.gm.common.alignment.Utils;
 import org.slf4j.Logger;
 
@@ -60,7 +61,8 @@ public class AlignmentTask extends DefaultTask {
                                     currentProjectVersion),
                             deps));
 
-            final ManipulationModel alignmentModel = getCurrentManipulationModel(project.getRootDir());
+            final ManipulationModel alignmentModel = ManipulationUtils.getCurrentManipulationModel(project.getRootDir(),
+                    new AdditionalPropertiesManipulationModelCache(project));
             final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getPath());
 
             correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());

@@ -1,5 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static org.jboss.gm.common.alignment.ManipulationUtils.addManipulationModel;
 import static org.jboss.gm.common.alignment.ManipulationUtils.getCurrentManipulationModel;
 import static org.jboss.gm.common.alignment.ManipulationUtils.writeUpdatedManipulationModel;
 
@@ -11,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,9 +23,11 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.LenientConfiguration;
 import org.gradle.api.artifacts.ModuleVersionSelector;
 import org.gradle.api.artifacts.ProjectDependency;
+import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.Configuration;
@@ -71,7 +75,7 @@ public class AlignmentTask extends DefaultTask {
             final Set<String> projectsToAlign = AlignmentPlugin.getProjectsToAlign(project);
             projectsToAlign.remove(projectName);
             if (projectsToAlign.isEmpty()) { // when the set is empty, we know that this was the last alignment task to execute
-
+                makeProjectVersionConsistent(alignmentModel);
                 writeUpdatedManipulationModel(project.getRootDir(), alignmentModel);
                 writeMarkerFile(project.getRootDir());
             }
@@ -80,6 +84,31 @@ public class AlignmentTask extends DefaultTask {
         } catch (IOException e) {
             throw new ManipulationUncheckedException("Failed to write marker file", e);
         }
+    }
+
+    private void makeProjectVersionConsistent(ManipulationModel alignmentModel) {
+        updateVersion(alignmentModel, getVersionToUse(alignmentModel));
+    }
+
+    private void updateVersion(ManipulationModel alignmentModel, String versionToUse) {
+        alignmentModel.setVersion(versionToUse);
+        final Map<String, ManipulationModel> children = alignmentModel.getChildren();
+        for (ManipulationModel child : children.values()) {
+            updateVersion(child, versionToUse);
+        }
+    }
+
+    // in order to make sure that all modules use the same version suffix
+    // we just use the maximum version we encounter
+    private String getVersionToUse(ManipulationModel alignmentModel) {
+        String versionToUse = alignmentModel.getVersion();
+        for (ManipulationModel child : alignmentModel.getChildren().values()) {
+            final String childVersionToUse = getVersionToUse(child);
+            if (childVersionToUse.compareTo(versionToUse) > 0) { //comparing the string here yields the proper result due to the nature of the suffix
+                versionToUse = childVersionToUse;
+            }
+        }
+        return versionToUse;
     }
 
     private void writeMarkerFile(File rootDir) throws IOException {
@@ -147,6 +176,12 @@ public class AlignmentTask extends DefaultTask {
                 }
 
                 lenient.getFirstLevelModuleDependencies().forEach(dep -> {
+                    // skip dependencies on project modules
+                    if (compareTo(dep, allProjectDependencies)) {
+                        project.getLogger().info("Skipping internal project dependency {} of configuration {}",
+                                dep.toString(), configuration.getName());
+                        return;
+                    }
                     ProjectVersionRef pvr = ProjectVersionFactory.withGAVAndConfiguration(dep.getModuleGroup(),
                             dep.getModuleName(),
                             dep.getModuleVersion(), configuration.getName());
@@ -178,6 +213,17 @@ public class AlignmentTask extends DefaultTask {
             if (StringUtils.equals(moduleVersionSelector.getGroup(), projectDependency.getGroup()) &&
                     StringUtils.equals(moduleVersionSelector.getName(), projectDependency.getName()) &&
                     StringUtils.equals(moduleVersionSelector.getVersion(), projectDependency.getVersion())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean compareTo(ResolvedDependency dependency, Set<ProjectDependency> projectDependencies) {
+        for (ProjectDependency projectDependency : projectDependencies) {
+            if (StringUtils.equals(dependency.getModuleGroup(), projectDependency.getGroup()) &&
+                    StringUtils.equals(dependency.getModuleName(), projectDependency.getName()) &&
+                    StringUtils.equals(dependency.getModuleVersion(), projectDependency.getVersion())) {
                 return true;
             }
         }

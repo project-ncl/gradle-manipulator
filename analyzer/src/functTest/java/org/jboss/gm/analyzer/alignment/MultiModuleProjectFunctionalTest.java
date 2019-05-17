@@ -80,13 +80,13 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
             assertThat(am.getChildren().keySet()).hasSize(2).containsExactly("subproject1", "subproject2");
 
             assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
-                assertThat(root.getVersion()).isEqualTo("1.1.2.redhat-00004");
+                assertThat(root.getVersion()).isEqualTo("1.1.2.redhat-00005");
                 assertThat(root.getAlignedDependencies()).isEmpty();
             });
 
             assertThat(am.findCorrespondingChild("subproject1")).satisfies(subproject1 -> {
                 assertThat(subproject1.getChildren().keySet()).hasSize(1).containsExactly("subproject11");
-                assertThat(subproject1.getVersion()).isEqualTo("1.1.2.redhat-00004");
+                assertThat(subproject1.getVersion()).isEqualTo("1.1.2.redhat-00005");
                 final Collection<ProjectVersionRef> alignedDependencies = subproject1.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
@@ -96,7 +96,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
             });
 
             assertThat(am.findCorrespondingChild("subproject2")).satisfies(subproject2 -> {
-                assertThat(subproject2.getVersion()).isEqualTo("1.1.2.redhat-00004");
+                assertThat(subproject2.getVersion()).isEqualTo("1.1.2.redhat-00005");
                 final Collection<ProjectVersionRef> alignedDependencies = subproject2.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
@@ -105,7 +105,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
             });
 
             assertThat(am.findCorrespondingChild(":subproject1:subproject11")).satisfies(subproject11 -> {
-                assertThat(subproject11.getVersion()).isEqualTo("1.1.2.redhat-00004");
+                assertThat(subproject11.getVersion()).isEqualTo("1.1.2.redhat-00005");
                 final Collection<ProjectVersionRef> alignedDependencies = subproject11.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")

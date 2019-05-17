@@ -1,5 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static org.jboss.gm.common.alignment.ManipulationUtils.addManipulationModel;
 import static org.jboss.gm.common.alignment.ManipulationUtils.getCurrentManipulationModel;
 import static org.jboss.gm.common.alignment.ManipulationUtils.writeUpdatedManipulationModel;
 
@@ -22,9 +23,11 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.LenientConfiguration;
 import org.gradle.api.artifacts.ModuleVersionSelector;
 import org.gradle.api.artifacts.ProjectDependency;
+import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.Configuration;
@@ -173,6 +176,12 @@ public class AlignmentTask extends DefaultTask {
                 }
 
                 lenient.getFirstLevelModuleDependencies().forEach(dep -> {
+                    // skip dependencies on project modules
+                    if (compareTo(dep, allProjectDependencies)) {
+                        project.getLogger().info("Skipping internal project dependency {} of configuration {}",
+                                dep.toString(), configuration.getName());
+                        return;
+                    }
                     ProjectVersionRef pvr = ProjectVersionFactory.withGAVAndConfiguration(dep.getModuleGroup(),
                             dep.getModuleName(),
                             dep.getModuleVersion(), configuration.getName());
@@ -204,6 +213,17 @@ public class AlignmentTask extends DefaultTask {
             if (StringUtils.equals(moduleVersionSelector.getGroup(), projectDependency.getGroup()) &&
                     StringUtils.equals(moduleVersionSelector.getName(), projectDependency.getName()) &&
                     StringUtils.equals(moduleVersionSelector.getVersion(), projectDependency.getVersion())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean compareTo(ResolvedDependency dependency, Set<ProjectDependency> projectDependencies) {
+        for (ProjectDependency projectDependency : projectDependencies) {
+            if (StringUtils.equals(dependency.getModuleGroup(), projectDependency.getGroup()) &&
+                    StringUtils.equals(dependency.getModuleName(), projectDependency.getName()) &&
+                    StringUtils.equals(dependency.getModuleVersion(), projectDependency.getVersion())) {
                 return true;
             }
         }

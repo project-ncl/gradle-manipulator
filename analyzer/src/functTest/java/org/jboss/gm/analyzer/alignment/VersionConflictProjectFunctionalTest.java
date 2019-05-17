@@ -27,7 +27,7 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
-public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
+public class VersionConflictProjectFunctionalTest extends AbstractWiremockTest {
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
@@ -51,7 +51,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void ensureAlignmentFileCreated() throws IOException, URISyntaxException {
-        final File projectRoot = tempDir.newFolder("simple-project");
+        final File projectRoot = tempDir.newFolder("version-conflict");
 
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
@@ -64,6 +64,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
             assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00001");
                 assertThat(root.getName()).isEqualTo("root");
+
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
@@ -72,5 +73,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                                 tuple("hibernate-core", "5.3.7.Final-redhat-00001"));
             });
         });
+
+        assertTrue(systemOutRule.getLog().contains("Detected use of conflict resolution strategy strict"));
     }
 }

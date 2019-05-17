@@ -8,6 +8,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -29,6 +31,8 @@ import org.gradle.api.artifacts.ModuleVersionSelector;
 import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.UnresolvedDependency;
+import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
+import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ProjectVersionFactory;
@@ -53,7 +57,17 @@ public class AlignmentTask extends DefaultTask {
     public void perform() {
         final Project project = getProject();
         final String projectName = project.getName();
-        logger.info("Starting alignment task for project {}", projectName);
+
+        // Handle the case where the groupId and/or version is empty (e.g. for a project that isn't deployed).
+        if (StringUtils.isEmpty(project.getGroup().toString())) {
+            project.setGroup("<gme-injected>");
+        }
+        if (project.getVersion().equals("unspecified")) {
+            project.setVersion("0.0.0");
+        }
+
+        logger.info("Starting alignment task for project {} with GAV {}:{}:{}", project.getDisplayName(), project.getGroup(),
+                projectName, project.getVersion());
 
         try {
             final Collection<ProjectVersionRef> deps = getAllProjectDependencies(project);
@@ -156,7 +170,22 @@ public class AlignmentTask extends DefaultTask {
                         .map(ProjectDependency.class::cast)
                         .collect(Collectors.toSet());
 
-                LenientConfiguration lenient = configuration.getResolvedConfiguration().getLenientConfiguration();
+                if (configuration.getResolutionStrategy() instanceof DefaultResolutionStrategy) {
+                    DefaultResolutionStrategy defaultResolutionStrategy = (DefaultResolutionStrategy) configuration
+                            .getResolutionStrategy();
+
+                    if (defaultResolutionStrategy.getConflictResolution() == ConflictResolution.strict) {
+                        // failOnVersionConflict() sets this which causes our plugin to crash out. Reset to latest to make an attempt
+                        // at continuing. As Gradle creates 'decorated' we can't use reflection to change the value back to the
+                        // default. Therefore use preferProjectModules as its not eager-fail.
+                        logger.warn("Detected use of conflict resolution strategy strict ; resetting to preferProjectModules.");
+
+                        defaultResolutionStrategy.preferProjectModules();
+                    }
+                }
+
+                LenientConfiguration lenient = configuration.copyRecursive().getResolvedConfiguration()
+                        .getLenientConfiguration();
 
                 // We don't care about modules of the project being unresolvable at this stage. Had we not excluded them,
                 // we would get false negatives

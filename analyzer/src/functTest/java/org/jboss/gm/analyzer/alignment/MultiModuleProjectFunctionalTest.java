@@ -100,6 +100,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                 final Collection<ProjectVersionRef> alignedDependencies = subproject2.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
+                        // dependency on subproject1 should not be included
                         .containsOnly(
                                 tuple("resteasy-jaxrs", "3.6.3.SP1-redhat-00001"));
             });

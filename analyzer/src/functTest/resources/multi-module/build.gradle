@@ -39,6 +39,7 @@ project(':subproject2') {
         compile group: 'org.jboss.resteasy', name: 'resteasy-jaxrs', version: '3.6.3.SP1'
         compile group: 'com.google.inject', name: 'guice', version: '4.2.2'
         compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
+        compile project(':subproject1')
         testCompile group: 'junit', name: 'junit', version: '4.12'
     }
 }

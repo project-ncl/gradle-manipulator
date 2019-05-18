@@ -1,6 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.jboss.gm.common.alignment.ManipulationUtils.writeUpdatedManipulationModel;
+import static org.jboss.gm.common.utils.ManipulationUtils.writeUpdatedManipulationModel;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,11 +29,12 @@ import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
 import org.gradle.api.tasks.TaskAction;
+import org.jboss.gm.common.AdditionalPropertiesManipulationModelCache;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ProjectVersionFactory;
-import org.jboss.gm.common.alignment.ManipulationModel;
-import org.jboss.gm.common.alignment.ManipulationUtils;
-import org.jboss.gm.common.alignment.Utils;
+import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.common.utils.IOUtils;
+import org.jboss.gm.common.utils.ManipulationUtils;
 import org.slf4j.Logger;
 
 /**
@@ -61,7 +62,7 @@ public class AlignmentTask extends DefaultTask {
             project.setVersion("0.0.0");
         }
 
-        logger.info("Starting alignment task for project {} with GAV {}:{}:{}", project.getDisplayName(), project.getGroup(),
+        logger.info("Starting model task for project {} with GAV {}:{}:{}", project.getDisplayName(), project.getGroup(),
                 projectName, project.getVersion());
 
         try {
@@ -74,7 +75,7 @@ public class AlignmentTask extends DefaultTask {
                                     currentProjectVersion),
                             deps));
 
-            final ManipulationModel alignmentModel = ManipulationUtils.getCurrentManipulationModel(project.getRootDir(),
+            final ManipulationModel alignmentModel = ManipulationUtils.getManipulationModel(project.getRootDir(),
                     new AdditionalPropertiesManipulationModelCache(project));
             final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getPath());
 
@@ -131,7 +132,7 @@ public class AlignmentTask extends DefaultTask {
 
         if (rootGradle.exists()) {
 
-            String line = Utils.getLastLine(rootGradle);
+            String line = IOUtils.getLastLine(rootGradle);
             logger.debug("Read line '{}' from build.gradle", line);
 
             if (!line.trim().equals(LOAD_GME)) {

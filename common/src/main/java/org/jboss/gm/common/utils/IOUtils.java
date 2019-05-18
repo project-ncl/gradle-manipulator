@@ -1,4 +1,4 @@
-package org.jboss.gm.common.alignment;
+package org.jboss.gm.common.utils;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -8,7 +8,7 @@ import java.nio.charset.Charset;
 
 import org.apache.commons.io.input.ReversedLinesFileReader;
 
-public class Utils {
+public class IOUtils {
     public static String getLastLine(File target) throws IOException {
         String line = "";
         try (ReversedLinesFileReader rFile = new ReversedLinesFileReader(target, Charset.defaultCharset())) {

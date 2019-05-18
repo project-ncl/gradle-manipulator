@@ -12,8 +12,8 @@ import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
-import org.jboss.gm.common.alignment.ManipulationModel;
-import org.jboss.gm.common.alignment.ManipulationUtils;
+import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.common.utils.ManipulationUtils;
 
 public final class TestUtils {
 
@@ -54,7 +54,7 @@ public final class TestUtils {
         if (expectFailure) {
             throw new ManipulationUncheckedException(buildResult.getOutput());
         } else {
-            return ManipulationUtils.getManipulationModelAt(projectRoot.toPath().toFile());
+            return ManipulationUtils.getManipulationModel(projectRoot);
         }
     }
 }

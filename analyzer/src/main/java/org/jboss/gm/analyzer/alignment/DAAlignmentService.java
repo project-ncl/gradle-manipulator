@@ -36,7 +36,7 @@ public class DAAlignmentService implements AlignmentService {
         final String endpointUrl = configuration.daEndpoint();
         if (endpointUrl == null) {
             throw new IllegalArgumentException(
-                    String.format("'%s' must be configured in order for alignment to work", Configuration.DA));
+                    String.format("'%s' must be configured in order for model to work", Configuration.DA));
         }
         dependencySource = configuration.dependencyConfiguration();
 

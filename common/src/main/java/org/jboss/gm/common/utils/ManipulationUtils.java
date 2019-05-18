@@ -1,51 +1,21 @@
-package org.jboss.gm.common.alignment;
+package org.jboss.gm.common.utils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.jboss.gm.common.ManipulationModelCache;
+import org.jboss.gm.common.model.ManipulationModel;
 
 public final class ManipulationUtils {
     private static final String MANIPULATION_FILE_NAME = "manipulation.json";
 
     private ManipulationUtils() {
-    }
-
-    public static ManipulationModel getManipulationModelAt(File path) throws IOException {
-        if (!path.isDirectory()) {
-            throw new IOException("Path must be a directory. Was: " + path);
-        }
-        File alignment = new File(path, MANIPULATION_FILE_NAME);
-        return getManipulationModel(alignment, ManipulationModelCache.NOOP);
-    }
-
-    private static ManipulationModel getManipulationModel(File alignment, ManipulationModelCache manipulationModelCache) {
-        final String absolutePath = getIdentifierFor(alignment);
-        ManipulationModel model = manipulationModelCache.get(absolutePath);
-        if (model == null) {
-            try {
-                model = SerializationUtils.getObjectMapper().readValue(alignment, ManipulationModel.class);
-                manipulationModelCache.put(absolutePath, model);
-            } catch (IOException e) {
-                throw new ManipulationUncheckedException("Unable to deserialize " + MANIPULATION_FILE_NAME, e);
-            }
-        }
-        return model;
-    }
-
-    private static String getIdentifierFor(File alignment) {
-        return alignment.getAbsolutePath();
-    }
-
-    private static Path getManipulationFilePath(File rootDir) {
-        return rootDir.toPath().resolve(MANIPULATION_FILE_NAME);
     }
 
     /**
@@ -54,12 +24,30 @@ public final class ManipulationUtils {
      *
      * @return a valid ManipulationModel.
      */
-    public static ManipulationModel getCurrentManipulationModel(File rootDir) {
-        return getManipulationModel(getManipulationFilePath(rootDir).toFile(), ManipulationModelCache.NOOP);
+    public static ManipulationModel getManipulationModel(File rootDir) {
+        return getInternalManipulationModel(getManipulationFilePath(rootDir).toFile(), null);
     }
 
-    public static ManipulationModel getCurrentManipulationModel(File rootDir, ManipulationModelCache manipulationModelCache) {
-        return getManipulationModel(getManipulationFilePath(rootDir).toFile(), manipulationModelCache);
+    public static ManipulationModel getManipulationModel(File rootDir, ManipulationModelCache manipulationModelCache) {
+        return getInternalManipulationModel(getManipulationFilePath(rootDir).toFile(), manipulationModelCache);
+    }
+
+    private static ManipulationModel getInternalManipulationModel(File alignment,
+            ManipulationModelCache manipulationModelCache) {
+        final String absolutePath = getIdentifierFor(alignment);
+        ManipulationModel model = manipulationModelCache == null ? null : manipulationModelCache.get(absolutePath);
+        if (model == null) {
+            try {
+                model = SerializationUtils.getObjectMapper().readValue(alignment, ManipulationModel.class);
+
+                if (manipulationModelCache != null) {
+                    manipulationModelCache.put(absolutePath, model);
+                }
+            } catch (IOException e) {
+                throw new ManipulationUncheckedException("Unable to deserialize " + MANIPULATION_FILE_NAME, e);
+            }
+        }
+        return model;
     }
 
     public static void addManipulationModel(File rootDir, ManipulationModel model,
@@ -90,4 +78,11 @@ public final class ManipulationUtils {
         }
     }
 
+    private static String getIdentifierFor(File alignment) {
+        return alignment.getAbsolutePath();
+    }
+
+    private static Path getManipulationFilePath(File rootDir) {
+        return rootDir.toPath().resolve(MANIPULATION_FILE_NAME);
+    }
 }

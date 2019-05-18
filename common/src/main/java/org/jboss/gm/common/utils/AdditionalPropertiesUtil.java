@@ -1,4 +1,4 @@
-package org.jboss.gm.analyzer.alignment;
+package org.jboss.gm.common.utils;
 
 import org.gradle.api.Project;
 import org.gradle.api.plugins.ExtraPropertiesExtension;

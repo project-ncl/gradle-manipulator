@@ -6,9 +6,11 @@ import java.util.Set;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.jboss.gm.common.alignment.ManifestUtils;
-import org.jboss.gm.common.alignment.ManipulationModel;
-import org.jboss.gm.common.alignment.ManipulationUtils;
+import org.jboss.gm.common.AdditionalPropertiesManipulationModelCache;
+import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.common.utils.AdditionalPropertiesUtil;
+import org.jboss.gm.common.utils.ManifestUtils;
+import org.jboss.gm.common.utils.ManipulationUtils;
 
 /**
  * Results in adding a task with name {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME}.

@@ -1,4 +1,4 @@
-package org.jboss.gm.common.alignment;
+package org.jboss.gm.common.model;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Contains the information extracted from a gradle project and its sub-project required to perform alignment and version
+ * Contains the information extracted from a gradle project and its sub-project required to perform model and version
  * change
  * 
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>

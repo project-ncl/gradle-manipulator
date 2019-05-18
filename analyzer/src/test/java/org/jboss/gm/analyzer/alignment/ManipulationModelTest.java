@@ -3,7 +3,7 @@ package org.jboss.gm.analyzer.alignment;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Test;
 
 /**

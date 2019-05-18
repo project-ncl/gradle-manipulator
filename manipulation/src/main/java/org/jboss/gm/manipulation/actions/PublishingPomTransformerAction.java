@@ -5,7 +5,7 @@ import org.gradle.api.Project;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
-import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.model.ManipulationModel;
 
 /**
  * Fixes pom.xml generation in "maven-publish" plugin.

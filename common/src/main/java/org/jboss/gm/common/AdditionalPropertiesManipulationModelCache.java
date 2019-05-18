@@ -1,9 +1,9 @@
-package org.jboss.gm.analyzer.alignment;
+package org.jboss.gm.common;
 
 import org.gradle.api.Project;
 import org.gradle.api.plugins.ExtraPropertiesExtension;
-import org.jboss.gm.common.alignment.ManipulationModel;
-import org.jboss.gm.common.alignment.ManipulationModelCache;
+import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.common.utils.AdditionalPropertiesUtil;
 
 /**
  * Delegates to the additional properties stored in Project

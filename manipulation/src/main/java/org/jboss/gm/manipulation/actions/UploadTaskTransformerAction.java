@@ -4,7 +4,7 @@ import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.maven.MavenResolver;
 import org.gradle.api.tasks.Upload;
-import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.model.ManipulationModel;
 
 /**
  * Fixes pom.xml generation in old "maven" plugin.

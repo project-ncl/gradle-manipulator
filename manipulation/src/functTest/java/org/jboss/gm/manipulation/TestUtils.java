@@ -19,7 +19,7 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.assertj.core.groups.Tuple;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.model.ManipulationModel;
 
 public final class TestUtils {
 
@@ -40,7 +40,7 @@ public final class TestUtils {
         if (count != 1) {
             if (count == 0) {
                 if (expected == null) {
-                    throw new IllegalArgumentException("No alignment was found for " + artifactId
+                    throw new IllegalArgumentException("No model was found for " + artifactId
                             + " and needed an expected value to test against");
                 }
                 return tuple(artifactId, expected);

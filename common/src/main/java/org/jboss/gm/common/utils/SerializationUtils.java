@@ -1,4 +1,4 @@
-package org.jboss.gm.common.alignment;
+package org.jboss.gm.common.utils;
 
 import java.io.IOException;
 

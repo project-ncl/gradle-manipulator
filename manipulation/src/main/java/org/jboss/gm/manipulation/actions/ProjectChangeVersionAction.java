@@ -2,7 +2,7 @@ package org.jboss.gm.manipulation.actions;
 
 import org.gradle.api.Action;
 import org.gradle.api.Project;
-import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.model.ManipulationModel;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>

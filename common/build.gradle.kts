@@ -2,6 +2,9 @@
 group = "org.jboss.gm.common"
 
 dependencies {
+    compileOnly(localGroovy())
+    compileOnly(gradleApi())
+
     compile("org.aeonbits.owner:owner-java8:1.0.10")
     compile("org.apache.commons:commons-lang3:3.8.1")
     compile("commons-io:commons-io:2.6")

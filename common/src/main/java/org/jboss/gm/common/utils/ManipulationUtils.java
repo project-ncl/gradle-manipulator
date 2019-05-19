@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
-import org.jboss.gm.common.ManipulationModelCache;
 import org.jboss.gm.common.model.ManipulationModel;
 
 public final class ManipulationUtils {
@@ -25,34 +24,20 @@ public final class ManipulationUtils {
      * @return a valid ManipulationModel.
      */
     public static ManipulationModel getManipulationModel(File rootDir) {
-        return getInternalManipulationModel(getManipulationFilePath(rootDir).toFile(), null);
+        return getInternalManipulationModel(getManipulationFilePath(rootDir).toFile());
     }
 
-    public static ManipulationModel getManipulationModel(File rootDir, ManipulationModelCache manipulationModelCache) {
-        return getInternalManipulationModel(getManipulationFilePath(rootDir).toFile(), manipulationModelCache);
-    }
+    private static ManipulationModel getInternalManipulationModel(File alignment) {
 
-    private static ManipulationModel getInternalManipulationModel(File alignment,
-            ManipulationModelCache manipulationModelCache) {
-        final String absolutePath = getIdentifierFor(alignment);
-        ManipulationModel model = manipulationModelCache == null ? null : manipulationModelCache.get(absolutePath);
-        if (model == null) {
-            try {
-                model = SerializationUtils.getObjectMapper().readValue(alignment, ManipulationModel.class);
+        ManipulationModel model;
 
-                if (manipulationModelCache != null) {
-                    manipulationModelCache.put(absolutePath, model);
-                }
-            } catch (IOException e) {
-                throw new ManipulationUncheckedException("Unable to deserialize " + MANIPULATION_FILE_NAME, e);
-            }
+        try {
+            model = SerializationUtils.getObjectMapper().readValue(alignment, ManipulationModel.class);
+
+        } catch (IOException e) {
+            throw new ManipulationUncheckedException("Unable to deserialize " + MANIPULATION_FILE_NAME, e);
         }
         return model;
-    }
-
-    public static void addManipulationModel(File rootDir, ManipulationModel model,
-            ManipulationModelCache manipulationModelCache) {
-        manipulationModelCache.put(getIdentifierFor(getManipulationFilePath(rootDir).toFile()), model);
     }
 
     /**

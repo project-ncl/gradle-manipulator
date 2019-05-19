@@ -29,12 +29,11 @@ import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
 import org.gradle.api.tasks.TaskAction;
-import org.jboss.gm.common.AdditionalPropertiesManipulationModelCache;
 import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.ProjectVersionFactory;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.IOUtils;
-import org.jboss.gm.common.utils.ManipulationUtils;
 import org.slf4j.Logger;
 
 /**
@@ -74,15 +73,14 @@ public class AlignmentTask extends DefaultTask {
                             ProjectVersionFactory.withGAV(project.getGroup().toString(), projectName,
                                     currentProjectVersion),
                             deps));
-
-            final ManipulationModel alignmentModel = ManipulationUtils.getManipulationModel(project.getRootDir(),
-                    new AdditionalPropertiesManipulationModelCache(project));
+            final ManipulationCache cache = ManipulationCache.getCache(project);
+            final ManipulationModel alignmentModel = cache.getModel();
             final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getPath());
 
             correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
             updateModuleDependencies(correspondingModule, deps, alignmentResponse);
 
-            final Set<String> projectsToAlign = AlignmentPlugin.getProjectsToAlign(project);
+            final Set<String> projectsToAlign = cache.getProjects();
             projectsToAlign.remove(projectName);
             if (projectsToAlign.isEmpty()) { // when the set is empty, we know that this was the last alignment task to execute
                 makeProjectVersionConsistent(alignmentModel);

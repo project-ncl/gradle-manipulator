@@ -1,18 +1,17 @@
 package org.jboss.gm.common;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import org.aeonbits.owner.Accessible;
+import org.aeonbits.owner.Config;
+import org.aeonbits.owner.Config.Sources;
+import org.aeonbits.owner.Converter;
+import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.aeonbits.owner.Accessible;
-import org.aeonbits.owner.Config;
-import org.aeonbits.owner.Config.Sources;
-import org.aeonbits.owner.Converter;
-import org.aeonbits.owner.Reloadable;
-import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 /**
  * This class is used to hold all configuration values for the two plugins. The naming scheme of

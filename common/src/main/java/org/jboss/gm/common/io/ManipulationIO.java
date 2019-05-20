@@ -1,4 +1,4 @@
-package org.jboss.gm.common.utils;
+package org.jboss.gm.common.io;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,11 +10,12 @@ import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.common.utils.SerializationUtils;
 
-public final class ManipulationUtils {
+public final class ManipulationIO {
     private static final String MANIPULATION_FILE_NAME = "manipulation.json";
 
-    private ManipulationUtils() {
+    private ManipulationIO() {
     }
 
     /**
@@ -23,29 +24,22 @@ public final class ManipulationUtils {
      *
      * @return a valid ManipulationModel.
      */
-    public static ManipulationModel getManipulationModel(File rootDir) {
-        return getInternalManipulationModel(getManipulationFilePath(rootDir).toFile());
-    }
-
-    private static ManipulationModel getInternalManipulationModel(File alignment) {
-
-        ManipulationModel model;
-
+    public static ManipulationModel readManipulationModel(File rootDir) {
         try {
-            model = SerializationUtils.getObjectMapper().readValue(alignment, ManipulationModel.class);
+            return SerializationUtils.getObjectMapper().readValue(getManipulationFilePath(rootDir).toFile(),
+                    ManipulationModel.class);
 
         } catch (IOException e) {
             throw new ManipulationUncheckedException("Unable to deserialize " + MANIPULATION_FILE_NAME, e);
         }
-        return model;
     }
 
     /**
      * Write the model to disk - override any existing file that might exist
      */
-    public static void writeUpdatedManipulationModel(File rootDir, ManipulationModel updatedManipulationModel)
+    public static void writeManipulationModel(File rootDir, ManipulationModel updatedManipulationModel)
             throws ManipulationException {
-        final Path manipulationFilePath = ManipulationUtils.getManipulationFilePath(rootDir);
+        final Path manipulationFilePath = ManipulationIO.getManipulationFilePath(rootDir);
         try {
             // first delete any existing file
             Files.delete(manipulationFilePath);
@@ -61,10 +55,6 @@ public final class ManipulationUtils {
         } catch (IOException e) {
             throw new ManipulationException("Unable to write manipulation.json in project root", e);
         }
-    }
-
-    private static String getIdentifierFor(File alignment) {
-        return alignment.getAbsolutePath();
     }
 
     private static Path getManipulationFilePath(File rootDir) {

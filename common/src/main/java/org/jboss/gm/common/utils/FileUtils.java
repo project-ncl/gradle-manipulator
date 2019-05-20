@@ -8,7 +8,7 @@ import java.nio.charset.Charset;
 
 import org.apache.commons.io.input.ReversedLinesFileReader;
 
-public class IOUtils {
+public class FileUtils {
     public static String getLastLine(File target) throws IOException {
         String line = "";
         try (ReversedLinesFileReader rFile = new ReversedLinesFileReader(target, Charset.defaultCharset())) {

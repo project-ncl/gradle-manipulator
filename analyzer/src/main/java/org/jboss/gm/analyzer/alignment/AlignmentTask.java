@@ -1,6 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.jboss.gm.common.utils.ManipulationUtils.writeUpdatedManipulationModel;
+import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -33,7 +33,7 @@ import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.ProjectVersionFactory;
 import org.jboss.gm.common.model.ManipulationModel;
-import org.jboss.gm.common.utils.IOUtils;
+import org.jboss.gm.common.utils.FileUtils;
 import org.slf4j.Logger;
 
 /**
@@ -84,7 +84,7 @@ public class AlignmentTask extends DefaultTask {
             projectsToAlign.remove(projectName);
             if (projectsToAlign.isEmpty()) { // when the set is empty, we know that this was the last alignment task to execute
                 makeProjectVersionConsistent(alignmentModel);
-                writeUpdatedManipulationModel(project.getRootDir(), alignmentModel);
+                writeManipulationModel(project.getRootDir(), alignmentModel);
                 writeMarkerFile(project.getRootDir());
             }
         } catch (ManipulationException e) {
@@ -130,7 +130,7 @@ public class AlignmentTask extends DefaultTask {
 
         if (rootGradle.exists()) {
 
-            String line = IOUtils.getLastLine(rootGradle);
+            String line = FileUtils.getLastLine(rootGradle);
             logger.debug("Read line '{}' from build.gradle", line);
 
             if (!line.trim().equals(LOAD_GME)) {

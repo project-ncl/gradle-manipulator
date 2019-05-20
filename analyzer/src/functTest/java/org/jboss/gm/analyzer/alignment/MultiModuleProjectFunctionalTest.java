@@ -2,8 +2,10 @@ package org.jboss.gm.analyzer.alignment;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
@@ -114,6 +116,13 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                                 tuple("spring-context", "5.1.6.RELEASE-redhat-00005"));
             });
         });
+
+        // we care about how many calls are made to DA from an implementation perspective which is why we assert
+        verifyDACalls(4);
+    }
+
+    private void verifyDACalls(int count) {
+        verify(count, postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs")));
     }
 
 }

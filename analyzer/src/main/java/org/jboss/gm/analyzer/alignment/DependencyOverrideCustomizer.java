@@ -1,6 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -49,11 +48,9 @@ public class DependencyOverrideCustomizer implements AlignmentService.ResponseCu
         }
 
         final Map<ProjectRef, String> overrideMap = new LinkedHashMap<>();
-        final Iterator<String> keys = prefixed.keySet().iterator();
-        //the idea is to create one DependencyOverrideCustomizer per configuration property
-        while (keys.hasNext()) {
-            final String key = keys.next();
 
+        //the idea is to create one DependencyOverrideCustomizer per configuration property
+        for (String key : prefixed.keySet()) {
             final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
             for (Project project : projects) {
                 final ProjectVersionRef projectRef = new SimpleProjectVersionRef(project.getGroup().toString(),

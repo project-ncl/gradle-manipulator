@@ -55,7 +55,7 @@ public class AlignmentTask extends DefaultTask {
 
         // Handle the case where the groupId and/or version is empty (e.g. for a project that isn't deployed).
         if (StringUtils.isEmpty(project.getGroup().toString())) {
-            project.setGroup("org.jboss.gm.analyzer.gme-injected>");
+            project.setGroup("org.jboss.gm.analyzer.gme-injected");
         }
         if (project.getVersion().equals("unspecified")) {
             project.setVersion("0.0.0");
@@ -76,11 +76,8 @@ public class AlignmentTask extends DefaultTask {
 
             cache.addGAV(current);
 
-            final Set<String> projectsToAlign = cache.getProjects();
-            projectsToAlign.remove(projectName);
-
             // when the set is empty, we know that this was the last alignment task to execute.
-            if (projectsToAlign.isEmpty()) {
+            if (cache.removeProject(projectName)) {
 
                 Collection<ProjectVersionRef> allDeps = cache.getDependencies().values().stream().flatMap(Collection::stream)
                         .collect(Collectors.toList());
@@ -89,7 +86,7 @@ public class AlignmentTask extends DefaultTask {
                         .getAlignmentService(cache.getDependencies().keySet());
                 final AlignmentService.Response alignmentResponse = alignmentService.align(
                         new AlignmentService.Request(
-                                cache.getGAV().stream().findFirst().get(),
+                                cache.getGAV().peekFirst(),
                                 allDeps));
 
                 final ManipulationModel alignmentModel = cache.getModel();
@@ -98,20 +95,10 @@ public class AlignmentTask extends DefaultTask {
                 alignmentModel.setVersion(alignmentResponse.getNewProjectVersion());
 
                 // Iterate through all modules and set their version
-                projectDependencies.entrySet().forEach(entry -> {
-                    final ManipulationModel correspondingModule = alignmentModel
-                            .findCorrespondingChild(entry.getKey().getPath());
-
-                    ProjectVersionRef pvr = ProjectVersionFactory.withGAV(entry.getKey().getGroup().toString(),
-                            entry.getKey().getName(),
-                            entry.getKey().getVersion().toString());
-
-                    logger.info("### Looping projects {} : version {} and alignedversion {} ", entry.getKey().getName(),
-                            entry.getKey().getVersion(),
-                            alignmentResponse.getAlignedVersionOfGav(pvr));
-
+                projectDependencies.forEach((key, value) -> {
+                    final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(key.getPath());
                     correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
-                    updateModuleDependencies(correspondingModule, entry.getValue(), alignmentResponse);
+                    updateModuleDependencies(correspondingModule, value, alignmentResponse);
                 });
 
                 writeManipulationModel(project.getRootDir(), alignmentModel);

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
  * Results in adding a task with name {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME}.
  * It scans the project(s) and creates the manipulation models.
  */
+@SuppressWarnings("unused")
 public class AlignmentPlugin implements Plugin<Project> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());

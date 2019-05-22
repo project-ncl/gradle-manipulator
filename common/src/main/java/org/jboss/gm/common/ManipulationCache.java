@@ -1,11 +1,10 @@
 package org.jboss.gm.common;
 
-import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -26,11 +25,11 @@ public class ManipulationCache {
      * Will be built up to contain all the projects that need alignment. The same reference is passed to each task
      * and is used to make sure that the result of alignment is only written once (by the last alignment task to be performed)
      */
-    private HashSet<String> allProjects = new HashSet<>();
+    private HashSet<String> projectCounter = new HashSet<>();
 
     private ManipulationModel rootModel;
 
-    private ArrayList<ProjectVersionRef> projectVersionRefs = new ArrayList<>();
+    private ArrayDeque<ProjectVersionRef> projectVersionRefs = new ArrayDeque<>();
 
     private Map<Project, Collection<ProjectVersionRef>> projectDependencies = new HashMap<>();
 
@@ -77,13 +76,24 @@ public class ManipulationCache {
         this.project = rootProject;
     }
 
+    /**
+     * Used to track the number of projects/subprojects.
+     *
+     * @param name the project name
+     */
     public void addProject(String name) {
-        allProjects.add(name);
+        projectCounter.add(name);
     }
 
-    // TODO: Consider replacing this with boolean remove(Project) function.
-    public Set<String> getProjects() {
-        return allProjects;
+    /**
+     * Tracking projects - remove the named project when it is evaluated.
+     *
+     * @param name the name of the project
+     * @return true if all projects are now handled.
+     */
+    public boolean removeProject(String name) {
+        projectCounter.remove(name);
+        return projectCounter.isEmpty();
     }
 
     public ManipulationModel getModel() {
@@ -98,7 +108,7 @@ public class ManipulationCache {
         projectVersionRefs.add(gav);
     }
 
-    public ArrayList<ProjectVersionRef> getGAV() {
+    public ArrayDeque<ProjectVersionRef> getGAV() {
         return projectVersionRefs;
     }
 

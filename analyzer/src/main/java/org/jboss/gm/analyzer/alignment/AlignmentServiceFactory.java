@@ -13,12 +13,12 @@ import org.jboss.gm.common.Configuration;
  * This is what {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME} task uses to retrieve a fully wired
  * {@link org.jboss.gm.analyzer.alignment.AlignmentService}
  */
-public final class AlignmentServiceFactory {
+final class AlignmentServiceFactory {
 
     private AlignmentServiceFactory() {
     }
 
-    public static AlignmentService getAlignmentService(Set<Project> projects) {
+    static AlignmentService getAlignmentService(Set<Project> projects) {
         Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
 
         return new WithCustomizersDelegatingAlignmentService(new DAAlignmentService(configuration),

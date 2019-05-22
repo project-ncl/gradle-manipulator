@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
+import org.gradle.api.Project;
 import org.jboss.gm.common.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +47,7 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
     }
 
     public static AlignmentService.RequestCustomizer fromConfigurationForModule(Configuration configuration,
-            ProjectRef projectRef) {
+            Set<Project> projects) {
         Map<String, String> prefixed = PropertiesUtils.getPropertiesByPrefix(configuration.getProperties(),
                 "dependencyExclusion.");
         if (prefixed.isEmpty()) {
@@ -57,11 +60,15 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
             final String key = keys.next();
 
             final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
-            if (keyParseResult.matchesModule(projectRef)) {
-                log.debug("Excluding dependency {} from alignment of module {}", keyParseResult.getDependency(),
-                        projectRef);
-                // if the key matches this module, add a predicate that rejects the artifact that was configured in the property
-                predicates.add(new DependencyExclusionPredicate(keyParseResult.getDependency()));
+            for (Project project : projects) {
+                final ProjectVersionRef projectRef = new SimpleProjectVersionRef(project.getGroup().toString(),
+                        project.getName(), project.getVersion().toString());
+                if (keyParseResult.matchesModule(projectRef)) {
+                    log.debug("Excluding dependency {} from alignment of module {}", keyParseResult.getDependency(),
+                            projectRef);
+                    // if the key matches this module, add a predicate that rejects the artifact that was configured in the property
+                    predicates.add(new DependencyExclusionPredicate(keyParseResult.getDependency()));
+                }
             }
         }
 

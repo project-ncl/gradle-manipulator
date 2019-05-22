@@ -28,13 +28,9 @@ public class AlignmentPlugin implements Plugin<Project> {
         if (project.getRootProject() == project) {
             project.afterEvaluate(pr -> {
                 // Run this in afterEvaluate because only then is the group information populated for certain
-                final ManipulationCache cache = ManipulationCache.getCache(project);
+                final ManipulationCache cache = ManipulationCache.getCache(project, getManipulationModel(project));
 
-                logger.info("#### Creating model for project {}", cache.getProject().getName());
-                // TODO - to remove
-                assert cache.getProject() == project;
-
-                cache.addModel(getManipulationModel(project));
+                logger.info("Setup cache for project {}", cache);
             });
         }
 

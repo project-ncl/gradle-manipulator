@@ -34,6 +34,7 @@ public class DAAlignmentService implements AlignmentService {
 
     public DAAlignmentService(Configuration configuration) {
         final String endpointUrl = configuration.daEndpoint();
+        // TODO: Remove this check?
         if (endpointUrl == null) {
             throw new IllegalArgumentException(
                     String.format("'%s' must be configured in order for model to work", Configuration.DA));
@@ -85,6 +86,11 @@ public class DAAlignmentService implements AlignmentService {
         @Override
         public String getNewProjectVersion() {
             return translationMap.get(refOfProject);
+        }
+
+        @Override
+        public Map<ProjectVersionRef, String> getTranslationMap() {
+            return translationMap;
         }
 
         @Override

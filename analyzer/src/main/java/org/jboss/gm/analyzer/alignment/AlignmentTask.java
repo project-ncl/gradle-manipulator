@@ -55,7 +55,7 @@ public class AlignmentTask extends DefaultTask {
 
         // Handle the case where the groupId and/or version is empty (e.g. for a project that isn't deployed).
         if (StringUtils.isEmpty(project.getGroup().toString())) {
-            project.setGroup("<gme-injected>");
+            project.setGroup("org.jboss.gm.analyzer.gme-injected>");
         }
         if (project.getVersion().equals("unspecified")) {
             project.setVersion("0.0.0");
@@ -66,24 +66,54 @@ public class AlignmentTask extends DefaultTask {
 
         try {
             final Collection<ProjectVersionRef> deps = getAllProjectDependencies(project);
-            final AlignmentService alignmentService = AlignmentServiceFactory.getAlignmentService(project);
-            final String currentProjectVersion = project.getVersion().toString();
-            final AlignmentService.Response alignmentResponse = alignmentService.align(
-                    new AlignmentService.Request(
-                            ProjectVersionFactory.withGAV(project.getGroup().toString(), projectName,
-                                    currentProjectVersion),
-                            deps));
             final ManipulationCache cache = ManipulationCache.getCache(project);
-            final ManipulationModel alignmentModel = cache.getModel();
-            final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getPath());
+            final String currentProjectVersion = project.getVersion().toString();
 
-            correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
-            updateModuleDependencies(correspondingModule, deps, alignmentResponse);
+            cache.addDependencies(project, deps);
+
+            ProjectVersionRef current = ProjectVersionFactory.withGAV(project.getGroup().toString(), projectName,
+                    currentProjectVersion);
+
+            cache.addGAV(current);
 
             final Set<String> projectsToAlign = cache.getProjects();
             projectsToAlign.remove(projectName);
-            if (projectsToAlign.isEmpty()) { // when the set is empty, we know that this was the last alignment task to execute
-                makeProjectVersionConsistent(alignmentModel);
+
+            // when the set is empty, we know that this was the last alignment task to execute.
+            if (projectsToAlign.isEmpty()) {
+
+                Collection<ProjectVersionRef> allDeps = cache.getDependencies().values().stream().flatMap(Collection::stream)
+                        .collect(Collectors.toList());
+
+                final AlignmentService alignmentService = AlignmentServiceFactory
+                        .getAlignmentService(cache.getDependencies().keySet());
+                final AlignmentService.Response alignmentResponse = alignmentService.align(
+                        new AlignmentService.Request(
+                                cache.getGAV().stream().findFirst().get(),
+                                allDeps));
+
+                final ManipulationModel alignmentModel = cache.getModel();
+                final Map<Project, Collection<ProjectVersionRef>> projectDependencies = cache.getDependencies();
+
+                alignmentModel.setVersion(alignmentResponse.getNewProjectVersion());
+
+                // Iterate through all modules and set their version
+                projectDependencies.entrySet().forEach(entry -> {
+                    final ManipulationModel correspondingModule = alignmentModel
+                            .findCorrespondingChild(entry.getKey().getPath());
+
+                    ProjectVersionRef pvr = ProjectVersionFactory.withGAV(entry.getKey().getGroup().toString(),
+                            entry.getKey().getName(),
+                            entry.getKey().getVersion().toString());
+
+                    logger.info("### Looping projects {} : version {} and alignedversion {} ", entry.getKey().getName(),
+                            entry.getKey().getVersion(),
+                            alignmentResponse.getAlignedVersionOfGav(pvr));
+
+                    correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
+                    updateModuleDependencies(correspondingModule, entry.getValue(), alignmentResponse);
+                });
+
                 writeManipulationModel(project.getRootDir(), alignmentModel);
                 writeMarkerFile(project.getRootDir());
             }
@@ -92,31 +122,6 @@ public class AlignmentTask extends DefaultTask {
         } catch (IOException e) {
             throw new ManipulationUncheckedException("Failed to write marker file", e);
         }
-    }
-
-    private void makeProjectVersionConsistent(ManipulationModel alignmentModel) {
-        updateVersion(alignmentModel, getVersionToUse(alignmentModel));
-    }
-
-    private void updateVersion(ManipulationModel alignmentModel, String versionToUse) {
-        alignmentModel.setVersion(versionToUse);
-        final Map<String, ManipulationModel> children = alignmentModel.getChildren();
-        for (ManipulationModel child : children.values()) {
-            updateVersion(child, versionToUse);
-        }
-    }
-
-    // in order to make sure that all modules use the same version suffix
-    // we just use the maximum version we encounter
-    private String getVersionToUse(ManipulationModel alignmentModel) {
-        String versionToUse = alignmentModel.getVersion();
-        for (ManipulationModel child : alignmentModel.getChildren().values()) {
-            final String childVersionToUse = getVersionToUse(child);
-            if (childVersionToUse.compareTo(versionToUse) > 0) { //comparing the string here yields the proper result due to the nature of the suffix
-                versionToUse = childVersionToUse;
-            }
-        }
-        return versionToUse;
     }
 
     private void writeMarkerFile(File rootDir) throws IOException {

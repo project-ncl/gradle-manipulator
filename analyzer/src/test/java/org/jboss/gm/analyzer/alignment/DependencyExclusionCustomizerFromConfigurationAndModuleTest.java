@@ -3,32 +3,53 @@ package org.jboss.gm.analyzer.alignment;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.aeonbits.owner.ConfigFactory;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.gradle.api.InvalidUserDataException;
+import org.gradle.api.Project;
+import org.gradle.testfixtures.ProjectBuilder;
 import org.jboss.gm.common.Configuration;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
 public class DependencyExclusionCustomizerFromConfigurationAndModuleTest {
 
-    private static final ProjectRef PROJECT = new SimpleProjectRef("org.acme", "test");
+    @Rule
+    public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+
+    @Before
+    public final void before() throws IOException {
+        final File simpleProjectRoot = tempDir.newFolder("simple-project");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+        Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
+        p.setVersion("1.0.0");
+        p.setGroup("org.acme");
+
+        projects = new HashSet<>();
+        projects.add(p);
+    }
+
+    private Set<Project> projects;
 
     @Test
     public void noDependencyExclusionProperty() {
         final Configuration configuration = ConfigFactory.create(Configuration.class);
 
         final AlignmentService.RequestCustomizer sut = DependencyExclusionCustomizer.fromConfigurationForModule(configuration,
-                PROJECT);
+                projects);
 
         assertThat(sut).isSameAs(AlignmentService.RequestCustomizer.NOOP);
     }
@@ -38,7 +59,7 @@ public class DependencyExclusionCustomizerFromConfigurationAndModuleTest {
         System.setProperty("dependencyExclusion.org.acme", "");
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
-        DependencyExclusionCustomizer.fromConfigurationForModule(configuration, PROJECT);
+        DependencyExclusionCustomizer.fromConfigurationForModule(configuration, projects);
     }
 
     @Test
@@ -68,7 +89,7 @@ public class DependencyExclusionCustomizerFromConfigurationAndModuleTest {
         final Configuration configuration = ConfigFactory.create(Configuration.class);
 
         final AlignmentService.RequestCustomizer sut = DependencyExclusionCustomizer.fromConfigurationForModule(configuration,
-                PROJECT);
+                projects);
 
         final AlignmentService.Request originalReq = new AlignmentService.Request(project,
                 Arrays.asList(hibernateGav, hibernateValidatorGav, undertowGav, jacksonDatabindGav, mongoGav, mockitoGav,

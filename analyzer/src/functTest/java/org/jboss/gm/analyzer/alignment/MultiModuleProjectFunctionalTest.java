@@ -6,7 +6,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,7 +32,7 @@ import org.junit.rules.TestRule;
 public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
 
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
@@ -43,27 +42,21 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
 
     @Before
     public void setup() throws IOException, URISyntaxException {
-        final String project_root_called = "project root called";
-        final String first_dependency_called = "first module called";
-        final String second_dependency_called = "second module called";
 
-        stubDACall(STARTED, "root", project_root_called);
-        stubDACall(project_root_called, "subproject1", first_dependency_called);
-        stubDACall(first_dependency_called, "subproject2", second_dependency_called);
-        stubDACall(second_dependency_called, "subproject11", "foo");
+        stubDACall();
 
         System.setProperty(Configuration.DA, "http://127.0.0.1:" + AbstractWiremockTest.PORT + "/da/rest/v-1");
     }
 
-    private void stubDACall(String initialState, String projectName, String nextState) throws IOException, URISyntaxException {
+    private void stubDACall() throws IOException, URISyntaxException {
         stubFor(post(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
                 .inScenario("multi-module")
-                .whenScenarioStateIs(initialState)
+                .whenScenarioStateIs(com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED)
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("multi-module-da-" + projectName + ".json")))
-                .willSetStateTo(nextState));
+                        .withBody(readSampleDAResponse("multi-module-da-" + "root" + ".json")))
+                .willSetStateTo("project root called"));
     }
 
     @Test
@@ -118,11 +111,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         });
 
         // we care about how many calls are made to DA from an implementation perspective which is why we assert
-        verifyDACalls(4);
-    }
-
-    private void verifyDACalls(int count) {
-        verify(count, postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs")));
+        verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs")));
     }
 
 }

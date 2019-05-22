@@ -21,6 +21,7 @@ public class ManifestUpdateAction implements Action<Project> {
         this.alignmentConfiguration = alignmentConfiguration;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void execute(Project project) {
         project.getTasks().withType(Jar.class, jar -> {

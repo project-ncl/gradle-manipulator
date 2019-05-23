@@ -34,13 +34,13 @@ public class DAAlignmentService implements AlignmentService {
 
     public DAAlignmentService(Configuration configuration) {
         final String endpointUrl = configuration.daEndpoint();
+
         if (endpointUrl == null) {
             throw new IllegalArgumentException(
-                    String.format("'%s' must be configured in order for alignment to work", Configuration.DA));
+                    String.format("'%s' must be configured in order for model to work", Configuration.DA));
         }
-        dependencySource = configuration.dependencyConfiguration();
 
-        //TODO: the parameters needs to be verified
+        dependencySource = configuration.dependencyConfiguration();
         restEndpoint = new GradleDefaultTranslator(
                 endpointUrl,
                 Translator.RestProtocol.CURRENT,
@@ -85,6 +85,11 @@ public class DAAlignmentService implements AlignmentService {
         @Override
         public String getNewProjectVersion() {
             return translationMap.get(refOfProject);
+        }
+
+        @Override
+        public Map<ProjectVersionRef, String> getTranslationMap() {
+            return translationMap;
         }
 
         @Override

@@ -3,27 +3,53 @@ package org.jboss.gm.analyzer.alignment;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.InvalidUserDataException;
+import org.gradle.api.Project;
+import org.gradle.testfixtures.ProjectBuilder;
 import org.jboss.gm.common.Configuration;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
 
     private static final ProjectVersionRef PROJECT = withGAV("org.acme", "test", "1.0.0-redhat-00001");
+
+    @Rule
+    public TemporaryFolder tempDir = new TemporaryFolder();
+
+    @Before
+    public final void before() throws IOException {
+        final File simpleProjectRoot = tempDir.newFolder("simple-project");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+        Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
+        p.setVersion(PROJECT.getVersionString());
+        p.setGroup(PROJECT.getGroupId());
+
+        projects = new HashSet<>();
+        projects.add(p);
+    }
+
+    private Set<Project> projects;
 
     @Test
     public void noDependencyOverrideProperty() {
         final Configuration configuration = ConfigFactory.create(Configuration.class);
 
         final AlignmentService.ResponseCustomizer sut = DependencyOverrideCustomizer.fromConfigurationForModule(configuration,
-                PROJECT);
+                projects);
 
         assertThat(sut).isSameAs(AlignmentService.ResponseCustomizer.NOOP);
     }
@@ -33,7 +59,7 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
         System.setProperty("dependencyOverride.org.acme", "");
         final Configuration configuration = ConfigFactory.create(Configuration.class);
 
-        DependencyOverrideCustomizer.fromConfigurationForModule(configuration, PROJECT);
+        DependencyOverrideCustomizer.fromConfigurationForModule(configuration, projects);
     }
 
     @Test
@@ -67,7 +93,7 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
         final Configuration configuration = ConfigFactory.create(Configuration.class);
 
         final AlignmentService.ResponseCustomizer sut = DependencyOverrideCustomizer.fromConfigurationForModule(configuration,
-                PROJECT);
+                projects);
 
         final AlignmentService.Response originalResp = new DummyResponse(PROJECT,
                 Arrays.asList(hibernateCoreGav, hibernateValidatorGav, undertowGav, jacksonCoreGav, jacksonMapperGav,
@@ -91,14 +117,17 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
 
         DummyResponse(ProjectVersionRef project, List<? extends ProjectVersionRef> dependencies) {
             this.project = project;
-            dependencies.forEach(d -> {
-                this.alignedVersionsMap.put(d, d.getVersionString());
-            });
+            dependencies.forEach(d -> this.alignedVersionsMap.put(d, d.getVersionString()));
         }
 
         @Override
         public String getNewProjectVersion() {
             return project.getVersionString();
+        }
+
+        @Override
+        public Map<ProjectVersionRef, String> getTranslationMap() {
+            throw new UnsupportedOperationException();
         }
 
         @Override

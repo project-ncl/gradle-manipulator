@@ -1,4 +1,4 @@
-package org.jboss.gm.common.alignment;
+package org.jboss.gm.common.utils;
 
 import java.io.IOException;
 
@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
-final class SerializationUtils {
+public final class SerializationUtils {
 
     private static final String GROUP_ID = "groupId";
     private static final String ARTIFACT_ID = "artifactId";

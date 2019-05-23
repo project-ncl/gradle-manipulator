@@ -12,8 +12,8 @@ import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
-import org.jboss.gm.common.alignment.ManipulationModel;
-import org.jboss.gm.common.alignment.ManipulationUtils;
+import org.jboss.gm.common.io.ManipulationIO;
+import org.jboss.gm.common.model.ManipulationModel;
 
 public final class TestUtils {
 
@@ -36,7 +36,7 @@ public final class TestUtils {
 
         final GradleRunner runner = GradleRunner.create()
                 .withProjectDir(projectRoot)
-                .withArguments("--info", AlignmentTask.NAME)
+                .withArguments("--stacktrace", "--info", AlignmentTask.NAME)
                 .withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath();
@@ -54,7 +54,7 @@ public final class TestUtils {
         if (expectFailure) {
             throw new ManipulationUncheckedException(buildResult.getOutput());
         } else {
-            return ManipulationUtils.getManipulationModelAt(projectRoot.toPath().toFile());
+            return ManipulationIO.readManipulationModel(projectRoot);
         }
     }
 }

@@ -12,8 +12,8 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
-import org.jboss.gm.common.alignment.ManipulationModel;
-import org.jboss.gm.common.alignment.ManipulationUtils;
+import org.jboss.gm.common.io.ManipulationIO;
+import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -35,7 +35,7 @@ public class SimpleProjectWithSpringDMAndMavenPluginsFunctionalTest {
         TestUtils.copyDirectory("simple-project-with-spring-dm-and-maven-plugins", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
 
-        final ManipulationModel alignment = ManipulationUtils.getManipulationModelAt(simpleProjectRoot);
+        final ManipulationModel alignment = ManipulationIO.readManipulationModel(simpleProjectRoot);
 
         final BuildResult buildResult = GradleRunner.create()
                 .withProjectDir(simpleProjectRoot)

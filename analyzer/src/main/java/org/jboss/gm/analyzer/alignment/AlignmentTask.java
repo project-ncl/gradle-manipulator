@@ -1,6 +1,7 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.jboss.gm.common.alignment.ManipulationUtils.writeUpdatedManipulationModel;
+import static org.gradle.api.Project.DEFAULT_VERSION;
+import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -30,10 +31,10 @@ import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.ProjectVersionFactory;
-import org.jboss.gm.common.alignment.ManipulationModel;
-import org.jboss.gm.common.alignment.ManipulationUtils;
-import org.jboss.gm.common.alignment.Utils;
+import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.common.utils.FileUtils;
 import org.slf4j.Logger;
 
 /**
@@ -53,39 +54,56 @@ public class AlignmentTask extends DefaultTask {
         final Project project = getProject();
         final String projectName = project.getName();
 
-        // Handle the case where the groupId and/or version is empty (e.g. for a project that isn't deployed).
-        if (StringUtils.isEmpty(project.getGroup().toString())) {
-            project.setGroup("<gme-injected>");
-        }
-        if (project.getVersion().equals("unspecified")) {
-            project.setVersion("0.0.0");
-        }
-
-        logger.info("Starting alignment task for project {} with GAV {}:{}:{}", project.getDisplayName(), project.getGroup(),
+        logger.info("Starting model task for project {} with GAV {}:{}:{}", project.getDisplayName(), project.getGroup(),
                 projectName, project.getVersion());
 
         try {
             final Collection<ProjectVersionRef> deps = getAllProjectDependencies(project);
-            final AlignmentService alignmentService = AlignmentServiceFactory.getAlignmentService(project);
+            final ManipulationCache cache = ManipulationCache.getCache(project);
             final String currentProjectVersion = project.getVersion().toString();
-            final AlignmentService.Response alignmentResponse = alignmentService.align(
-                    new AlignmentService.Request(
-                            ProjectVersionFactory.withGAV(project.getGroup().toString(), projectName,
-                                    currentProjectVersion),
-                            deps));
 
-            final ManipulationModel alignmentModel = ManipulationUtils.getCurrentManipulationModel(project.getRootDir(),
-                    new AdditionalPropertiesManipulationModelCache(project));
-            final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getPath());
+            cache.addDependencies(project, deps);
 
-            correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
-            updateModuleDependencies(correspondingModule, deps, alignmentResponse);
+            if (StringUtils.isBlank(project.getGroup().toString()) ||
+                    DEFAULT_VERSION.equals(project.getVersion().toString())) {
 
-            final Set<String> projectsToAlign = AlignmentPlugin.getProjectsToAlign(project);
-            projectsToAlign.remove(projectName);
-            if (projectsToAlign.isEmpty()) { // when the set is empty, we know that this was the last alignment task to execute
-                makeProjectVersionConsistent(alignmentModel);
-                writeUpdatedManipulationModel(project.getRootDir(), alignmentModel);
+                logger.warn("Project '{}:{}:{}' is not fully defined ; skipping. ", project.getGroup(), projectName,
+                        project.getVersion());
+            } else {
+                ProjectVersionRef current = ProjectVersionFactory.withGAV(project.getGroup().toString(), projectName,
+                        currentProjectVersion);
+
+                cache.addGAV(current);
+            }
+
+            // when the set is empty, we know that this was the last alignment task to execute.
+            if (cache.removeProject(projectName)) {
+
+                Collection<ProjectVersionRef> allDeps = cache.getDependencies().values().stream().flatMap(Collection::stream)
+                        .collect(Collectors.toList());
+
+                final AlignmentService alignmentService = AlignmentServiceFactory
+                        .getAlignmentService(cache.getDependencies().keySet());
+                final AlignmentService.Response alignmentResponse = alignmentService.align(
+                        new AlignmentService.Request(
+                                cache.getGAV().peekFirst(),
+                                allDeps));
+
+                final ManipulationModel alignmentModel = cache.getModel();
+                final Map<Project, Collection<ProjectVersionRef>> projectDependencies = cache.getDependencies();
+
+                alignmentModel.setVersion(alignmentResponse.getNewProjectVersion());
+
+                // Iterate through all modules and set their version
+                projectDependencies.forEach((key, value) -> {
+                    final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(key.getPath());
+                    correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
+                    updateModuleDependencies(correspondingModule, value, alignmentResponse);
+                });
+
+                logger.info("Completed processing for alignment and writing {} ", cache.toString());
+
+                writeManipulationModel(project.getRootDir(), alignmentModel);
                 writeMarkerFile(project.getRootDir());
             }
         } catch (ManipulationException e) {
@@ -93,31 +111,6 @@ public class AlignmentTask extends DefaultTask {
         } catch (IOException e) {
             throw new ManipulationUncheckedException("Failed to write marker file", e);
         }
-    }
-
-    private void makeProjectVersionConsistent(ManipulationModel alignmentModel) {
-        updateVersion(alignmentModel, getVersionToUse(alignmentModel));
-    }
-
-    private void updateVersion(ManipulationModel alignmentModel, String versionToUse) {
-        alignmentModel.setVersion(versionToUse);
-        final Map<String, ManipulationModel> children = alignmentModel.getChildren();
-        for (ManipulationModel child : children.values()) {
-            updateVersion(child, versionToUse);
-        }
-    }
-
-    // in order to make sure that all modules use the same version suffix
-    // we just use the maximum version we encounter
-    private String getVersionToUse(ManipulationModel alignmentModel) {
-        String versionToUse = alignmentModel.getVersion();
-        for (ManipulationModel child : alignmentModel.getChildren().values()) {
-            final String childVersionToUse = getVersionToUse(child);
-            if (childVersionToUse.compareTo(versionToUse) > 0) { //comparing the string here yields the proper result due to the nature of the suffix
-                versionToUse = childVersionToUse;
-            }
-        }
-        return versionToUse;
     }
 
     private void writeMarkerFile(File rootDir) throws IOException {
@@ -131,7 +124,7 @@ public class AlignmentTask extends DefaultTask {
 
         if (rootGradle.exists()) {
 
-            String line = Utils.getLastLine(rootGradle);
+            String line = FileUtils.getLastLine(rootGradle);
             logger.debug("Read line '{}' from build.gradle", line);
 
             if (!line.trim().equals(LOAD_GME)) {

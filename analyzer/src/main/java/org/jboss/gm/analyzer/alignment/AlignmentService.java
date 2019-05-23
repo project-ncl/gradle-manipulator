@@ -1,6 +1,7 @@
 package org.jboss.gm.analyzer.alignment;
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
@@ -42,6 +43,8 @@ public interface AlignmentService {
     interface Response {
 
         String getNewProjectVersion();
+
+        Map<ProjectVersionRef, String> getTranslationMap();
 
         String getAlignedVersionOfGav(ProjectVersionRef gav);
     }

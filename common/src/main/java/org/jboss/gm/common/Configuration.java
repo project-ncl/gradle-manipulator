@@ -11,7 +11,6 @@ import org.aeonbits.owner.Accessible;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.Converter;
-import org.aeonbits.owner.Reloadable;
 import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
 
 /**

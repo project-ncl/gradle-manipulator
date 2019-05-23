@@ -3,7 +3,7 @@ package org.jboss.gm.manipulation.actions;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
-import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.model.ManipulationModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,8 +28,7 @@ public class OverrideDependenciesAction implements Action<Project> {
             if (configuration.getState() != Configuration.State.UNRESOLVED) {
                 // TODO: Can we use reflection to force the state back to unresolved?
                 logger.warn("Configuration {} for {} is not in unresolved state", configuration.getName(), project);
-            }
-            else {
+            } else {
                 configuration.getResolutionStrategy().eachDependency(resolver);
             }
         });

@@ -10,7 +10,7 @@ import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.DependencyResolveDetails;
 import org.gradle.api.artifacts.ModuleVersionSelector;
-import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.model.ManipulationModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

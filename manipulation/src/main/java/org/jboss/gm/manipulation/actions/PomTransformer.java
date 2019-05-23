@@ -6,7 +6,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.gradle.api.Action;
 import org.gradle.api.XmlProvider;
-import org.jboss.gm.common.alignment.ManipulationModel;
+import org.jboss.gm.common.model.ManipulationModel;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;

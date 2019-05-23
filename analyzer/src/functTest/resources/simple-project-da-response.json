@@ -59,7 +59,7 @@
     "blacklisted": false,
     "whitelisted": [],
     "version": "1.0.0",
-    "groupId": "org.jboss.gm.analyzer.functest",
-    "artifactId": "invalid"
+    "groupId": "org.acme.gradle",
+    "artifactId": "root"
   }
 ]

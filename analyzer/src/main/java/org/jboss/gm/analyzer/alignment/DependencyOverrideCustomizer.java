@@ -1,14 +1,16 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
+import org.gradle.api.Project;
 import org.jboss.gm.common.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +40,7 @@ public class DependencyOverrideCustomizer implements AlignmentService.ResponseCu
     }
 
     public static AlignmentService.ResponseCustomizer fromConfigurationForModule(Configuration configuration,
-            ProjectRef projectRef) {
+            Set<Project> projects) {
         final Map<String, String> prefixed = PropertiesUtils.getPropertiesByPrefix(configuration.getProperties(),
                 "dependencyOverride.");
         if (prefixed.isEmpty()) {
@@ -46,17 +48,19 @@ public class DependencyOverrideCustomizer implements AlignmentService.ResponseCu
         }
 
         final Map<ProjectRef, String> overrideMap = new LinkedHashMap<>();
-        final Iterator<String> keys = prefixed.keySet().iterator();
-        //the idea is to create one DependencyOverrideCustomizer per configuration property
-        while (keys.hasNext()) {
-            final String key = keys.next();
 
+        //the idea is to create one DependencyOverrideCustomizer per configuration property
+        for (String key : prefixed.keySet()) {
             final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
-            if (keyParseResult.matchesModule(projectRef)) {
-                final String overrideVersion = prefixed.get(key);
-                log.debug("Overriding dependency {} from in module {} with version {}",
-                        keyParseResult.getDependency(), projectRef, overrideVersion);
-                overrideMap.put(keyParseResult.getDependency(), overrideVersion);
+            for (Project project : projects) {
+                final ProjectVersionRef projectRef = new SimpleProjectVersionRef(project.getGroup().toString(),
+                        project.getName(), project.getVersion().toString());
+                if (keyParseResult.matchesModule(projectRef)) {
+                    final String overrideVersion = prefixed.get(key);
+                    log.debug("Overriding dependency {} from in module {} with version {}",
+                            keyParseResult.getDependency(), projectRef, overrideVersion);
+                    overrideMap.put(keyParseResult.getDependency(), overrideVersion);
+                }
             }
         }
 
@@ -81,6 +85,11 @@ public class DependencyOverrideCustomizer implements AlignmentService.ResponseCu
         @Override
         public String getNewProjectVersion() {
             return originalResponse.getNewProjectVersion();
+        }
+
+        @Override
+        public Map<ProjectVersionRef, String> getTranslationMap() {
+            throw new UnsupportedOperationException();
         }
 
         @Override

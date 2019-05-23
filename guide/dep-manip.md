@@ -163,3 +163,7 @@ This will prevent any alignment within the org.foo:moduleB.
 
 This will prevent any alignment within org.foo and all sub-modules within that.
 
+#### Disabling Dependency Manipulation
+
+TODO: Introduce new parameter? Setting -DdependencySource=NONE is not sufficient, because that also disables alignment 
+of the project version.

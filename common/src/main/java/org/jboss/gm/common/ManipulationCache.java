@@ -19,7 +19,7 @@ public class ManipulationCache {
     private static final String NAME_PREFIX = "manipulationModelCache";
 
     /** Root project */
-    private Project project;
+    private Project rootProject;
 
     /**
      * Will be built up to contain all the projects that need alignment. The same reference is passed to each task
@@ -73,7 +73,7 @@ public class ManipulationCache {
     }
 
     private ManipulationCache(Project rootProject) {
-        this.project = rootProject;
+        this.rootProject = rootProject;
     }
 
     /**
@@ -118,6 +118,11 @@ public class ManipulationCache {
 
     @Override
     public String toString() {
-        return project.getName();
+        return rootProject.getName();
     }
+
+    public Project getRootProject() {
+        return rootProject;
+    }
+
 }

@@ -71,6 +71,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme");
             assertThat(am.getName()).isEqualTo("root");
+            assertThat(am.getVersion()).isEqualTo("1.1.2.redhat-00005");
 
             assertThat(am.getChildren().keySet()).hasSize(2).containsExactly("subproject1", "subproject2");
 

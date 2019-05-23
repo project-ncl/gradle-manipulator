@@ -1,5 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static org.gradle.api.Project.DEFAULT_VERSION;
 import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
 
 import java.io.BufferedWriter;
@@ -53,14 +54,6 @@ public class AlignmentTask extends DefaultTask {
         final Project project = getProject();
         final String projectName = project.getName();
 
-        // Handle the case where the groupId and/or version is empty (e.g. for a project that isn't deployed).
-        if (StringUtils.isEmpty(project.getGroup().toString())) {
-            project.setGroup("org.jboss.gm.analyzer.gme-injected");
-        }
-        if (project.getVersion().equals("unspecified")) {
-            project.setVersion("0.0.0");
-        }
-
         logger.info("Starting model task for project {} with GAV {}:{}:{}", project.getDisplayName(), project.getGroup(),
                 projectName, project.getVersion());
 
@@ -71,10 +64,17 @@ public class AlignmentTask extends DefaultTask {
 
             cache.addDependencies(project, deps);
 
-            ProjectVersionRef current = ProjectVersionFactory.withGAV(project.getGroup().toString(), projectName,
-                    currentProjectVersion);
+            if (StringUtils.isBlank(project.getGroup().toString()) ||
+                    DEFAULT_VERSION.equals(project.getVersion().toString())) {
 
-            cache.addGAV(current);
+                logger.warn("Project '{}:{}:{}' is not fully defined ; skipping. ", project.getGroup(), projectName,
+                        project.getVersion());
+            } else {
+                ProjectVersionRef current = ProjectVersionFactory.withGAV(project.getGroup().toString(), projectName,
+                        currentProjectVersion);
+
+                cache.addGAV(current);
+            }
 
             // when the set is empty, we know that this was the last alignment task to execute.
             if (cache.removeProject(projectName)) {
@@ -100,6 +100,8 @@ public class AlignmentTask extends DefaultTask {
                     correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
                     updateModuleDependencies(correspondingModule, value, alignmentResponse);
                 });
+
+                logger.info("Completed processing for alignment and writing {} ", cache.toString());
 
                 writeManipulationModel(project.getRootDir(), alignmentModel);
                 writeMarkerFile(project.getRootDir());

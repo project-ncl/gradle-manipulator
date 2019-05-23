@@ -11,6 +11,7 @@ import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.core.impl.VersionCalculator;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.gradle.api.Project;
+import org.gradle.api.internal.project.DefaultProject;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.slf4j.Logger;
@@ -55,7 +56,17 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Response
                 Configuration configuration) {
             this.originalResponse = originalResponse;
 
-            root = projects.toArray(new Project[] {})[0].getRootProject();
+            Project tmp = projects.toArray(new Project[] {})[0].getRootProject();
+            if (DefaultProject.DEFAULT_VERSION.equals(tmp.getVersion())) {
+                // Root project has a non-valid version. Find another one to use.
+                for (Project p : projects) {
+                    if (!DefaultProject.DEFAULT_VERSION.equals(p.getVersion())) {
+                        tmp = p;
+                        break;
+                    }
+                }
+            }
+            root = tmp;
 
             cache = ManipulationCache.getCache(root);
 

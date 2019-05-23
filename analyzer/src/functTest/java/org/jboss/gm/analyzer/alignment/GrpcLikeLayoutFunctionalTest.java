@@ -29,7 +29,7 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
-public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
+public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
@@ -62,23 +62,18 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
     @Test
     public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException {
 
-        final File projectRoot = tempDir.newFolder("spring-like-layout");
+        final File projectRoot = tempDir.newFolder("grpc-like-layout");
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.LOAD_GME, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
-            assertThat(am.getGroup()).isEqualTo("org.acme");
+            assertThat(am.getGroup()).isEqualTo(null);
             assertThat(am.getName()).isEqualTo("root");
             assertThat(am.getVersion()).isEqualTo("1.1.2.redhat-00004");
 
             assertThat(am.getChildren().keySet()).hasSize(3).containsExactly("subproject1", "subproject2", "subproject3");
-
-            assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
-                assertThat(root.getVersion()).isEqualTo("1.1.2.redhat-00004");
-                assertThat(root.getAlignedDependencies()).isEmpty();
-            });
 
             assertThat(am.findCorrespondingChild("subproject1")).satisfies(subproject1 -> {
                 assertThat(subproject1.getVersion()).isEqualTo("1.1.2.redhat-00004");

@@ -31,3 +31,4 @@ Below are links to more specific information about configuring sets of features 
 
 * [Project version manipulation](guide/project-version-manip.html)
 * [Dependency manipulation](guide/dep-manip.html)
+* [Artifact publishing](guide/artifact-publishing.html)

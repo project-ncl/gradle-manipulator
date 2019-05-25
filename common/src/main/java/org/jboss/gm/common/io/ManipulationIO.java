@@ -57,7 +57,7 @@ public final class ManipulationIO {
         }
     }
 
-    private static Path getManipulationFilePath(File rootDir) {
+    public static Path getManipulationFilePath(File rootDir) {
         return rootDir.toPath().resolve(MANIPULATION_FILE_NAME);
     }
 }

@@ -91,13 +91,20 @@ public class AlignmentTask extends DefaultTask {
 
                 final ManipulationModel alignmentModel = cache.getModel();
                 final Map<Project, Collection<ProjectVersionRef>> projectDependencies = cache.getDependencies();
+                final String newVersion = alignmentResponse.getNewProjectVersion();
+                final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
 
-                alignmentModel.setVersion(alignmentResponse.getNewProjectVersion());
+                if (configuration.versionModificationEnabled()) {
+                    logger.info("Updating project '{}' version to {}", projectName, newVersion);
+                    alignmentModel.setVersion(newVersion);
+                }
 
                 // Iterate through all modules and set their version
                 projectDependencies.forEach((key, value) -> {
                     final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(key.getPath());
-                    correspondingModule.setVersion(alignmentResponse.getNewProjectVersion());
+                    if (configuration.versionModificationEnabled()) {
+                        correspondingModule.setVersion(newVersion);
+                    }
                     updateModuleDependencies(correspondingModule, value, alignmentResponse);
                 });
 

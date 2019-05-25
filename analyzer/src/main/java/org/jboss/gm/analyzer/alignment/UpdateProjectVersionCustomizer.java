@@ -14,6 +14,7 @@ import org.gradle.api.Project;
 import org.gradle.api.internal.project.DefaultProject;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
+import org.jboss.gm.common.io.ManipulationIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,6 +109,12 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Response
             protected Set<String> getVersionCandidates(VersioningState state, String groupId, String artifactId) {
 
                 final Set<String> result = new HashSet<>();
+
+                // If there is an existing manipulation file, also use this as potential candidates.
+                if (ManipulationIO.getManipulationFilePath(root.getRootDir()).toFile().exists()) {
+
+                    result.add(ManipulationIO.readManipulationModel(root.getRootDir()).getVersion());
+                }
 
                 cache.getGAV().forEach(pvr -> {
                     String t = getTranslationMap().get(pvr);

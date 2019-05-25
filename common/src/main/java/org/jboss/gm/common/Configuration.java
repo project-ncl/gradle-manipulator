@@ -63,6 +63,10 @@ public interface Configuration extends Accessible {
     @DefaultValue("5")
     int versionIncrementalSuffixPadding();
 
+    @Key("versionModification")
+    @DefaultValue("true")
+    boolean versionModificationEnabled();
+
     @Key("restRepositoryGroup")
     String restRepositoryGroup();
 

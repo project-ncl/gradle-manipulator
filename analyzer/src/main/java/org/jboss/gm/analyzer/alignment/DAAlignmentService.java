@@ -41,6 +41,7 @@ public class DAAlignmentService implements AlignmentService {
         }
 
         dependencySource = configuration.dependencyConfiguration();
+
         restEndpoint = new GradleDefaultTranslator(
                 endpointUrl,
                 Translator.RestProtocol.CURRENT,

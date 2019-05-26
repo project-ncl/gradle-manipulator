@@ -44,4 +44,10 @@ The plugins can be released using the following command:
 
 
 	./gradlew publishPlugins -Pversion=whatever
+	
+#### Publishing locally
+
+Both plugins can be published to maven local for easy consumption and testing. The command to do so is:
+
+	./gradlew publishToMavenLocal	
  	     

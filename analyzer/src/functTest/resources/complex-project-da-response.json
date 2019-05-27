@@ -40,11 +40,11 @@
     "artifactId": "spring-boot-dependencies"
   },
   {
-    "bestMatchVersion": "2.0.20.Final-redhat-00001",
+    "bestMatchVersion": "2.0.21.Final-redhat-00001",
     "availableVersions": [],
     "blacklisted": false,
     "whitelisted": [],
-    "version": "2.0.20.Final",
+    "version": "2.0.21.Final",
     "groupId": "io.undertow",
     "artifactId": "undertow-core"
   },

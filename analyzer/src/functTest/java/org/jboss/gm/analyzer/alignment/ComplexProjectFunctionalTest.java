@@ -50,6 +50,8 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
+    // Note : if this test has started failing check the latest version of undertow on
+    // http://central.maven.org/maven2/io/undertow/undertow-core/
     public void ensureAlignmentFileCreated() throws IOException, URISyntaxException {
         final File projectRoot = tempDir.newFolder("complex-project");
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
@@ -67,7 +69,7 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
                         .containsOnly(
-                                tuple("undertow-core", "2.0.20.Final-redhat-00001"),
+                                tuple("undertow-core", "2.0.21.Final-redhat-00001"),
                                 tuple("spring-boot-dependencies", "2.1.4.RELEASE.redhat-3"),
                                 tuple("hibernate-core", "5.3.9.Final-redhat-00001"));
             });

@@ -25,6 +25,9 @@ There are multiple ways that the plugins can be applied.
 * Apply script to project that handles all the details (this method is used by the `analyzer` plugin is run which configures the project to use the `manipulation` plugin automatically)
 * Use an init script (see example [here](https://github.com/project-ncl/gradle-manipulator#testing-on-a-real-project))
 
+It should also be noted that the project itself contains a properly configured init script for the analyzer plugin (which gets released along with the plugin).
+Furthermore, when the analyzer plugin executes, it alters the main gradle script of the target project to include the manipulation plugin.
+
 ### Feature Guide
 
 Below are links to more specific information about configuring sets of features in GME:

@@ -17,7 +17,7 @@ gradlePlugin {
             description = "Plugin that that generates alignment metadata at \${project.rootDir}/manipulation.json"
             id = "org.jboss.gm.analyzer"
             implementationClass = "org.jboss.gm.analyzer.alignment.AlignmentPlugin"
-            displayName = "gme-analyzer"
+            displayName = "GME Manipulation Plugin"
         }
     }
 }

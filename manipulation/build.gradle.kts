@@ -16,7 +16,7 @@ gradlePlugin {
             description = "Plugin that reads the alignment data from \${project.rootDir}/manipulation.json and configures build and publishing to use those versions"
             id = "org.jboss.gm.manipulation"
             implementationClass = "org.jboss.gm.manipulation.ManipulationPlugin"
-            displayName = "gme-manipulation"
+            displayName = "GME Manipulation Plugin"
         }
     }
 }

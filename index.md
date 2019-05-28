@@ -22,11 +22,11 @@ The metadata file is named `manipulation.json` and is created by the `generateAl
 There are multiple ways that the plugins can be applied.
 
 * Add plugin configuration to project manually 
-* Apply script to project that handles all the details (this method is used by the `analyzer` plugin is run which configures the project to use the `manipulation` plugin automatically)
+* Apply script to project that handles all the details (this method is used by the `analyzer` plugin which configures the project to use the `manipulation` plugin automatically)
 * Use an init script (see example [here](https://github.com/project-ncl/gradle-manipulator#testing-on-a-real-project))
 
-It should also be noted that the project itself contains a properly configured init script for the analyzer plugin (which gets released along with the plugin).
-Furthermore, when the analyzer plugin executes, it alters the main gradle script of the target project to include the manipulation plugin.
+It should also be noted that the project itself contains a properly configured init script for the `analyzer` plugin (which gets released along with the plugin).
+Furthermore, when the `analyzer` plugin executes, it alters the main gradle script of the target project to include the manipulation plugin.
 
 ### Feature Guide
 

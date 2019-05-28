@@ -20,6 +20,7 @@ gradlePlugin {
             displayName = "gme-analyzer"
         }
     }
+    this.isAutomatedPublishing = false
 }
 
 dependencies {

@@ -19,6 +19,7 @@ gradlePlugin {
             displayName = "gme-manipulation"
         }
     }
+    this.isAutomatedPublishing = false
 }
 
 dependencies {

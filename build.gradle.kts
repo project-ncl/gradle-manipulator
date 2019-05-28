@@ -15,21 +15,8 @@ plugins {
 }
 
 apply(plugin = "net.researchgate.release")
-release {
-    failOnUnversionedFiles = false
-}
 
-tasks.named("beforeReleaseBuild") {
-    dependsOn (
-            ":build",
-            "common:build",
-            "analyzer:build",
-            "manipulation:build"
-    )
-}
-tasks.named("afterReleaseBuild") {
-    dependsOn ( "publish")
-}
+tasks.afterReleaseBuild { dependsOn(":analyzer:publish", ":manipulation:publish") }
 
 allprojects {
     repositories {
@@ -96,7 +83,9 @@ subprojects {
 
         tasks.withType<ShadowJar> {
             // ensure that a single jar is built which is the shadowed one
-            archiveClassifier.set("")
+            // Using non-deprecated archiveClassifier.set doesn't seem to work.
+            @Suppress("DEPRECATION")
+            classifier = ""
             dependencies {
                 exclude(dependency("org.slf4j:slf4j-api:1.7.25"))
             }

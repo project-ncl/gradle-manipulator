@@ -45,6 +45,10 @@ Now by executing the following command:
 
 you should get the `manipulation.json` file in the root of the project.
 
+# Contributions: 
+
+Contributions as more than welcome! Before contrubuting to the project, please [this](https://github.com/project-ncl/gradle-manipulator/blob/master/CONTRIBUTING.md). 
+
 # Documentation
 
 Documentation for the project can be found [here](https://project-ncl.github.io/gradle-manipulator/)

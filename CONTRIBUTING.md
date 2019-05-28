@@ -51,3 +51,6 @@ Both plugins can be published to maven local for easy consumption and testing. T
 
 	./gradlew publishToMavenLocal	
  	     
+### More documentation
+
+More documentation for the project can be found [here](https://project-ncl.github.io/gradle-manipulator/)

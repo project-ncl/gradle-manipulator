@@ -14,6 +14,25 @@ import org.jboss.gm.common.Configuration;
  * Adds a publication repository to the legacy maven plugin.
  *
  * Repository URL and authentication token need to be configured externally.
+ *
+ * Performed configuration is equivalent to following gradle snippet:
+ *
+ * <pre>
+ *     uploadArchives {
+ *         repositories {
+ *             maven {
+ *                 url = System.getProperty('AProxDeployUrl')
+ *                 credentials(HttpHeaderCredentials) {
+ *                     name = "Authorization"
+ *                     value = "Bearer " + System.getProperty('accessToken')
+ *                 }
+ *                 authentication {
+ *                     header(HttpHeaderAuthentication)
+ *                 }
+ *             }
+ *         }
+ *     }
+ * </pre>
  */
 public class MavenPublicationRepositoryAction implements Action<Project> {
 

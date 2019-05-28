@@ -36,7 +36,7 @@ public final class TestUtils {
 
         final GradleRunner runner = GradleRunner.create()
                 .withProjectDir(projectRoot)
-                .withArguments("--stacktrace", "--info", AlignmentTask.NAME)
+                .withArguments("--stacktrace", "--info", AlignmentTask.NAME, "-DrepoRemovalBackup=settings.xml")
                 .withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath();

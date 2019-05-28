@@ -11,7 +11,7 @@ GME can override a set of dependency versions using a remote REST endpoint as it
 
 #### REST Endpoint
 
-GME can prescan the project, collect up all group:artifact:version's used and call a REST endpoint using the endpoint property `restURL` (provided from the Dependency Analysis tool [here](https://github.com/project-ncl/dependency-analysis)), which will then return a list of possible new versions. Note that the URL should be the subset of the endpoint e.g.
+GME can prescan the project, collect up all used `group:artifact:version` and call a REST endpoint using the endpoint property `restURL` (provided from the Dependency Analysis tool [here](https://github.com/project-ncl/dependency-analysis)), which will then return a list of possible new versions. Note that the URL should be the subset of the endpoint e.g.
 
     http://foo.bar.com/da/rest/v-1
 
@@ -20,9 +20,9 @@ GME will then call the following endpoints
     reports/lookup/gavs
     listings/blacklist/ga
 
-It will initially call the `lookup/gavs` endpoint. By default PME will pass *all* the GAVs to the endpoint ; it can be configured to split them into initial batches via `-DrestMaxSize=<...>`. If the endpoint returns a 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`. An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group.
+It will initially call the `lookup/gavs` endpoint. By default PME will pass *all* the GAVs to the endpoint, though it can be configured to split them into initial batches via `-DrestMaxSize=<...>`. If the endpoint returns a 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`. An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group.
 
-Finally it will call the `blacklist/ga` endpoint in order to check that the version being build is not in the blacklist.
+Finally it will call the `blacklist/ga` endpoint in order to check that the version being built is not blacklisted.
 
 The lookup REST endpoint should follow:
 
@@ -33,7 +33,7 @@ The lookup REST endpoint should follow:
 </tr>
 <tr>
 <td>
-   <pre lang="xml" style="font-size: 10px">
+   <pre lang="json" style="font-size: 10px">
 [
     [ "repositoryGroup" : "id" ]
     {
@@ -46,7 +46,7 @@ The lookup REST endpoint should follow:
     </pre>
 </td>
 <td>
-  <pre lang="xml" style="font-size: 10px">
+  <pre lang="json" style="font-size: 10px">
 [
     {
         "groupId": "org.foo",
@@ -73,15 +73,15 @@ The blacklist REST endpoint should follow:
 </tr>
 <tr>
 <td>
-   <pre lang="xml" style="font-size: 10px">
+   <pre lang="json" style="font-size: 10px">
 
     "groupid": "org.foo",
     "artifactid": "bar"
 
-    </pre>
+   </pre>
 </td>
 <td>
-  <pre lang="xml" style="font-size: 10px">
+  <pre lang="json" style="font-size: 10px">
 [
     {
         "groupId": "org.foo",
@@ -97,7 +97,9 @@ The blacklist REST endpoint should follow:
 ### Exclusions and Overrides
 
 
-In a multi-module build it is considered good practice to coordinate dependency version among the modules using dependency management.  In other words, if module A and B both use dependency X, both modules should use the same version of dependency X.  Therefore, the default behaviour of this extension is to use a single set of dependency versions applied to all modules.
+In a multi-module build it is considered good practice to coordinate dependency version among the modules using dependency management.
+In other words, if modules `A` and `B` both use dependency `X`, both modules should use the same version of dependency `X`. 
+Therefore, the default behaviour of this extension is to use a single set of dependency versions applied to all modules.
 
 It is possible to flexibly override or exclude a dependency globally or on a per module basis. The property starts with `dependencyExclusion.` and has the following format:
 
@@ -113,12 +115,12 @@ Doing the following
 
     gradle generateAlignmentMetadata -DdependencyOverride.junit:junit@*=4.10-rebuild-10
 
-will, throughout the entire project (due to the wildcard), apply the explicit 4.10-rebuild-10 version to the junit:junit dependency.
+will, throughout the entire project (due to the wildcard), apply the explicit `4.10-rebuild-10` version to the `junit:junit` dependency.
 
 
 #### Per-Module Version Override
 
-However, there are certain cases where it is useful to use different versions of the same dependency in different modules.  For example, if the project includes integration code for multiple versions of a particular API. In that case it is possible to apply a version override to a specific module of a multi-module build. For example to apply an explicit dependency override only to module B of project foo.
+However, there are certain cases where it is useful to use different versions of the same dependency in different modules. For example, if the project includes integration code for multiple versions of a particular API. In that case it is possible to apply a version override to a specific module of a multi-module build. For example to apply an explicit dependency override only to module `B` of project `foo`.
 
     gradle generateAlignmentMetadata -DdependencyOverride.junit:junit@org.foo:moduleB=4.10
 
@@ -143,7 +145,7 @@ For example:
 
     gradle generateAlignmentMetadata -DdependencyOverride.junit:junit@*=
 
-Or, you can prevent overriding a dependency version across the entire project where the groupId matches, using multiple wildcards:
+Or, you can prevent overriding a dependency version across the entire project where the `groupId` matches, using multiple wildcards:
 
     gradle generateAlignmentMetadata -DdependencyOverride.[groupId]:*@*=
 
@@ -157,13 +159,13 @@ Linking the two prior concepts it is also possible to prevent overriding using w
 
     gradle generateAlignmentMetadata -DdependencyOverride.*:*@org.foo:moduleB=
 
-This will prevent any alignment within the org.foo:moduleB.
+This will prevent any alignment within the `org.foo:moduleB`.
 
     gradle generateAlignmentMetadata -DdependencyOverride.*:*@org.foo:*=
 
-This will prevent any alignment within org.foo and all sub-modules within that.
+This will prevent any alignment within `org.foo` and all sub-modules within that.
 
 #### Disabling Dependency Manipulation
 
-TODO: Introduce new parameter? Setting -DdependencySource=NONE is not sufficient, because that also disables alignment 
+TODO: Introduce new parameter? Setting `-DdependencySource=NONE` is not sufficient, because that also disables alignment 
 of the project version.

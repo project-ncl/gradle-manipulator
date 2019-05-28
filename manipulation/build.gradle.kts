@@ -5,7 +5,6 @@ java {
 }
 
 pluginBundle {
-    description = "Plugin that reads the alignment data from \${project.rootDir}/manipulation.json and configures build and publishing to use those versions"
     website = "https://project-ncl.github.io/gradle-manipulator/"
     vcsUrl = "https://github.com/project-ncl/gradle-manipulator/tree/master/manipulation/tree/master/analyzer"
     tags = listOf("versions", "manipulation")
@@ -14,6 +13,7 @@ pluginBundle {
 gradlePlugin {
     plugins {
         create("manipulationPlugin") {
+            description = "Plugin that reads the alignment data from \${project.rootDir}/manipulation.json and configures build and publishing to use those versions"
             id = "org.jboss.gm.manipulation"
             implementationClass = "org.jboss.gm.manipulation.ManipulationPlugin"
             displayName = "gme-manipulation"

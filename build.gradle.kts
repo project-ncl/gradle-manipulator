@@ -4,10 +4,13 @@ import java.util.*
 
 plugins {
     java
+    signing
+    `maven-publish`
     id("com.diffplug.gradle.spotless") version "3.21.0"
     id("com.github.johnrengelman.shadow") version "5.0.0"
     id("net.nemerosa.versioning") version "2.8.2"
     id("com.gradle.plugin-publish") version "0.10.1"
+    id("net.researchgate.release") version "2.6.0"
 }
 
 allprojects {
@@ -22,6 +25,11 @@ allprojects {
 
 subprojects {
 
+    var isReleaseBuild = false
+
+    if ("true" == System.getProperty("release")) {
+        isReleaseBuild = true
+    }
     extra["bytemanVersion"] = "4.0.6"
     extra["pmeVersion"] = "3.6.1"
 
@@ -42,11 +50,12 @@ subprojects {
     if (project.name == "common") {
         apply(plugin = "java-library")
     } else {
-        apply(plugin = "java")
+        apply(plugin = "signing")
         apply(plugin = "maven-publish")
         apply(plugin = "java-gradle-plugin")
         apply(plugin = "com.github.johnrengelman.shadow")
         apply(plugin = "com.gradle.plugin-publish")
+        apply(plugin = "net.researchgate.release")
 
         /**
          * The configuration below has been created by reading the documentation at:
@@ -67,23 +76,27 @@ subprojects {
         val shadowJar = tasks["shadowJar"] as ShadowJar
         build.dependsOn(shadowJar)
 
-        tasks.withType<ShadowJar>() {
+        tasks.withType<ShadowJar> {
             // ensure that a single jar is built which is the shadowed one
-            classifier = ""
+            archiveClassifier.set("")
             dependencies {
                 exclude(dependency("org.slf4j:slf4j-api:1.7.25"))
             }
-            // no need to analyzer.init.gradle in the jar since it will never be used from inside the plugin itself
+            // no need to add analyzer.init.gradle in the jar since it will never be used from inside the plugin itself
             exclude("analyzer.init.gradle")
         }
 
+        release {
+            failOnUnversionedFiles = false
+        }
+
         val sourcesJar by tasks.registering(Jar::class) {
-            classifier = "sources"
+            archiveClassifier.set("sources")
             from(sourceSets.main.get().allSource)
         }
 
         val javadocJar by tasks.registering(Jar::class) {
-            classifier = "javadoc"
+            archiveClassifier.set("javadoc")
             from(tasks["javadoc"])
         }
 
@@ -94,6 +107,7 @@ subprojects {
                     project.shadow.component(this)
                     artifact(sourcesJar.get())
                     artifact(javadocJar.get())
+
                     // we publish the init gradle file to make it easy for tools that use
                     // the plugin to set it up without having to create their own init gradle file
                     if (project.name == "analyzer") {
@@ -101,7 +115,56 @@ subprojects {
                             extension = "init.gradle"
                         })
                     }
+
+
+                    pom {
+                        name.set("Gradle Manipulation Extension")
+                        description.set("A tool to work with ProjectNCL to manipulate Gradle builds.")
+                        url.set("https://github.com/project-ncl/gradle-manipulator")
+                        packaging = "jar"
+
+                        licenses {
+                            license {
+                                name.set("The Apache License, Version 2.0")
+                                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                            }
+                        }
+                        developers {
+                            developer {
+                                id.set("geoand")
+                                name.set("Georgios Andrianakis")
+                                email.set("gandrian@redhat.com")
+                            }
+                            developer {
+                                id.set("rnc")
+                                name.set("Nick Cross")
+                                email.set("ncross@redhat.com")
+                            }
+                            developer {
+                                id.set("TomasHofman")
+                                name.set("Tomas Hofman")
+                                email.set("thofman@redhat.com")
+                            }
+                            developer {
+                                id.set("metacosm")
+                                name.set("Chris Laprun")
+                                email.set("claprun@redhat.com")
+                            }
+                        }
+                        scm {
+                            connection.set("scm:git:http://github.com/project-ncl/gradle-manipulator.git")
+                            developerConnection.set("scm:git:git@github.com:project-ncl/gradle-manipulator.git")
+                            url.set("https://github.com/project-ncl/gradle-manipulator")
+                        }
+                    }
                 }
+            }
+        }
+
+        if (isReleaseBuild) {
+            signing {
+                useGpgCmd()
+                this.sign(publishing.publications["shadow"])
             }
         }
     }
@@ -120,7 +183,7 @@ subprojects {
         "jar"(Jar::class) {
             this.manifest {
                 attributes["Built-By"]=System.getProperty("user.name")
-                attributes["Build-Timestamp"]= SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(Date())
+                attributes["Build-Timestamp"]=SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(Date())
                 attributes["Scm-Revision"]=versioning.info.commit
                 attributes["Created-By"]="Gradle ${gradle.gradleVersion}"
                 attributes["Build-Jdk"]=System.getProperty("java.version") + " ; " + System.getProperty("java.vendor") + " ; " + System.getProperty("java.vm.version")

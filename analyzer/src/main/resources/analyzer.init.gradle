@@ -2,6 +2,7 @@
 
 initscript {
     repositories {
+        mavenCentral()
         mavenLocal()
     }
     dependencies {

@@ -5,7 +5,6 @@ java {
 }
 
 pluginBundle {
-    description = "Plugin that that generates alignment metadata at \${project.rootDir}/manipulation.json"
     website = "https://project-ncl.github.io/gradle-manipulator/"
     vcsUrl = "https://github.com/project-ncl/gradle-manipulator/tree/master/analyzer"
     tags = listOf("versions", "alignment")
@@ -14,9 +13,10 @@ pluginBundle {
 gradlePlugin {
     plugins {
         create("alignmentPlugin") {
+            description = "Plugin that that generates alignment metadata at \${project.rootDir}/manipulation.json"
             id = "org.jboss.gm.analyzer"
             implementationClass = "org.jboss.gm.analyzer.alignment.AlignmentPlugin"
-            displayName = "gme-analyzer"
+            displayName = "GME Manipulation Plugin"
         }
     }
     // Disable creation of the plugin marker pom.

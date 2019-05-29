@@ -1,3 +1,12 @@
+
+# Development
+
+Contributions to the project are very welcome! Please submit pull requests with any changes (preferably with tests).
+
+### Documentation
+
+The documentation for the project can be found [here](https://project-ncl.github.io/gradle-manipulator/). In order to edit the website checkout the `gh-pages` branch. It is possible to use Jekyll (https://help.github.com/articles/using-jekyll-with-pages) to preview the changes. Jekyll can be run with `jekyll serve --watch -V`
+
 ### IDE Config and Code Style
 
 This project has a strictly enforced code style. Code formatting is done by the Eclipse code formatter, using the config files
@@ -20,7 +29,7 @@ Select _Use the Eclipse Code Formatter_, then change the _Eclipse Java Formatter
 `eclipse-format.xml` file in the `ide-config` directory. Make sure the _Optimize Imports_ box is ticked, and
 select the `eclipse.importorder` file as the import order config file.
 
-### Recommendations
+### Code Recommendations
 
 #### Exceptions
 
@@ -31,7 +40,22 @@ select the `eclipse.importorder` file as the import order config file.
 
 ### Releasing
 
-The project has been configured to release both plugins to the Gradle Portal.
+The project has been configured to release both plugins to the Gradle Portal and to release to Maven Central. 
+
+<!-- Using diff syntax to highlight the warning in red -->
+```diff
+- Before running the release notify the team to lock down the repository until the release is finished. -
+```
+
+It uses the [gradle-release](https://github.com/researchgate/gradle-release) plugin to simulate a similar process to the Maven release plugin - it can increment the version, add tags, push the changes, etc. It supplies a hook task (`afterReleaseBuild`) that can be used to ensure that tasks after the release version has been changed - we have configured it as follows:
+
+```
+tasks.afterReleaseBuild { 
+    dependsOn(":analyzer:publish", ":manipulation:publish", 
+              ":analyzer:publishPlugins", ":manipulation:publishPlugins") }
+```
+
+The `publish` pushes to Sonatype staging while the `publishPlugins` pushes to the Gradle Plugin Portal.
 
 #### Prerequisites
 
@@ -49,16 +73,20 @@ gradle.publish.secret=secret
 * Update `$HOME/.gradle/gradle.properties` to contain the necessary configuration for publishing to Maven Central. Something like:
 
 ```
-signing.gnupg.executable=gpg
 signing.gnupg.keyName=someKey
 signing.passphrase=pass
 ```   
+
+Note: If your gpg executable is not named `gpg` then you may need to add a line like `signing.gnupg.executable=gpg` to the properties file.
+
+The configuration will also read your `$HOME/.m2/settings.xml` for a username/password associated with `sonatype-nexus-staging`. 
+
 
 See [this](https://docs.gradle.org/current/userguide/signing_plugin.html) for more details
 
 #### Release command
 
-The plugins can be released using the following command:
+The plugins can be released using the following command (from the master branch of the repository):
 
 
 	./gradlew clean release -Drelease=true
@@ -73,6 +101,3 @@ Both plugins can be published to maven local to make it easier to consume them i
 	
 To change the version that will be deployed just add `-Pversion=whatever`.	
  	     
-### More documentation
-
-More documentation for the project can be found [here](https://project-ncl.github.io/gradle-manipulator/).

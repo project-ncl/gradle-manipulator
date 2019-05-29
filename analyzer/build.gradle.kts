@@ -4,7 +4,6 @@ java {
     sourceCompatibility = JavaVersion.VERSION_1_8
 }
 
-
 pluginBundle {
     description = "Plugin that that generates alignment metadata at \${project.rootDir}/manipulation.json"
     website = "https://project-ncl.github.io/gradle-manipulator/"
@@ -20,6 +19,8 @@ gradlePlugin {
             displayName = "gme-analyzer"
         }
     }
+    // Disable creation of the plugin marker pom.
+    this.isAutomatedPublishing = false
 }
 
 dependencies {
@@ -76,4 +77,3 @@ tasks {
         }
     }
 }
-

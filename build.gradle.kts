@@ -6,12 +6,17 @@ plugins {
     java
     signing
     `maven-publish`
+    id("org.datlowe.maven-publish-auth") version "2.0.2"
     id("com.diffplug.gradle.spotless") version "3.21.0"
     id("com.github.johnrengelman.shadow") version "5.0.0"
     id("net.nemerosa.versioning") version "2.8.2"
     id("com.gradle.plugin-publish") version "0.10.1"
     id("net.researchgate.release") version "2.6.0"
 }
+
+apply(plugin = "net.researchgate.release")
+
+tasks.afterReleaseBuild { dependsOn(":analyzer:publish", ":manipulation:publish") }
 
 allprojects {
     repositories {
@@ -52,10 +57,10 @@ subprojects {
     } else {
         apply(plugin = "signing")
         apply(plugin = "maven-publish")
+        apply(plugin = "org.datlowe.maven-publish-auth")
         apply(plugin = "java-gradle-plugin")
         apply(plugin = "com.github.johnrengelman.shadow")
         apply(plugin = "com.gradle.plugin-publish")
-        apply(plugin = "net.researchgate.release")
 
         /**
          * The configuration below has been created by reading the documentation at:
@@ -78,16 +83,14 @@ subprojects {
 
         tasks.withType<ShadowJar> {
             // ensure that a single jar is built which is the shadowed one
-            archiveClassifier.set("")
+            // Using non-deprecated archiveClassifier.set doesn't seem to work.
+            @Suppress("DEPRECATION")
+            classifier = ""
             dependencies {
                 exclude(dependency("org.slf4j:slf4j-api:1.7.25"))
             }
             // no need to add analyzer.init.gradle in the jar since it will never be used from inside the plugin itself
             exclude("analyzer.init.gradle")
-        }
-
-        release {
-            failOnUnversionedFiles = false
         }
 
         val sourcesJar by tasks.registering(Jar::class) {
@@ -157,6 +160,12 @@ subprojects {
                             url.set("https://github.com/project-ncl/gradle-manipulator")
                         }
                     }
+                }
+            }
+            repositories {
+                maven {
+                    name = "sonatype-nexus-staging"
+                    url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
                 }
             }
         }

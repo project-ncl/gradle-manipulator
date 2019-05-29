@@ -19,6 +19,8 @@ gradlePlugin {
             displayName = "gme-manipulation"
         }
     }
+    // Disable creation of the plugin marker pom.
+    this.isAutomatedPublishing = false
 }
 
 dependencies {

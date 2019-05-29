@@ -36,21 +36,43 @@ The project has been configured to release both plugins to the Gradle Portal.
 #### Prerequisites
 
 * Sign up for a Gradle account (see details [here](https://guides.gradle.org/publishing-plugins-to-gradle-plugin-portal/#create_an_account_on_the_gradle_plugin_portal))
-* Create the required `$HOME/.gradle/gradle.properties` locally with data from the API key (which can be found in your gradle account)
+* Make sure you can push changes to Maven Central 
+* Create or update the required `$HOME/.gradle/gradle.properties` locally with data from the API key (which can be found in your gradle account)
+
+It should look something like this:
+
+```
+gradle.publish.key=key
+gradle.publish.secret=secret
+```
+
+* Update `$HOME/.gradle/gradle.properties` to contain the necessary configuration for publishing to Maven Central. Something like:
+
+```
+signing.gnupg.executable=gpg
+signing.gnupg.keyName=someKey
+signing.passphrase=pass
+```   
+
+See [this](https://docs.gradle.org/current/userguide/signing_plugin.html) for more details
 
 #### Release command
 
 The plugins can be released using the following command:
 
 
-	./gradlew publishPlugins -Pversion=whatever
+	./gradlew clean release -Drelease=true
 	
-#### Publishing locally
+The command will both publish the plugin to the Gradle Plugin Portal and to Maven Central.
+	
+#### Publishing artifacts locally
 
-Both plugins can be published to maven local for easy consumption and testing. The command to do so is:
+Both plugins can be published to maven local to make it easier to consume them in projects. The command to do so is:
 
-	./gradlew publishToMavenLocal	
+	./gradlew publishToMavenLocal
+	
+To change the version that will be deployed just add `-Pversion=whatever`.	
  	     
 ### More documentation
 
-More documentation for the project can be found [here](https://project-ncl.github.io/gradle-manipulator/)
+More documentation for the project can be found [here](https://project-ncl.github.io/gradle-manipulator/).

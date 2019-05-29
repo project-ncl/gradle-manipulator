@@ -16,7 +16,7 @@ plugins {
 
 apply(plugin = "net.researchgate.release")
 
-tasks.afterReleaseBuild { dependsOn(":analyzer:publish", ":manipulation:publish") }
+tasks.afterReleaseBuild { dependsOn(":analyzer:publish", ":manipulation:publish", ":analyzer:publishPlugins", ":manipulation:publishPlugins") }
 
 allprojects {
     repositories {

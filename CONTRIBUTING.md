@@ -3,6 +3,19 @@
 
 Contributions to the project are very welcome! Please submit pull requests with any changes (preferably with tests).
 
+ * [Documentation](#documentation)
+ * [IDE Config and Code Style](#ide-config-and-code-style)
+    * [Eclipse Setup](#eclipse-setup)
+    * [IDEA Setup](#idea-setup)
+ * [Code Recommendations](#code-recommendations)
+    * [Exceptions](#exceptions)
+ * [Releasing](#releasing)
+    * [Prerequisites](#prerequisites)
+    * [Release command](#release-command)
+    * [Publishing artifacts locally](#publishing-artifacts-locally)
+
+
+
 ### Documentation
 
 The documentation for the project can be found [here](https://project-ncl.github.io/gradle-manipulator/). In order to edit the website checkout the `gh-pages` branch. It is possible to use Jekyll (https://help.github.com/articles/using-jekyll-with-pages) to preview the changes. Jekyll can be run with `jekyll serve --watch -V`
@@ -77,7 +90,14 @@ signing.gnupg.keyName=someKey
 signing.passphrase=pass
 ```   
 
-Note: If your gpg executable is not named `gpg` then you may need to add a line like `signing.gnupg.executable=gpg` to the properties file.
+Note: By default the signing is configured to use GPG. It will automatically look for the `gpg2` executable. On Fedora systems this is normally a symbolic link e.g.
+```
+    /usr/bin/gpg*
+    /usr/bin/gpg2 -> gpg*
+```
+If this does not exist on your system then you may need to add a line like `signing.gnupg.executable=gpg` to the properties file.
+
+<br>
 
 The configuration will also read your `$HOME/.m2/settings.xml` for a username/password associated with `sonatype-nexus-staging`. 
 

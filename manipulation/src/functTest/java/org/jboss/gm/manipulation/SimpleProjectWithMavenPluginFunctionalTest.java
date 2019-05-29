@@ -19,6 +19,7 @@ import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
@@ -26,6 +27,9 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
 
     private static final String ARTIFACT_NAME = "root-1.0.1-redhat-00001";
     private static final Path PATH_IN_REPOSITORY = Paths.get("org/acme/root/1.0.1-redhat-00001/");
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();

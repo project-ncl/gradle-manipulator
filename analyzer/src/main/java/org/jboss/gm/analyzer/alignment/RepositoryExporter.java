@@ -44,6 +44,7 @@ public class RepositoryExporter {
         mavenProfile.setId("generated-by-gme");
         mavenSettings.addActiveProfile(mavenProfile.getId());
 
+        addDefaultRepositories();
         processRepositories(repositories);
     }
 
@@ -106,5 +107,9 @@ public class RepositoryExporter {
 
     private static boolean isSuportedScheme(URI url) {
         return url.getScheme() != null && SUPPORTED_SCHEMES.contains(url.getScheme().toLowerCase());
+    }
+
+    protected void addDefaultRepositories() {
+        addRepository("Gradle Plugin Repository", "https://plugins.gradle.org/m2/");
     }
 }

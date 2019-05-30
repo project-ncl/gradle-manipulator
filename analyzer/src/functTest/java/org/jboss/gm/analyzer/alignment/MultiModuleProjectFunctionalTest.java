@@ -127,7 +127,9 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         List<Repository> repositories = generatedSettings.getProfiles().get(0).getRepositories();
         assertThat(repositories).extracting("url")
                 // should not contain duplicate entries
-                .containsOnly("https://repo.maven.apache.org/maven2/");
+                .containsOnly(
+                        "https://repo.maven.apache.org/maven2/",
+                        "https://plugins.gradle.org/m2/");
     }
 
 }

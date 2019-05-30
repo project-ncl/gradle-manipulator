@@ -91,6 +91,14 @@ public interface Configuration extends Accessible {
     @DefaultValue("REST")
     DependencyPrecedence dependencyConfiguration();
 
+    /**
+     * Path to a file where project's artifact repositories will be exported in the maven settings format.
+     *
+     * PNC will use this file to configure repository proxying.
+     */
+    @Key("repoRemovalBackup")
+    String repositoriesFile();
+
     class DependencyConverter implements Converter<DependencyPrecedence> {
         /**
          * Converts the given input into an Object of type T.

@@ -27,6 +27,7 @@ import org.gradle.api.artifacts.ModuleVersionSelector;
 import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.UnresolvedDependency;
+import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
 import org.gradle.api.tasks.TaskAction;
@@ -63,6 +64,8 @@ public class AlignmentTask extends DefaultTask {
             final String currentProjectVersion = project.getVersion().toString();
 
             cache.addDependencies(project, deps);
+            project.getRepositories().forEach(cache::addRepository);
+            project.getBuildscript().getRepositories().forEach(cache::addRepository);
 
             if (StringUtils.isBlank(project.getGroup().toString()) ||
                     DEFAULT_VERSION.equals(project.getVersion().toString())) {
@@ -111,7 +114,8 @@ public class AlignmentTask extends DefaultTask {
                 logger.info("Completed processing for alignment and writing {} ", cache.toString());
 
                 writeManipulationModel(project.getRootDir(), alignmentModel);
-                writeMarkerFile(project.getRootDir());
+                writeMarkerFile();
+                writeRepositorySettingsFile(cache.getRepositories());
             }
         } catch (ManipulationException e) {
             throw new ManipulationUncheckedException(e);
@@ -120,7 +124,8 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private void writeMarkerFile(File rootDir) throws IOException {
+    private void writeMarkerFile() throws IOException {
+        File rootDir = getProject().getRootDir();
         File gmeGradle = new File(rootDir, GME);
         File rootGradle = new File(rootDir, Project.DEFAULT_BUILD_FILE);
 
@@ -264,5 +269,26 @@ public class AlignmentTask extends DefaultTask {
                 correspondingModule.getAlignedDependencies().put(d.toString(), newVersion);
             }
         });
+    }
+
+    /**
+     * Writes a maven settings file containing artifact repositories used by this project.
+     */
+    private void writeRepositorySettingsFile(Collection<ArtifactRepository> repositories) {
+        Configuration config = ConfigCache.getOrCreate(Configuration.class);
+
+        // trying to mimick PME behaviour here - export only if repoRemovalBackup is defined and by default place it in
+        // project root
+        String repositoriesFilePath = config.repositoriesFile();
+        if (repositoriesFilePath != null) {
+            File repositoriesFile;
+            if (repositoriesFilePath.equals("settings.xml")) {
+                repositoriesFile = new File(getProject().getRootDir(), repositoriesFilePath);
+            } else {
+                repositoriesFile = new File(config.repositoriesFile());
+            }
+
+            new RepositoryExporter(repositories).export(repositoriesFile);
+        }
     }
 }

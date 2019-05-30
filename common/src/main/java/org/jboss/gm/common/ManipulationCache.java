@@ -1,14 +1,19 @@
 package org.jboss.gm.common;
 
+import java.net.URL;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.jboss.gm.common.model.ManipulationModel;
 
 /**
@@ -32,6 +37,8 @@ public class ManipulationCache {
     private ArrayDeque<ProjectVersionRef> projectVersionRefs = new ArrayDeque<>();
 
     private Map<Project, Collection<ProjectVersionRef>> projectDependencies = new HashMap<>();
+
+    private Set<ArtifactRepository> repositories = new HashSet<>();
 
     /**
      * Retrieves the cache given any project. It will access the root project, check if the
@@ -125,4 +132,11 @@ public class ManipulationCache {
         return rootProject;
     }
 
+    public void addRepository(ArtifactRepository repository) {
+        repositories.add(repository);
+    }
+
+    public Set<ArtifactRepository> getRepositories() {
+        return repositories;
+    }
 }

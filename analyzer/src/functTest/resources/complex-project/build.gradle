@@ -1,3 +1,10 @@
+buildscript {
+    repositories {
+        maven {
+            url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+        }
+    }
+}
 
 plugins {
     // including this plugin directly instead of by an init script, which allows to use the freshly build version
@@ -13,6 +20,18 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
+        flatDir {
+            dirs = [file("repo/")]
+        }
+        /*maven {
+            url = uri("https://localhost/test-repo1")
+        }
+        maven {
+            url = uri("https://localhost/test-repo2")
+        }*/
+        ivy {
+            url = uri("https://localhost:8089/ivy-repo")
+        }
     }
 
     sourceCompatibility = 1.8

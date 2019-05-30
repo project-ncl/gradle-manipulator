@@ -12,10 +12,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.List;
 
+import org.apache.maven.settings.Repository;
+import org.apache.maven.settings.Settings;
+import org.apache.maven.settings.io.xpp3.SettingsXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.Project;
 import org.jboss.gm.common.Configuration;
@@ -60,7 +66,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException {
+    public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException, XmlPullParserException {
 
         final File projectRoot = tempDir.newFolder("multi-module");
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
@@ -113,6 +119,17 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
 
         // we care about how many calls are made to DA from an implementation perspective which is why we assert
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs")));
+
+        // check that generated settings.xml contains correct remote repositories
+        File settingsFile = new File(projectRoot, "settings.xml");
+        SettingsXpp3Reader reader = new SettingsXpp3Reader();
+        Settings generatedSettings = reader.read(new FileInputStream(settingsFile));
+        List<Repository> repositories = generatedSettings.getProfiles().get(0).getRepositories();
+        assertThat(repositories).extracting("url")
+                // should not contain duplicate entries
+                .containsOnly(
+                        "https://repo.maven.apache.org/maven2/",
+                        "https://plugins.gradle.org/m2/");
     }
 
 }

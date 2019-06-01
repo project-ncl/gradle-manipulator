@@ -54,4 +54,22 @@ public class SimpleProjectFunctionalTest {
                         TestUtils.getAlignedTuple(module, "commons-lang3", "3.8.1"),
                         TestUtils.getAlignedTuple(module, "undertow-core"));
     }
+
+    @Test
+    public void ensureDocs() throws IOException, URISyntaxException {
+        final File simpleProjectRoot = tempDir.newFolder("simple-project");
+        TestUtils.copyDirectory("simple-project", simpleProjectRoot);
+        assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
+
+        final BuildResult buildResult = GradleRunner.create()
+                .withProjectDir(simpleProjectRoot)
+                .withArguments("distZip")
+                .withDebug(true)
+                .withPluginClasspath()
+                .build();
+
+        assertThat(buildResult.task(":" + "distZip").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
+        assertThat(simpleProjectRoot.toPath().resolve("build/distributions/dummy-1.0.1-redhat-00001-docs.zip")).exists();
+        assertThat(simpleProjectRoot.toPath().resolve("build/distributions/dummy-1.0.1-redhat-00001-dist.zip")).exists();
+    }
 }

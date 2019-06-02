@@ -30,11 +30,8 @@ allprojects {
 
 subprojects {
 
-    var isReleaseBuild = false
+    val isReleaseBuild = "true" == System.getProperty("release")
 
-    if ("true" == System.getProperty("release")) {
-        isReleaseBuild = true
-    }
 
     extra["bytemanVersion"] = "4.0.7"
     extra["pmeVersion"] = "3.6.1"

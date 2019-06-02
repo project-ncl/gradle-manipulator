@@ -39,6 +39,7 @@ public class SimpleProjectFunctionalTest {
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("generatePomFileForMainPublication")
                 .withDebug(true)
+                .forwardOutput()
                 .withPluginClasspath()
                 .build();
 
@@ -65,6 +66,7 @@ public class SimpleProjectFunctionalTest {
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("distZip")
                 .withDebug(true)
+                .forwardOutput()
                 .withPluginClasspath()
                 .build();
 

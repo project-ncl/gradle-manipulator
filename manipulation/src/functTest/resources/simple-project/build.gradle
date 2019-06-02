@@ -64,7 +64,6 @@ task distZip(type: Zip, dependsOn: [docsZip]) {
 
 }
 
-
 // TODO: this will need to be removed when the plugin takes care of things
 publishing {
     publications {

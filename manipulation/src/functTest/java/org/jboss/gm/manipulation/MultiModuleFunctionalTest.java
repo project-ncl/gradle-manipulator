@@ -38,6 +38,7 @@ public class MultiModuleFunctionalTest {
                 .withProjectDir(multiModuleRoot)
                 .withArguments("generatePomFileForMainPublication")
                 .withDebug(true)
+                .forwardOutput()
                 .withPluginClasspath()
                 .build();
 

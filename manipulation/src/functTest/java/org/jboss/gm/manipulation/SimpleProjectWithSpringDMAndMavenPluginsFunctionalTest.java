@@ -45,6 +45,7 @@ public class SimpleProjectWithSpringDMAndMavenPluginsFunctionalTest {
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("install")
                 .withDebug(true)
+                .forwardOutput()
                 .withPluginClasspath()
                 .build();
         assertThat(buildResult.task(":install").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);

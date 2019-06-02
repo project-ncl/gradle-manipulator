@@ -39,6 +39,7 @@ public class SimpleProjectWithMisconfiguredSpringDMAndMavenPluginsFunctionalTest
                     .withProjectDir(simpleProjectRoot)
                     .withArguments("install")
                     .withDebug(true)
+                    .forwardOutput()
                     .withPluginClasspath()
                     .build();
         }).withMessageContaining("cannot be used together");

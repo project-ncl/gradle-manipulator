@@ -164,9 +164,16 @@ subprojects {
                 }
             }
             repositories {
-                maven {
-                    name = "sonatype-nexus-staging"
-                    url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+                if (isReleaseBuild) {
+                    maven {
+                        name = "sonatype-nexus-staging"
+                        url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+                    }
+                } else {
+                    maven {
+                        name = "sonatype-nexus-snapshots"
+                        url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+                    }
                 }
             }
         }

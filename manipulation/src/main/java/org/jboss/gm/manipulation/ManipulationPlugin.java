@@ -18,7 +18,6 @@ import org.jboss.gm.common.utils.ManifestUtils;
 import org.jboss.gm.manipulation.actions.ManifestUpdateAction;
 import org.jboss.gm.manipulation.actions.MavenPublicationRepositoryAction;
 import org.jboss.gm.manipulation.actions.OverrideDependenciesAction;
-import org.jboss.gm.manipulation.actions.ProjectChangeVersionAction;
 import org.jboss.gm.manipulation.actions.PublishingArtifactsAction;
 import org.jboss.gm.manipulation.actions.PublishingPomTransformerAction;
 import org.jboss.gm.manipulation.actions.PublishingRepositoryAction;
@@ -44,6 +43,10 @@ public class ManipulationPlugin implements Plugin<Project> {
         final ManipulationModel alignmentModel = ManipulationIO.readManipulationModel(project.getRootDir());
         final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getName());
 
+        // we need to change the project version early so various tasks that ready early and create other vars based on it
+        // (like the zip tasks) can use the correct version
+        project.setVersion(alignmentModel.getVersion());
+
         final ResolvedDependenciesRepository resolvedDependenciesRepository = new ResolvedDependenciesRepository();
 
         project.afterEvaluate(p -> {
@@ -58,7 +61,6 @@ public class ManipulationPlugin implements Plugin<Project> {
         });
 
         // add actions to manipulate project
-        project.afterEvaluate(new ProjectChangeVersionAction(correspondingModule));
         project.afterEvaluate(new OverrideDependenciesAction(correspondingModule, resolvedDependenciesRepository));
         project.afterEvaluate(new ManifestUpdateAction(correspondingModule));
 

@@ -19,6 +19,51 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
+task api(type: Javadoc) {
+    group = "Documentation"
+    description = "Generates aggregated Javadoc API documentation."
+    title = "${rootProject.description} ${version} API"
+
+    dependsOn {
+        project.tasks.getByName("jar")
+    }
+
+    source project.collect { project ->
+        project.sourceSets.main.allJava
+    }
+}
+
+task docsZip(type: Zip, dependsOn: ['api']) {
+    group = "Distribution"
+    baseName = "dummy"
+    classifier = "docs"
+    description = "Builds -${classifier} archive containing api and reference " +
+            "for deployment at https://docs.spring.io/spring-framework/docs."
+
+    from (api) {
+        into "javadoc-api"
+    }
+}
+
+task distZip(type: Zip, dependsOn: [docsZip]) {
+    group = "Distribution"
+    baseName = "dummy"
+    classifier = "dist"
+    description = "Builds -${classifier} archive, containing all jars and docs, " +
+            "suitable for community download page."
+
+    ext.baseDir = "${baseName}-${project.version}";
+
+
+    println(docsZip.archivePath)
+    println(docsZip.archiveName)
+
+    from(zipTree(docsZip.archivePath)) {
+        into "${baseDir}/docs"
+    }
+
+}
+
 
 // TODO: this will need to be removed when the plugin takes care of things
 publishing {

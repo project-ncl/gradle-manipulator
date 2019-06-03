@@ -7,7 +7,8 @@ title: "Dependency Manipulation"
 
 ### Overview
 
-GME can override a set of dependency versions using a remote REST endpoint as its input source.
+GME can override a set of dependency versions using a remote REST endpoint as its input source. The tool uses the same code from PME and therefore supports a subset of the features from [here](https://release-engineering.github.io/pom-manipulation-ext/guide/dep-manip.html)
+
 
 #### REST Endpoint
 
@@ -22,7 +23,10 @@ GME will then call the following endpoints
 
 It will initially call the `lookup/gavs` endpoint. By default PME will pass *all* the GAVs to the endpoint, though it can be configured to split them into initial batches via `-DrestMaxSize=<...>`. If the endpoint returns a 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`. An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group.
 
+<!--
+Not Implemented Yet
 Finally it will call the `blacklist/ga` endpoint in order to check that the version being built is not blacklisted.
+-->
 
 The lookup REST endpoint should follow:
 
@@ -98,7 +102,7 @@ The blacklist REST endpoint should follow:
 
 
 In a multi-module build it is considered good practice to coordinate dependency version among the modules using dependency management.
-In other words, if modules `A` and `B` both use dependency `X`, both modules should use the same version of dependency `X`. 
+In other words, if modules `A` and `B` both use dependency `X`, both modules should use the same version of dependency `X`.
 Therefore, the default behaviour of this extension is to use a single set of dependency versions applied to all modules.
 
 It is possible to flexibly override or exclude a dependency globally or on a per module basis. The property starts with `dependencyExclusion.` and has the following format:
@@ -167,5 +171,4 @@ This will prevent any alignment within `org.foo` and all sub-modules within that
 
 #### Disabling Dependency Manipulation
 
-TODO: Introduce new parameter? Setting `-DdependencySource=NONE` is not sufficient, because that also disables alignment 
-of the project version.
+If the parameter `-DdependencySource=NONE` is set then this will disable communication with the REST source which effectively disables manipulation. Note that the version will still be changed - although, if there is no preceeding `manipulation.json` it will always get a `-00001` suffix.

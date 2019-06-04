@@ -53,10 +53,7 @@ task distZip(type: Zip, dependsOn: [docsZip]) {
             "suitable for community download page."
 
     ext.baseDir = "${baseName}-${project.version}";
-
-
-    println(docsZip.archivePath)
-    println(docsZip.archiveName)
+    
 
     from(zipTree(docsZip.archivePath)) {
         into "${baseDir}/docs"

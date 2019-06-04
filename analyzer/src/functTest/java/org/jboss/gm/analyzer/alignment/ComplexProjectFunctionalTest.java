@@ -21,10 +21,9 @@ import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.io.xpp3.SettingsXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.gradle.api.Project;
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.model.ManipulationModel;
-import org.jboss.gm.common.utils.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -58,12 +57,14 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
     @Test
     // Note : if this test has started failing check the latest version of undertow on
     // http://central.maven.org/maven2/io/undertow/undertow-core/
-    public void ensureAlignmentFileCreated() throws IOException, URISyntaxException, XmlPullParserException {
+    public void ensureAlignmentFileCreated()
+            throws IOException, URISyntaxException, XmlPullParserException, ManipulationException {
         final File projectRoot = tempDir.newFolder("complex-project");
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
-        assertEquals(AlignmentTask.LOAD_GME, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+
+        assertEquals(AlignmentTask.LOAD_GME, TestUtils.getLine(projectRoot));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.jboss.gm.analyzer.functest");

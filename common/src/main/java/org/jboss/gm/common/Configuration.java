@@ -1,6 +1,6 @@
 package org.jboss.gm.common;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;

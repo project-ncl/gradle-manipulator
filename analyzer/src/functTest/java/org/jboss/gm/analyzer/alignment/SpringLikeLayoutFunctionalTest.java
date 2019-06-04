@@ -17,10 +17,9 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.gradle.api.Project;
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.model.ManipulationModel;
-import org.jboss.gm.common.utils.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -60,13 +59,13 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException {
+    public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException, ManipulationException {
 
         final File projectRoot = tempDir.newFolder("spring-like-layout");
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
-        assertEquals(AlignmentTask.LOAD_GME, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(AlignmentTask.LOAD_GME, TestUtils.getLine(projectRoot));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme");

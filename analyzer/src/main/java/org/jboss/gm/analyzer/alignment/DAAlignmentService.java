@@ -1,6 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence.NONE;
 
 import java.util.ArrayList;

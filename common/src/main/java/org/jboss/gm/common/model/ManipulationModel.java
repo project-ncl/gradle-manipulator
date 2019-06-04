@@ -3,7 +3,7 @@ package org.jboss.gm.common.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang.Validate;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
 import com.fasterxml.jackson.annotation.JsonProperty;

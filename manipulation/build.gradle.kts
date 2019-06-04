@@ -31,6 +31,8 @@ dependencies {
     testCompile("junit:junit:4.12")
     testCompile("org.assertj:assertj-core:3.12.2")
     testCompile("com.github.stefanbirkner:system-rules:1.19.0")
+    // GradleAPI in test compile to get access to org.gradle.internal.Pair
+    testCompile(gradleApi())
 }
 
 // separate source set and task for functional tests

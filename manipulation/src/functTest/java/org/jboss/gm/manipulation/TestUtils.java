@@ -13,12 +13,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.assertj.core.groups.Tuple;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.gradle.internal.Pair;
 import org.jboss.gm.common.model.ManipulationModel;
 
 public final class TestUtils {
@@ -87,6 +86,6 @@ public final class TestUtils {
         assertThat(model.getArtifactId()).isEqualTo(module.getName());
         assertThat(model.getVersion()).isEqualTo(module.getVersion());
 
-        return new ImmutablePair<>(model, module);
+        return Pair.of(model, module);
     }
 }

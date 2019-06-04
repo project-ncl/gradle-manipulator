@@ -1,6 +1,6 @@
 package org.jboss.gm.manipulation.actions;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 import org.aeonbits.owner.ConfigCache;
 import org.gradle.api.Action;

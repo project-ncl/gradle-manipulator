@@ -1,6 +1,6 @@
 package org.jboss.gm.manipulation;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 import java.lang.reflect.Method;
 
@@ -50,6 +50,7 @@ public class ManipulationPlugin implements Plugin<Project> {
         final ResolvedDependenciesRepository resolvedDependenciesRepository = new ResolvedDependenciesRepository();
 
         project.afterEvaluate(p -> {
+            logger.info("### Project :: after evaluate setting {} to {} ", p.getVersion(), alignmentModel.getVersion());
             // dependencyManagement is the extension that the Spring Dependency Management Plugin registers
             final Object obj = p.getExtensions().findByName("dependencyManagement");
             if (obj != null) {

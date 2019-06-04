@@ -5,10 +5,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.gradle.api.Project;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
@@ -56,5 +60,12 @@ public final class TestUtils {
         } else {
             return ManipulationIO.readManipulationModel(projectRoot);
         }
+    }
+
+    public static String getLine(File projectRoot) throws IOException, ManipulationException {
+
+        List<String> lines = FileUtils.readLines(new File(projectRoot, Project.DEFAULT_BUILD_FILE), Charset.defaultCharset());
+
+        return org.jboss.gm.common.utils.FileUtils.getFirstLine(lines);
     }
 }

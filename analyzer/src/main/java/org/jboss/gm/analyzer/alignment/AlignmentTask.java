@@ -3,19 +3,21 @@ package org.jboss.gm.analyzer.alignment;
 import static org.gradle.api.Project.DEFAULT_VERSION;
 import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigCache;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -35,7 +37,6 @@ import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.ProjectVersionFactory;
 import org.jboss.gm.common.model.ManipulationModel;
-import org.jboss.gm.common.utils.FileUtils;
 import org.slf4j.Logger;
 
 /**
@@ -44,7 +45,7 @@ import org.slf4j.Logger;
  */
 public class AlignmentTask extends DefaultTask {
 
-    static final String LOAD_GME = "apply from: \"gme.gradle\"";
+    static final String LOAD_GME = "buildscript { apply from: \"gme.gradle\" }";
     static final String GME = "gme.gradle";
     static final String NAME = "generateAlignmentMetadata";
 
@@ -124,7 +125,7 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private void writeMarkerFile() throws IOException {
+    private void writeMarkerFile() throws IOException, ManipulationException {
         File rootDir = getProject().getRootDir();
         File gmeGradle = new File(rootDir, GME);
         File rootGradle = new File(rootDir, Project.DEFAULT_BUILD_FILE);
@@ -136,19 +137,21 @@ public class AlignmentTask extends DefaultTask {
 
         if (rootGradle.exists()) {
 
-            String line = FileUtils.getLastLine(rootGradle);
-            logger.debug("Read line '{}' from build.gradle", line);
+            List<String> lines = FileUtils.readLines(rootGradle, Charset.defaultCharset());
+            List<String> result = new ArrayList<>();
 
-            if (!line.trim().equals(LOAD_GME)) {
-                // Haven't appended it before.
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter(rootGradle, true))) {
-                    // Ensure the marker is on a line by itself.
-                    writer.newLine();
-                    writer.write(LOAD_GME);
-                    writer.newLine();
-                    writer.flush();
-                }
+            String first = org.jboss.gm.common.utils.FileUtils.getFirstLine(lines);
+
+            // Check if the first non-blank line is the gme phrase, otherwise inject it.
+            if (!LOAD_GME.equals(first.trim())) {
+                result.add(System.lineSeparator());
+                result.add(LOAD_GME);
+                result.add(System.lineSeparator());
+                result.addAll(lines);
+
+                FileUtils.writeLines(rootGradle, result);
             }
+
         } else {
             logger.warn("Unable to find build.gradle in {} to modify.", rootDir);
         }

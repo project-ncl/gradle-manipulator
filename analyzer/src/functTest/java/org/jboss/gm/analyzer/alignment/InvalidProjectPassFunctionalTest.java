@@ -14,6 +14,7 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.api.Project;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMUnitConfig;
@@ -62,7 +63,7 @@ public class InvalidProjectPassFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void ensureInvalidNoException() throws IOException, URISyntaxException {
+    public void ensureInvalidNoException() throws IOException, URISyntaxException, ManipulationException {
 
         // In theory, setting this property should have been sufficient but we are currently running the tests
         // in-process to allow for debugging. This prevents the configuration from being applied when
@@ -73,7 +74,7 @@ public class InvalidProjectPassFunctionalTest extends AbstractWiremockTest {
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
-        assertEquals(AlignmentTask.LOAD_GME, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(AlignmentTask.LOAD_GME, TestUtils.getLine(projectRoot));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.jboss.gm.analyzer.functest");

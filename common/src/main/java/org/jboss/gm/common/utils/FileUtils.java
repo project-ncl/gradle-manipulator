@@ -1,21 +1,27 @@
 package org.jboss.gm.common.utils;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
-
-import org.apache.commons.io.input.ReversedLinesFileReader;
 
 public class FileUtils {
-    public static String getLastLine(File target) throws IOException {
-        String line = "";
-        try (ReversedLinesFileReader rFile = new ReversedLinesFileReader(target, Charset.defaultCharset())) {
-            while (isBlank(line)) {
-                line = rFile.readLine();
+
+    /**
+     * Read the n-th line of a file (n starts from 1)
+     * Returns null of the line does not exist
+     */
+    public static String getNthLine(File target, int n) throws IOException {
+        try (BufferedReader br = new BufferedReader(new FileReader(target))) {
+            String line = null;
+            int i = 0;
+            while ((i < n) && ((line = br.readLine()) != null)) {
+                i++;
             }
+            if (i == n) {
+                return line;
+            }
+            return null;
         }
-        return line;
     }
 }

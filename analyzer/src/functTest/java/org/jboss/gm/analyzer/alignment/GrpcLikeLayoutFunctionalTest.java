@@ -66,7 +66,7 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
-        assertEquals(AlignmentTask.LOAD_GME, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(AlignmentTask.LOAD_GME, FileUtils.getNthLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE), 2).trim());
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo(null);

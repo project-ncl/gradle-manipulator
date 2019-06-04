@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
@@ -16,6 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigCache;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -35,7 +37,6 @@ import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.ProjectVersionFactory;
 import org.jboss.gm.common.model.ManipulationModel;
-import org.jboss.gm.common.utils.FileUtils;
 import org.slf4j.Logger;
 
 /**
@@ -45,6 +46,7 @@ import org.slf4j.Logger;
 public class AlignmentTask extends DefaultTask {
 
     static final String LOAD_GME = "apply from: \"gme.gradle\"";
+    private static final String LOAD_GME_BUILDSCRIPT = "buildscript {\n\t" + LOAD_GME + "\n}\n";
     static final String GME = "gme.gradle";
     static final String NAME = "generateAlignmentMetadata";
 
@@ -135,20 +137,9 @@ public class AlignmentTask extends DefaultTask {
         }
 
         if (rootGradle.exists()) {
-
-            String line = FileUtils.getLastLine(rootGradle);
-            logger.debug("Read line '{}' from build.gradle", line);
-
-            if (!line.trim().equals(LOAD_GME)) {
-                // Haven't appended it before.
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter(rootGradle, true))) {
-                    // Ensure the marker is on a line by itself.
-                    writer.newLine();
-                    writer.write(LOAD_GME);
-                    writer.newLine();
-                    writer.flush();
-                }
-            }
+            final String originalContent = FileUtils.readFileToString(rootGradle, StandardCharsets.UTF_8);
+            final String newContent = LOAD_GME_BUILDSCRIPT + originalContent;
+            FileUtils.writeStringToFile(rootGradle, newContent, StandardCharsets.UTF_8, false);
         } else {
             logger.warn("Unable to find build.gradle in {} to modify.", rootDir);
         }

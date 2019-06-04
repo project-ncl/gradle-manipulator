@@ -55,7 +55,7 @@ public class SimpleProjectWithSpringDMPluginFunctionalTest extends AbstractWirem
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
-        assertEquals(AlignmentTask.LOAD_GME, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(AlignmentTask.LOAD_GME, FileUtils.getNthLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE), 2).trim());
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");

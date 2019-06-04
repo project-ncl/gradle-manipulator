@@ -2,8 +2,12 @@
 
 initscript {
     repositories {
-        mavenCentral()
+        // Maven local isn't required for production but its useful during development.
         mavenLocal()
+        mavenCentral()
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots"
+        }
     }
     dependencies {
         classpath "org.jboss.gm.analyzer:analyzer:${project.version}"

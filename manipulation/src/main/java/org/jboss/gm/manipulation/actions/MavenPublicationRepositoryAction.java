@@ -39,11 +39,12 @@ public class MavenPublicationRepositoryAction implements Action<Project> {
     @Override
     public void execute(Project project) {
         if (!project.getPluginManager().hasPlugin("maven")) {
-            project.getLogger().warn("Legacy `maven` plugin not detected, skipping publishing repository creation.");
+            project.getLogger().warn("Legacy 'maven' plugin not detected, skipping publishing repository creation.");
         }
 
         Upload uploadArchives = project.getTasks().withType(Upload.class).findByName("uploadArchives");
         if (uploadArchives == null) {
+            project.getLogger().info("Creating uploadArchives task");
             uploadArchives = project.getTasks().create("uploadArchives", Upload.class);
         }
 

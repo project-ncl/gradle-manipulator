@@ -1,5 +1,6 @@
 package org.jboss.gm.common;
 
+import static org.aeonbits.owner.Config.LoadType.MERGE;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
 import java.lang.reflect.Method;
@@ -9,6 +10,7 @@ import java.util.Properties;
 
 import org.aeonbits.owner.Accessible;
 import org.aeonbits.owner.Config;
+import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.Converter;
 import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
@@ -19,6 +21,7 @@ import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
  * <a href=https://release-engineering.github.io/pom-manipulation-ext/#feature-guide>PME</a> naming.
  */
 @Sources({ "system:properties", "system:env" })
+@LoadPolicy(MERGE)
 public interface Configuration extends Accessible {
 
     /**

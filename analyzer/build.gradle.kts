@@ -72,7 +72,7 @@ tasks {
         filesMatching("gme.gradle") {
             expand(project.properties)
         }
-        filesMatching("analyzer.init_gradle") {
+        filesMatching("analyzer_init.gradle") {
             expand(project.properties)
         }
     }

@@ -100,6 +100,7 @@ public interface Configuration extends Accessible {
      * PNC will use this file to configure repository proxying.
      */
     @Key("repoRemovalBackup")
+    @DefaultValue("repositories-backup.xml")
     String repositoriesFile();
 
     class DependencyConverter implements Converter<DependencyPrecedence> {

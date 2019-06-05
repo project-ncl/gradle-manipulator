@@ -18,8 +18,10 @@ import java.util.Collection;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.gradle.api.Project;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.common.utils.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -66,6 +68,7 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.LOAD_GME, TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.LOAD_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo(null);

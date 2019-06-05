@@ -44,16 +44,3 @@ allprojects {
     }
 
 }
-
-
-// Extra configuration for badly behaved plugins
-pluginManager.withPlugin("dokka") {
-    // TODO: Investigate whether proxy could avoid this for dokka.
-    //
-    // Disable linking to online kotlin-stdlib documentation
-    noStdlibLink = true
-    // Disable linking to online JDK documentation
-    noJdkLink = true
-    // Disable any user-configured external links.
-    externalDocumentationLinks.clear()
-}

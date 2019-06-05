@@ -1,0 +1,19 @@
+/**
+ * This file is injected by the Gradle Manipulation Tool during the analysis phase
+ */
+
+// Make sure that if the dokka task has been configured on the build,
+// we further configure it to not use the network at all
+if (project.tasks.findByName("dokka")) {
+    dokka {
+        // TODO: Investigate whether proxy could avoid this for dokka.
+        //
+        // Disable linking to online kotlin-stdlib documentation
+        noStdlibLink = true
+        // Disable linking to online JDK documentation
+        noJdkLink = true
+        // Disable any user-configured external links.
+        externalDocumentationLinks.clear()
+    }
+
+}

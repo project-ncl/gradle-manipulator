@@ -4,7 +4,9 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.gradle.api.Project.DEFAULT_VERSION;
 import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -49,6 +51,8 @@ public class AlignmentTask extends DefaultTask {
 
     static final String LOAD_GME = "buildscript { apply from: \"gme.gradle\" }";
     static final String GME = "gme.gradle";
+    static final String LOAD_GME_END = "apply from: \"gme.gradle\"";
+    static final String GME_END = "gme-end.gradle";
     static final String NAME = "generateAlignmentMetadata";
 
     private final Logger logger = getLogger();
@@ -117,7 +121,8 @@ public class AlignmentTask extends DefaultTask {
                 logger.info("Completed processing for alignment and writing {} ", cache.toString());
 
                 writeManipulationModel(project.getRootDir(), alignmentModel);
-                writeMarkerFile();
+                writeGmeMarkerFile();
+                writeGmeEndMarkerFile();
                 writeRepositorySettingsFile(cache.getRepositories());
             }
         } catch (ManipulationException e) {
@@ -127,7 +132,7 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private void writeMarkerFile() throws IOException, ManipulationException {
+    private void writeGmeMarkerFile() throws IOException, ManipulationException {
         File rootDir = getProject().getRootDir();
         File gmeGradle = new File(rootDir, GME);
         File rootGradle = new File(rootDir, Project.DEFAULT_BUILD_FILE);
@@ -154,6 +159,37 @@ public class AlignmentTask extends DefaultTask {
                 FileUtils.writeLines(rootGradle, result);
             }
 
+        } else {
+            logger.warn("Unable to find build.gradle in {} to modify.", rootDir);
+        }
+    }
+
+    private void writeGmeEndMarkerFile() throws IOException {
+        File rootDir = getProject().getRootDir();
+        File gmeGradle = new File(rootDir, GME_END);
+        File rootGradle = new File(rootDir, Project.DEFAULT_BUILD_FILE);
+
+        // TODO: Always replace or only in certain circumstances?
+        if (!gmeGradle.exists()) {
+            Files.copy(getClass().getResourceAsStream("/gme-end.gradle"), gmeGradle.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        if (rootGradle.exists()) {
+
+            String line = org.jboss.gm.common.utils.FileUtils.getLastLine(rootGradle);
+            logger.debug("Read line '{}' from build.gradle", line);
+
+            if (!line.trim().equals(LOAD_GME_END)) {
+                // Haven't appended it before.
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(rootGradle, true))) {
+                    // Ensure the marker is on a line by itself.
+                    writer.newLine();
+                    writer.write(LOAD_GME_END);
+                    writer.newLine();
+                    writer.flush();
+                }
+            }
         } else {
             logger.warn("Unable to find build.gradle in {} to modify.", rootDir);
         }

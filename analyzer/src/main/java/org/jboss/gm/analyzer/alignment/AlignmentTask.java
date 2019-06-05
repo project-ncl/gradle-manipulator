@@ -51,7 +51,7 @@ public class AlignmentTask extends DefaultTask {
 
     static final String LOAD_GME = "buildscript { apply from: \"gme.gradle\" }";
     static final String GME = "gme.gradle";
-    static final String LOAD_GME_END = "apply from: \"gme.gradle\"";
+    static final String LOAD_GME_END = "apply from: \"gme-end.gradle\"";
     static final String GME_END = "gme-end.gradle";
     static final String NAME = "generateAlignmentMetadata";
 

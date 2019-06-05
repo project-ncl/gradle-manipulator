@@ -1,5 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.gradle.api.Project.DEFAULT_VERSION;
 import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
 
@@ -7,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -280,18 +282,18 @@ public class AlignmentTask extends DefaultTask {
     private void writeRepositorySettingsFile(Collection<ArtifactRepository> repositories) {
         Configuration config = ConfigCache.getOrCreate(Configuration.class);
 
-        // trying to mimick PME behaviour here - export only if repoRemovalBackup is defined and by default place it in
-        // project root
         String repositoriesFilePath = config.repositoriesFile();
-        if (repositoriesFilePath != null) {
+        if (!isEmpty(repositoriesFilePath)) {
             File repositoriesFile;
-            if (repositoriesFilePath.equals("settings.xml")) {
-                repositoriesFile = new File(getProject().getRootDir(), repositoriesFilePath);
-            } else {
+            if (Paths.get(repositoriesFilePath).isAbsolute()) {
                 repositoriesFile = new File(config.repositoriesFile());
+            } else {
+                repositoriesFile = new File(getProject().getRootDir(), repositoriesFilePath);
             }
 
             new RepositoryExporter(repositories).export(repositoriesFile);
+        } else {
+            getProject().getLogger().info("Repository export disabled.");
         }
     }
 }

@@ -39,12 +39,16 @@ public class MavenPublicationRepositoryAction implements Action<Project> {
     @Override
     public void execute(Project project) {
         if (!project.getPluginManager().hasPlugin("maven")) {
-            project.getLogger().warn("Legacy `maven` plugin not detected, skipping publishing repository creation.");
+            project.getLogger().warn("Legacy 'maven' plugin not detected, skipping publishing repository creation.");
         }
 
         Upload uploadArchives = project.getTasks().withType(Upload.class).findByName("uploadArchives");
         if (uploadArchives == null) {
+            project.getLogger().info("Creating uploadArchives task");
             uploadArchives = project.getTasks().create("uploadArchives", Upload.class);
+            // we need to associate the task with the archives configuration as per
+            // https://docs.gradle.org/current/userguide/artifact_management.html#sec:artifacts_and_configurations
+            uploadArchives.setConfiguration(project.getConfigurations().getByName("archives"));
         }
 
         Configuration config = ConfigCache.getOrCreate(Configuration.class);

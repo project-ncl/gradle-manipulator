@@ -124,12 +124,12 @@ public class ManipulationPlugin implements Plugin<Project> {
             }
 
             if (LEGACY_MAVEN_PLUGIN.equals(deployPlugin)) {
-                logger.info("Configuring `maven` plugin");
+                logger.info("Configuring 'maven' plugin");
                 evaluatedProject
                         .afterEvaluate(new UploadTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
                 evaluatedProject.afterEvaluate(new MavenPublicationRepositoryAction());
             } else if (MAVEN_PUBLISH_PLUGIN.equals(deployPlugin)) {
-                logger.info("Configuring `maven-publish` plugin");
+                logger.info("Configuring 'maven-publish' plugin");
                 evaluatedProject.afterEvaluate(new PublishingRepositoryAction());
                 evaluatedProject
                         .afterEvaluate(new PublishingPomTransformerAction(correspondingModule, resolvedDependenciesRepository));

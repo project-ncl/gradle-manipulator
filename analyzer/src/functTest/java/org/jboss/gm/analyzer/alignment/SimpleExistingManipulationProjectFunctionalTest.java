@@ -69,8 +69,8 @@ public class SimpleExistingManipulationProjectFunctionalTest extends AbstractWir
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), false);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
-        assertEquals(AlignmentTask.LOAD_GME, TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.LOAD_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
@@ -108,7 +108,7 @@ public class SimpleExistingManipulationProjectFunctionalTest extends AbstractWir
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), false);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
-        assertEquals(AlignmentTask.LOAD_GME, TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");

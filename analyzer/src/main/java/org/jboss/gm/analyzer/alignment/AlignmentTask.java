@@ -49,10 +49,10 @@ import org.slf4j.Logger;
  */
 public class AlignmentTask extends DefaultTask {
 
-    static final String LOAD_GME = "buildscript { apply from: \"gme.gradle\" }";
+    static final String INJECT_GME_START = "buildscript { apply from: \"gme.gradle\" }";
     static final String GME = "gme.gradle";
-    static final String LOAD_GME_END = "apply from: \"gme-end.gradle\"";
-    static final String GME_END = "gme-end.gradle";
+    static final String INJECT_GME_END = "apply from: \"gme-pluginconfigs.gradle\"";
+    static final String GME_PLUGINCONFIGS = "gme-pluginconfigs.gradle";
     static final String NAME = "generateAlignmentMetadata";
 
     private final Logger logger = getLogger();
@@ -122,7 +122,7 @@ public class AlignmentTask extends DefaultTask {
 
                 writeManipulationModel(project.getRootDir(), alignmentModel);
                 writeGmeMarkerFile();
-                writeGmeEndMarkerFile();
+                writeGmeConfigMarkerFile();
                 writeRepositorySettingsFile(cache.getRepositories());
             }
         } catch (ManipulationException e) {
@@ -139,7 +139,7 @@ public class AlignmentTask extends DefaultTask {
 
         // TODO: Always replace or only in certain circumstances?
         if (!gmeGradle.exists()) {
-            Files.copy(getClass().getResourceAsStream("/gme.gradle"), gmeGradle.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(getClass().getResourceAsStream('/' + GME), gmeGradle.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
 
         if (rootGradle.exists()) {
@@ -150,9 +150,9 @@ public class AlignmentTask extends DefaultTask {
             String first = org.jboss.gm.common.utils.FileUtils.getFirstLine(lines);
 
             // Check if the first non-blank line is the gme phrase, otherwise inject it.
-            if (!LOAD_GME.equals(first.trim())) {
+            if (!INJECT_GME_START.equals(first.trim())) {
                 result.add(System.lineSeparator());
-                result.add(LOAD_GME);
+                result.add(INJECT_GME_START);
                 result.add(System.lineSeparator());
                 result.addAll(lines);
 
@@ -164,14 +164,14 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private void writeGmeEndMarkerFile() throws IOException {
+    private void writeGmeConfigMarkerFile() throws IOException {
         File rootDir = getProject().getRootDir();
-        File gmeGradle = new File(rootDir, GME_END);
+        File gmeGradle = new File(rootDir, GME_PLUGINCONFIGS);
         File rootGradle = new File(rootDir, Project.DEFAULT_BUILD_FILE);
 
         // TODO: Always replace or only in certain circumstances?
         if (!gmeGradle.exists()) {
-            Files.copy(getClass().getResourceAsStream("/gme-end.gradle"), gmeGradle.toPath(),
+            Files.copy(getClass().getResourceAsStream('/' + GME_PLUGINCONFIGS), gmeGradle.toPath(),
                     StandardCopyOption.REPLACE_EXISTING);
         }
 
@@ -180,12 +180,12 @@ public class AlignmentTask extends DefaultTask {
             String line = org.jboss.gm.common.utils.FileUtils.getLastLine(rootGradle);
             logger.debug("Read line '{}' from build.gradle", line);
 
-            if (!line.trim().equals(LOAD_GME_END)) {
+            if (!line.trim().equals(INJECT_GME_END)) {
                 // Haven't appended it before.
                 try (BufferedWriter writer = new BufferedWriter(new FileWriter(rootGradle, true))) {
                     // Ensure the marker is on a line by itself.
                     writer.newLine();
-                    writer.write(LOAD_GME_END);
+                    writer.write(INJECT_GME_END);
                     writer.newLine();
                     writer.flush();
                 }

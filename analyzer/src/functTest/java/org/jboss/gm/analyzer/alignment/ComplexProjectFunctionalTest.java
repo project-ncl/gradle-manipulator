@@ -66,8 +66,8 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
 
-        assertEquals(AlignmentTask.LOAD_GME, TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.LOAD_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.jboss.gm.analyzer.functest");
@@ -94,6 +94,8 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
                 "https://repo.maven.apache.org/maven2/",
                 "https://oss.sonatype.org/content/repositories/snapshots/",
                 "https://localhost:8089/ivy-repo",
-                "https://plugins.gradle.org/m2/");
+                "https://plugins.gradle.org/m2/",
+                "https://dl.google.com/dl/android/maven2/",
+                "https://jcenter.bintray.com/");
     }
 }

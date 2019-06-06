@@ -85,7 +85,7 @@ subprojects {
                 exclude(dependency("org.slf4j:slf4j-api:1.7.25"))
             }
             // no need to add analyzer.init.gradle in the jar since it will never be used from inside the plugin itself
-            exclude("analyzer_init.gradle")
+            exclude("analyzer-init.gradle")
         }
 
         val sourcesJar by tasks.registering(Jar::class) {
@@ -109,7 +109,8 @@ subprojects {
                     // we publish the init gradle file to make it easy for tools that use
                     // the plugin to set it up without having to create their own init gradle file
                     if (project.name == "analyzer") {
-                        artifact("${sourceSets.main.get().output.resourcesDir}/analyzer_init.gradle", {
+                        artifact("${sourceSets.main.get().output.resourcesDir}/analyzer-init.gradle", {
+                            classifier = "init"
                             extension = "gradle"
                         })
                     }

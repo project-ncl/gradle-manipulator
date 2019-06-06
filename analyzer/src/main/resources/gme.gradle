@@ -4,7 +4,20 @@
 
 
 buildscript {
-    if (System.getenv("AProxDependencyUrl") == null) {
+    if (System.getenv("AProxDependencyUrl") != null) {
+        // Running inside PNC
+        repositories {
+            maven {
+                name "indy-mvn"
+                url System.getenv("AProxDependencyUrl")
+                credentials(HttpHeaderCredentials) {
+                    name = "Authorization"
+                    value = "Bearer " + System.getenv('accessToken')
+                }
+                authentication { header(HttpHeaderAuthentication) }
+            }
+        }
+    } else {
         // Not running in PNC e.g. local development environment.
         repositories {
             // Maven local isn't required for production but its useful during development.

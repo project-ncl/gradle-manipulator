@@ -7,7 +7,6 @@ import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.credentials.HttpHeaderCredentials;
 import org.gradle.api.publish.PublishingExtension;
-import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
 import org.gradle.authentication.http.HttpHeaderAuthentication;
 import org.jboss.gm.common.Configuration;
 
@@ -56,20 +55,16 @@ public class PublishingRepositoryAction implements Action<Project> {
             project.getLogger().warn("No authentication token was configured.");
         }
 
-        project.getPlugins().withType(MavenPublishPlugin.class, plugin -> {
-            project.getExtensions().configure(PublishingExtension.class, publishingExtension -> {
-                publishingExtension.getRepositories().maven(repository -> {
-                    repository.setName("Manipulator Publishing Repository");
-                    repository.setUrl(config.deployUrl());
-                    if (!isEmpty(config.deployUrl())) {
-                        repository.credentials(HttpHeaderCredentials.class, cred -> {
-                            cred.setName("Authorization");
-                            cred.setValue("Bearer " + config.accessToken());
-                        });
-                        repository.getAuthentication().create("header", HttpHeaderAuthentication.class);
-                    }
+        project.getExtensions().getByType(PublishingExtension.class).getRepositories().maven(repository -> {
+            repository.setName("Manipulator Publishing Repository");
+            repository.setUrl(config.deployUrl());
+            if (!isEmpty(config.accessToken())) {
+                repository.credentials(HttpHeaderCredentials.class, cred -> {
+                    cred.setName("Authorization");
+                    cred.setValue("Bearer " + config.accessToken());
                 });
-            });
+                repository.getAuthentication().create("header", HttpHeaderAuthentication.class);
+            }
         });
     }
 }

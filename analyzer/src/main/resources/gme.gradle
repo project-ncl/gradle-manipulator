@@ -1,25 +1,11 @@
 /**
- * This file is injected by the Gradle Manipulation Tool during the analysis phase
+ * This file is injected at the start by the Gradle Manipulation Tool during the analysis phase
  */
 
 
-// TODO: Do we need AProxDependencyUrl in here and init script?
 buildscript {
-    if (System.getenv("AProxDependencyUrl") != null) {
-        // Running inside PNC
-        repositories {
-            maven {
-                name "indy-mvn"
-                url System.getenv("AProxDependencyUrl")
-                credentials(HttpHeaderCredentials) {
-                    name = "Authorization"
-                    value = "Bearer " + System.getenv('accessToken')
-                }
-                authentication { header(HttpHeaderAuthentication) }
-            }
-        }
-    } else {
-        // Running elsewhere e.g. local development environment.
+    if (System.getenv("AProxDependencyUrl") == null) {
+        // Not running in PNC e.g. local development environment.
         repositories {
             // Maven local isn't required for production but its useful during development.
             mavenLocal()

@@ -22,7 +22,6 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.api.Project;
 import org.gradle.testkit.runner.GradleRunner;
 import org.jboss.byteman.contrib.bmunit.BMRule;
-import org.jboss.byteman.contrib.bmunit.BMUnitConfig;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.io.ManipulationIO;
@@ -66,8 +65,8 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
-        assertEquals(AlignmentTask.LOAD_GME, TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.LOAD_GME_END,
+        assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_END,
                 org.jboss.gm.common.utils.FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
@@ -102,7 +101,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         List<String> lines = FileUtils.readLines(new File(projectRoot, Project.DEFAULT_BUILD_FILE), Charset.defaultCharset());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
-        assertEquals(AlignmentTask.LOAD_GME, org.jboss.gm.common.utils.FileUtils.getFirstLine(lines));
+        assertEquals(AlignmentTask.INJECT_GME_START, org.jboss.gm.common.utils.FileUtils.getFirstLine(lines));
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
             assertThat(am.getName()).isEqualTo("root");
@@ -127,11 +126,11 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
             assertThat(am.findCorrespondingChild("root"))
                     .satisfies(root -> assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00002"));
         });
-        assertEquals(AlignmentTask.LOAD_GME, org.jboss.gm.common.utils.FileUtils.getFirstLine(lines));
+        assertEquals(AlignmentTask.INJECT_GME_START, org.jboss.gm.common.utils.FileUtils.getFirstLine(lines));
 
         int counter = 0;
         for (String l : lines) {
-            if (l.trim().equals(AlignmentTask.LOAD_GME)) {
+            if (l.trim().equals(AlignmentTask.INJECT_GME_START)) {
                 counter++;
             }
         }

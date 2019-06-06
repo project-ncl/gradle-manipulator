@@ -13,6 +13,13 @@ import org.commonjava.maven.ext.common.ManipulationException;
 
 public class FileUtils {
 
+    /**
+     * Returns the first non blank line working from the end of the file.
+     *
+     * @param target the file to examine.
+     * @return the last line that isn't blank
+     * @throws IOException if an error occurs
+     */
     public static String getLastLine(File target) throws IOException {
         String line = "";
         try (ReversedLinesFileReader rFile = new ReversedLinesFileReader(target, Charset.defaultCharset())) {

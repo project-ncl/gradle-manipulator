@@ -23,7 +23,7 @@
     "availableVersions": [],
     "blacklisted": false,
     "whitelisted": [],
-    "version": "1.0.0",
+    "version": "1.0.1",
     "groupId": "org.acme",
     "artifactId": "root"
   }

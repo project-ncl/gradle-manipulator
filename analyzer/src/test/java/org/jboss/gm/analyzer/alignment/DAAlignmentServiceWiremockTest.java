@@ -12,6 +12,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.io.FileUtils;
@@ -57,7 +58,7 @@ public class DAAlignmentServiceWiremockTest {
         final ProjectVersionRef undertowGav = withGAV("io.undertow", "undertow-core", "2.0.15.Final");
         final ProjectVersionRef mockitoGav = withGAV("org.mockito", "mockito-core", "2.27.0");
         final AlignmentService.Response response = sut.align(new AlignmentService.Request(
-                projectGav,
+                Collections.singletonList(projectGav),
                 Arrays.asList(
                         hibernateGav,
                         undertowGav,

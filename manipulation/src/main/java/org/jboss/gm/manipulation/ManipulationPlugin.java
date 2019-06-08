@@ -45,12 +45,12 @@ public class ManipulationPlugin implements Plugin<Project> {
 
         // we need to change the project version early so various tasks that ready early and create other vars based on it
         // (like the zip tasks) can use the correct version
+        logger.info("Updating project version {} to {} ", project.getVersion(), alignmentModel.getVersion());
         project.setVersion(alignmentModel.getVersion());
 
         final ResolvedDependenciesRepository resolvedDependenciesRepository = new ResolvedDependenciesRepository();
 
         project.afterEvaluate(p -> {
-            logger.info("### Project :: after evaluate setting {} to {} ", p.getVersion(), alignmentModel.getVersion());
             // dependencyManagement is the extension that the Spring Dependency Management Plugin registers
             final Object obj = p.getExtensions().findByName("dependencyManagement");
             if (obj != null) {

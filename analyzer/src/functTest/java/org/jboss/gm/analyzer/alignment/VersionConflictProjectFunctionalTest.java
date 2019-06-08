@@ -64,7 +64,7 @@ public class VersionConflictProjectFunctionalTest extends AbstractWiremockTest {
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
             assertThat(am.getName()).isEqualTo("root");
             assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
-                assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00001");
+                assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00002");
                 assertThat(root.getName()).isEqualTo("root");
 
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();

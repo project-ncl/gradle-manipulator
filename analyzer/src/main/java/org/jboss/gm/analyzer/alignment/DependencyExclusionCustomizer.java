@@ -39,11 +39,10 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
 
     @Override
     public AlignmentService.Request customize(AlignmentService.Request request) {
-        final ProjectVersionRef project = request.getProject();
         final List<? extends ProjectVersionRef> dependenciesWithoutExclusions = request.getDependencies().stream()
                 .filter(predicate).collect(Collectors.toList());
 
-        return new AlignmentService.Request(project, dependenciesWithoutExclusions);
+        return new AlignmentService.Request(request.getProject(), dependenciesWithoutExclusions);
     }
 
     public static AlignmentService.RequestCustomizer fromConfigurationForModule(Configuration configuration,

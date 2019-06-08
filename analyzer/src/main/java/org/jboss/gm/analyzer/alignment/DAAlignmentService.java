@@ -55,14 +55,13 @@ public class DAAlignmentService implements AlignmentService {
     @Override
     public Response align(Request request) {
         final List<ProjectVersionRef> translateRequest = new ArrayList<>(request.getDependencies().size() + 1);
-        final ProjectVersionRef refOfProject = request.getProject();
 
         if (dependencySource == NONE) {
             logger.warn("No dependencySource configured ; unable to call endpoint");
-            return new Response(refOfProject, Collections.emptyMap());
+            return new Response(request.getProject(), Collections.emptyMap());
         }
 
-        translateRequest.add(refOfProject);
+        translateRequest.addAll(request.getProject());
         translateRequest.addAll(request.getDependencies());
 
         logger.info("Passing {} GAVs following into the REST client api {} ", translateRequest.size(), translateRequest);
@@ -70,22 +69,28 @@ public class DAAlignmentService implements AlignmentService {
         final Map<ProjectVersionRef, String> translationMap = restEndpoint.translateVersions(translateRequest);
         logger.info("REST Client returned {} ", translationMap);
 
-        return new Response(refOfProject, translationMap);
+        return new Response(request.getProject(), translationMap);
     }
 
     private static class Response implements AlignmentService.Response {
 
-        private final ProjectVersionRef refOfProject;
+        private final Logger logger = LoggerFactory.getLogger(getClass());
+
+        private final List<ProjectVersionRef> refOfProject;
         private final Map<ProjectVersionRef, String> translationMap;
 
-        Response(ProjectVersionRef refOfProject, Map<ProjectVersionRef, String> translationMap) {
+        Response(List<ProjectVersionRef> refOfProject, Map<ProjectVersionRef, String> translationMap) {
             this.refOfProject = refOfProject;
             this.translationMap = translationMap;
         }
 
+        // TODO: Verify this is safe - do we need to find the highest projectref version?
+        // TODO: When is this used / called ?
         @Override
         public String getNewProjectVersion() {
-            return translationMap.get(refOfProject);
+            logger.info("Retrieving project version {} and returning {} ", refOfProject.get(0),
+                    translationMap.get(refOfProject.get(0)));
+            return translationMap.get(refOfProject.get(0));
         }
 
         @Override

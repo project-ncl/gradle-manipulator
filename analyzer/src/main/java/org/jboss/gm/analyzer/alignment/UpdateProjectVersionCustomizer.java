@@ -71,9 +71,8 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Response
 
             cache = ManipulationCache.getCache(root);
 
-            logger.info("Creating versioning state with {} and {} with original {} and version {}",
-                    configuration.versionIncrementalSuffix(), configuration.versionIncrementalSuffixPadding(), originalResponse,
-                    projects);
+            logger.info("Creating versioning state with {} and {}", configuration.versionIncrementalSuffix(),
+                    configuration.versionIncrementalSuffixPadding());
             this.state = new VersioningState(configuration.getProperties());
         }
 
@@ -115,11 +114,12 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Response
 
                     result.add(ManipulationIO.readManipulationModel(root.getRootDir()).getVersion());
                 }
+                logger.debug("Adding project version candidates from cache {} ", cache.getGAV());
 
                 cache.getGAV().forEach(pvr -> {
                     String t = getTranslationMap().get(pvr);
-                    if (StringUtils.isNotEmpty(t)) {
-                        result.add(t);
+                    if (StringUtils.isNotBlank(t)) {
+                        result.add(t.trim());
                     }
                 });
 

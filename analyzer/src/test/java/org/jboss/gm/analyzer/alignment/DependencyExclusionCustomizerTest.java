@@ -1,13 +1,14 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
-
-import java.util.Arrays;
-import java.util.function.Predicate;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.function.Predicate;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 
 public class DependencyExclusionCustomizerTest {
 
@@ -21,12 +22,12 @@ public class DependencyExclusionCustomizerTest {
         final Predicate<ProjectVersionRef> excludeHibernatePredicate = (gav -> !"org.hibernate".equals(gav.getGroupId()));
         final DependencyExclusionCustomizer sut = new DependencyExclusionCustomizer(excludeHibernatePredicate);
 
-        final AlignmentService.Request originalReq = new AlignmentService.Request(project,
+        final AlignmentService.Request originalReq = new AlignmentService.Request(Collections.singletonList(project),
                 Arrays.asList(hibernateGav, undertowGav, mockitoGav));
         final AlignmentService.Request customizedReq = sut.customize(originalReq);
 
         assertThat(customizedReq).isNotNull().satisfies(r -> {
-            assertThat(r.getProject()).isEqualTo(project);
+            assertThat(r.getProject()).isEqualTo(Collections.singletonList(project));
             assertThat(r.getDependencies()).extracting("artifactId").containsOnly("undertow-core", "mockito-core");
         });
     }

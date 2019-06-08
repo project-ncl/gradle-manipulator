@@ -6,6 +6,7 @@ import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -91,13 +92,14 @@ public class DependencyExclusionCustomizerFromConfigurationAndModuleTest {
         final AlignmentService.RequestCustomizer sut = DependencyExclusionCustomizer.fromConfigurationForModule(configuration,
                 projects);
 
-        final AlignmentService.Request originalReq = new AlignmentService.Request(project,
+        final AlignmentService.Request originalReq = new AlignmentService.Request(
+                Collections.singletonList(project),
                 Arrays.asList(hibernateGav, hibernateValidatorGav, undertowGav, jacksonDatabindGav, mongoGav, mockitoGav,
                         wiremockGav));
         final AlignmentService.Request customizedReq = sut.customize(originalReq);
 
         assertThat(customizedReq).isNotNull().satisfies(r -> {
-            assertThat(r.getProject()).isEqualTo(project);
+            assertThat(r.getProject()).isEqualTo(Collections.singletonList(project));
             assertThat(r.getDependencies()).extracting("artifactId").containsOnly("undertow-core", "mongo-java-driver",
                     "wiremock-jre8");
         });

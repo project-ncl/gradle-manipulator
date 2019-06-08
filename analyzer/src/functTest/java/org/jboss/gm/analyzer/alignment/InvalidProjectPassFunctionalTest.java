@@ -78,7 +78,7 @@ public class InvalidProjectPassFunctionalTest extends AbstractWiremockTest {
             assertThat(am.getGroup()).isEqualTo("org.jboss.gm.analyzer.functest");
             assertThat(am.getName()).isEqualTo("invalid");
             assertThat(am.findCorrespondingChild("invalid")).satisfies(root -> {
-                assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00001");
+                assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00002");
                 assertThat(root.getName()).isEqualTo("invalid");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
                 assertEquals(0, alignedDependencies.size());

@@ -1,7 +1,5 @@
 package org.jboss.gm.common;
 
-import java.net.URL;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,7 +32,7 @@ public class ManipulationCache {
 
     private ManipulationModel rootModel;
 
-    private ArrayDeque<ProjectVersionRef> projectVersionRefs = new ArrayDeque<>();
+    private List<ProjectVersionRef> projectVersionRefs = new ArrayList<>();
 
     private Map<Project, Collection<ProjectVersionRef>> projectDependencies = new HashMap<>();
 
@@ -115,7 +113,7 @@ public class ManipulationCache {
         projectVersionRefs.add(gav);
     }
 
-    public ArrayDeque<ProjectVersionRef> getGAV() {
+    public List<ProjectVersionRef> getGAV() {
         return projectVersionRefs;
     }
 

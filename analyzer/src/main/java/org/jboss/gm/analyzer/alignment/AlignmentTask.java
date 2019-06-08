@@ -83,7 +83,9 @@ public class AlignmentTask extends DefaultTask {
                 ProjectVersionRef current = ProjectVersionFactory.withGAV(project.getGroup().toString(), projectName,
                         currentProjectVersion);
 
+                logger.debug("Adding {} to cache for scanning.", current);
                 cache.addGAV(current);
+
             }
 
             // when the set is empty, we know that this was the last alignment task to execute.
@@ -96,16 +98,19 @@ public class AlignmentTask extends DefaultTask {
                         .getAlignmentService(cache.getDependencies().keySet());
                 final AlignmentService.Response alignmentResponse = alignmentService.align(
                         new AlignmentService.Request(
-                                cache.getGAV().peekFirst(),
+                                cache.getGAV(),
                                 allDeps));
 
                 final ManipulationModel alignmentModel = cache.getModel();
                 final Map<Project, Collection<ProjectVersionRef>> projectDependencies = cache.getDependencies();
-                final String newVersion = alignmentResponse.getNewProjectVersion();
                 final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
+                final String newVersion = alignmentResponse.getNewProjectVersion();
 
+                // While we've completed processing (sub)projects the current one is not going to be the root; so
+                // explicitly retrieve it and set its version.
                 if (configuration.versionModificationEnabled()) {
-                    logger.info("Updating project '{}' version to {}", projectName, newVersion);
+                    project.getRootProject().setVersion(newVersion);
+                    logger.info("Updating project {} version to {}", project.getRootProject(), newVersion);
                     alignmentModel.setVersion(newVersion);
                 }
 
@@ -113,6 +118,7 @@ public class AlignmentTask extends DefaultTask {
                 projectDependencies.forEach((key, value) -> {
                     final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(key.getPath());
                     if (configuration.versionModificationEnabled()) {
+                        logger.info("Updating sub-project {} version to {} ", correspondingModule.getName(), newVersion);
                         correspondingModule.setVersion(newVersion);
                     }
                     updateModuleDependencies(correspondingModule, value, alignmentResponse);
@@ -244,7 +250,6 @@ public class AlignmentTask extends DefaultTask {
                                 + ", unable to resolve all project dependencies: " + unresolvedDependencies);
                     }
                 }
-
                 lenient.getFirstLevelModuleDependencies().forEach(dep -> {
                     // skip dependencies on project modules
                     if (compareTo(dep, allProjectDependencies)) {

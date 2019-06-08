@@ -4,6 +4,8 @@
 
 
 buildscript {
+    // While the global PNC init script also defines this, for some reason
+    // Gradle doesn't seem to apply it to included scrpts.
     if (System.getenv("AProxDependencyUrl") != null) {
         // Running inside PNC
         repositories {

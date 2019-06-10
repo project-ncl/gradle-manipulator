@@ -1,9 +1,9 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 
 /**
@@ -25,11 +25,14 @@ public interface AlignmentService {
      */
     class Request {
         private final Collection<? extends ProjectVersionRef> dependencies;
+        private final Set<? extends ProjectRef> dynamicDependencies; // dependencies whose version was not set to a specific value, but instead could be a range or latest
         private final List<ProjectVersionRef> project;
 
-        public Request(List<ProjectVersionRef> projectVersionRefs, Collection<? extends ProjectVersionRef> dependencies) {
+        public Request(List<ProjectVersionRef> projectVersionRefs, Collection<? extends ProjectVersionRef> dependencies,
+                Set<? extends ProjectRef> dynamicDependencies) {
             this.dependencies = dependencies;
             this.project = projectVersionRefs;
+            this.dynamicDependencies = dynamicDependencies;
         }
 
         Collection<? extends ProjectVersionRef> getDependencies() {
@@ -38,6 +41,20 @@ public interface AlignmentService {
 
         List<ProjectVersionRef> getProject() {
             return project;
+        }
+
+        Set<? extends ProjectRef> getDynamicDependencies() {
+            return dynamicDependencies;
+        }
+
+        Set<? extends ProjectVersionRef> getDynamicDependenciesWithGradleResolvedVersions() {
+            final Set<ProjectVersionRef> result = new HashSet<>();
+            for (ProjectVersionRef dependency : dependencies) {
+                if (dynamicDependencies.contains(dependency.asProjectRef())) {
+                    result.add(dependency);
+                }
+            }
+            return result;
         }
     }
 
@@ -90,7 +107,11 @@ public interface AlignmentService {
      */
     interface ResponseCustomizer {
 
-        Response customize(Response response);
+        /**
+         * No changes to request are allowed - it simply represents the final Request that was sent to the final alignment
+         * service
+         */
+        Response customize(Response response, Request request);
 
         // Integer.MIN_VALUE is the max order. This means that if we have 2 services for example
         // we with the first one to be invoked before the second, we would give the first one a
@@ -101,7 +122,7 @@ public interface AlignmentService {
 
         ResponseCustomizer NOOP = new ResponseCustomizer() {
             @Override
-            public Response customize(Response response) {
+            public Response customize(Response response, Request request) {
                 return response;
             }
 

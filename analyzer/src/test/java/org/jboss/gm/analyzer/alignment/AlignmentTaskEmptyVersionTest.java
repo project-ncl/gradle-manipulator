@@ -84,11 +84,12 @@ public class AlignmentTaskEmptyVersionTest {
         // As getAllProjectDependencies is private, use reflection to modify the access control.
         Class[] types = new Class[1];
         types[0] = Project.class;
-        Method m = at.getClass().getDeclaredMethod("getAllProjectDependencies", types);
+        Method m = at.getClass().getDeclaredMethod("getDependenciesTuple", Project.class);
         m.setAccessible(true);
-        Collection<ProjectVersionRef> result = (Collection<ProjectVersionRef>) m.invoke(at, new Object[] { p });
+        AlignmentTask.DependenciesTuple result = (AlignmentTask.DependenciesTuple) m.invoke(at, new Object[] { p });
+        Collection<ProjectVersionRef> allDependencies = result.getAllDeps();
 
-        assertEquals(1, result.size());
-        assertEquals("org.apache.commons:commons-configuration2:2.4", result.stream().findFirst().get().toString());
+        assertEquals(1, allDependencies.size());
+        assertEquals("org.apache.commons:commons-configuration2:2.4", allDependencies.stream().findFirst().get().toString());
     }
 }

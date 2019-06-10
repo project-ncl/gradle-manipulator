@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.io.FileUtils;
@@ -62,7 +63,8 @@ public class DAAlignmentServiceWiremockTest {
                 Arrays.asList(
                         hibernateGav,
                         undertowGav,
-                        mockitoGav)));
+                        mockitoGav),
+                new HashSet<>()));
 
         assertThat(response).isNotNull().satisfies(r -> {
             assertThat(r.getNewProjectVersion()).isNull();

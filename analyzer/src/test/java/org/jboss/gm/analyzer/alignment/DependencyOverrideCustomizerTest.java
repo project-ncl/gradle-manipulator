@@ -39,7 +39,7 @@ public class DependencyOverrideCustomizerTest {
         final String newProjectVersion = "1.0.0" + DEFAULT_SUFFIX;
         when(originalResp.getNewProjectVersion()).thenReturn(newProjectVersion);
 
-        final AlignmentService.Response customizedReq = sut.customize(originalResp);
+        final AlignmentService.Response customizedReq = sut.customize(originalResp, mock(AlignmentService.Request.class));
 
         assertThat(customizedReq).isNotNull().satisfies(r -> {
             assertThat(r.getNewProjectVersion()).isEqualTo(newProjectVersion);

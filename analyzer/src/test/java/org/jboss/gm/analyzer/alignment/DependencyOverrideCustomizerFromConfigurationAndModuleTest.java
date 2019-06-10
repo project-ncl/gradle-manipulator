@@ -2,6 +2,7 @@ package org.jboss.gm.analyzer.alignment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
+import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.io.IOException;
@@ -98,7 +99,7 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
         final AlignmentService.Response originalResp = new DummyResponse(PROJECT,
                 Arrays.asList(hibernateCoreGav, hibernateValidatorGav, undertowGav, jacksonCoreGav, jacksonMapperGav,
                         mongoGav, mockitoGav, wiremockGav));
-        final AlignmentService.Response finalResp = sut.customize(originalResp);
+        final AlignmentService.Response finalResp = sut.customize(originalResp, mock(AlignmentService.Request.class));
 
         assertThat(finalResp).isNotNull().satisfies(r -> {
             assertThat(r.getNewProjectVersion()).isEqualTo(PROJECT.getVersionString());

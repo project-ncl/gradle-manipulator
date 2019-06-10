@@ -35,7 +35,7 @@ public class DependencyOverrideCustomizer implements AlignmentService.ResponseCu
     }
 
     @Override
-    public AlignmentService.Response customize(AlignmentService.Response response) {
+    public AlignmentService.Response customize(AlignmentService.Response response, AlignmentService.Request request) {
         return new DependencyOverrideCustomizerResponse(overrideMap, response);
     }
 

@@ -7,15 +7,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.List;
 
-import org.apache.maven.settings.Repository;
-import org.apache.maven.settings.Settings;
-import org.apache.maven.settings.io.xpp3.SettingsXpp3Reader;
 import org.assertj.core.groups.Tuple;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -32,7 +27,7 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
-public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
+public class ComplexWithExistingManipulationProjectFunctionalTest extends AbstractWiremockTest {
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
@@ -49,7 +44,7 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("complex-project-da-response.json"))));
+                        .withBody(readSampleDAResponse("complex-project-da-response-with-existing-manipulation.json"))));
 
         System.setProperty(Configuration.DA, "http://127.0.0.1:" + AbstractWiremockTest.PORT + "/da/rest/v-1");
     }
@@ -59,7 +54,7 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
     // http://central.maven.org/maven2/io/undertow/undertow-core/
     public void ensureAlignmentFileCreated()
             throws IOException, URISyntaxException, XmlPullParserException, ManipulationException {
-        final File projectRoot = tempDir.newFolder("complex-project");
+        final File projectRoot = tempDir.newFolder("complex-project-with-existing-manipulation");
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
@@ -69,55 +64,25 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.jboss.gm.analyzer.functest");
-            assertThat(am.getName()).isEqualTo("complex");
-            assertThat(am.findCorrespondingChild("complex")).satisfies(root -> {
-                assertThat(root.getVersion()).isEqualTo("1.0.0.redhat-00004");
-                assertThat(root.getName()).isEqualTo("complex");
+            assertThat(am.getName()).isEqualTo("complex-existing");
+            assertThat(am.findCorrespondingChild("complex-existing")).satisfies(root -> {
+                assertThat(root.getVersion()).isEqualTo("1.0.0.redhat-00005");
+                assertThat(root.getName()).isEqualTo("complex-existing");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
-                        .hasSize(5)
                         .extracting("artifactId", "versionString")
-                        .contains(
+                        .containsOnly(
                                 // ensure that the aligned versions as are always used for dynamic and regular dependencies
-                                tuple("undertow-core", "2.0.21.Final-redhat-00001"),
-                                tuple("spring-boot-dependencies", "2.1.4.RELEASE.redhat-3"),
-                                tuple("hibernate-core", "5.3.9.Final-redhat-00001"))
-                        // we can't assert on a specific version because we have used a range as the dependency's version
-                        .filteredOn(t -> !getVersion(t).contains("redhat"))
-                        .satisfies(l -> {
-                            // make sure the two dynamic dependencies not aligned exist and have versions similar to what we expect
-
-                            assertThat(l).filteredOn(t -> "HdrHistogram".equals(getArtifactId(t)))
-                                    .hasOnlyOneElementSatisfying(t -> {
-                                        assertThat(getVersion(t)).startsWith("2.");
-                                    });
-                            assertThat(l).filteredOn(t -> "commons-lang3".equals(getArtifactId(t)))
-                                    .hasOnlyOneElementSatisfying(t -> {
-                                        assertThat(getVersion(t)).startsWith("3.");
-                                    });
-                        });
+                                tuple("undertow-core", "2.0.21.Final-redhat-00002"),
+                                tuple("commons-lang3", "3.8-redhat-00001"),
+                                tuple("HdrHistogram", "2.1.10"));
 
                 assertThat(root.getAlignedDependencies().keySet()).containsOnly(
                         "org.apache.commons:commons-lang3:latest.release",
                         "org.hdrhistogram:HdrHistogram:2.+",
-                        "org.springframework.boot:spring-boot-dependencies:2.1.4.RELEASE",
-                        "io.undertow:undertow-core:2.0+",
-                        "org.hibernate:hibernate-core:5.3.9.Final");
+                        "io.undertow:undertow-core:2.0+");
             });
         });
-
-        // check that generated settings.xml contains correct remote repositories
-        File settingsFile = new File(projectRoot, "settings.xml");
-        SettingsXpp3Reader reader = new SettingsXpp3Reader();
-        Settings generatedSettings = reader.read(new FileInputStream(settingsFile));
-        List<Repository> repositories = generatedSettings.getProfiles().get(0).getRepositories();
-        assertThat(repositories).extracting("url").containsOnly(
-                "https://repo.maven.apache.org/maven2/",
-                "https://oss.sonatype.org/content/repositories/snapshots/",
-                "https://localhost:8089/ivy-repo",
-                "https://plugins.gradle.org/m2/",
-                "https://dl.google.com/dl/android/maven2/",
-                "https://jcenter.bintray.com/");
     }
 
     private String getArtifactId(Tuple tuple) {

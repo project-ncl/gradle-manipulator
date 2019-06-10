@@ -5,6 +5,7 @@ import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.function.Predicate;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -23,7 +24,7 @@ public class DependencyExclusionCustomizerTest {
         final DependencyExclusionCustomizer sut = new DependencyExclusionCustomizer(excludeHibernatePredicate);
 
         final AlignmentService.Request originalReq = new AlignmentService.Request(Collections.singletonList(project),
-                Arrays.asList(hibernateGav, undertowGav, mockitoGav));
+                Arrays.asList(hibernateGav, undertowGav, mockitoGav), new HashSet<>());
         final AlignmentService.Request customizedReq = sut.customize(originalReq);
 
         assertThat(customizedReq).isNotNull().satisfies(r -> {

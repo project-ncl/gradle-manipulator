@@ -42,7 +42,8 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
         final List<? extends ProjectVersionRef> dependenciesWithoutExclusions = request.getDependencies().stream()
                 .filter(predicate).collect(Collectors.toList());
 
-        return new AlignmentService.Request(request.getProject(), dependenciesWithoutExclusions);
+        return new AlignmentService.Request(request.getProject(), dependenciesWithoutExclusions,
+                request.getDynamicDependencies());
     }
 
     public static AlignmentService.RequestCustomizer fromConfigurationForModule(Configuration configuration,

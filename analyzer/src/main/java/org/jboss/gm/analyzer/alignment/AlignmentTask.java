@@ -262,12 +262,12 @@ public class AlignmentTask extends DefaultTask {
                             dep.getModuleVersion(), configuration.getName());
 
                     if (result.add(pvr)) {
-                        logger.info("Adding dependency to scan {} ", pvr);
+                        logger.info("For configuration {}, adding dependency to scan {} ", configuration, pvr);
                     }
                 });
             } else {
                 // TODO: Why are certain configurations not resolvable?
-                logger.warn("Unable to resolve configuration {} for project {}", configuration.getName(), project);
+                logger.debug("Unable to resolve configuration {} for project {}", configuration.getName(), project);
             }
         });
 

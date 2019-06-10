@@ -95,8 +95,7 @@ public class DependencyExclusionCustomizerFromConfigurationAndModuleTest {
         final AlignmentService.Request originalReq = new AlignmentService.Request(
                 Collections.singletonList(project),
                 Arrays.asList(hibernateGav, hibernateValidatorGav, undertowGav, jacksonDatabindGav, mongoGav, mockitoGav,
-                        wiremockGav),
-                new HashSet<>());
+                        wiremockGav));
         final AlignmentService.Request customizedReq = sut.customize(originalReq);
 
         assertThat(customizedReq).isNotNull().satisfies(r -> {

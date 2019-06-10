@@ -3,17 +3,17 @@
   "name" : "complex-existing",
   "version" : "1.0.0.redhat-00004",
   "alignedDependencies" : {
-    "org.apache.commons:commons-lang3:3.8" : {
+    "org.apache.commons:commons-lang3:latest.release" : {
       "groupId" : "org.apache.commons",
       "artifactId" : "commons-lang3",
       "version" : "3.8"
     },
-    "io.undertow:undertow-core:2.0.21.Final" : {
+    "io.undertow:undertow-core:2.0+" : {
       "groupId" : "io.undertow",
       "artifactId" : "undertow-core",
       "version" : "2.0.21.Final-redhat-00002"
     },
-    "org.hdrhistogram:HdrHistogram:2.1.10" : {
+    "org.hdrhistogram:HdrHistogram:2.+" : {
       "groupId" : "org.hdrhistogram",
       "artifactId" : "HdrHistogram",
       "version" : "2.1.10"

@@ -51,6 +51,9 @@ public class AlignedDependencyResolver implements Action<DependencyResolveDetail
         final Map<String, ProjectVersionRef> alignedDependencies = module.getAlignedDependencies();
         final String key = requestedGAV.toString();
         final ProjectVersionRef aligned = alignedDependencies.get(key);
+
+        logger.info("Overriding dependency {} with new version {}", key, aligned);
+
         if (aligned != null) {
             resolveDetails.because(key + " is aligned to " + aligned.toString()).useVersion(aligned.getVersionString());
         }

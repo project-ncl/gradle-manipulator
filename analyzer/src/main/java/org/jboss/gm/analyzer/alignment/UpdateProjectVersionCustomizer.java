@@ -39,7 +39,7 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Response
     }
 
     @Override
-    public AlignmentService.Response customize(AlignmentService.Response response, AlignmentService.Request request) {
+    public AlignmentService.Response customize(AlignmentService.Response response) {
         return new ProjectVersionCustomizerResponse(response, projects, configuration);
     }
 

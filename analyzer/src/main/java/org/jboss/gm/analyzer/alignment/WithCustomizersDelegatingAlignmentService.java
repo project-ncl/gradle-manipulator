@@ -40,7 +40,7 @@ public class WithCustomizersDelegatingAlignmentService implements AlignmentServi
         Response response = delegate.align(request);
 
         for (ResponseCustomizer responseCustomizer : responseCustomizers) {
-            response = responseCustomizer.customize(response, request);
+            response = responseCustomizer.customize(response);
         }
 
         return response;

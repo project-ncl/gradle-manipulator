@@ -37,7 +37,6 @@ final class AlignmentServiceFactory {
             Set<Project> projects) {
         return Arrays.asList(
                 DependencyOverrideCustomizer.fromConfigurationForModule(configuration, projects),
-                new UpdateProjectVersionCustomizer(projects, configuration),
-                new EnsureDynamicDependenciesIncludedCustomizer());
+                new UpdateProjectVersionCustomizer(projects, configuration));
     }
 }

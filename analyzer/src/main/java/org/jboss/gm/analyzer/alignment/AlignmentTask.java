@@ -1,5 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.gradle.api.Project.DEFAULT_VERSION;
 import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
@@ -12,21 +13,30 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.*;
+import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.DependencySet;
+import org.gradle.api.artifacts.LenientConfiguration;
+import org.gradle.api.artifacts.ModuleVersionSelector;
+import org.gradle.api.artifacts.ProjectDependency;
+import org.gradle.api.artifacts.ResolvedDependency;
+import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
@@ -36,6 +46,7 @@ import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.ProjectVersionFactory;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.common.utils.DynamicVersionParser;
 import org.slf4j.Logger;
 
 /**
@@ -61,14 +72,11 @@ public class AlignmentTask extends DefaultTask {
                 projectName, project.getVersion());
 
         try {
-            final DependenciesTuple dependenciesTuple = getDependenciesTuple(project);
-            final Collection<ProjectVersionRef> deps = dependenciesTuple.getAllDeps();
-            final Set<ProjectRef> dynamicDeps = dependenciesTuple.getDynamicDeps();
-            final Map<ProjectRef, String> dynamicDepsToKey = dependenciesTuple.getDynamicDepsToKey();
             final ManipulationCache cache = ManipulationCache.getCache(project);
             final String currentProjectVersion = project.getVersion().toString();
+            final HashMap<Dependency, ProjectVersionRef> dependencies = processAnyExistingManipulationFile(project, getDependencies(project));
 
-            cache.addDependencies(project, deps);
+            cache.addDependencies(project, dependencies);
             project.getRepositories().forEach(cache::addRepository);
             project.getBuildscript().getRepositories().forEach(cache::addRepository);
 
@@ -89,8 +97,9 @@ public class AlignmentTask extends DefaultTask {
             // when the set is empty, we know that this was the last alignment task to execute.
             if (cache.removeProject(projectName)) {
 
-                Collection<ProjectVersionRef> allDeps = cache.getDependencies().values().stream().flatMap(Collection::stream)
-                        .collect(Collectors.toList());
+                logger.info("Completed scanning projects; now processing for REST...");
+                Collection<ProjectVersionRef> allDeps = cache.getDependencies().values().stream()
+                        .flatMap(m -> m.values().stream()).distinct().collect(Collectors.toList());
 
                 final AlignmentService alignmentService = AlignmentServiceFactory
                         .getAlignmentService(cache.getDependencies().keySet());
@@ -98,10 +107,10 @@ public class AlignmentTask extends DefaultTask {
                 final AlignmentService.Response alignmentResponse = alignmentService.align(
                         new AlignmentService.Request(
                                 cache.getGAV(),
-                                allDeps, dynamicDeps));
+                                allDeps));
 
                 final ManipulationModel alignmentModel = cache.getModel();
-                final Map<Project, Collection<ProjectVersionRef>> projectDependencies = cache.getDependencies();
+                final HashMap<Project, HashMap<Dependency, ProjectVersionRef>> projectDependencies = cache.getDependencies();
                 final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
                 final String newVersion = alignmentResponse.getNewProjectVersion();
 
@@ -120,7 +129,8 @@ public class AlignmentTask extends DefaultTask {
                         logger.info("Updating sub-project {} version to {} ", correspondingModule.getName(), newVersion);
                         correspondingModule.setVersion(newVersion);
                     }
-                    updateModuleDependencies(correspondingModule, value, alignmentResponse, dynamicDepsToKey);
+                    updateModuleDynamicDependencies(correspondingModule, value);
+                    updateModuleDependencies(correspondingModule, value, alignmentResponse);
                 });
 
                 logger.info("Completed processing for alignment and writing {} ", cache.toString());
@@ -142,7 +152,6 @@ public class AlignmentTask extends DefaultTask {
         File gmeGradle = new File(rootDir, GME);
         File rootGradle = new File(rootDir, Project.DEFAULT_BUILD_FILE);
 
-        // TODO: Always replace or only in certain circumstances?
         if (!gmeGradle.exists()) {
             Files.copy(getClass().getResourceAsStream('/' + GME), gmeGradle.toPath(), StandardCopyOption.REPLACE_EXISTING);
         }
@@ -174,7 +183,6 @@ public class AlignmentTask extends DefaultTask {
         File gmeGradle = new File(rootDir, GME_PLUGINCONFIGS);
         File rootGradle = new File(rootDir, Project.DEFAULT_BUILD_FILE);
 
-        // TODO: Always replace or only in certain circumstances?
         if (!gmeGradle.exists()) {
             Files.copy(getClass().getResourceAsStream('/' + GME_PLUGINCONFIGS), gmeGradle.toPath(),
                     StandardCopyOption.REPLACE_EXISTING);
@@ -200,25 +208,22 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private DependenciesTuple getDependenciesTuple(Project project) {
+    private HashMap<Dependency, ProjectVersionRef> getDependencies(Project project) {
         Configuration internalConfig = ConfigCache.getOrCreate(Configuration.class);
 
-        final Set<ProjectVersionRef> allDeps = new LinkedHashSet<>();
-        final Set<ProjectRef> dynamicDeps = new LinkedHashSet<>();
-        final Map<ProjectRef, String> dynamicDepsToKey = new HashMap<>();
+        final HashMap<Dependency, ProjectVersionRef> depMap = new HashMap<>();
         project.getConfigurations().all(configuration -> {
 
             if (configuration.isCanBeResolved()) {
 
                 // using getAllDependencies here instead of getDependencies because the later
                 // was returning an empty array for the root project of SpringLikeLayoutFunctionalTest
-                final Set<ProjectDependency> allProjectDependencies = configuration.getAllDependencies()
+                final DependencySet allDependencies = configuration.getAllDependencies();
+                final Set<ProjectDependency> allProjectDependencies = allDependencies
                         .stream()
                         .filter(d -> ProjectDependency.class.isAssignableFrom(d.getClass()))
                         .map(ProjectDependency.class::cast)
                         .collect(Collectors.toSet());
-
-                findDynamicDependencies(configuration, dynamicDeps, dynamicDepsToKey);
 
                 if (configuration.getResolutionStrategy() instanceof DefaultResolutionStrategy) {
                     DefaultResolutionStrategy defaultResolutionStrategy = (DefaultResolutionStrategy) configuration
@@ -264,19 +269,33 @@ public class AlignmentTask extends DefaultTask {
                             dep.getModuleName(),
                             dep.getModuleVersion(), configuration.getName());
 
-                    if (allDeps.add(pvr)) {
+                    List<Dependency> originalDeps = allDependencies.stream()
+                            .filter(d -> StringUtils.equals(d.getGroup(), dep.getModuleGroup()) &&
+                                    StringUtils.equals(d.getName(), dep.getModuleName()))
+                            .collect(Collectors.toList());
+
+                    // Not sure this can ever happen - would mean we have GA with multiple V.
+                    if (originalDeps.size() > 1) {
+                        logger.error("Found duplicate matching original dependencies {} for {}", originalDeps, dep);
+                    }
+
+                    Dependency originalDep = originalDeps.get(0);
+
+                    // TODO: What if originalDep has an empty version - then its from the BOM. Should we record it
+                    // at all?
+                    // if (StringUtils.isNotBlank(originalDep.getVersion())) {
+
+                    if (depMap.put(originalDep, pvr) == null) {
                         logger.info("For configuration {}, adding dependency to scan {} ", configuration, pvr);
                     }
+
                 });
             } else {
-                // TODO: Why are certain configurations not resolvable?
                 logger.debug("Unable to resolve configuration {} for project {}", configuration.getName(), project);
             }
         });
 
-        return new DependenciesTuple(
-                updateDynamicDependenciesToExistingVersions(allDeps, dynamicDeps, project),
-                dynamicDeps, dynamicDepsToKey);
+        return depMap;
     }
 
     private Set<UnresolvedDependency> getUnresolvedDependenciesExcludingProjectDependencies(LenientConfiguration lenient,
@@ -310,18 +329,31 @@ public class AlignmentTask extends DefaultTask {
         return false;
     }
 
-    private void updateModuleDependencies(ManipulationModel correspondingModule,
-            Collection<ProjectVersionRef> allModuleDependencies, AlignmentService.Response alignmentResponse,
-            Map<ProjectRef, String> dynamicDepsToKey) {
+    private void updateModuleDynamicDependencies(ManipulationModel correspondingModule,
+            HashMap<Dependency, ProjectVersionRef> allModuleDependencies) {
 
-        allModuleDependencies.forEach(d -> {
-            final String newDependencyVersion = alignmentResponse.getAlignedVersionOfGav(d);
+        allModuleDependencies.forEach((d, p) -> {
+            // we need to make sure that dynamic dependencies are stored with their original key
+            // in order for the manipulation plugin to be able to look them up properly
+            if (isBlank(d.getVersion())) {
+                // TODO : Should we list the bom ones as well?
+            } else if (DynamicVersionParser.isDynamic(d.getVersion())) {
+                correspondingModule.getAlignedDependencies().put(d.getGroup() + ":" + d.getName() + ":" + d.getVersion(), p);
+            }
+        });
+    }
+
+    private void updateModuleDependencies(ManipulationModel correspondingModule,
+            HashMap<Dependency, ProjectVersionRef> allModuleDependencies, AlignmentService.Response alignmentResponse) {
+
+        allModuleDependencies.forEach((d, p) -> {
+            final String newDependencyVersion = alignmentResponse.getAlignedVersionOfGav(p);
             if (newDependencyVersion != null) {
-                final ProjectVersionRef newVersion = ProjectVersionFactory.withNewVersion(d, newDependencyVersion);
+                final ProjectVersionRef newVersion = ProjectVersionFactory.withNewVersion(p, newDependencyVersion);
                 // we need to make sure that dynamic dependencies are stored with their original key
                 // in order for the manipulation plugin to be able to look them up properly
-                final String key = dynamicDepsToKey.getOrDefault(newVersion.asProjectRef(), d.toString());
-                correspondingModule.getAlignedDependencies().put(key, newVersion);
+                correspondingModule.getAlignedDependencies().put(d.getGroup() + ":" + d.getName() + ":" + d.getVersion(),
+                        newVersion);
             }
         });
     }
@@ -347,94 +379,44 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    //TODO this needs to be improved since it is very naive
-    private void findDynamicDependencies(org.gradle.api.artifacts.Configuration configuration,
-            Set<ProjectRef> dynamicDependencies, Map<ProjectRef, String> dynamicDepToKey) {
-        configuration.getIncoming().getDependencies().withType(ExternalDependency.class).matching(d -> {
-            final String requiredVersion = d.getVersionConstraint().getRequiredVersion();
-            return requiredVersion.endsWith("latest.release") || requiredVersion.endsWith("+");
-        }).forEach(d -> {
-            final SimpleProjectRef ref = new SimpleProjectRef(d.getGroup(), d.getName());
-            dynamicDependencies.add(ref);
-            dynamicDepToKey.put(ref,
-                    new SimpleProjectVersionRef(ref, d.getVersionConstraint().getRequiredVersion()).toString());
-        });
-    }
-
-    private Set<ProjectVersionRef> updateDynamicDependenciesToExistingVersions(Set<ProjectVersionRef> allDependencies,
-            Set<ProjectRef> dynamicDependencies, Project project) {
+    private HashMap<Dependency, ProjectVersionRef> processAnyExistingManipulationFile(Project project,
+            HashMap<Dependency, ProjectVersionRef> allDependencies) {
         // If there is an existing manipulation file, also use this as potential candidates.
-        if (!ManipulationIO.getManipulationFilePath(project.getRootProject().getRootDir()).toFile().exists() ||
-                dynamicDependencies.isEmpty()) {
+        if (!ManipulationIO.getManipulationFilePath(project.getRootProject().getRootDir()).toFile().exists()) {
             return allDependencies;
         }
-
         final ManipulationModel manipulationModel = ManipulationIO.readManipulationModel(project.getRootProject().getRootDir())
                 .findCorrespondingChild(project.getName());
 
-        final Set<ProjectVersionRef> allDepsWithSetDynamicDependencyVersions = new HashSet<>(
-                allDependencies.size());
-        for (ProjectVersionRef dependency : allDependencies) {
-            // if the dependency is a dynamic dependency we need to find the version that was
-            // recorded in the manipulation output of the previous run
-            boolean updatedFromDynamic = false;
-            if (dynamicDependencies.contains(dependency.asProjectRef())) {
-                final Collection<ProjectVersionRef> previouslyAlignedDeps = manipulationModel.getAlignedDependencies().values();
+        Map<String, ProjectVersionRef> aligned = manipulationModel.getAlignedDependencies();
 
-                final Optional<ProjectVersionRef> matching = previouslyAlignedDeps.stream()
-                        .filter(d -> d.asProjectRef().equals(dependency.asProjectRef()))
-                        .findFirst();
-                if (matching.isPresent()) {
-                    updatedFromDynamic = true;
+        for (Map.Entry<String, ProjectVersionRef> modelDependencies : aligned.entrySet()) {
 
-                    // TODO is this usage of correct?
-                    final String versionFromMatching = matching.get().getVersionString();
-                    allDepsWithSetDynamicDependencyVersions.add(new SimpleProjectVersionRef(matching.get().getGroupId(),
-                            matching.get().getArtifactId(), removeVersionSuffix(versionFromMatching)));
+            // If we don't have 2 then we must be stored an unversioned artifact. Only interested in full GAV right now.
+            if (StringUtils.countMatches(modelDependencies.getKey(), ":") == 2) {
+
+                ProjectVersionRef originalPvr = SimpleProjectVersionRef.parse(modelDependencies.getKey());
+
+                for (Map.Entry<Dependency, ProjectVersionRef> entry : allDependencies.entrySet()) {
+
+                    Dependency d = entry.getKey();
+
+                    if (StringUtils.equals(originalPvr.getGroupId(), d.getGroup()) &&
+                            StringUtils.equals(originalPvr.getArtifactId(), d.getName()) &&
+                            StringUtils.equals(originalPvr.getVersionString(), d.getVersion())) {
+
+                        if (!modelDependencies.getValue().getVersionString().equals(entry.getValue().getVersionString())) {
+
+                            logger.info("Using existing model to update {} to {}", entry.getValue(),
+                                    modelDependencies.getValue());
+
+                            allDependencies.put(d, modelDependencies.getValue());
+                            break;
+                        }
+                    }
                 }
             }
-            if (!updatedFromDynamic) {
-                allDepsWithSetDynamicDependencyVersions.add(dependency);
-            }
         }
-
-        return allDepsWithSetDynamicDependencyVersions;
-    }
-
-    // TODO improve, this is pretty naive
-    // Avoid adding the suffix to the version here since it messes with proper alignment
-    // If the version was aligned on a previous run, we need to make sure it can be aligned again to the
-    // latest version
-    private String removeVersionSuffix(String version) {
-        final int index = version.indexOf("-" + ConfigCache.getOrCreate(Configuration.class).versionIncrementalSuffix());
-        if (index == -1) {
-            return version;
-        }
-        return version.substring(0, index);
-    }
-
-    static class DependenciesTuple {
-        private final Collection<ProjectVersionRef> allDeps;
-        private final Set<ProjectRef> dynamicDeps;
-        private final Map<ProjectRef, String> dynamicDepsToKey;
-
-        public DependenciesTuple(Collection<ProjectVersionRef> allDeps, Set<ProjectRef> dynamicDeps,
-                Map<ProjectRef, String> dynamicDepsToKey) {
-            this.allDeps = allDeps;
-            this.dynamicDeps = dynamicDeps;
-            this.dynamicDepsToKey = dynamicDepsToKey;
-        }
-
-        public Collection<ProjectVersionRef> getAllDeps() {
-            return allDeps;
-        }
-
-        public Set<ProjectRef> getDynamicDeps() {
-            return dynamicDeps;
-        }
-
-        public Map<ProjectRef, String> getDynamicDepsToKey() {
-            return dynamicDepsToKey;
-        }
+        return allDependencies;
     }
 }

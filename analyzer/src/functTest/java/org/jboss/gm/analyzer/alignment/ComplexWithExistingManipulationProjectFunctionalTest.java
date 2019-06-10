@@ -1,6 +1,9 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -11,8 +14,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collection;
 
-import org.assertj.core.groups.Tuple;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.api.Project;
@@ -53,7 +54,7 @@ public class ComplexWithExistingManipulationProjectFunctionalTest extends Abstra
     // Note : if this test has started failing check the latest version of undertow on
     // http://central.maven.org/maven2/io/undertow/undertow-core/
     public void ensureAlignmentFileCreated()
-            throws IOException, URISyntaxException, XmlPullParserException, ManipulationException {
+            throws IOException, URISyntaxException, ManipulationException {
         final File projectRoot = tempDir.newFolder("complex-project-with-existing-manipulation");
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
@@ -83,13 +84,5 @@ public class ComplexWithExistingManipulationProjectFunctionalTest extends Abstra
                         "io.undertow:undertow-core:2.0+");
             });
         });
-    }
-
-    private String getArtifactId(Tuple tuple) {
-        return tuple.toList().get(0).toString();
-    }
-
-    private String getVersion(Tuple tuple) {
-        return tuple.toList().get(1).toString();
     }
 }

@@ -35,7 +35,7 @@ import org.junit.rules.TestRule;
 public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
 
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
@@ -102,7 +102,7 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
                         "org.hdrhistogram:HdrHistogram:2.+",
                         "org.springframework.boot:spring-boot-dependencies:2.1.4.RELEASE",
                         "io.undertow:undertow-core:2.0+",
-                        "org.hibernate:hibernate-core:5.3.9.Final");
+                        "org.hibernate:hibernate-core:5.3.7.Final");
             });
         });
 

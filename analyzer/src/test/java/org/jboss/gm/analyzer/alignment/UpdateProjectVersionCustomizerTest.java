@@ -2,7 +2,6 @@ package org.jboss.gm.analyzer.alignment;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +54,7 @@ public class UpdateProjectVersionCustomizerTest {
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final AlignmentService.Response customizedReq = sut.customize(originalResp, mock(AlignmentService.Request.class));
+        final AlignmentService.Response customizedReq = sut.customize(originalResp);
 
         assertThat(customizedReq).isNotNull().satisfies(r -> {
             assertThat(r.getNewProjectVersion()).isEqualTo("1.0.0.redhat-00001");
@@ -82,7 +81,7 @@ public class UpdateProjectVersionCustomizerTest {
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final AlignmentService.Response customizedReq = sut.customize(originalResp, mock(AlignmentService.Request.class));
+        final AlignmentService.Response customizedReq = sut.customize(originalResp);
 
         assertThat(customizedReq).isNotNull().satisfies(r -> {
             assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001");
@@ -112,7 +111,7 @@ public class UpdateProjectVersionCustomizerTest {
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final AlignmentService.Response customizedReq = sut.customize(originalResp, mock(AlignmentService.Request.class));
+        final AlignmentService.Response customizedReq = sut.customize(originalResp);
 
         assertThat(customizedReq).isNotNull().satisfies(r -> {
             assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-001");
@@ -151,7 +150,7 @@ public class UpdateProjectVersionCustomizerTest {
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final AlignmentService.Response customizedReq = sut.customize(originalResp, mock(AlignmentService.Request.class));
+        final AlignmentService.Response customizedReq = sut.customize(originalResp);
 
         assertThat(customizedReq).isNotNull().satisfies(r -> {
             assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002");

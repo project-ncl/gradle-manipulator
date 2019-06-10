@@ -56,8 +56,8 @@ public class WithCustomizersDelegatingAlignmentServiceTest {
         final AlignmentService.Response customizedResp2 = mock(AlignmentService.Response.class);
 
         when(delegate.align(request)).thenReturn(originalResponse);
-        when(respCustomizer1.customize(originalResponse, request)).thenReturn(customizedResp1);
-        when(respCustomizer2.customize(customizedResp1, request)).thenReturn(customizedResp2);
+        when(respCustomizer1.customize(originalResponse)).thenReturn(customizedResp1);
+        when(respCustomizer2.customize(customizedResp1)).thenReturn(customizedResp2);
         when(respCustomizer1.order()).thenReturn(0);
         when(respCustomizer2.order()).thenReturn(10);
 

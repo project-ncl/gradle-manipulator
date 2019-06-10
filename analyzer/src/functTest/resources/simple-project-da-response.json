@@ -54,7 +54,7 @@
     "artifactId": "undertow-core"
   },
   {
-    "bestMatchVersion": "1.0.1.redhat.00001",
+    "bestMatchVersion": "1.0.1.redhat-00001",
     "availableVersions": [],
     "blacklisted": false,
     "whitelisted": [],

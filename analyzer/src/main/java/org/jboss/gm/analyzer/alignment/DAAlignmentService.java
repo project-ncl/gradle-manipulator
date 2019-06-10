@@ -104,7 +104,7 @@ public class DAAlignmentService implements AlignmentService {
         }
     }
 
-    class GradleDefaultTranslator extends DefaultTranslator {
+    static class GradleDefaultTranslator extends DefaultTranslator {
         private final Random RANDOM = new Random();
 
         private final String logContext;

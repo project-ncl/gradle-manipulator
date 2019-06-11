@@ -47,6 +47,7 @@ import org.jboss.gm.common.ProjectVersionFactory;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.DynamicVersionParser;
+import org.jboss.gm.common.utils.RelaxedProjectVersionRef;
 import org.slf4j.Logger;
 
 /**
@@ -74,7 +75,9 @@ public class AlignmentTask extends DefaultTask {
         try {
             final ManipulationCache cache = ManipulationCache.getCache(project);
             final String currentProjectVersion = project.getVersion().toString();
-            final HashMap<Dependency, ProjectVersionRef> dependencies = processAnyExistingManipulationFile(project, getDependencies(project));
+            final HashMap<RelaxedProjectVersionRef, ProjectVersionRef> dependencies = processAnyExistingManipulationFile(
+                    project,
+                    getDependencies(project));
 
             cache.addDependencies(project, dependencies);
             project.getRepositories().forEach(cache::addRepository);
@@ -110,7 +113,8 @@ public class AlignmentTask extends DefaultTask {
                                 allDeps));
 
                 final ManipulationModel alignmentModel = cache.getModel();
-                final HashMap<Project, HashMap<Dependency, ProjectVersionRef>> projectDependencies = cache.getDependencies();
+                final HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = cache
+                        .getDependencies();
                 final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
                 final String newVersion = alignmentResponse.getNewProjectVersion();
 
@@ -208,10 +212,10 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private HashMap<Dependency, ProjectVersionRef> getDependencies(Project project) {
+    private HashMap<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(Project project) {
         Configuration internalConfig = ConfigCache.getOrCreate(Configuration.class);
 
-        final HashMap<Dependency, ProjectVersionRef> depMap = new HashMap<>();
+        final HashMap<RelaxedProjectVersionRef, ProjectVersionRef> depMap = new HashMap<>();
         project.getConfigurations().all(configuration -> {
 
             if (configuration.isCanBeResolved()) {
@@ -279,14 +283,22 @@ public class AlignmentTask extends DefaultTask {
                         logger.error("Found duplicate matching original dependencies {} for {}", originalDeps, dep);
                     }
 
-                    Dependency originalDep = originalDeps.get(0);
+                    RelaxedProjectVersionRef relaxedProjectVersionRef;
+                    // If we haven't found any original dependency we'll default to the current resolved dependency
+                    // value. This might be possible if the dependency has come from a lock file.
+                    if (originalDeps.size() == 0) {
+                        relaxedProjectVersionRef = new RelaxedProjectVersionRef(dep);
+                    } else {
+                        relaxedProjectVersionRef = new RelaxedProjectVersionRef(originalDeps.get(0));
+                    }
 
                     // TODO: What if originalDep has an empty version - then its from the BOM. Should we record it
                     // at all?
                     // if (StringUtils.isNotBlank(originalDep.getVersion())) {
 
-                    if (depMap.put(originalDep, pvr) == null) {
-                        logger.info("For configuration {}, adding dependency to scan {} ", configuration, pvr);
+                    if (depMap.put(relaxedProjectVersionRef, pvr) == null) {
+                        logger.info("For configuration {}, with original key {}, adding dependency to scan {} ", configuration,
+                                relaxedProjectVersionRef, pvr);
                     }
 
                 });
@@ -330,21 +342,22 @@ public class AlignmentTask extends DefaultTask {
     }
 
     private void updateModuleDynamicDependencies(ManipulationModel correspondingModule,
-            HashMap<Dependency, ProjectVersionRef> allModuleDependencies) {
+            HashMap<RelaxedProjectVersionRef, ProjectVersionRef> allModuleDependencies) {
 
         allModuleDependencies.forEach((d, p) -> {
             // we need to make sure that dynamic dependencies are stored with their original key
             // in order for the manipulation plugin to be able to look them up properly
-            if (isBlank(d.getVersion())) {
+            if (isBlank(d.getVersionString())) {
                 // TODO : Should we list the bom ones as well?
-            } else if (DynamicVersionParser.isDynamic(d.getVersion())) {
-                correspondingModule.getAlignedDependencies().put(d.getGroup() + ":" + d.getName() + ":" + d.getVersion(), p);
+            } else if (DynamicVersionParser.isDynamic(d.getVersionString())) {
+                correspondingModule.getAlignedDependencies().put(d.toString(), p);
             }
         });
     }
 
     private void updateModuleDependencies(ManipulationModel correspondingModule,
-            HashMap<Dependency, ProjectVersionRef> allModuleDependencies, AlignmentService.Response alignmentResponse) {
+            HashMap<RelaxedProjectVersionRef, ProjectVersionRef> allModuleDependencies,
+            AlignmentService.Response alignmentResponse) {
 
         allModuleDependencies.forEach((d, p) -> {
             final String newDependencyVersion = alignmentResponse.getAlignedVersionOfGav(p);
@@ -352,8 +365,7 @@ public class AlignmentTask extends DefaultTask {
                 final ProjectVersionRef newVersion = ProjectVersionFactory.withNewVersion(p, newDependencyVersion);
                 // we need to make sure that dynamic dependencies are stored with their original key
                 // in order for the manipulation plugin to be able to look them up properly
-                correspondingModule.getAlignedDependencies().put(d.getGroup() + ":" + d.getName() + ":" + d.getVersion(),
-                        newVersion);
+                correspondingModule.getAlignedDependencies().put(d.toString(), newVersion);
             }
         });
     }
@@ -379,8 +391,8 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private HashMap<Dependency, ProjectVersionRef> processAnyExistingManipulationFile(Project project,
-            HashMap<Dependency, ProjectVersionRef> allDependencies) {
+    private HashMap<RelaxedProjectVersionRef, ProjectVersionRef> processAnyExistingManipulationFile(Project project,
+            HashMap<RelaxedProjectVersionRef, ProjectVersionRef> allDependencies) {
         // If there is an existing manipulation file, also use this as potential candidates.
         if (!ManipulationIO.getManipulationFilePath(project.getRootProject().getRootDir()).toFile().exists()) {
             return allDependencies;
@@ -397,13 +409,11 @@ public class AlignmentTask extends DefaultTask {
 
                 ProjectVersionRef originalPvr = SimpleProjectVersionRef.parse(modelDependencies.getKey());
 
-                for (Map.Entry<Dependency, ProjectVersionRef> entry : allDependencies.entrySet()) {
+                for (Map.Entry<RelaxedProjectVersionRef, ProjectVersionRef> entry : allDependencies.entrySet()) {
 
-                    Dependency d = entry.getKey();
+                    RelaxedProjectVersionRef d = entry.getKey();
 
-                    if (StringUtils.equals(originalPvr.getGroupId(), d.getGroup()) &&
-                            StringUtils.equals(originalPvr.getArtifactId(), d.getName()) &&
-                            StringUtils.equals(originalPvr.getVersionString(), d.getVersion())) {
+                    if (d.equals(originalPvr)) {
 
                         if (!modelDependencies.getValue().getVersionString().equals(entry.getValue().getVersionString())) {
 

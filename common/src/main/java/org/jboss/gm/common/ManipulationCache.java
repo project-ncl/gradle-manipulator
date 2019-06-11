@@ -9,9 +9,9 @@ import java.util.Set;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
-import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.common.utils.RelaxedProjectVersionRef;
 
 /**
  * Cache that is stored in the root project extensions.
@@ -37,7 +37,7 @@ public class ManipulationCache {
      * Represents a mapping of project module to a map of the original Dependency (which might be dynamic) to
      * the fully resolved GAV.
      */
-    private HashMap<Project, HashMap<Dependency, ProjectVersionRef>> projectDependencies = new HashMap<>();
+    private HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = new HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>>();
 
     private Set<ArtifactRepository> repositories = new HashSet<>();
 
@@ -108,11 +108,11 @@ public class ManipulationCache {
         return rootModel;
     }
 
-    public void addDependencies(Project project, HashMap<Dependency, ProjectVersionRef> deps) {
+    public void addDependencies(Project project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef> deps) {
         projectDependencies.put(project, deps);
     }
 
-    public HashMap<Project, HashMap<Dependency, ProjectVersionRef>> getDependencies() {
+    public HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> getDependencies() {
         return projectDependencies;
     }
 

@@ -1,9 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,6 +16,7 @@ import java.util.List;
 import org.apache.maven.settings.Repository;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.io.xpp3.SettingsXpp3Reader;
+import org.assertj.core.groups.Tuple;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -37,7 +35,7 @@ import org.junit.rules.TestRule;
 public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
 
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
@@ -77,11 +75,34 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
                 assertThat(root.getName()).isEqualTo("complex");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
+                        .hasSize(5)
                         .extracting("artifactId", "versionString")
-                        .containsOnly(
+                        .contains(
+                                // ensure that the aligned versions as are always used for dynamic and regular dependencies
                                 tuple("undertow-core", "2.0.21.Final-redhat-00001"),
                                 tuple("spring-boot-dependencies", "2.1.4.RELEASE.redhat-3"),
-                                tuple("hibernate-core", "5.3.9.Final-redhat-00001"));
+                                tuple("hibernate-core", "5.3.9.Final-redhat-00001"))
+                        // we can't assert on a specific version because we have used a range as the dependency's version
+                        .filteredOn(t -> !getVersion(t).contains("redhat"))
+                        .satisfies(l -> {
+                            // make sure the two dynamic dependencies not aligned exist and have versions similar to what we expect
+
+                            assertThat(l).filteredOn(t -> "HdrHistogram".equals(getArtifactId(t)))
+                                    .hasOnlyOneElementSatisfying(t -> {
+                                        assertThat(getVersion(t)).startsWith("2.");
+                                    });
+                            assertThat(l).filteredOn(t -> "commons-lang3".equals(getArtifactId(t)))
+                                    .hasOnlyOneElementSatisfying(t -> {
+                                        assertThat(getVersion(t)).startsWith("3.");
+                                    });
+                        });
+
+                assertThat(root.getAlignedDependencies().keySet()).containsOnly(
+                        "org.apache.commons:commons-lang3:latest.release",
+                        "org.hdrhistogram:HdrHistogram:2.+",
+                        "org.springframework.boot:spring-boot-dependencies:2.1.4.RELEASE",
+                        "io.undertow:undertow-core:2.0+",
+                        "org.hibernate:hibernate-core:5.3.7.Final");
             });
         });
 
@@ -97,5 +118,13 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
                 "https://plugins.gradle.org/m2/",
                 "https://dl.google.com/dl/android/maven2/",
                 "https://jcenter.bintray.com/");
+    }
+
+    private String getArtifactId(Tuple tuple) {
+        return tuple.toList().get(0).toString();
+    }
+
+    private String getVersion(Tuple tuple) {
+        return tuple.toList().get(1).toString();
     }
 }

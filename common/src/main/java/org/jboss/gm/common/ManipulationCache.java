@@ -1,11 +1,9 @@
 package org.jboss.gm.common;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -13,6 +11,7 @@ import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.common.utils.RelaxedProjectVersionRef;
 
 /**
  * Cache that is stored in the root project extensions.
@@ -34,7 +33,11 @@ public class ManipulationCache {
 
     private List<ProjectVersionRef> projectVersionRefs = new ArrayList<>();
 
-    private Map<Project, Collection<ProjectVersionRef>> projectDependencies = new HashMap<>();
+    /**
+     * Represents a mapping of project module to a map of the original Dependency (which might be dynamic) to
+     * the fully resolved GAV.
+     */
+    private HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = new HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>>();
 
     private Set<ArtifactRepository> repositories = new HashSet<>();
 
@@ -105,8 +108,12 @@ public class ManipulationCache {
         return rootModel;
     }
 
-    public void addDependencies(Project project, Collection<ProjectVersionRef> deps) {
+    public void addDependencies(Project project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef> deps) {
         projectDependencies.put(project, deps);
+    }
+
+    public HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> getDependencies() {
+        return projectDependencies;
     }
 
     public void addGAV(ProjectVersionRef gav) {
@@ -115,10 +122,6 @@ public class ManipulationCache {
 
     public List<ProjectVersionRef> getGAV() {
         return projectVersionRefs;
-    }
-
-    public Map<Project, Collection<ProjectVersionRef>> getDependencies() {
-        return projectDependencies;
     }
 
     @Override

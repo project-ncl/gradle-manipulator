@@ -7,10 +7,12 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.HashMap;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.internal.AbstractTask;
 import org.gradle.api.internal.GradleInternal;
 import org.gradle.api.internal.TaskInternal;
@@ -84,11 +86,13 @@ public class AlignmentTaskEmptyVersionTest {
         // As getAllProjectDependencies is private, use reflection to modify the access control.
         Class[] types = new Class[1];
         types[0] = Project.class;
-        Method m = at.getClass().getDeclaredMethod("getAllProjectDependencies", types);
+        Method m = at.getClass().getDeclaredMethod("getDependencies", Project.class);
         m.setAccessible(true);
-        Collection<ProjectVersionRef> result = (Collection<ProjectVersionRef>) m.invoke(at, new Object[] { p });
+        HashMap<Dependency, ProjectVersionRef> result = (HashMap<Dependency, ProjectVersionRef>) m.invoke(at,
+                new Object[] { p });
+        Collection<ProjectVersionRef> allDependencies = result.values();
 
-        assertEquals(1, result.size());
-        assertEquals("org.apache.commons:commons-configuration2:2.4", result.stream().findFirst().get().toString());
+        assertEquals(1, allDependencies.size());
+        assertEquals("org.apache.commons:commons-configuration2:2.4", allDependencies.stream().findFirst().get().toString());
     }
 }

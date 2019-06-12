@@ -11,6 +11,7 @@ import java.util.Random;
 
 import org.apache.commons.codec.binary.Base32;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.Translator;
@@ -36,7 +37,7 @@ public class DAAlignmentService implements AlignmentService {
         final String endpointUrl = configuration.daEndpoint();
 
         if (endpointUrl == null) {
-            throw new IllegalArgumentException(
+            throw new ManipulationUncheckedException(
                     String.format("'%s' must be configured in order for model to work", Configuration.DA));
         }
 

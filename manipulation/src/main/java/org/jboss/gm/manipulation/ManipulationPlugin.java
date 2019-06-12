@@ -51,6 +51,13 @@ public class ManipulationPlugin implements Plugin<Project> {
         final ResolvedDependenciesRepository resolvedDependenciesRepository = new ResolvedDependenciesRepository();
 
         project.afterEvaluate(p -> {
+
+            if (!alignmentModel.getVersion().equals(project.getVersion())) {
+                logger.warn("Another plugin has reset the version to {}. Resetting to {}",
+                        project.getVersion(), alignmentModel.getVersion());
+                project.setVersion(alignmentModel.getVersion());
+            }
+
             // dependencyManagement is the extension that the Spring Dependency Management Plugin registers
             final Object obj = p.getExtensions().findByName("dependencyManagement");
             if (obj != null) {

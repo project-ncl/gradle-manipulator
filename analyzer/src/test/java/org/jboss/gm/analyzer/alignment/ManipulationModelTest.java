@@ -3,6 +3,7 @@ package org.jboss.gm.analyzer.alignment;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Test;
 
@@ -23,11 +24,11 @@ public class ManipulationModelTest {
         assertThat(model.findCorrespondingChild(model.getName())).isEqualTo(model);
         assertThat(model.findCorrespondingChild("child1")).isEqualTo(child);
 
-        assertThatExceptionOfType(IllegalArgumentException.class)
+        assertThatExceptionOfType(ManipulationUncheckedException.class)
                 .isThrownBy(() -> model.findCorrespondingChild("child11"))
                 .withMessage("ManipulationModel child11 does not exist");
 
-        assertThatExceptionOfType(IllegalArgumentException.class)
+        assertThatExceptionOfType(ManipulationUncheckedException.class)
                 .isThrownBy(() -> model.findCorrespondingChild(""))
                 .withMessage("Supplied child name cannot be empty");
 
@@ -49,7 +50,7 @@ public class ManipulationModelTest {
 
         assertThat(model.findCorrespondingChild(":child1")).isEqualTo(child);
 
-        assertThatExceptionOfType(IllegalArgumentException.class)
+        assertThatExceptionOfType(ManipulationUncheckedException.class)
                 .isThrownBy(() -> model.findCorrespondingChild(":child11"))
                 .withMessage("ManipulationModel child11 does not exist");
 

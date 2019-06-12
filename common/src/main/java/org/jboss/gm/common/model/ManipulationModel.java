@@ -3,8 +3,9 @@ package org.jboss.gm.common.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -88,8 +89,9 @@ public class ManipulationModel {
     }
 
     public ManipulationModel findCorrespondingChild(String name) {
-        Validate.notEmpty(name, "Supplied child name cannot be empty");
-
+        if (StringUtils.isBlank(name)) {
+            throw new ManipulationUncheckedException("Supplied child name cannot be empty");
+        }
         final ManipulationModel module;
         if (!name.contains(":")) {
             // we provided a simple name so assume we're looking for a direct child
@@ -99,7 +101,7 @@ public class ManipulationModel {
 
             module = children.get(name);
             if (module == null) {
-                throw new IllegalArgumentException("ManipulationModel " + name + " does not exist");
+                throw new ManipulationUncheckedException("ManipulationModel " + name + " does not exist");
             }
         } else {
             // we provided a project path, so recursively find the corresponding child by removing the initial ":"

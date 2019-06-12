@@ -1,0 +1,4 @@
+# Dummy similar to what gradle writes when --write-locks is enabled
+io.undertow:undertow-core:2.0.21.Final
+# there are more transitives added by gradle, we only add one in order to not distract
+org.jboss.xnio:xnio-nio:3.3.8.Final

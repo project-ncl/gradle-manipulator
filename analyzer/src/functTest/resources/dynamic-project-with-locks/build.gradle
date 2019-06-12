@@ -1,0 +1,89 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+        }
+    }
+}
+
+plugins {
+    // including this plugin directly instead of by an init script, which allows to use the freshly build version
+    id 'org.jboss.gm.analyzer'
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group = 'org.jboss.gm.analyzer.functest'
+version = '1.0.0'
+
+allprojects {
+    repositories {
+        google()
+        mavenLocal()
+        mavenCentral()
+        flatDir {
+            dirs = [file("repo/")]
+        }
+        /*maven {
+            url = uri("https://localhost/test-repo1")
+        }
+        maven {
+            url = uri("https://localhost/test-repo2")
+        }*/
+        ivy {
+            url = uri("https://localhost:8089/ivy-repo")
+        }
+    }
+
+    sourceCompatibility = 1.8
+
+}
+
+dependencyLocking {
+    lockAllConfigurations()
+}
+
+
+dependencies {
+    implementation "org.apache.commons:commons-lang3:latest.release"
+    compile('org.hdrhistogram:HdrHistogram:2.+')
+    compile('com.google.inject:guice:4.2.2')
+    compile('org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1')
+
+    compile group: 'io.undertow', name: 'undertow-core', version: '2.0+'
+}
+
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    archiveClassifier = 'javadoc'
+}
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'dynamic-locks'
+
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+
+
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+}

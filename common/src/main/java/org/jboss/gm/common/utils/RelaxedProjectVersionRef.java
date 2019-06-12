@@ -8,7 +8,6 @@ import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.TypeAndClassifier;
 import org.commonjava.maven.atlas.ident.ref.VersionlessArtifactRef;
-import org.commonjava.maven.atlas.ident.version.InvalidVersionSpecificationException;
 import org.commonjava.maven.atlas.ident.version.SingleVersion;
 import org.commonjava.maven.atlas.ident.version.VersionSpec;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -18,21 +17,19 @@ import org.gradle.api.artifacts.ResolvedDependency;
 /**
  * This is a special ProjectVersionRef that allows a null for a version and delegates to the
  * appropriate implementation.
+ * <p/>
+ * The majority of this is merely a wrapper and not implemented - just enough to store the
+ * original mapping key in the {@link org.jboss.gm.common.ManipulationCache} and provide comparison functionality.
  *
- * @see {@link SimpleProjectRef}
- * @see {@link SimpleProjectVersionRef}
+ * @see org.commonjava.maven.atlas.ident.ref.SimpleProjectRef
+ * @see org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef
  *
- * @author jdcasey
+ * @author ncross
  */
 public class RelaxedProjectVersionRef
         implements ProjectVersionRef {
     private ProjectVersionRef projectVersionRefDelegate;
     private ProjectRef projectRefDelegate;
-
-    public RelaxedProjectVersionRef(final ProjectRef ref, final String versionSpec)
-            throws InvalidVersionSpecificationException {
-        this(ref.getGroupId(), ref.getArtifactId(), versionSpec);
-    }
 
     private RelaxedProjectVersionRef(final String groupId, final String artifactId, final String versionString) {
         if (StringUtils.isEmpty(versionString)) {
@@ -52,7 +49,7 @@ public class RelaxedProjectVersionRef
 
     @Override
     public ProjectVersionRef asProjectVersionRef() {
-        return this;
+        return projectVersionRefDelegate;
     }
 
     @Override
@@ -182,7 +179,7 @@ public class RelaxedProjectVersionRef
 
     @Override
     public ProjectRef asProjectRef() {
-        throw new ManipulationUncheckedException("Not implemented");
+        return projectRefDelegate;
     }
 
     @Override
@@ -210,6 +207,7 @@ public class RelaxedProjectVersionRef
         throw new ManipulationUncheckedException("Not implemented");
     }
 
+    @SuppressWarnings("NullableProblems")
     @Override
     public int compareTo(ProjectRef projectRef) {
         if (projectRefDelegate != null) {

@@ -65,6 +65,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
+        assertTrue(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
         assertEquals(AlignmentTask.INJECT_GME_END,
                 org.jboss.gm.common.utils.FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));

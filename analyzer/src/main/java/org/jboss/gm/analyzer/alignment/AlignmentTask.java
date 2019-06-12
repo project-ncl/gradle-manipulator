@@ -268,8 +268,12 @@ public class AlignmentTask extends DefaultTask {
                         logger.warn("For configuration {}; ignoring all unresolvable dependencies: {}", configuration.getName(),
                                 unresolvedDependencies);
                     } else {
+
                         logger.error("For configuration {}; unable to resolve all dependencies: {}", configuration.getName(),
                                 lenient.getUnresolvedModuleDependencies());
+                        for (UnresolvedDependency ud : unresolvedDependencies) {
+                            logger.error("Unresolved had problem in {} with ", ud.getSelector(), ud.getProblem());
+                        }
                         throw new ManipulationUncheckedException("For configuration " + configuration.getName()
                                 + ", unable to resolve all project dependencies: " + unresolvedDependencies);
                     }
@@ -317,7 +321,7 @@ public class AlignmentTask extends DefaultTask {
                     // if (StringUtils.isNotBlank(originalDep.getVersion())) {
 
                     if (depMap.put(relaxedProjectVersionRef, pvr) == null) {
-                        logger.info("For configuration {}, with original key {}, adding dependency to scan {} ", configuration,
+                        logger.info("For {}, with original key {}, adding dependency to scan {} ", configuration,
                                 relaxedProjectVersionRef, pvr);
                     }
 

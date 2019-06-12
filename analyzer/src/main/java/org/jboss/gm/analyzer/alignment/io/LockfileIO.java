@@ -1,4 +1,4 @@
-package org.jboss.gm.analyzer.alignment;
+package org.jboss.gm.analyzer.alignment.io;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,15 +9,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 
-final class LockfileIO {
+public final class LockfileIO {
 
     private static final String LOCKFILE_EXTENSION = ".lockfile";
 
@@ -37,9 +39,14 @@ final class LockfileIO {
             return FileUtils.readLines(lockfile, Charset.defaultCharset())
                     .stream()
                     .filter(l -> !l.startsWith("#"))
-                    .map(l -> l.split(":"))
-                    .filter(p -> p.length >= 3)
-                    .map(p -> new SimpleProjectVersionRef(p[0], p[1], p[2]))
+                    .map(l -> {
+                        try {
+                            return SimpleProjectVersionRef.parse(l);
+                        } catch (InvalidRefException e) {
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
         } catch (IOException e) {
             throw new ManipulationUncheckedException("Unable to parse lockfile " + lockfile, e);

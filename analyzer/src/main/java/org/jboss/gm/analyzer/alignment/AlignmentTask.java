@@ -42,6 +42,7 @@ import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
 import org.gradle.api.tasks.TaskAction;
+import org.jboss.gm.analyzer.alignment.io.LockfileIO;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.ProjectVersionFactory;
@@ -283,8 +284,8 @@ public class AlignmentTask extends DefaultTask {
                     String version = dep.getModuleVersion(); // this is the resolved version from gradle
                     // if the dependency is present in any of the lockfiles, then we use that version
                     for (ProjectVersionRef lockFileDep : lockFileDeps) {
-                        if (lockFileDep.asProjectRef().getGroupId().equals(dep.getModuleGroup())
-                                && lockFileDep.asProjectRef().getArtifactId().equals(dep.getModuleName())) {
+                        if (lockFileDep.getGroupId().equals(dep.getModuleGroup())
+                                && lockFileDep.getArtifactId().equals(dep.getModuleName())) {
                             version = lockFileDep.getVersionString();
                         }
                     }
@@ -303,6 +304,8 @@ public class AlignmentTask extends DefaultTask {
                     }
 
                     RelaxedProjectVersionRef relaxedProjectVersionRef;
+                    // If we haven't found any original dependency we'll default to the current resolved dependency
+                    // value. This might be possible if the dependency has come from a lock file.
                     if (originalDeps.size() == 0) {
                         relaxedProjectVersionRef = new RelaxedProjectVersionRef(dep);
                     } else {

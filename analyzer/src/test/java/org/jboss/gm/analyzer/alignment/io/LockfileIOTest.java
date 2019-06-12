@@ -1,4 +1,4 @@
-package org.jboss.gm.analyzer.alignment;
+package org.jboss.gm.analyzer.alignment.io;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;

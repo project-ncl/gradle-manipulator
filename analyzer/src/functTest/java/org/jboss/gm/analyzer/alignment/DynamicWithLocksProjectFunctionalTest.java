@@ -62,10 +62,10 @@ public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest 
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.jboss.gm.analyzer.functest");
-            assertThat(am.getName()).isEqualTo("dynamic-locks");
-            assertThat(am.findCorrespondingChild("dynamic-locks")).satisfies(root -> {
+            assertThat(am.getName()).isEqualTo("rootProject");
+            assertThat(am.findCorrespondingChild("rootProject")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("1.0.0.redhat-00001");
-                assertThat(root.getName()).isEqualTo("dynamic-locks");
+                assertThat(root.getName()).isEqualTo("rootProject");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
@@ -83,5 +83,9 @@ public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest 
                         "org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1");
             });
         });
+
+        // make sure the project name was added
+        assertEquals("rootProject.name='rootProject'",
+                FileUtils.getLastLine(new File(projectRoot, "settings.gradle")));
     }
 }

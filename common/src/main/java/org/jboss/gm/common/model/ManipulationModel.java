@@ -59,6 +59,10 @@ public class ManipulationModel {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public Map<String, ProjectVersionRef> getAlignedDependencies() {
         return alignedDependencies;
     }

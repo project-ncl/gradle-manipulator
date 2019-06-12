@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
 
@@ -133,6 +134,12 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                 .containsOnly(
                         "https://repo.maven.apache.org/maven2/",
                         "https://plugins.gradle.org/m2/");
+
+        // make sure the project name was not changed
+        List<String> settingsLines = org.apache.commons.io.FileUtils.readLines(new File(projectRoot, "settings.gradle"),
+                Charset.defaultCharset());
+        assertThat(settingsLines).filteredOn(s -> s.trim().startsWith("rootProject.name"))
+                .hasOnlyOneElementSatisfying(s -> s.trim().endsWith("'root'"));
     }
 
 }

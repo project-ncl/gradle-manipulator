@@ -1,7 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.*;
 import static org.gradle.api.Project.DEFAULT_VERSION;
 import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
 
@@ -143,10 +142,15 @@ public class AlignmentTask extends DefaultTask {
 
                 logger.info("Completed processing for alignment and writing {} ", cache.toString());
 
+                final String newProjectName = writeProjectNameIfNeeded();
+                if ((newProjectName != null) && !newProjectName.isEmpty()) {
+                    alignmentModel.setName(newProjectName);
+                }
                 writeManipulationModel(project.getRootDir(), alignmentModel);
                 writeGmeMarkerFile();
                 writeGmeConfigMarkerFile();
                 writeRepositorySettingsFile(cache.getRepositories());
+
             }
 
             LockfileIO.renameAllLockFiles(getLocksRootPath(project));
@@ -158,6 +162,7 @@ public class AlignmentTask extends DefaultTask {
     }
 
     // TODO: we might need to make this configurable
+
     private Path getLocksRootPath(Project project) {
         return project.getProjectDir().toPath().resolve("gradle/dependency-locks");
     }
@@ -452,5 +457,38 @@ public class AlignmentTask extends DefaultTask {
             }
         }
         return allDependencies;
+    }
+
+    // we need to make sure that the name of the root project is stored if not set
+    // this is because the manipulation plugin must use the same name
+    // otherwise the model won't be found
+    // see also: https://discuss.gradle.org/t/rootproject-name-in-settings-gradle-vs-projectname-in-build-gradle/5704/4
+    private String writeProjectNameIfNeeded() throws IOException {
+        File rootDir = getProject().getRootDir();
+        File settingsGradle = new File(rootDir, "settings.gradle");
+
+        if (!settingsGradle.exists()) {
+            return null;
+        }
+
+        List<String> lines = FileUtils.readLines(settingsGradle, Charset.defaultCharset());
+        for (String line : lines) {
+            if (line.contains("rootProject.name")) {
+                return null;
+            }
+        }
+
+        final String newProjectName = "rootProject";
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(settingsGradle, true))) {
+            // Ensure the marker is on a line by itself.
+            writer.newLine();
+
+            writer.write("rootProject.name='" + newProjectName + "'");
+            writer.newLine();
+            writer.flush();
+        }
+
+        return newProjectName;
     }
 }

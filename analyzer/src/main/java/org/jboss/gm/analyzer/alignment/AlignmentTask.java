@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
 import org.gradle.api.tasks.TaskAction;
+import org.jboss.gm.analyzer.alignment.io.LockfileIO;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.ProjectVersionFactory;
@@ -73,11 +75,13 @@ public class AlignmentTask extends DefaultTask {
                 projectName, project.getVersion());
 
         try {
+            final Set<ProjectVersionRef> lockFileDeps = LockfileIO
+                    .allProjectVersionRefsFromLockfiles(getLocksRootPath(project));
             final ManipulationCache cache = ManipulationCache.getCache(project);
             final String currentProjectVersion = project.getVersion().toString();
             final HashMap<RelaxedProjectVersionRef, ProjectVersionRef> dependencies = processAnyExistingManipulationFile(
                     project,
-                    getDependencies(project));
+                    getDependencies(project, lockFileDeps));
 
             cache.addDependencies(project, dependencies);
             project.getRepositories().forEach(cache::addRepository);
@@ -144,11 +148,18 @@ public class AlignmentTask extends DefaultTask {
                 writeGmeConfigMarkerFile();
                 writeRepositorySettingsFile(cache.getRepositories());
             }
+
+            LockfileIO.renameAllLockFiles(getLocksRootPath(project));
         } catch (ManipulationException e) {
             throw new ManipulationUncheckedException(e);
         } catch (IOException e) {
             throw new ManipulationUncheckedException("Failed to write marker file", e);
         }
+    }
+
+    // TODO: we might need to make this configurable
+    private Path getLocksRootPath(Project project) {
+        return project.getProjectDir().toPath().resolve("gradle/dependency-locks");
     }
 
     private void writeGmeMarkerFile() throws IOException, ManipulationException {
@@ -212,7 +223,8 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private HashMap<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(Project project) {
+    private HashMap<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(Project project,
+            Set<ProjectVersionRef> lockFileDeps) {
         Configuration internalConfig = ConfigCache.getOrCreate(Configuration.class);
 
         final HashMap<RelaxedProjectVersionRef, ProjectVersionRef> depMap = new HashMap<>();
@@ -269,9 +281,17 @@ public class AlignmentTask extends DefaultTask {
                                 dep.toString(), configuration.getName());
                         return;
                     }
+                    String version = dep.getModuleVersion(); // this is the resolved version from gradle
+                    // if the dependency is present in any of the lockfiles, then we use that version
+                    for (ProjectVersionRef lockFileDep : lockFileDeps) {
+                        if (lockFileDep.getGroupId().equals(dep.getModuleGroup())
+                                && lockFileDep.getArtifactId().equals(dep.getModuleName())) {
+                            version = lockFileDep.getVersionString();
+                        }
+                    }
                     ProjectVersionRef pvr = ProjectVersionFactory.withGAVAndConfiguration(dep.getModuleGroup(),
                             dep.getModuleName(),
-                            dep.getModuleVersion(), configuration.getName());
+                            version, configuration.getName());
 
                     List<Dependency> originalDeps = allDependencies.stream()
                             .filter(d -> StringUtils.equals(d.getGroup(), dep.getModuleGroup()) &&

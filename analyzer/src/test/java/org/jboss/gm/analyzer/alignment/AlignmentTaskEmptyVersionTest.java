@@ -8,6 +8,8 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.DefaultTask;
@@ -86,10 +88,10 @@ public class AlignmentTaskEmptyVersionTest {
         // As getAllProjectDependencies is private, use reflection to modify the access control.
         Class[] types = new Class[1];
         types[0] = Project.class;
-        Method m = at.getClass().getDeclaredMethod("getDependencies", Project.class);
+        Method m = at.getClass().getDeclaredMethod("getDependencies", Project.class, Set.class);
         m.setAccessible(true);
         HashMap<Dependency, ProjectVersionRef> result = (HashMap<Dependency, ProjectVersionRef>) m.invoke(at,
-                new Object[] { p });
+                new Object[] { p, new HashSet<ProjectVersionRef>() });
         Collection<ProjectVersionRef> allDependencies = result.values();
 
         assertEquals(1, allDependencies.size());

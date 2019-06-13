@@ -1,9 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -84,6 +81,13 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                                 tuple("hibernate-core", "5.3.7.Final-redhat-00001"));
             });
         });
+
+        //verify that dummy.gradle now includes the gme-repos.gradle injection
+        final File extraGradleFile = projectRoot.toPath().resolve("gradle/dummy.gradle").toFile();
+        assertThat(extraGradleFile).exists();
+        assertThat(FileUtils.readLines(extraGradleFile, Charset.defaultCharset()))
+                .filteredOn(l -> l.trim().equals(AlignmentTask.APPLY_GME_REPOS)).hasSize(1);
+
     }
 
     @Test

@@ -1,6 +1,7 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.apache.commons.lang.StringUtils.*;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.gradle.api.Project.DEFAULT_VERSION;
 import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
 
@@ -23,6 +24,8 @@ import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
@@ -59,6 +62,8 @@ public class AlignmentTask extends DefaultTask {
 
     static final String INJECT_GME_START = "buildscript { apply from: \"gme.gradle\" }";
     static final String GME = "gme.gradle";
+    static final String GME_REPOS = "gme-repos.gradle";
+    static final String APPLY_GME_REPOS = "buildscript { apply from: \"${project.rootDir}/gme-repos.gradle\" to: buildscript }";
     static final String INJECT_GME_END = "apply from: \"gme-pluginconfigs.gradle\"";
     static final String GME_PLUGINCONFIGS = "gme-pluginconfigs.gradle";
     static final String NAME = "generateAlignmentMetadata";
@@ -148,6 +153,8 @@ public class AlignmentTask extends DefaultTask {
                 }
                 writeManipulationModel(project.getRootDir(), alignmentModel);
                 writeGmeMarkerFile();
+                writeGmeReposMarkerFile();
+                updateAllExtraGradleFilesWithGmeRepos();
                 writeGmeConfigMarkerFile();
                 writeRepositorySettingsFile(cache.getRepositories());
 
@@ -195,6 +202,35 @@ public class AlignmentTask extends DefaultTask {
 
         } else {
             logger.warn("Unable to find build.gradle in {} to modify.", rootDir);
+        }
+    }
+
+    private void writeGmeReposMarkerFile() throws IOException {
+        File rootDir = getProject().getRootDir();
+        File gmeReposGradle = new File(rootDir, GME_REPOS);
+
+        Files.copy(getClass().getResourceAsStream('/' + GME_REPOS), gmeReposGradle.toPath(),
+                StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    private void updateAllExtraGradleFilesWithGmeRepos() throws IOException, ManipulationException {
+        final File rootDir = getProject().getRootDir();
+        final File gradleScriptsDirectory = rootDir.toPath().resolve("gradle").toFile();
+        if (!gradleScriptsDirectory.exists()) {
+            return;
+        }
+        final Collection<File> extraGradleScripts = FileUtils.listFiles(gradleScriptsDirectory, new SuffixFileFilter(".gradle"),
+                DirectoryFileFilter.DIRECTORY);
+        for (File extraGradleScript : extraGradleScripts) {
+            final List<String> lines = FileUtils.readLines(extraGradleScript, Charset.defaultCharset());
+
+            if (!APPLY_GME_REPOS.equals(org.jboss.gm.common.utils.FileUtils.getFirstLine(lines))) {
+                final List<String> result = new ArrayList<>(lines.size() + 2);
+                result.add(APPLY_GME_REPOS);
+                result.add(System.lineSeparator());
+                result.addAll(lines);
+                FileUtils.writeLines(extraGradleScript, result);
+            }
         }
     }
 

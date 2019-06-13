@@ -21,7 +21,7 @@ The metadata file is named `manipulation.json` and is created by the `generateAl
 
 There are multiple ways that the plugins can be applied.
 
-* Add plugin configuration to project manually 
+* Add plugin configuration to project manually
 * Apply script to project that handles all the details (this method is used by the `analyzer` plugin which configures the project to use the `manipulation` plugin automatically)
 * Use an init script (see example [here](https://github.com/project-ncl/gradle-manipulator#testing-on-a-real-project))
 
@@ -35,3 +35,4 @@ Below are links to more specific information about configuring sets of features 
 * [Project version manipulation](guide/project-version-manip.html)
 * [Dependency manipulation](guide/dep-manip.html)
 * [Artifact publishing](guide/artifact-publishing.html)
+* [Repositories Etc.](guide/misc.html)

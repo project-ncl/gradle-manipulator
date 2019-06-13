@@ -123,20 +123,23 @@ public class ManipulationPlugin implements Plugin<Project> {
 
             // if no plugin is enforced by configuration, look at which plugin is used by the project
             if (isEmpty(deployPlugin)) {
-                if (evaluatedProject.getPluginManager().hasPlugin(LEGACY_MAVEN_PLUGIN)) {
-                    deployPlugin = LEGACY_MAVEN_PLUGIN;
-                } else if (evaluatedProject.getPluginManager().hasPlugin(MAVEN_PUBLISH_PLUGIN)) {
+                // make sure we first check for the maven publish plugin since it seems that when both are declared, this is the one used
+                // see hibernate-enhance-maven-plugin
+                if (evaluatedProject.getPluginManager().hasPlugin(MAVEN_PUBLISH_PLUGIN)) {
                     deployPlugin = MAVEN_PUBLISH_PLUGIN;
+                } else if (evaluatedProject.getPluginManager().hasPlugin(LEGACY_MAVEN_PLUGIN)) {
+                    deployPlugin = LEGACY_MAVEN_PLUGIN;
                 }
             }
 
             if (LEGACY_MAVEN_PLUGIN.equals(deployPlugin)) {
-                logger.info("Configuring 'maven' plugin");
+                logger.info("Configuring 'maven' plugin for project " + evaluatedProject.getName());
                 evaluatedProject
                         .afterEvaluate(new UploadTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
                 evaluatedProject.afterEvaluate(new MavenPublicationRepositoryAction());
             } else if (MAVEN_PUBLISH_PLUGIN.equals(deployPlugin)) {
-                logger.info("Configuring 'maven-publish' plugin");
+                logger.info("Configuring 'maven-publish' plugin for project " + evaluatedProject.getName());
+
                 evaluatedProject.afterEvaluate(new PublishingRepositoryAction());
                 evaluatedProject
                         .afterEvaluate(new PublishingPomTransformerAction(correspondingModule, resolvedDependenciesRepository));

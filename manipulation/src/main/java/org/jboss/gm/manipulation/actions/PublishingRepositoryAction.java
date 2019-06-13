@@ -39,6 +39,17 @@ public class PublishingRepositoryAction implements Action<Project> {
 
     @Override
     public void execute(Project project) {
+        // disable existing publishing tasks but make sure we keep ours
+        project.afterEvaluate(p -> {
+            p.getTasks().stream()
+                    .filter(t -> t.getName().startsWith("publish") && t.getName().endsWith("Repository")
+                            && !t.getName().contains("Manipulator"))
+                    .forEach(t -> {
+                        project.getLogger().info("Disabling publishing task " + t.getName());
+                        t.setEnabled(false);
+                    });
+        });
+
         if (!project.getPluginManager().hasPlugin("maven-publish")) {
             project.getLogger().warn("Cannot configure publishing repository, maven-publish plugin was not detected.");
             return;

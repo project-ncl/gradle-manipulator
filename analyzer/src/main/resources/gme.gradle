@@ -8,7 +8,7 @@ buildscript {
     // Gradle doesn't seem to apply it to included scrpts.
     if (System.getenv("AProxDependencyUrl") != null) {
         // Running inside PNC
-        apply from: "${project.rootDir}/gme-repos.gradle", to: buildscript
+        apply from: "\${project.rootDir}/gme-repos.gradle", to: buildscript
     } else {
         // Not running in PNC e.g. local development environment.
         repositories {

@@ -213,7 +213,7 @@ public class AlignmentTask extends DefaultTask {
                 StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private void updateAllExtraGradleFilesWithGmeRepos() throws IOException {
+    private void updateAllExtraGradleFilesWithGmeRepos() throws IOException, ManipulationException {
         final File rootDir = getProject().getRootDir();
         final File gradleScriptsDirectory = rootDir.toPath().resolve("gradle").toFile();
         if (!gradleScriptsDirectory.exists()) {
@@ -224,11 +224,13 @@ public class AlignmentTask extends DefaultTask {
         for (File extraGradleScript : extraGradleScripts) {
             final List<String> lines = FileUtils.readLines(extraGradleScript, Charset.defaultCharset());
 
-            final List<String> result = new ArrayList<>(lines.size() + 2);
-            result.add(APPLY_GME_REPOS);
-            result.add(System.lineSeparator());
-            result.addAll(lines);
-            FileUtils.writeLines(extraGradleScript, result);
+            if (!APPLY_GME_REPOS.equals(org.jboss.gm.common.utils.FileUtils.getFirstLine(lines))) {
+                final List<String> result = new ArrayList<>(lines.size() + 2);
+                result.add(APPLY_GME_REPOS);
+                result.add(System.lineSeparator());
+                result.addAll(lines);
+                FileUtils.writeLines(extraGradleScript, result);
+            }
         }
     }
 

@@ -63,7 +63,7 @@ public class AlignmentTask extends DefaultTask {
     static final String INJECT_GME_START = "buildscript { apply from: \"gme.gradle\" }";
     static final String GME = "gme.gradle";
     static final String GME_REPOS = "gme-repos.gradle";
-    static final String APPLY_GME_REPOS = "apply from: \"${project.rootDir}/gme-repos.gradle\" to: buildscript";
+    static final String APPLY_GME_REPOS = "buildscript { apply from: \"${project.rootDir}/gme-repos.gradle\" to: buildscript }";
     static final String INJECT_GME_END = "apply from: \"gme-pluginconfigs.gradle\"";
     static final String GME_PLUGINCONFIGS = "gme-pluginconfigs.gradle";
     static final String NAME = "generateAlignmentMetadata";
@@ -222,29 +222,13 @@ public class AlignmentTask extends DefaultTask {
         final Collection<File> extraGradleScripts = FileUtils.listFiles(gradleScriptsDirectory, new SuffixFileFilter(".gradle"),
                 DirectoryFileFilter.DIRECTORY);
         for (File extraGradleScript : extraGradleScripts) {
-            List<String> lines = FileUtils.readLines(extraGradleScript, Charset.defaultCharset());
-            int buildscriptStartsIndex = -1;
-            boolean containsDependencies = false;
-            for (int i = 0; i < lines.size(); i++) {
-                final String line = lines.get(i).trim();
-                if (line.startsWith("buildscript")) {
-                    buildscriptStartsIndex = i;
-                } else if (line.startsWith("dependencies")) {
-                    containsDependencies = true;
-                }
-                if (containsDependencies && (buildscriptStartsIndex >= 0)) {
-                    break;
-                }
-            }
+            final List<String> lines = FileUtils.readLines(extraGradleScript, Charset.defaultCharset());
 
-            if (containsDependencies && (buildscriptStartsIndex >= 0)) {
-                List<String> result = new ArrayList<>(lines.subList(0, buildscriptStartsIndex + 1));
-                result.add(System.lineSeparator());
-                result.add("\t" + APPLY_GME_REPOS);
-                result.add(System.lineSeparator());
-                result.addAll(lines.subList(buildscriptStartsIndex + 1, lines.size()));
-                FileUtils.writeLines(extraGradleScript, result);
-            }
+            final List<String> result = new ArrayList<>(lines.size() + 2);
+            result.add(APPLY_GME_REPOS);
+            result.add(System.lineSeparator());
+            result.addAll(lines);
+            FileUtils.writeLines(extraGradleScript, result);
         }
     }
 

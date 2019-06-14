@@ -61,12 +61,19 @@ task distZip(type: Zip, dependsOn: [docsZip]) {
 
 }
 
-// TODO: this will need to be removed when the plugin takes care of things
 publishing {
     publications {
         main(MavenPublication) {
             from components.java
-            artifact jar
+            artifact distZip
+        }
+    }
+
+    // we will use this to test that no attempt will be made to publish here
+    repositories {
+        maven {
+            name 'jboss-snapshots-repository'
+            url 'https://repository.jboss.org/nexus/content/repositories/snapshots'
         }
     }
 }

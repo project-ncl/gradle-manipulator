@@ -26,6 +26,14 @@ install {
     }
 }
 
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "https://repository.jboss.org/nexus/content/repositories/snapshots")
+        }
+    }
+}
+
 def customizePom(pom, gradleProject) {
     // just add some additional info into generated POM
     pom.whenConfigured { generatedPom ->

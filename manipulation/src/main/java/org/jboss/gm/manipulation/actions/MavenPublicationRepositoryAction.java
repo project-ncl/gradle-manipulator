@@ -46,6 +46,8 @@ public class MavenPublicationRepositoryAction implements Action<Project> {
         if (uploadArchives == null) {
             project.getLogger().info("Creating uploadArchives task");
             uploadArchives = project.getTasks().create("uploadArchives", Upload.class);
+        } else {
+            uploadArchives.getRepositories().clear();
         }
 
         Configuration config = ConfigCache.getOrCreate(Configuration.class);

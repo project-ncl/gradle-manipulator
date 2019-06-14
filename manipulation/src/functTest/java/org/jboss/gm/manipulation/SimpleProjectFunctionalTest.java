@@ -74,4 +74,27 @@ public class SimpleProjectFunctionalTest {
         assertThat(simpleProjectRoot.toPath().resolve("build/distributions/dummy-1.0.1-redhat-00001-docs.zip")).exists();
         assertThat(simpleProjectRoot.toPath().resolve("build/distributions/dummy-1.0.1-redhat-00001-dist.zip")).exists();
     }
+
+    @Test
+    public void ensurePublish() throws IOException, URISyntaxException {
+        final File publishDirectory = tempDir.newFolder("publish");
+        System.setProperty("AProxDeployUrl", "file://" + publishDirectory.toString());
+
+        final File simpleProjectRoot = tempDir.newFolder("simple-project");
+        TestUtils.copyDirectory("simple-project", simpleProjectRoot);
+        assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
+
+        final BuildResult buildResult = GradleRunner.create()
+                .withProjectDir(simpleProjectRoot)
+                .withArguments("publish")
+                .withDebug(true)
+                .forwardOutput()
+                .withPluginClasspath()
+                .build();
+
+        assertThat(buildResult.task(":" + "publishMainPublicationToJboss-snapshots-repositoryRepository").getOutcome())
+                .isEqualTo(TaskOutcome.SKIPPED);
+        assertThat(buildResult.task(":" + "publish").getOutcome()).isEqualTo(TaskOutcome.UP_TO_DATE);
+        assertThat(publishDirectory).exists();
+    }
 }

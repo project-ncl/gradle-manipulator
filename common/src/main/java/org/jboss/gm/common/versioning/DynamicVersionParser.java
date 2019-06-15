@@ -1,4 +1,4 @@
-package org.jboss.gm.common.utils;
+package org.jboss.gm.common.versioning;
 
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.DefaultVersionComparator;

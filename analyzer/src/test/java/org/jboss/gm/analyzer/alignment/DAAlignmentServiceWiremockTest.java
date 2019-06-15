@@ -5,7 +5,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
+import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

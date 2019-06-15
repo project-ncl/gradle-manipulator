@@ -26,6 +26,7 @@ import org.jboss.gm.manipulation.actions.UploadTaskTransformerAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("unused")
 public class ManipulationPlugin implements Plugin<Project> {
 
     private static final String LEGACY_MAVEN_PLUGIN = "maven";
@@ -52,6 +53,8 @@ public class ManipulationPlugin implements Plugin<Project> {
 
         project.afterEvaluate(p -> {
 
+            // This double version set is required - sometimes other plugins seem to override the version we set initially.
+            // We need to set it at the start as other plugins also require it there. Hence this belt and braces approach.
             if (!alignmentModel.getVersion().equals(project.getVersion())) {
                 logger.warn("Another plugin has reset the version to {}. Resetting to {}",
                         project.getVersion(), alignmentModel.getVersion());

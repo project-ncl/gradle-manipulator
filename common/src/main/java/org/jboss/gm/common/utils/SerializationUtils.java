@@ -3,7 +3,7 @@ package org.jboss.gm.common.utils;
 import java.io.IOException;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.jboss.gm.common.ProjectVersionFactory;
+import org.jboss.gm.common.versioning.ProjectVersionFactory;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;

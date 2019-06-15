@@ -1,27 +1,7 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.gradle.api.Project.DEFAULT_VERSION;
-import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -47,15 +27,34 @@ import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.analyzer.alignment.io.LockfileIO;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
-import org.jboss.gm.common.ProjectVersionFactory;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
-import org.jboss.gm.common.utils.DynamicVersionParser;
-import org.jboss.gm.common.utils.RelaxedProjectVersionRef;
+import org.jboss.gm.common.versioning.DynamicVersionParser;
+import org.jboss.gm.common.versioning.ProjectVersionFactory;
+import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
 import org.slf4j.Logger;
 
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.gradle.api.Project.DEFAULT_VERSION;
+import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
 
 /**
  * The actual Gradle task that creates the {@code manipulation.json} file for the whole project

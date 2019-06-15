@@ -1,4 +1,4 @@
-package org.jboss.gm.common;
+package org.jboss.gm.common.versioning;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;

@@ -1,7 +1,7 @@
 package org.jboss.gm.manipulation.actions;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
+import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
 
 import java.util.Map;
 

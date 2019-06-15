@@ -1,0 +1,53 @@
+plugins {
+    // including this plugin directly instead of by an init script, which allows to use the freshly build version
+    id 'org.jboss.gm.analyzer'
+    id 'java'
+}
+
+sourceCompatibility = 1.8
+
+ext {
+    customVersion = new CustomVersion('1.0.1')
+}
+
+version = project.customVersion
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
+    compile group: 'org.hibernate', name: 'hibernate-core', version: '5.3.7.Final'
+    compile group: 'io.undertow', name: 'undertow-core', version: '2.0.15.Final'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+// taken from Hibernate
+class CustomVersion {
+    final String fullName
+    final String majorVersion
+    final String family
+
+    final String osgiVersion
+
+    final boolean isSnapshot
+
+    CustomVersion(String fullName) {
+        this.fullName = fullName
+
+        final String[] hibernateVersionComponents = fullName.split( '\\.' )
+        this.majorVersion = hibernateVersionComponents[0]
+        this.family = hibernateVersionComponents[0] + '.' + hibernateVersionComponents[1]
+
+        this.isSnapshot = fullName.endsWith( '-SNAPSHOT' )
+
+        this.osgiVersion = isSnapshot ? family + '.' + hibernateVersionComponents[2] + '.SNAPSHOT' : fullName
+    }
+
+    @Override
+    String toString() {
+        return this.fullName
+    }
+}

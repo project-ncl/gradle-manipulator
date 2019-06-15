@@ -54,6 +54,9 @@ import org.jboss.gm.common.utils.DynamicVersionParser;
 import org.jboss.gm.common.utils.RelaxedProjectVersionRef;
 import org.slf4j.Logger;
 
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
+
 /**
  * The actual Gradle task that creates the {@code manipulation.json} file for the whole project
  * (whether it's a single or multi module project)
@@ -158,9 +161,10 @@ public class AlignmentTask extends DefaultTask {
                 writeGmeConfigMarkerFile();
                 writeRepositorySettingsFile(cache.getRepositories());
 
+                LockfileIO.renameAllLockFiles(getLocksRootPath(project));
+                runCustomGroovyScript(project.getRootProject(), alignmentModel);
             }
 
-            LockfileIO.renameAllLockFiles(getLocksRootPath(project));
         } catch (ManipulationException e) {
             throw new ManipulationUncheckedException(e);
         } catch (IOException e) {
@@ -169,7 +173,6 @@ public class AlignmentTask extends DefaultTask {
     }
 
     // TODO: we might need to make this configurable
-
     private Path getLocksRootPath(Project project) {
         return project.getProjectDir().toPath().resolve("gradle/dependency-locks");
     }
@@ -499,6 +502,7 @@ public class AlignmentTask extends DefaultTask {
     // this is because the manipulation plugin must use the same name
     // otherwise the model won't be found
     // see also: https://discuss.gradle.org/t/rootproject-name-in-settings-gradle-vs-projectname-in-build-gradle/5704/4
+
     private String writeProjectNameIfNeeded() throws IOException {
         File rootDir = getProject().getRootDir();
         File settingsGradle = new File(rootDir, "settings.gradle");
@@ -526,5 +530,21 @@ public class AlignmentTask extends DefaultTask {
         }
 
         return newProjectName;
+    }
+
+    // for now we simply assume that the script is called gme.groovy and already resides in the project's root directory
+    // TODO allow downloading scripts from a configured URL
+    private void runCustomGroovyScript(Project rootProject, ManipulationModel alignmentModel) throws IOException {
+        final File rootDir = rootProject.getRootDir();
+        final File groovyScriptFile = new File(rootDir.getAbsolutePath(), "gme.groovy");
+        if (!groovyScriptFile.exists()) {
+            return;
+        }
+
+        final Binding binding = new Binding();
+        binding.setVariable("alignmentModel", alignmentModel);
+        binding.setVariable("projectRoot", rootProject.getRootDir().getAbsolutePath());
+        final GroovyShell groovyShell = new GroovyShell(binding);
+        groovyShell.evaluate(groovyScriptFile);
     }
 }

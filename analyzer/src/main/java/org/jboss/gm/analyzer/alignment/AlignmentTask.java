@@ -1,7 +1,28 @@
 package org.jboss.gm.analyzer.alignment;
 
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.gradle.api.Project.DEFAULT_VERSION;
+import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -24,6 +45,7 @@ import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
 import org.gradle.api.tasks.TaskAction;
+import org.jboss.gm.analyzer.alignment.groovy.GMEBaseScript;
 import org.jboss.gm.analyzer.alignment.io.LockfileIO;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
@@ -34,27 +56,9 @@ import org.jboss.gm.common.versioning.ProjectVersionFactory;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
 import org.slf4j.Logger;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.gradle.api.Project.DEFAULT_VERSION;
-import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
+import groovy.lang.Script;
 
 /**
  * The actual Gradle task that creates the {@code manipulation.json} file for the whole project
@@ -161,7 +165,8 @@ public class AlignmentTask extends DefaultTask {
                 writeRepositorySettingsFile(cache.getRepositories());
 
                 LockfileIO.renameAllLockFiles(getLocksRootPath(project));
-                runCustomGroovyScript(project.getRootProject(), alignmentModel);
+
+                runCustomGroovyScript(configuration, project.getRootProject(), alignmentModel);
             }
 
         } catch (ManipulationException e) {
@@ -532,18 +537,43 @@ public class AlignmentTask extends DefaultTask {
     }
 
     // for now we simply assume that the script is called gme.groovy and already resides in the project's root directory
-    // TODO allow downloading scripts from a configured URL
-    private void runCustomGroovyScript(Project rootProject, ManipulationModel alignmentModel) throws IOException {
-        final File rootDir = rootProject.getRootDir();
-        final File groovyScriptFile = new File(rootDir.getAbsolutePath(), "gme.groovy");
-        if (!groovyScriptFile.exists()) {
-            return;
-        }
+    private void runCustomGroovyScript(Configuration configuration, Project rootProject, ManipulationModel alignmentModel)
+            throws IOException, ManipulationException {
 
-        final Binding binding = new Binding();
-        binding.setVariable("alignmentModel", alignmentModel);
-        binding.setVariable("projectRoot", rootProject.getRootDir().getAbsolutePath());
-        final GroovyShell groovyShell = new GroovyShell(binding);
-        groovyShell.evaluate(groovyScriptFile);
+        final List<File> groovyFiles = new ArrayList<>();
+        final String[] scripts = configuration.groovyScripts();
+
+        if (scripts != null) {
+            int i = 0;
+            for (String script : scripts) {
+                logger.info("Attempting to read URL {} ", script);
+                File remote = new File(rootProject.getRootDir(), "gme-" + i + "groovy");
+                FileUtils.copyURLToFile(new URL(script), remote);
+                groovyFiles.add(remote);
+            }
+        }
+        // Also check for a default gme.groovy as well as remote files.
+        groovyFiles.add(new File(rootProject.getRootDir(), "gme.groovy"));
+
+        for (File scriptFile : groovyFiles) {
+
+            if (scriptFile.exists()) {
+                final Binding binding = new Binding();
+                // We use the current class' classloader so the script has access to this plugin's API and the
+                // groovy API.
+                final GroovyShell groovyShell = new GroovyShell(this.getClass().getClassLoader(), binding);
+                final Script script = groovyShell.parse(scriptFile);
+
+                logger.info("Attempting to invoke groovy script {} ", scriptFile);
+
+                // Inject the values via a new BaseScript so user's can have completion.
+                if (script instanceof GMEBaseScript) {
+                    ((GMEBaseScript) script).setValues(rootProject, alignmentModel);
+                } else {
+                    throw new ManipulationException("Cannot cast " + script + " to a BaseScript to set values.");
+                }
+                script.run();
+            }
+        }
     }
 }

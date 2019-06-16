@@ -7,7 +7,7 @@ plugins {
 sourceCompatibility = 1.8
 
 ext {
-    customVersion = new CustomVersion('1.0.1')
+    customVersion = new CustomVersion( '1.0.1', project )
 }
 
 version = project.customVersion
@@ -34,7 +34,7 @@ class CustomVersion {
 
     final boolean isSnapshot
 
-    CustomVersion(String fullName) {
+    CustomVersion(String fullName, Project project) {
         this.fullName = fullName
 
         final String[] hibernateVersionComponents = fullName.split( '\\.' )

@@ -1,11 +1,16 @@
-repositories {
-    maven {
-        name "indy-mvn"
-        url System.getenv("AProxDependencyUrl")
-        credentials(HttpHeaderCredentials) {
-            name = "Authorization"
-            value = "Bearer " + System.getenv('accessToken')
+
+// This check ensures that if we are running outside of PNC so we don't get
+// problems with adding an empty URL.
+if (System.getenv("AProxDependencyUrl") != null) {
+    repositories {
+        maven {
+            name "indy-mvn"
+            url System.getenv("AProxDependencyUrl")
+            credentials(HttpHeaderCredentials) {
+                name = "Authorization"
+                value = "Bearer " + System.getenv('accessToken')
+            }
+            authentication { header(HttpHeaderAuthentication) }
         }
-        authentication { header(HttpHeaderAuthentication) }
     }
 }

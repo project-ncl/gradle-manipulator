@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.List;
 
@@ -79,10 +80,10 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
         });
 
         // verify that the custom groovy script altered the build script
-        final List<String> lines = FileUtils.readLines(new File(projectRoot, "build.gradle"));
-        assertThat(lines).filteredOn(l -> l.contains("new CustomVersion")).hasOnlyOneElementSatisfying(l -> {
-            assertThat(l.contains("CustomVersion('1.0.1.redhat-00002')"));
-        });
+        final List<String> lines = FileUtils.readLines(new File(projectRoot, "build.gradle"), Charset.defaultCharset());
+        assertThat(lines).filteredOn(
+                l -> l.contains("new CustomVersion"))
+                .hasOnlyOneElementSatisfying(l -> assertThat(l.contains("CustomVersion( '1.0.1.redhat-00002', project )")));
     }
 
 }

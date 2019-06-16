@@ -84,6 +84,9 @@ public interface Configuration extends Accessible {
     @DefaultValue("false")
     boolean ignoreUnresolvableDependencies();
 
+    @Key("groovyScripts")
+    String[] groovyScripts();
+
     /**
      * This value is used to represent the dependency configuration. While PME supports
      * BOM and REST configs ; currently within Gradle only REST is supported. If this

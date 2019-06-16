@@ -1,22 +1,22 @@
-import org.apache.commons.io.FileUtils
 
+/**
+ * Example groovy file to manipulate a project.
+ *
+ */
 
-// this script has access to the following variables
-// alignmentModel which is the result of the alignment process
-// projectRoot which is the absolute path of the of the aligned model
+import groovy.transform.BaseScript
+import org.jboss.gm.analyzer.alignment.groovy.GMEBaseScript
 
-final String alignedVersion = alignmentModel.version
+// Use BaseScript annotation to set script for evaluating the DSL.
+@BaseScript GMEBaseScript gmeScript
 
-final buildGradle = new File(projectRoot,'build.gradle')
-final lines = FileUtils.readLines(buildGradle)
-final newLines = new ArrayList(lines.size())
+println "Running Groovy script on " + gmeScript.getProject()
+println "\tgroovy found new version is " + gmeScript.getModel().getVersion()
 
-for (String line : lines) {
-    if(line.contains("CustomVersion('1.0.1')")) {
-        newLines.add(line.replace("CustomVersion('1.0.1')", "CustomVersion('${alignedVersion}')"))
-    } else {
-        newLines.add(line)
-    }
-}
+String newVersion = gmeScript.getModel().getVersion()
+File information = new File(gmeScript.getProject().getRootDir(), "build.gradle")
 
-FileUtils.writeLines(buildGradle, newLines)
+def newContent = information.text.replaceAll( "(new CustomVersion[(]\\s')(.*)(',\\sproject\\s[)])", "\$1$newVersion\$3")
+information.text = newContent
+
+println "New content is " + newContent

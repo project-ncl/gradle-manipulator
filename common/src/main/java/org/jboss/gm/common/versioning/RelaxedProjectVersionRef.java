@@ -74,7 +74,10 @@ public class RelaxedProjectVersionRef
 
     @Override
     public VersionSpec getVersionSpecRaw() {
-        throw new ManipulationUncheckedException("Not implemented");
+        if (projectVersionRefDelegate != null) {
+            return projectVersionRefDelegate.getVersionSpecRaw();
+        }
+        return null;
     }
 
     @Override
@@ -127,12 +130,19 @@ public class RelaxedProjectVersionRef
 
     @Override
     public VersionSpec getVersionSpec() {
+        if (projectVersionRefDelegate != null) {
+            return projectVersionRefDelegate.getVersionSpec();
+        }
         return null;
     }
 
     @Override
     public boolean versionlessEquals(ProjectVersionRef other) {
-        throw new ManipulationUncheckedException("Not implemented");
+        if (projectRefDelegate != null) {
+            return projectRefDelegate.equals(other.asProjectRef());
+        } else {
+            return projectVersionRefDelegate.versionlessEquals(other);
+        }
     }
 
     @Override
@@ -147,11 +157,10 @@ public class RelaxedProjectVersionRef
 
     @Override
     public String getVersionString() {
-        if (projectRefDelegate != null) {
-            return null;
-        } else {
+        if (projectVersionRefDelegate != null) {
             return projectVersionRefDelegate.getVersionString();
         }
+        return null;
     }
 
     @Override

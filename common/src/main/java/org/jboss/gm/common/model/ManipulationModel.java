@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -64,8 +65,28 @@ public class ManipulationModel {
         this.name = name;
     }
 
+    /**
+     * Returns the alignments for this project only, doesn't include children
+     */
     public Map<String, ProjectVersionRef> getAlignedDependencies() {
         return alignedDependencies;
+    }
+
+    /**
+     * Returns all alignments for this project and those of the children
+     */
+    @JsonIgnore
+    public Map<String, ProjectVersionRef> getAllAlignedDependencies() {
+        final Map<String, ProjectVersionRef> result = new HashMap<>();
+        addDependenciesRec(this, result);
+        return result;
+    }
+
+    private void addDependenciesRec(ManipulationModel manipulationModel, Map<String, ProjectVersionRef> result) {
+        result.putAll(manipulationModel.getAlignedDependencies());
+        for (ManipulationModel child : manipulationModel.getChildren().values()) {
+            addDependenciesRec(child, result);
+        }
     }
 
     public String getVersion() {

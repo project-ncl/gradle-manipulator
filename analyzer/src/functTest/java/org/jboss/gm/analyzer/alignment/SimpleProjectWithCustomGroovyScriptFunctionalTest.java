@@ -84,6 +84,8 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
         assertThat(lines).filteredOn(
                 l -> l.contains("new CustomVersion"))
                 .hasOnlyOneElementSatisfying(l -> assertThat(l.contains("CustomVersion( '1.0.1.redhat-00002', project )")));
+        assertThat(lines).filteredOn(l -> l.contains("undertowVersion ="))
+                .hasOnlyOneElementSatisfying(l -> assertThat(l.contains("2.0.15.Final-redhat-00001")));
     }
 
 }

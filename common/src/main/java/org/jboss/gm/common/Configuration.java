@@ -74,7 +74,7 @@ public interface Configuration extends Accessible {
     String restRepositoryGroup();
 
     @Key("restMaxSize")
-    @DefaultValue("0")
+    @DefaultValue("-1")
     int restMaxSize();
 
     @Key("log-context")

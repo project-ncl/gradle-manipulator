@@ -31,7 +31,7 @@ subprojects {
 
 
     extra["bytemanVersion"] = "4.0.7"
-    extra["pmeVersion"] = "3.7"
+    extra["pmeVersion"] = "3.7.1"
 
     apply(plugin = "com.diffplug.gradle.spotless")
     apply(plugin = "net.nemerosa.versioning")

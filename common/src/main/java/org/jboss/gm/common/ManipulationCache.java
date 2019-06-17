@@ -11,7 +11,7 @@ import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.jboss.gm.common.model.ManipulationModel;
-import org.jboss.gm.common.utils.RelaxedProjectVersionRef;
+import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
 
 /**
  * Cache that is stored in the root project extensions.

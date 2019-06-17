@@ -1,4 +1,4 @@
-package org.jboss.gm.common.utils;
+package org.jboss.gm.common.versioning;
 
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;

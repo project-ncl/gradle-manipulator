@@ -1,7 +1,7 @@
 package org.jboss.gm.analyzer.alignment;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
+import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
 
 import java.io.File;
 import java.io.IOException;

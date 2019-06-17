@@ -1,6 +1,6 @@
 package org.jboss.gm.manipulation.actions;
 
-import static org.jboss.gm.common.ProjectVersionFactory.withGAV;
+import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;

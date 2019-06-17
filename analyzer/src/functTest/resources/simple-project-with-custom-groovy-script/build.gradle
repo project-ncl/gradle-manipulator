@@ -8,6 +8,7 @@ sourceCompatibility = 1.8
 
 ext {
     customVersion = new CustomVersion( '1.0.1', project )
+    undertowVersion = '2.0.15.Final'
 }
 
 version = project.customVersion
@@ -20,7 +21,7 @@ repositories {
 dependencies {
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
     compile group: 'org.hibernate', name: 'hibernate-core', version: '5.3.7.Final'
-    compile group: 'io.undertow', name: 'undertow-core', version: '2.0.15.Final'
+    compile group: 'io.undertow', name: 'undertow-core', version: undertowVersion
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 

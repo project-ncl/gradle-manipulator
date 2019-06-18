@@ -20,9 +20,10 @@ GME will then call the following endpoints
 
     reports/lookup/gavs
 
-It will initially call the `lookup/gavs` endpoint. By default PME will pass *all* the GAVs to the endpoint, though it can be configured to split them into initial batches via `-DrestMaxSize=<...>`. If the endpoint returns a 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`. An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group.
+It will initially call the `lookup/gavs` endpoint. By default PME will pass *all* the GAVs to the endpoint **automatically auto-sizing** the data sent to DA according to the project size. Note that the initial split batches can also be configured manually via `-DrestMaxSize=<...>`. If the endpoint returns a 503 or 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint and the request retried. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`. An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group.
 
 The lookup REST endpoint should follow:
+
 
 <table>
 <tr>
@@ -31,7 +32,7 @@ The lookup REST endpoint should follow:
 </tr>
 <tr>
 <td>
-   <pre lang="json" style="font-size: 10px">
+   <pre lang="xml" style="font-size: 10px">
 [
     [ "repositoryGroup" : "id" ]
     {
@@ -44,7 +45,7 @@ The lookup REST endpoint should follow:
     </pre>
 </td>
 <td>
-  <pre lang="json" style="font-size: 10px">
+  <pre lang="xml" style="font-size: 10px">
 [
     {
         "groupId": "org.foo",

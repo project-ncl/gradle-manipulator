@@ -55,8 +55,6 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    // Note : if this test has started failing check the latest version of undertow on
-    // http://central.maven.org/maven2/io/undertow/undertow-core/
     public void ensureAlignmentFileCreated()
             throws IOException, URISyntaxException, XmlPullParserException, ManipulationException {
         final File projectRoot = tempDir.newFolder("complex-project");
@@ -88,13 +86,9 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
                             // make sure the two dynamic dependencies not aligned exist and have versions similar to what we expect
 
                             assertThat(l).filteredOn(t -> "HdrHistogram".equals(getArtifactId(t)))
-                                    .hasOnlyOneElementSatisfying(t -> {
-                                        assertThat(getVersion(t)).startsWith("2.");
-                                    });
+                                    .hasOnlyOneElementSatisfying(t -> assertThat(getVersion(t)).startsWith("2."));
                             assertThat(l).filteredOn(t -> "commons-lang3".equals(getArtifactId(t)))
-                                    .hasOnlyOneElementSatisfying(t -> {
-                                        assertThat(getVersion(t)).startsWith("3.");
-                                    });
+                                    .hasOnlyOneElementSatisfying(t -> assertThat(getVersion(t)).startsWith("3."));
                         });
 
                 assertThat(root.getAlignedDependencies().keySet()).containsOnly(

@@ -109,7 +109,7 @@ public class RepositoryExporter {
         return url.getScheme() != null && SUPPORTED_SCHEMES.contains(url.getScheme().toLowerCase());
     }
 
-    protected void addDefaultRepositories() {
+    private void addDefaultRepositories() {
         addRepository("Gradle Plugin Repository", "https://plugins.gradle.org/m2/");
     }
 }

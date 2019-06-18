@@ -37,7 +37,7 @@ public class ManipulationCache {
      * Represents a mapping of project module to a map of the original Dependency (which might be dynamic) to
      * the fully resolved GAV.
      */
-    private HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = new HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>>();
+    private HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = new HashMap<>();
 
     private Set<ArtifactRepository> repositories = new HashSet<>();
 

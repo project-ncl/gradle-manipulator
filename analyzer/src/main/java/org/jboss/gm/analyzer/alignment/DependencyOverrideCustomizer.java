@@ -4,7 +4,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -106,18 +105,4 @@ public class DependencyOverrideCustomizer implements AlignmentService.ResponseCu
             return overrideMap.keySet().stream().filter(p -> p.matches(gav)).findFirst();
         }
     }
-
-    private static class DependencyOverridePredicate implements Predicate<ProjectRef> {
-        private final ProjectRef dependency;
-
-        DependencyOverridePredicate(ProjectRef dependency) {
-            this.dependency = dependency;
-        }
-
-        @Override
-        public boolean test(ProjectRef gav) {
-            return !dependency.matches(gav);
-        }
-    }
-
 }

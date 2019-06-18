@@ -19,14 +19,8 @@ GME can prescan the project, collect up all used `group:artifact:version` and ca
 GME will then call the following endpoints
 
     reports/lookup/gavs
-    listings/blacklist/ga
 
 It will initially call the `lookup/gavs` endpoint. By default PME will pass *all* the GAVs to the endpoint, though it can be configured to split them into initial batches via `-DrestMaxSize=<...>`. If the endpoint returns a 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`. An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group.
-
-<!--
-Not Implemented Yet
-Finally it will call the `blacklist/ga` endpoint in order to check that the version being built is not blacklisted.
--->
 
 The lookup REST endpoint should follow:
 
@@ -61,36 +55,6 @@ The lookup REST endpoint should follow:
         "bestMatchVersion": "1.0.0.Final-rebuild-2",
         "blacklisted": false,
         "whitelisted": true
-    },
-    ...
-]  </pre>
-</td>
-</tr>
-</table>
-
-The blacklist REST endpoint should follow:
-
-<table>
-<tr>
-   <th id="Parameters">Parameters</th>
-   <th id="Returns">Returns</th>
-</tr>
-<tr>
-<td>
-   <pre lang="json" style="font-size: 10px">
-
-    "groupid": "org.foo",
-    "artifactid": "bar"
-
-   </pre>
-</td>
-<td>
-  <pre lang="json" style="font-size: 10px">
-[
-    {
-        "groupId": "org.foo",
-        "artifactId": "bar",
-        "version": "1.0.0.Final-rebuild-1",
     },
     ...
 ]  </pre>

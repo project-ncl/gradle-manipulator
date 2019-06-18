@@ -79,7 +79,7 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
                         .extracting("artifactId", "versionString")
                         .contains(
                                 // ensure that the aligned versions as are always used for dynamic and regular dependencies
-                                tuple("undertow-core", "2.0.21.Final-redhat-00001"),
+                                tuple("undertow-core", "2.0.19.Final-redhat-00001"),
                                 tuple("spring-boot-dependencies", "2.1.4.RELEASE.redhat-3"),
                                 tuple("hibernate-core", "5.3.9.Final-redhat-00001"))
                         // we can't assert on a specific version because we have used a range as the dependency's version
@@ -101,7 +101,7 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
                         "org.apache.commons:commons-lang3:latest.release",
                         "org.hdrhistogram:HdrHistogram:2.+",
                         "org.springframework.boot:spring-boot-dependencies:2.1.4.RELEASE",
-                        "io.undertow:undertow-core:2.0+",
+                        "io.undertow:undertow-core:[2.0.0, 2.0.20)",
                         "org.hibernate:hibernate-core:5.3.7.Final");
             });
         });

@@ -42,6 +42,7 @@ It will initially call the `lookup/gavs` endpoint. By default PME will pass *all
 
 The lookup REST endpoint should follow:
 
+
 <table>
 <tr>
    <th id="Parameters">Parameters</th>
@@ -49,7 +50,7 @@ The lookup REST endpoint should follow:
 </tr>
 <tr>
 <td>
-   <pre lang="json" style="font-size: 10px">
+   <pre lang="xml" style="font-size: 10px">
 [
     [ "repositoryGroup" : "id" ]
     {
@@ -62,7 +63,7 @@ The lookup REST endpoint should follow:
     </pre>
 </td>
 <td>
-  <pre lang="json" style="font-size: 10px">
+  <pre lang="xml" style="font-size: 10px">
 [
     {
         "groupId": "org.foo",

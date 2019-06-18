@@ -1,7 +1,7 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.gradle.api.Project.DEFAULT_VERSION;
 import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
 
@@ -419,9 +419,7 @@ public class AlignmentTask extends DefaultTask {
         allModuleDependencies.forEach((d, p) -> {
             // we need to make sure that dynamic dependencies are stored with their original key
             // in order for the manipulation plugin to be able to look them up properly
-            if (isBlank(d.getVersionString())) {
-                // TODO : Should we list the bom ones as well?
-            } else if (DynamicVersionParser.isDynamic(d.getVersionString())) {
+            if (isNotBlank(d.getVersionString()) && DynamicVersionParser.isDynamic(d.getVersionString())) {
                 correspondingModule.getAlignedDependencies().put(d.toString(), p);
             }
         });

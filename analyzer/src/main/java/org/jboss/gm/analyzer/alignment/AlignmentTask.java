@@ -164,10 +164,11 @@ public class AlignmentTask extends DefaultTask {
                 writeGmeConfigMarkerFile();
                 writeRepositorySettingsFile(cache.getRepositories());
 
-                LockfileIO.renameAllLockFiles(getLocksRootPath(project));
-
                 runCustomGroovyScript(configuration, project.getRootProject(), alignmentModel);
             }
+
+            // this needs to happen for each project, not just the last one
+            LockfileIO.renameAllLockFiles(getLocksRootPath(project));
 
         } catch (ManipulationException e) {
             throw new ManipulationUncheckedException(e);

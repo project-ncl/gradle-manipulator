@@ -136,13 +136,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         });
         assertEquals(AlignmentTask.INJECT_GME_START, org.jboss.gm.common.utils.FileUtils.getFirstLine(lines));
 
-        int counter = 0;
-        for (String l : lines) {
-            if (l.trim().equals(AlignmentTask.INJECT_GME_START)) {
-                counter++;
-            }
-        }
-        assertEquals(1, counter);
+        assertThat(lines).filteredOn(l -> l.startsWith(AlignmentTask.INJECT_GME_START)).hasSize(1);
     }
 
 }

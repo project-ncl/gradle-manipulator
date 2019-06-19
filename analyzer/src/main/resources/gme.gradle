@@ -25,7 +25,7 @@ buildscript {
     // this flag is used to disable the execution of the manipulation plugin
     // after the analyzer plugin has already run on the projects
     // This avoids issues with rerunning in local environments and also in
-    // tests when we don't want to apply the manipilation plugin, but
+    // tests when we don't want to apply the manipulation plugin, but
     // just rerun the analyzer plugin
     if (!project.hasProperty("gmeAnalyse")) {
         dependencies {

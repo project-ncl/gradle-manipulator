@@ -112,6 +112,9 @@ The plugins can be released using the following command (from the master branch 
 	./gradlew clean release -Drelease=true
 	
 The command will both publish the plugin to the Gradle Plugin Portal and to Maven Central.
+
+Note: It is **very** important to execute this exact command when releasing. Adding other tasks can cause the release to fail,
+or even worse leave the release in an inconsistent state. 
 	
 #### Publishing artifacts locally
 

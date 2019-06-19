@@ -115,6 +115,8 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                     .satisfies(root -> assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00002"));
         });
 
+        // ensure we don't try to apply the manipulation plugin which in all likelihood isn't even available on the classpath
+        System.setProperty("org.gradle.project.gmeAnalyse", "true");
         GradleRunner.create()
                 .withProjectDir(projectRoot)
                 .withArguments("--stacktrace", "--info", AlignmentTask.NAME)
@@ -134,13 +136,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         });
         assertEquals(AlignmentTask.INJECT_GME_START, org.jboss.gm.common.utils.FileUtils.getFirstLine(lines));
 
-        int counter = 0;
-        for (String l : lines) {
-            if (l.trim().equals(AlignmentTask.INJECT_GME_START)) {
-                counter++;
-            }
-        }
-        assertEquals(1, counter);
+        assertThat(lines).filteredOn(l -> l.startsWith(AlignmentTask.INJECT_GME_START)).hasSize(1);
     }
 
 }

@@ -115,6 +115,8 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                     .satisfies(root -> assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00002"));
         });
 
+        // ensure we don't try to apply the manipulation plugin which in all likelihood isn't even available on the classpath
+        System.setProperty("org.gradle.project.gmeAnalyse", "true");
         GradleRunner.create()
                 .withProjectDir(projectRoot)
                 .withArguments("--stacktrace", "--info", AlignmentTask.NAME)

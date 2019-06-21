@@ -1,5 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -110,8 +111,8 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Response
                 final Set<String> result = new HashSet<>();
 
                 // If there is an existing manipulation file, also use this as potential candidates.
-                if (ManipulationIO.getManipulationFilePath(root.getRootDir()).toFile().exists()) {
-
+                File m = new File(root.getRootDir(), ManipulationIO.MANIPULATION_FILE_NAME);
+                if (m.exists()) {
                     result.add(ManipulationIO.readManipulationModel(root.getRootDir()).getVersion());
                 }
                 logger.debug("Adding project version candidates from cache {} ", cache.getGAV());

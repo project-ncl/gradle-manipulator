@@ -464,10 +464,14 @@ public class AlignmentTask extends DefaultTask {
 
     private HashMap<RelaxedProjectVersionRef, ProjectVersionRef> processAnyExistingManipulationFile(Project project,
             HashMap<RelaxedProjectVersionRef, ProjectVersionRef> allDependencies) {
-        // If there is an existing manipulation file, also use this as potential candidates.
-        if (!ManipulationIO.getManipulationFilePath(project.getRootProject().getRootDir()).toFile().exists()) {
+
+        File m = new File(project.getRootDir(), ManipulationIO.MANIPULATION_FILE_NAME);
+
+        if (!m.exists()) {
             return allDependencies;
         }
+
+        // If there is an existing manipulation file, also use this as potential candidates.
         final ManipulationModel manipulationModel = ManipulationIO.readManipulationModel(project.getRootProject().getRootDir())
                 .findCorrespondingChild(project.getName());
 

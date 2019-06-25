@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
@@ -27,6 +28,7 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMUnitConfig;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
+import org.jboss.gm.common.Configuration;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -84,14 +86,15 @@ public class AlignmentTaskEmptyVersionTest {
         p.getDependencies().add("default", "org.apache.commons:dummy-artifact");
 
         AlignmentTask at = new AlignmentTask();
+        Configuration config = ConfigCache.getOrCreate(Configuration.class);
 
         // As getAllProjectDependencies is private, use reflection to modify the access control.
         Class[] types = new Class[1];
         types[0] = Project.class;
-        Method m = at.getClass().getDeclaredMethod("getDependencies", Project.class, Set.class);
+        Method m = at.getClass().getDeclaredMethod("getDependencies", Project.class, Configuration.class, Set.class);
         m.setAccessible(true);
         HashMap<Dependency, ProjectVersionRef> result = (HashMap<Dependency, ProjectVersionRef>) m.invoke(at,
-                new Object[] { p, new HashSet<ProjectVersionRef>() });
+                new Object[] { p, config, new HashSet<ProjectVersionRef>() });
         Collection<ProjectVersionRef> allDependencies = result.values();
 
         assertEquals(1, allDependencies.size());

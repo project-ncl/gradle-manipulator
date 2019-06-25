@@ -9,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -21,8 +22,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -74,24 +77,31 @@ public class AlignmentTask extends DefaultTask {
     static final String GME_PLUGINCONFIGS = "gme-pluginconfigs.gradle";
     static final String NAME = "generateAlignmentMetadata";
 
+    private static final AtomicBoolean configOutput = new AtomicBoolean();
+
     private final Logger logger = getLogger();
 
     @TaskAction
     public void perform() {
         final Project project = getProject();
         final String projectName = project.getName();
+        final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
+        final ManipulationCache cache = ManipulationCache.getCache(project);
 
+        if (configOutput.compareAndSet(false, true)) {
+            // Only output the config once to avoid noisy logging.
+            dumpCurrentConfig(configuration);
+        }
         logger.info("Starting model task for project {} with GAV {}:{}:{}", project.getDisplayName(), project.getGroup(),
                 projectName, project.getVersion());
 
         try {
             final Set<ProjectVersionRef> lockFileDeps = LockfileIO
                     .allProjectVersionRefsFromLockfiles(getLocksRootPath(project));
-            final ManipulationCache cache = ManipulationCache.getCache(project);
             final String currentProjectVersion = project.getVersion().toString();
             final HashMap<RelaxedProjectVersionRef, ProjectVersionRef> dependencies = processAnyExistingManipulationFile(
                     project,
-                    getDependencies(project, lockFileDeps));
+                    getDependencies(project, configuration, lockFileDeps));
 
             cache.addDependencies(project, dependencies);
             project.getRepositories().forEach(cache::addRepository);
@@ -129,7 +139,6 @@ public class AlignmentTask extends DefaultTask {
                 final ManipulationModel alignmentModel = cache.getModel();
                 final HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = cache
                         .getDependencies();
-                final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
                 final String newVersion = alignmentResponse.getNewProjectVersion();
 
                 // While we've completed processing (sub)projects the current one is not going to be the root; so
@@ -272,13 +281,11 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private HashMap<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(Project project,
+    private HashMap<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(Project project, Configuration internalConfig,
             Set<ProjectVersionRef> lockFileDeps) {
-        Configuration internalConfig = ConfigCache.getOrCreate(Configuration.class);
 
         final HashMap<RelaxedProjectVersionRef, ProjectVersionRef> depMap = new HashMap<>();
         project.getConfigurations().all(configuration -> {
-
             if (configuration.isCanBeResolved()) {
 
                 // using getAllDependencies here instead of getDependencies because the later
@@ -578,5 +585,23 @@ public class AlignmentTask extends DefaultTask {
                 script.run();
             }
         }
+    }
+
+    private void dumpCurrentConfig(Configuration configuration) {
+
+        StringBuilder currentProperties = new StringBuilder("Current properties are");
+        for (Method method : Configuration.class.getMethods()) {
+
+            if (method.isAnnotationPresent(Config.Key.class)) {
+                Config.Key val = method.getAnnotation(Config.Key.class);
+                currentProperties.append(System.lineSeparator());
+                currentProperties.append('\t');
+                currentProperties.append(val.value());
+                currentProperties.append(" : ");
+
+                currentProperties.append(configuration.getProperties().get(val.value()));
+            }
+        }
+        logger.info(currentProperties.toString());
     }
 }

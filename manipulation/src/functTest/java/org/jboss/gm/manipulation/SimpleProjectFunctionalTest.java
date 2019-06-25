@@ -28,6 +28,25 @@ public class SimpleProjectFunctionalTest {
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Test
+    public void ignoreMissingManipulationFile() throws IOException, URISyntaxException {
+
+        final File simpleProjectRoot = tempDir.newFolder("simple-project");
+        TestUtils.copyDirectory("simple-project", simpleProjectRoot);
+        assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
+        new File(simpleProjectRoot, ManipulationIO.MANIPULATION_FILE_NAME).delete();
+
+        GradleRunner.create()
+                .withProjectDir(simpleProjectRoot)
+                .withArguments("generatePomFileForMainPublication")
+                .withDebug(true)
+                .forwardOutput()
+                .withPluginClasspath()
+                .build();
+
+        assertThat(systemOutRule.getLog().contains("No manipulation.json found in"));
+    }
+
+    @Test
     public void ensureProperPomGenerated() throws IOException, URISyntaxException, XmlPullParserException {
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         TestUtils.copyDirectory("simple-project", simpleProjectRoot);

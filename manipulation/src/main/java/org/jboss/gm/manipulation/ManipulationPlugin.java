@@ -2,6 +2,7 @@ package org.jboss.gm.manipulation;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
+import java.io.File;
 import java.lang.reflect.Method;
 
 import org.aeonbits.owner.ConfigCache;
@@ -40,6 +41,11 @@ public class ManipulationPlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
+
+        if (!new File(project.getRootDir(), ManipulationIO.MANIPULATION_FILE_NAME).exists()) {
+            logger.error("No {} found in {}; exiting plugin.", ManipulationIO.MANIPULATION_FILE_NAME, project.getRootDir());
+            return;
+        }
         // get the previously performed alignment
         final ManipulationModel alignmentModel = ManipulationIO.readManipulationModel(project.getRootDir());
         final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getName());

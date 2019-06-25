@@ -14,33 +14,12 @@ modifies the project to use those dependencies and project version.
 
 The plugins can be tested on real projects like so:
 
-In the root of the project to be tested, create a file named `align.gradle`
-
-The contents of the file are the following:
-
-```
-import org.jboss.gm.analyzer.alignment.AlignmentPlugin
-
-initscript {
-	repositories {
-		mavenLocal()
-		mavenCentral()
-	}
-	dependencies {
-		classpath 'org.jboss.gm.analyzer:analyzer:0.1-SNAPSHOT'
-	}
-}
-
-
-allprojects {
-	apply plugin: AlignmentPlugin
-}
-```
+An init script is required. If a development version is being used it is built into `analyzer/build/resources/main/analyzer-init.gradle`. If a released version is being used it is deployed as `analyzer-<version>-init.gradle` e.g. http://central.maven.org/maven2/org/jboss/gm/analyzer/analyzer/1.0/analyzer-1.0-init.gradle
 
 Now by executing the following command:
 
 ```
-./gradlew --no-daemon --stacktrace --init-script align.gradle generateAlignmentMetadata -DrestURL=http://some.da.server
+./gradlew --no-daemon --stacktrace --info --init-script analyzer-init.gradle generateAlignmentMetadata -DrestURL=http://some.da.server
 ```
 
 you should get the `manipulation.json` file in the root of the project.

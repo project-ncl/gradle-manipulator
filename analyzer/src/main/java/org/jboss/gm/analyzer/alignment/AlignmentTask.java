@@ -151,7 +151,7 @@ public class AlignmentTask extends DefaultTask {
 
                 // Iterate through all modules and set their version
                 projectDependencies.forEach((key, value) -> {
-                    final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(key.getPath());
+                    final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(key);
                     if (configuration.versionModificationEnabled()) {
                         logger.info("Updating sub-project {} version to {} ", correspondingModule.getName(), newVersion);
                         correspondingModule.setVersion(newVersion);
@@ -480,7 +480,7 @@ public class AlignmentTask extends DefaultTask {
 
         // If there is an existing manipulation file, also use this as potential candidates.
         final ManipulationModel manipulationModel = ManipulationIO.readManipulationModel(project.getRootProject().getRootDir())
-                .findCorrespondingChild(project.getName());
+                .findCorrespondingChild(project);
 
         Map<String, ProjectVersionRef> aligned = manipulationModel.getAlignedDependencies();
 

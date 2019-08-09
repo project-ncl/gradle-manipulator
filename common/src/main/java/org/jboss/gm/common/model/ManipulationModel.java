@@ -1,14 +1,14 @@
 package org.jboss.gm.common.model;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.gradle.api.Project;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Contains the information extracted from a gradle project and its sub-project required to perform model and version
@@ -24,13 +24,13 @@ public class ManipulationModel {
      * Name of the project as defined by the build system.
      */
     @JsonProperty
-    private String name;
+    protected String name;
 
     /**
      * Version of the project.
      */
     @JsonProperty
-    private String version;
+    protected String version;
 
     /**
      * Computed aligned dependencies for this project, indexed by the previous GAV of the dependency, e.g.
@@ -38,13 +38,13 @@ public class ManipulationModel {
      * {@code 3.6.3.SP1-redhat-00001} version
      */
     @JsonProperty
-    private Map<String, ProjectVersionRef> alignedDependencies = new HashMap<>();
+    protected Map<String, ProjectVersionRef> alignedDependencies = new HashMap<>();
 
     /**
      * Representation of this project children projects if any, keyed by name.
      */
     @JsonProperty
-    private Map<String, ManipulationModel> children = new HashMap<>(7);
+    protected Map<String, ManipulationModel> children = new HashMap<>(7);
 
     /**
      * Required for Jackson
@@ -109,11 +109,16 @@ public class ManipulationModel {
         children.put(child.getName(), child);
     }
 
-    public ManipulationModel findCorrespondingChild(String name) {
+    public ManipulationModel findCorrespondingChild(Project name) {
+        return findCorrespondingChild(name.getPath());
+    }
+
+    protected ManipulationModel findCorrespondingChild(String name) {
         if (StringUtils.isBlank(name)) {
             throw new ManipulationUncheckedException("Supplied child name cannot be empty");
         }
         final ManipulationModel module;
+
         if (!name.contains(":")) {
             // we provided a simple name so assume we're looking for a direct child
             if (getName().equals(name) || name.isEmpty()) {
@@ -122,7 +127,7 @@ public class ManipulationModel {
 
             module = children.get(name);
             if (module == null) {
-                throw new ManipulationUncheckedException("ManipulationModel " + name + " does not exist");
+                throw new ManipulationUncheckedException("ManipulationModel '" + name + "' does not exist");
             }
         } else {
             // we provided a project path, so recursively find the corresponding child by removing the initial ":"

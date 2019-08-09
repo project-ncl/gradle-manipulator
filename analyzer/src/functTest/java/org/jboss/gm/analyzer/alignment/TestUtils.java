@@ -1,14 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.nio.file.Paths;
-import java.util.List;
-
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -19,16 +10,25 @@ import org.gradle.testkit.runner.TaskOutcome;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.file.Paths;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 public final class TestUtils {
 
     private TestUtils() {
     }
 
-    static ManipulationModel align(File projectRoot, String projectDirName) throws IOException, URISyntaxException {
+    static TestManipulationModel align(File projectRoot, String projectDirName) throws IOException, URISyntaxException {
         return align(projectRoot, projectDirName, false);
     }
 
-    static ManipulationModel align(File projectRoot, String projectDirName, boolean expectFailure)
+    static TestManipulationModel align(File projectRoot, String projectDirName, boolean expectFailure)
             throws IOException, URISyntaxException {
 
         FileUtils.copyDirectory(Paths
@@ -58,7 +58,7 @@ public final class TestUtils {
         if (expectFailure) {
             throw new ManipulationUncheckedException(buildResult.getOutput());
         } else {
-            return ManipulationIO.readManipulationModel(projectRoot);
+            return new TestManipulationModel(ManipulationIO.readManipulationModel(projectRoot));
         }
     }
 
@@ -67,5 +67,27 @@ public final class TestUtils {
         List<String> lines = FileUtils.readLines(new File(projectRoot, Project.DEFAULT_BUILD_FILE), Charset.defaultCharset());
 
         return org.jboss.gm.common.utils.FileUtils.getFirstLine(lines);
+    }
+
+
+
+    public static class TestManipulationModel extends ManipulationModel {
+        TestManipulationModel(ManipulationModel m) {
+            group = m.getGroup();
+            name = m.getName();
+            version = m.getVersion();
+            alignedDependencies = m.getAlignedDependencies();
+            children = m.getChildren();
+        }
+
+        /**
+         * Calls the super method but with less access protection for test purposes
+         *
+         * @param name string name
+         * @return the child model
+         */
+        public ManipulationModel findCorrespondingChild(String name) {
+            return super.findCorrespondingChild(name);
+        }
     }
 }

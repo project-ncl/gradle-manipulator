@@ -48,7 +48,7 @@ public class ManipulationPlugin implements Plugin<Project> {
         }
         // get the previously performed alignment
         final ManipulationModel alignmentModel = ManipulationIO.readManipulationModel(project.getRootDir());
-        final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getName());
+        final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project);
 
         // we need to change the project version early so various tasks that ready early and create other vars based on it
         // (like the zip tasks) can use the correct version

@@ -1,18 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.List;
-
 import org.apache.maven.settings.Repository;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.io.xpp3.SettingsXpp3Reader;
@@ -21,8 +8,8 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.api.Project;
+import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
-import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,6 +18,22 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.List;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
 
@@ -58,7 +61,7 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
     public void ensureAlignmentFileCreated()
             throws IOException, URISyntaxException, XmlPullParserException, ManipulationException {
         final File projectRoot = tempDir.newFolder("complex-project");
-        final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
 

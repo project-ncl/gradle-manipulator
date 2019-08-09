@@ -13,6 +13,7 @@ dependencies {
     compile("org.commonjava.maven.ext:pom-manipulation-core:${extra.get("pmeVersion")}")
 
     testCompile("junit", "junit", "4.12")
+    testCompile("org.assertj:assertj-core:3.12.2")
     testCompile("com.github.stefanbirkner:system-rules:1.19.0")
     testCompile(gradleApi())
 }

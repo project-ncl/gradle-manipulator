@@ -1,28 +1,13 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collection;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.api.Project;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMRules;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
+import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
-import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -32,6 +17,21 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collection;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(BMUnitRunner.class)
 //@BMUnitConfig(verbose = true, bmunitVerbose = true)
@@ -66,7 +66,7 @@ public class SimpleExistingManipulationProjectFunctionalTest extends AbstractWir
     public void versionUpdate() throws IOException, URISyntaxException, ManipulationException {
         final File projectRoot = tempDir.newFolder("simple-existing-manipulation");
 
-        final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), false);
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), false);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
@@ -105,7 +105,7 @@ public class SimpleExistingManipulationProjectFunctionalTest extends AbstractWir
     public void noVersionUpdate() throws IOException, URISyntaxException, ManipulationException {
         final File projectRoot = tempDir.newFolder("simple-existing-manipulation");
 
-        final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), false);
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), false);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));

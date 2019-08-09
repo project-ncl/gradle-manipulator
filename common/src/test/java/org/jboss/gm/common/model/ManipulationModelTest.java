@@ -1,11 +1,10 @@
-package org.jboss.gm.analyzer.alignment;
+package org.jboss.gm.common.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
-import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Test;
 
 /**
@@ -27,7 +26,7 @@ public class ManipulationModelTest {
 
         assertThatExceptionOfType(ManipulationUncheckedException.class)
                 .isThrownBy(() -> model.findCorrespondingChild("child11"))
-                .withMessage("ManipulationModel child11 does not exist");
+                .withMessage("ManipulationModel 'child11' does not exist");
 
         assertThatExceptionOfType(ManipulationUncheckedException.class)
                 .isThrownBy(() -> model.findCorrespondingChild(""))
@@ -53,7 +52,7 @@ public class ManipulationModelTest {
 
         assertThatExceptionOfType(ManipulationUncheckedException.class)
                 .isThrownBy(() -> model.findCorrespondingChild(":child11"))
-                .withMessage("ManipulationModel child11 does not exist");
+                .withMessage("ManipulationModel 'child11' does not exist");
 
         assertThat(child.findCorrespondingChild(":child1:child11")).isEqualTo(child11);
         assertThat(child.findCorrespondingChild(":child1:child11:child111")).isEqualTo(child111);

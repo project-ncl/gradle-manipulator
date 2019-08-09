@@ -1,18 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.List;
-
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -20,9 +7,9 @@ import org.gradle.api.Project;
 import org.gradle.testkit.runner.GradleRunner;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
+import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.io.ManipulationIO;
-import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,6 +18,22 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.List;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 @RunWith(BMUnitRunner.class)
 public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
@@ -59,7 +62,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
     public void ensureAlignmentFileCreated() throws IOException, URISyntaxException, ManipulationException {
         final File projectRoot = tempDir.newFolder("simple-project");
 
-        final ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertTrue(new File(projectRoot, AlignmentTask.GME_REPOS).exists());
@@ -102,7 +105,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
     public void verifySingleGMEInjection() throws IOException, URISyntaxException, ManipulationException {
         final File projectRoot = tempDir.newFolder("simple-project");
 
-        ManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
+        TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
         List<String> lines = FileUtils.readLines(new File(projectRoot, Project.DEFAULT_BUILD_FILE), Charset.defaultCharset());
 
@@ -124,7 +127,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                 .forwardOutput()
                 .withPluginClasspath()
                 .build();
-        alignmentModel = ManipulationIO.readManipulationModel(projectRoot);
+        alignmentModel = new TestManipulationModel(ManipulationIO.readManipulationModel(projectRoot));
         lines = FileUtils.readLines(new File(projectRoot, Project.DEFAULT_BUILD_FILE), Charset.defaultCharset());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());

@@ -7,8 +7,10 @@ buildscript {
     // While the global PNC init script also defines this, for some reason
     // Gradle doesn't seem to apply it to included scrpts.
 
+    apply from: "gradle/gme-repos.gradle", to: buildscript
+
     // Running inside PNC
-    apply from: "\${project.rootDir}/gme-repos.gradle", to: buildscript
+    apply from: "\${project.rootDir}/gradle/gme-repos.gradle", to: buildscript
 
     if (System.getenv("AProxDependencyUrl") == null) {
         // Not running in PNC e.g. local development environment.

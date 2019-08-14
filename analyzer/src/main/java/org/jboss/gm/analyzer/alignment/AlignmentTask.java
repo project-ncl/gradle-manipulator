@@ -71,8 +71,9 @@ public class AlignmentTask extends DefaultTask {
 
     static final String INJECT_GME_START = "buildscript { apply from: \"gme.gradle\" }";
     static final String GME = "gme.gradle";
+    static final String GRADLE = "gradle";
     static final String GME_REPOS = "gme-repos.gradle";
-    static final String APPLY_GME_REPOS = "buildscript { apply from: \"${project.rootDir}/gme-repos.gradle\", to: buildscript }";
+    static final String APPLY_GME_REPOS = "buildscript { apply from: new File(buildscript.getSourceFile().getParentFile(),\"gme-repos.gradle\"), to: buildscript }";
     static final String INJECT_GME_END = "apply from: \"gme-pluginconfigs.gradle\"";
     static final String GME_PLUGINCONFIGS = "gme-pluginconfigs.gradle";
     static final String NAME = "generateAlignmentMetadata";
@@ -167,9 +168,11 @@ public class AlignmentTask extends DefaultTask {
                     alignmentModel.setName(newProjectName);
                 }
                 writeManipulationModel(project.getRootDir(), alignmentModel);
+                // Ordering is important here ; we mustn't inject the gme-repos file before iterating over all *.gradle
+                // files.
+                updateAllExtraGradleFilesWithGmeRepos();
                 writeGmeMarkerFile();
                 writeGmeReposMarkerFile();
-                updateAllExtraGradleFilesWithGmeRepos();
                 writeGmeConfigMarkerFile();
                 writeRepositorySettingsFile(cache.getRepositories());
 
@@ -222,9 +225,12 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void writeGmeReposMarkerFile() throws IOException {
         File rootDir = getProject().getRootDir();
-        File gmeReposGradle = new File(rootDir, GME_REPOS);
+        File gradleDir = new File(rootDir, GRADLE);
+        gradleDir.mkdir();
+        File gmeReposGradle = new File(gradleDir, GME_REPOS);
 
         Files.copy(getClass().getResourceAsStream('/' + GME_REPOS), gmeReposGradle.toPath(),
                 StandardCopyOption.REPLACE_EXISTING);

@@ -30,16 +30,14 @@ dependencies {
     shadow(gradleApi())
 
     compile("commons-beanutils:commons-beanutils:1.9.3")
-    compile("org.commonjava.maven.ext:pom-manipulation-core:${extra.get("pmeVersion")}")
+    compile("org.commonjava.maven.ext:pom-manipulation-core:${project.extra.get("pmeVersion")}")
     testCompile("junit:junit:4.12")
     testCompile("com.github.stefanbirkner:system-rules:1.19.0")
-    testCompile("org.jboss.byteman:byteman:${extra.get("bytemanVersion")}")
-    testCompile("org.jboss.byteman:byteman-bmunit:${extra.get("bytemanVersion")}")
-    testCompile("org.jboss.byteman:byteman-submit:${extra.get("bytemanVersion")}")
-    testCompile("org.jboss.byteman:byteman-install:${extra.get("bytemanVersion")}")
-    if ( ! JavaVersion.current().isJava9Compatible) {
-        testCompile (files ("${System.getProperty("java.home")}/../lib/tools.jar") )
-    }
+    testCompile("org.jboss.byteman:byteman:${project.extra.get("bytemanVersion")}")
+    testCompile("org.jboss.byteman:byteman-bmunit:${project.extra.get("bytemanVersion")}")
+    testCompile("org.jboss.byteman:byteman-submit:${project.extra.get("bytemanVersion")}")
+    testCompile("org.jboss.byteman:byteman-install:${project.extra.get("bytemanVersion")}")
+    testCompile (files ("${System.getProperty("java.home")}/../lib/tools.jar") )
     testCompile("org.assertj:assertj-core:3.12.2")
     testCompile("org.mockito:mockito-core:2.27.0")
     testCompile("com.github.tomakehurst:wiremock-jre8:2.23.2")

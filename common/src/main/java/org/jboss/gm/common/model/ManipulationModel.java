@@ -1,14 +1,15 @@
 package org.jboss.gm.common.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Contains the information extracted from a gradle project and its sub-project required to perform model and version

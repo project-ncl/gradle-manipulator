@@ -21,6 +21,7 @@ plugins {
     id("net.nemerosa.versioning") version "2.8.2"
     id("com.gradle.plugin-publish") version "0.10.1"
     id("net.researchgate.release") version "2.6.0"
+    id("com.adarshr.test-logger") version "1.7.0"
 }
 
 apply(plugin = "net.researchgate.release")
@@ -74,6 +75,7 @@ subprojects {
         apply(plugin = "java-gradle-plugin")
         apply(plugin = "com.github.johnrengelman.shadow")
         apply(plugin = "com.gradle.plugin-publish")
+        apply(plugin = "com.adarshr.test-logger")
 
         /**
          * The configuration below has been created by reading the documentation at:

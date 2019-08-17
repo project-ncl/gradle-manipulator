@@ -1,4 +1,4 @@
-package org.jboss.gm.analyzer.alignment;
+package org.jboss.gm.analyzer.alignment.io;
 
 import java.io.File;
 import java.net.URI;

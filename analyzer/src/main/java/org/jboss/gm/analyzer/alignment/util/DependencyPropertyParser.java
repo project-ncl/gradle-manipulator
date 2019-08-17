@@ -1,4 +1,4 @@
-package org.jboss.gm.analyzer.alignment;
+package org.jboss.gm.analyzer.alignment.util;
 
 import java.util.function.Predicate;
 
@@ -12,7 +12,7 @@ import org.gradle.api.InvalidUserDataException;
  * See section "Exclusions and Overrides" of
  * https://release-engineering.github.io/pom-manipulation-ext/guide/dep-manip.html
  */
-final class DependencyPropertyParser {
+public final class DependencyPropertyParser {
 
     private DependencyPropertyParser() {
     }

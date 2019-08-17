@@ -10,6 +10,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.gradle.api.Project;
+import org.jboss.gm.analyzer.alignment.util.DependencyPropertyParser;
 import org.jboss.gm.common.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

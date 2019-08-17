@@ -2,6 +2,8 @@ package org.jboss.gm.analyzer.alignment;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.internal.logging.slf4j.OutputEventListenerBackedLoggerContext;
+import org.jboss.gm.analyzer.alignment.util.FilteringCustomLogger;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.ManifestUtils;
@@ -19,6 +21,15 @@ public class AlignmentPlugin implements Plugin<Project> {
 
     static {
         System.out.println("Injecting AlignmentPlugin ; version " + ManifestUtils.getManifestInformation());
+
+        OutputEventListenerBackedLoggerContext context = (OutputEventListenerBackedLoggerContext) LoggerFactory
+                .getILoggerFactory();
+        // TODO: I don't think we need to call reset...
+        // LogLevel level = context.getLevel();
+        // System.out.println("### Original level is " + context.getLevel());
+        // context.reset();
+        // context.setLevel(level);
+        context.setOutputEventListener(new FilteringCustomLogger(context.getOutputEventListener()));
     }
 
     @Override

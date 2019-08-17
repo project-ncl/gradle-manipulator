@@ -1,10 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-import static org.gradle.api.Project.DEFAULT_VERSION;
-import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -24,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.io.FileUtils;
@@ -47,9 +41,11 @@ import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
+import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.analyzer.alignment.groovy.GMEBaseScript;
 import org.jboss.gm.analyzer.alignment.io.LockfileIO;
+import org.jboss.gm.analyzer.alignment.io.RepositoryExporter;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.io.ManipulationIO;
@@ -57,11 +53,14 @@ import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.versioning.DynamicVersionParser;
 import org.jboss.gm.common.versioning.ProjectVersionFactory;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
-import org.slf4j.Logger;
-
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.gradle.api.Project.DEFAULT_VERSION;
+import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
 
 /**
  * The actual Gradle task that creates the {@code manipulation.json} file for the whole project
@@ -93,8 +92,14 @@ public class AlignmentTask extends DefaultTask {
             // Only output the config once to avoid noisy logging.
             dumpCurrentConfig(configuration);
         }
-        logger.info("Starting model task for project {} with GAV {}:{}:{}", project.getDisplayName(), project.getGroup(),
+        logger.lifecycle("Starting model task for project {} with GAV {}:{}:{}", project.getDisplayName(), project.getGroup(),
                 projectName, project.getVersion());
+        // TODO: Determine appropriate logging type/level (lifecycle/quiet/info)
+        logger.info("### Logging at info level {} ", project);
+        logger.error("### Logging at error level {} ", project);
+        logger.debug("### Logging at debug level {} ", project);
+        logger.warn("### Logging at warn level {} ", project);
+        logger.quiet("### Logging at quiet level {} ", project);
 
         try {
             final Set<ProjectVersionRef> lockFileDeps = LockfileIO

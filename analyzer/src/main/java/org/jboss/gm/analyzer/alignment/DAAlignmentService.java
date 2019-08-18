@@ -126,6 +126,7 @@ public class DAAlignmentService implements AlignmentService {
                 // If we have no MDC PME has been used as the entry point. Dummy one up for DA.
                 byte[] randomBytes = new byte[20];
                 RANDOM.nextBytes(randomBytes);
+                // TODO: Replace with PME CODEC on new release of PME
                 headerContext = "pme-" + new Base32().encodeAsString(randomBytes);
             }
 

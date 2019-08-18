@@ -28,17 +28,28 @@ dependencies {
     // the shadow configuration is used in order to avoid adding gradle and groovy stuff to the shadowed jar
     shadow(localGroovy())
     shadow(gradleApi())
+    permitUsedUndeclared("org.codehaus.groovy:groovy:2.5.7")
 
-    compile("commons-beanutils:commons-beanutils:1.9.3")
     compile("org.commonjava.maven.ext:pom-manipulation-core:${project.extra.get("pmeVersion")}")
-    testCompile("junit:junit:4.12")
-    testCompile("com.github.stefanbirkner:system-rules:1.19.0")
-    testCompile("org.jboss.byteman:byteman:${project.extra.get("bytemanVersion")}")
+    compile("org.commonjava.maven.ext:pom-manipulation-io:${project.extra.get("pmeVersion")}")
+    compile("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
+    compile("org.commonjava.maven.atlas:atlas-identities:0.17.2")
+
+    compile("org.apache.maven:maven-settings-builder:${project.extra.get("mavenVersion")}")
+    compile("org.apache.maven:maven-settings:${project.extra.get("mavenVersion")}")
+
+    compile("commons-lang:commons-lang:${project.extra.get("commonsVersion")}")
+    compile("commons-io:commons-io:${project.extra.get("commonsVersion")}")
+    compile("commons-codec:commons-codec:1.11")
+
+    compile("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
+    compile("org.aeonbits.owner:owner:${project.extra.get("ownerVersion")}")
+
+    testCompile("junit:junit:${project.extra.get("junitVersion")}")
+    testCompile("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
+    testCompile("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
     testCompile("org.jboss.byteman:byteman-bmunit:${project.extra.get("bytemanVersion")}")
-    testCompile("org.jboss.byteman:byteman-submit:${project.extra.get("bytemanVersion")}")
-    testCompile("org.jboss.byteman:byteman-install:${project.extra.get("bytemanVersion")}")
     testCompile (files ("${System.getProperty("java.home")}/../lib/tools.jar") )
-    testCompile("org.assertj:assertj-core:3.12.2")
     testCompile("org.mockito:mockito-core:2.27.0")
     testCompile("com.github.tomakehurst:wiremock-jre8:2.23.2")
 }

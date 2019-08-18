@@ -28,9 +28,10 @@ dependencies {
     // the shadow configuration is used in order to avoid adding gradle and groovy stuff to the shadowed jar
     shadow(localGroovy())
     shadow(gradleApi())
-    testCompile("junit:junit:4.12")
-    testCompile("org.assertj:assertj-core:3.12.2")
-    testCompile("com.github.stefanbirkner:system-rules:1.19.0")
+
+    testCompile("junit:junit:${project.extra.get("junitVersion")}")
+    testCompile("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
+    testCompile("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
     // GradleAPI in test compile to get access to org.gradle.internal.Pair
     testCompile(gradleApi())
 }

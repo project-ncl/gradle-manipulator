@@ -39,9 +39,11 @@ subprojects {
 
     val isReleaseBuild = "true" == System.getProperty("release")
 
+    extra["atlasVersion"] = "0.17.2"
     extra["assertjVersion"] = "3.12.2"
     extra["bytemanVersion"] = "4.0.7"
     extra["commonsVersion"] = "2.6"
+    extra["jacksonVersion"] = "2.10.0.pr1"
     extra["junitVersion"] = "4.12"
     extra["mavenVersion"] = "3.5.0"
     extra["ownerVersion"] = "1.0.10"

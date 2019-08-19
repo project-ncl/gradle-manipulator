@@ -28,12 +28,11 @@ dependencies {
     // the shadow configuration is used in order to avoid adding gradle and groovy stuff to the shadowed jar
     shadow(localGroovy())
     shadow(gradleApi())
-    permitUsedUndeclared("org.codehaus.groovy:groovy:2.5.7")
 
     compile("org.commonjava.maven.ext:pom-manipulation-core:${project.extra.get("pmeVersion")}")
     compile("org.commonjava.maven.ext:pom-manipulation-io:${project.extra.get("pmeVersion")}")
     compile("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
-    compile("org.commonjava.maven.atlas:atlas-identities:0.17.2")
+    compile("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")
 
     compile("org.apache.maven:maven-settings-builder:${project.extra.get("mavenVersion")}")
     compile("org.apache.maven:maven-settings:${project.extra.get("mavenVersion")}")
@@ -43,7 +42,7 @@ dependencies {
     compile("commons-codec:commons-codec:1.11")
 
     compile("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
-    compile("org.aeonbits.owner:owner:${project.extra.get("ownerVersion")}")
+    compile("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
 
     testCompile("junit:junit:${project.extra.get("junitVersion")}")
     testCompile("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
@@ -52,6 +51,15 @@ dependencies {
     testCompile (files ("${System.getProperty("java.home")}/../lib/tools.jar") )
     testCompile("org.mockito:mockito-core:2.27.0")
     testCompile("com.github.tomakehurst:wiremock-jre8:2.23.2")
+
+    // Ignore our own modules; avoid https://github.com/wfhartford/gradle-dependency-analyze/issues/83
+    permitUsedUndeclared(project(":common"))
+    // Groovy is built into Gradle
+    permitUsedUndeclared("org.codehaus.groovy:groovy:2.5.7")
+
+    // Owner: Need Java8 dependency which pulls in owner itself.
+    permitUnusedDeclared("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
+    permitUsedUndeclared("org.aeonbits.owner:owner:${project.extra.get("ownerVersion")}")
 }
 
 // separate source set and task for functional tests

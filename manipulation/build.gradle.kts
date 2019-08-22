@@ -28,11 +28,27 @@ dependencies {
     // the shadow configuration is used in order to avoid adding gradle and groovy stuff to the shadowed jar
     shadow(localGroovy())
     shadow(gradleApi())
-    testCompile("junit:junit:4.12")
-    testCompile("org.assertj:assertj-core:3.12.2")
-    testCompile("com.github.stefanbirkner:system-rules:1.19.0")
+
+    compile("commons-lang:commons-lang:${project.extra.get("commonsVersion")}")
+    compile("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
+    compile("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")
+    compile("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
+
+    testCompile("junit:junit:${project.extra.get("junitVersion")}")
+    testCompile("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
+    testCompile("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
+
     // GradleAPI in test compile to get access to org.gradle.internal.Pair
     testCompile(gradleApi())
+
+    // TODO: New task to cover functional tests
+    permitTestUnusedDeclared("junit:junit:${project.extra.get("junitVersion")}")
+    permitTestUnusedDeclared("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
+    permitTestUnusedDeclared("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
+
+    // Owner: Need Java8 dependency which pulls in owner itself.
+    permitUnusedDeclared("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
+    permitUsedUndeclared("org.aeonbits.owner:owner:${project.extra.get("ownerVersion")}")
 }
 
 // separate source set and task for functional tests

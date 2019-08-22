@@ -2,6 +2,15 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.text.SimpleDateFormat
 import java.util.*
 
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath("ca.cutterslade.gradle:gradle-dependency-analyze:1.3.0")
+    }
+}
+
 plugins {
     java
     signing
@@ -23,15 +32,24 @@ allprojects {
         mavenCentral()
         mavenLocal()
     }
+    apply(plugin = "ca.cutterslade.analyze" )
 }
 
 subprojects {
 
     val isReleaseBuild = "true" == System.getProperty("release")
 
-
+    extra["atlasVersion"] = "0.17.2"
+    extra["assertjVersion"] = "3.12.2"
     extra["bytemanVersion"] = "4.0.7"
-    extra["pmeVersion"] = "3.7.1"
+    extra["commonsVersion"] = "2.6"
+    extra["jacksonVersion"] = "2.10.0.pr1"
+    extra["junitVersion"] = "4.12"
+    extra["mavenVersion"] = "3.5.0"
+    extra["ownerVersion"] = "1.0.10"
+    extra["pmeVersion"] = "3.8"
+    extra["slf4jVersion"] = "1.7.25"
+    extra["systemRulesVersion"] = "1.19.0"
 
     apply(plugin = "com.diffplug.gradle.spotless")
     apply(plugin = "net.nemerosa.versioning")

@@ -52,8 +52,6 @@ dependencies {
     testCompile("org.mockito:mockito-core:2.27.0")
     testCompile("com.github.tomakehurst:wiremock-jre8:2.23.2")
 
-    // Ignore our own modules; avoid https://github.com/wfhartford/gradle-dependency-analyze/issues/83
-    permitUsedUndeclared(project(":common"))
     // Groovy is built into Gradle
     permitUsedUndeclared("org.codehaus.groovy:groovy:2.5.7")
 

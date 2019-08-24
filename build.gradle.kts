@@ -1,3 +1,4 @@
+import com.adarshr.gradle.testlogger.theme.ThemeType
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.text.SimpleDateFormat
 import java.util.*
@@ -89,7 +90,7 @@ subprojects {
         // it tries to shadow the entire gradle api
         // Moreover, the gradleApi and groovy dependencies in the plugins themselves
         // have been explicitly declared with the shadow configuration
-        configurations.get("compile").dependencies.remove(dependencies.gradleApi())
+        configurations["compile"].dependencies.remove(dependencies.gradleApi())
 
         // make build task depend on shadowJar
         val build: DefaultTask by tasks
@@ -129,10 +130,10 @@ subprojects {
                     // we publish the init gradle file to make it easy for tools that use
                     // the plugin to set it up without having to create their own init gradle file
                     if (project.name == "analyzer") {
-                        artifact("${sourceSets.main.get().output.resourcesDir}/analyzer-init.gradle", {
+                        artifact("${sourceSets.main.get().output.resourcesDir}/analyzer-init.gradle") {
                             classifier = "init"
                             extension = "gradle"
-                        })
+                        }
                     }
 
 
@@ -198,6 +199,13 @@ subprojects {
                 useGpgCmd()
                 this.sign(publishing.publications["shadow"])
             }
+        }
+
+        testlogger {
+            // Some of our tests take a _long_ time ; remove spurious warnings.
+            slowThreshold = 120000
+            // Nicer looking theme than default.
+            theme = ThemeType.MOCHA
         }
     }
 

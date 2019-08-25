@@ -47,12 +47,12 @@ import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
-import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.analyzer.alignment.groovy.GMEBaseScript;
 import org.jboss.gm.analyzer.alignment.io.LockfileIO;
 import org.jboss.gm.analyzer.alignment.io.RepositoryExporter;
 import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.GMLogger;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
@@ -81,7 +81,7 @@ public class AlignmentTask extends DefaultTask {
 
     private static final AtomicBoolean configOutput = new AtomicBoolean();
 
-    private final Logger logger = getLogger();
+    private final GMLogger logger = GMLogger.getLogger(getClass().getName());
 
     @TaskAction
     public void perform() {
@@ -94,14 +94,8 @@ public class AlignmentTask extends DefaultTask {
             // Only output the config once to avoid noisy logging.
             dumpCurrentConfig(configuration);
         }
-        logger.lifecycle("Starting model task for project {} with GAV {}:{}:{}", project.getDisplayName(), project.getGroup(),
+        logger.info("Starting model task for project {} with GAV {}:{}:{}", project.getDisplayName(), project.getGroup(),
                 projectName, project.getVersion());
-        // TODO: Determine appropriate logging type/level (lifecycle/quiet/info)
-        logger.info("### Logging at info level {} ", project);
-        logger.error("### Logging at error level {} ", project);
-        logger.debug("### Logging at debug level {} ", project);
-        logger.warn("### Logging at warn level {} ", project);
-        logger.quiet("### Logging at quiet level {} ", project);
 
         try {
             final Set<ProjectVersionRef> lockFileDeps = LockfileIO
@@ -390,7 +384,7 @@ public class AlignmentTask extends DefaultTask {
                     // if (StringUtils.isNotBlank(originalDep.getVersion())) {
 
                     if (depMap.put(relaxedProjectVersionRef, pvr) == null) {
-                        logger.info("For {}, with original key {}, adding dependency to scan {} ", configuration,
+                        logger.debug("For {}, with original key {}, adding dependency to scan {} ", configuration,
                                 relaxedProjectVersionRef, pvr);
                     }
 
@@ -478,7 +472,7 @@ public class AlignmentTask extends DefaultTask {
 
             new RepositoryExporter(repositories).export(repositoriesFile);
         } else {
-            getProject().getLogger().info("Repository export disabled.");
+            logger.info("Repository export disabled.");
         }
     }
 

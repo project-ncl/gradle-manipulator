@@ -19,6 +19,10 @@ public class FilteringCustomLogger implements OutputEventListener {
             "org.gradle.configuration.project.BuildScriptProcessor",
             "org.gradle.execution.TaskNameResolvingBuildConfigurationAction");
 
+    private final List<String> ownCategories = Arrays.asList(
+            "org.jboss.gm.analyzer.alignment.AlignmentTask_Decorated",
+            "org.jboss.gm.analyzer.alignment.util.FilteringCustomLogger");
+
     @SuppressWarnings("FieldCanBeLocal")
     private final String defaultCategory = "org.gradle.api.Task";
 
@@ -32,8 +36,12 @@ public class FilteringCustomLogger implements OutputEventListener {
 
         if (!ignoreCategories.contains(logEvent.getCategory())) {
 
-            if (!logEvent.getCategory().equals(defaultCategory)) {
-                System.err.println("### Unknown event using category " + logEvent.getCategory());
+            if (!ownCategories.contains(logEvent.getCategory()) &&
+                    !logEvent.getCategory().equals(defaultCategory)) {
+                // Can't use logger to output the warning as causes stackoverflow.
+                System.err.println("Unknown event using category " + logEvent.getCategory() + " : ");
+                delegate.onOutput(event);
+                System.err.println(".... completed unknown event.");
             }
             delegate.onOutput(event);
         }

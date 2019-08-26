@@ -6,9 +6,11 @@ import org.aeonbits.owner.ConfigCache;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.credentials.HttpHeaderCredentials;
+import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.Upload;
 import org.gradle.authentication.http.HttpHeaderAuthentication;
 import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.logging.GMLogger;
 
 /**
  * Adds a publication repository to the legacy maven plugin.
@@ -36,15 +38,17 @@ import org.jboss.gm.common.Configuration;
  */
 public class MavenPublicationRepositoryAction implements Action<Project> {
 
+    private final Logger logger = GMLogger.getLogger(getClass());
+
     @Override
     public void execute(Project project) {
         if (!project.getPluginManager().hasPlugin("maven")) {
-            project.getLogger().warn("Legacy 'maven' plugin not detected, skipping publishing repository creation.");
+            logger.warn("Legacy 'maven' plugin not detected, skipping publishing repository creation.");
         }
 
         Upload uploadArchives = project.getTasks().withType(Upload.class).findByName("uploadArchives");
         if (uploadArchives == null) {
-            project.getLogger().info("Creating uploadArchives task");
+            logger.info("Creating uploadArchives task");
             uploadArchives = project.getTasks().create("uploadArchives", Upload.class);
         } else {
             uploadArchives.getRepositories().clear();
@@ -53,12 +57,12 @@ public class MavenPublicationRepositoryAction implements Action<Project> {
         Configuration config = ConfigCache.getOrCreate(Configuration.class);
 
         if (isEmpty(config.deployUrl())) {
-            project.getLogger().warn("Publishing URL was not configured.");
+            logger.warn("Publishing URL was not configured.");
             return;
         }
 
         if (isEmpty(config.accessToken())) {
-            project.getLogger().warn("No authentication token was configured.");
+            logger.warn("No authentication token was configured.");
         }
 
         // add a maven repository and configure authentication token

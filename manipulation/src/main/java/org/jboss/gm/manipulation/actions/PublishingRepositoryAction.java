@@ -6,9 +6,11 @@ import org.aeonbits.owner.ConfigCache;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.credentials.HttpHeaderCredentials;
+import org.gradle.api.logging.Logger;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.authentication.http.HttpHeaderAuthentication;
 import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.logging.GMLogger;
 
 /**
  * Adds a publishing repository specific to PNC environment.
@@ -37,6 +39,8 @@ import org.jboss.gm.common.Configuration;
  */
 public class PublishingRepositoryAction implements Action<Project> {
 
+    private final Logger logger = GMLogger.getLogger(getClass());
+
     @Override
     public void execute(Project project) {
         // disable existing publishing tasks but make sure we keep ours
@@ -45,25 +49,25 @@ public class PublishingRepositoryAction implements Action<Project> {
                     .filter(t -> t.getName().startsWith("publish") && t.getName().endsWith("Repository")
                             && !t.getName().contains("Manipulator"))
                     .forEach(t -> {
-                        project.getLogger().info("Disabling publishing task " + t.getName());
+                        logger.info("Disabling publishing task " + t.getName());
                         t.setEnabled(false);
                     });
         });
 
         if (!project.getPluginManager().hasPlugin("maven-publish")) {
-            project.getLogger().warn("Cannot configure publishing repository, maven-publish plugin was not detected.");
+            logger.warn("Cannot configure publishing repository, maven-publish plugin was not detected.");
             return;
         }
 
         Configuration config = ConfigCache.getOrCreate(Configuration.class);
 
         if (isEmpty(config.deployUrl())) {
-            project.getLogger().warn("Publishing URL was not configured.");
+            logger.warn("Publishing URL was not configured.");
             return;
         }
 
         if (isEmpty(config.accessToken())) {
-            project.getLogger().warn("No authentication token was configured.");
+            logger.warn("No authentication token was configured.");
         }
 
         project.getExtensions().getByType(PublishingExtension.class).getRepositories().maven(repository -> {

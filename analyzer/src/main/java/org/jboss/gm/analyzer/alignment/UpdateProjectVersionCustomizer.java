@@ -13,11 +13,11 @@ import org.commonjava.maven.ext.core.impl.VersionCalculator;
 import org.commonjava.maven.ext.core.state.VersioningState;
 import org.gradle.api.Project;
 import org.gradle.api.internal.project.DefaultProject;
+import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.io.ManipulationIO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.gm.common.logging.GMLogger;
 
 /**
  * {@link org.jboss.gm.analyzer.alignment.AlignmentService.ResponseCustomizer} that changes the project version
@@ -46,7 +46,7 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Response
 
     private static class ProjectVersionCustomizerResponse implements AlignmentService.Response {
 
-        private final Logger logger = LoggerFactory.getLogger(getClass());
+        private final Logger logger = GMLogger.getLogger(getClass());
 
         private final GradleVersionCalculator vc = new GradleVersionCalculator();
         private final AlignmentService.Response originalResponse;

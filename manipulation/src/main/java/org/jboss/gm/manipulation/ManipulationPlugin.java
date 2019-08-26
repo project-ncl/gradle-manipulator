@@ -10,10 +10,12 @@ import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.logging.Logger;
 import org.gradle.api.plugins.MavenPlugin;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.io.ManipulationIO;
+import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.ManifestUtils;
 import org.jboss.gm.manipulation.actions.ManifestUpdateAction;
@@ -24,8 +26,6 @@ import org.jboss.gm.manipulation.actions.PublishingPomTransformerAction;
 import org.jboss.gm.manipulation.actions.PublishingRepositoryAction;
 import org.jboss.gm.manipulation.actions.ResolvedDependenciesRepository;
 import org.jboss.gm.manipulation.actions.UploadTaskTransformerAction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unused")
 public class ManipulationPlugin implements Plugin<Project> {
@@ -37,7 +37,7 @@ public class ManipulationPlugin implements Plugin<Project> {
         System.out.println("Injecting ManipulationPlugin ; version " + ManifestUtils.getManifestInformation());
     }
 
-    private final Logger logger = LoggerFactory.getLogger(ManipulationPlugin.class);
+    private final Logger logger = GMLogger.getLogger(getClass());
 
     @Override
     public void apply(Project project) {

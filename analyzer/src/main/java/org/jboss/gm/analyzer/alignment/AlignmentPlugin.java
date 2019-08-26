@@ -2,13 +2,12 @@ package org.jboss.gm.analyzer.alignment;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
-import org.gradle.internal.logging.slf4j.OutputEventListenerBackedLoggerContext;
-import org.jboss.gm.analyzer.alignment.util.FilteringCustomLogger;
+import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.ManipulationCache;
+import org.jboss.gm.common.logging.FilteringCustomLogger;
+import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.ManifestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Results in adding a task with name {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME}.
@@ -17,19 +16,12 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unused")
 public class AlignmentPlugin implements Plugin<Project> {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = GMLogger.getLogger(getClass());
 
     static {
         System.out.println("Injecting AlignmentPlugin ; version " + ManifestUtils.getManifestInformation());
 
-        OutputEventListenerBackedLoggerContext context = (OutputEventListenerBackedLoggerContext) LoggerFactory
-                .getILoggerFactory();
-        // TODO: I don't think we need to call reset...
-        // LogLevel level = context.getLevel();
-        // System.out.println("### Original level is " + context.getLevel());
-        // context.reset();
-        // context.setLevel(level);
-        context.setOutputEventListener(new FilteringCustomLogger(context.getOutputEventListener()));
+        FilteringCustomLogger.enableFilter();
     }
 
     @Override

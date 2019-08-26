@@ -15,9 +15,9 @@ import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.Translator;
+import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.gm.common.logging.GMLogger;
 
 /**
  * An implementation of {@link org.jboss.gm.analyzer.alignment.AlignmentService} that uses the Dependency Analyzer service
@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DAAlignmentService implements AlignmentService {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = GMLogger.getLogger(getClass());
 
     private final Translator restEndpoint;
 
@@ -75,7 +75,7 @@ public class DAAlignmentService implements AlignmentService {
 
     private static class Response implements AlignmentService.Response {
 
-        private final Logger logger = LoggerFactory.getLogger(getClass());
+        private final Logger logger = GMLogger.getLogger(getClass());
 
         private final List<ProjectVersionRef> refOfProject;
         private final Map<ProjectVersionRef, String> translationMap;
@@ -127,7 +127,7 @@ public class DAAlignmentService implements AlignmentService {
                 byte[] randomBytes = new byte[20];
                 RANDOM.nextBytes(randomBytes);
                 // TODO: Replace with PME CODEC on new release of PME
-                headerContext = "pme-" + new Base32().encodeAsString(randomBytes);
+                headerContext = "gme-" + new Base32().encodeAsString(randomBytes);
             }
 
             return headerContext;

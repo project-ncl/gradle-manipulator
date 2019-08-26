@@ -47,14 +47,15 @@ import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
+import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.analyzer.alignment.groovy.GMEBaseScript;
 import org.jboss.gm.analyzer.alignment.io.LockfileIO;
 import org.jboss.gm.analyzer.alignment.io.RepositoryExporter;
 import org.jboss.gm.common.Configuration;
-import org.jboss.gm.common.GMLogger;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.io.ManipulationIO;
+import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.versioning.DynamicVersionParser;
 import org.jboss.gm.common.versioning.ProjectVersionFactory;
@@ -81,7 +82,7 @@ public class AlignmentTask extends DefaultTask {
 
     private static final AtomicBoolean configOutput = new AtomicBoolean();
 
-    private final GMLogger logger = GMLogger.getLogger(getClass().getName());
+    private final Logger logger = GMLogger.getLogger(getClass());
 
     @TaskAction
     public void perform() {

@@ -1,9 +1,9 @@
 package org.jboss.gm.analyzer.alignment.groovy;
 
 import org.gradle.api.Project;
+import org.gradle.api.logging.Logger;
+import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import groovy.lang.Script;
 
@@ -12,7 +12,7 @@ import groovy.lang.Script;
  * for GME.
  */
 public abstract class GMEBaseScript extends Script {
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = GMLogger.getLogger(getClass());
 
     private ManipulationModel model;
 

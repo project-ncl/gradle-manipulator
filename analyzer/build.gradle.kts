@@ -41,7 +41,6 @@ dependencies {
     compile("commons-io:commons-io:${project.extra.get("commonsVersion")}")
     compile("commons-codec:commons-codec:1.11")
 
-    compile("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
     compile("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
 
     testCompile("junit:junit:${project.extra.get("junitVersion")}")

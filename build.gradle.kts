@@ -3,14 +3,6 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.text.SimpleDateFormat
 import java.util.*
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath("ca.cutterslade.gradle:gradle-dependency-analyze:1.3.2")
-    }
-}
 
 plugins {
     java
@@ -23,6 +15,7 @@ plugins {
     id("com.gradle.plugin-publish") version "0.10.1"
     id("net.researchgate.release") version "2.6.0"
     id("com.adarshr.test-logger") version "1.7.0"
+    id("ca.cutterslade.analyze") version "1.3.3"
 }
 
 apply(plugin = "net.researchgate.release")

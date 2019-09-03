@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.aeonbits.owner.ConfigCache;
+import org.aeonbits.owner.ConfigFactory;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
@@ -65,8 +65,10 @@ public class AlignmentTaskEmptyVersionTest {
         final ProjectInternal projectInternal = mock(ProjectInternal.class);
         when(projectInternal.getGradle()).thenReturn(mock(GradleInternal.class));
         when(projectInternal.getServices()).thenReturn(mock(ServiceRegistry.class));
+        //noinspection UnstableApiUsage
         when(projectInternal.getObjects()).thenReturn(mock(ObjectFactory.class));
 
+        //noinspection ConstantConditions
         AbstractTask.injectIntoNewInstance(projectInternal,
                 TaskIdentity.create("DummyIdentity", taskType, projectInternal), null);
     }
@@ -86,18 +88,17 @@ public class AlignmentTaskEmptyVersionTest {
         p.getDependencies().add("default", "org.apache.commons:dummy-artifact");
 
         AlignmentTask at = new AlignmentTask();
-        Configuration config = ConfigCache.getOrCreate(Configuration.class);
+        Configuration config = ConfigFactory.create(Configuration.class);
 
-        // As getAllProjectDependencies is private, use reflection to modify the access control.
-        Class[] types = new Class[1];
-        types[0] = Project.class;
+        // As getDependencies is private, use reflection to modify the access control.
         Method m = at.getClass().getDeclaredMethod("getDependencies", Project.class, Configuration.class, Set.class);
         m.setAccessible(true);
+        @SuppressWarnings("unchecked")
         HashMap<Dependency, ProjectVersionRef> result = (HashMap<Dependency, ProjectVersionRef>) m.invoke(at,
                 new Object[] { p, config, new HashSet<ProjectVersionRef>() });
         Collection<ProjectVersionRef> allDependencies = result.values();
 
         assertEquals(1, allDependencies.size());
-        assertEquals("org.apache.commons:commons-configuration2:2.4", allDependencies.stream().findFirst().get().toString());
+        assertEquals("org.apache.commons:commons-configuration2:2.4", allDependencies.toArray()[0].toString());
     }
 }

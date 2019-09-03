@@ -106,6 +106,7 @@ public class DAAlignmentService implements AlignmentService {
     }
 
     static class GradleDefaultTranslator extends DefaultTranslator {
+        // TODO: Replace with PME Random on new release of PME.
         private final Random RANDOM = new Random();
 
         private final String logContext;

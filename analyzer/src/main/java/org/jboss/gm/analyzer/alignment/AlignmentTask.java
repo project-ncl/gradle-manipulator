@@ -21,9 +21,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.Config;
@@ -83,8 +84,9 @@ public class AlignmentTask extends DefaultTask {
 
     private static final AtomicBoolean configOutput = new AtomicBoolean();
 
+    private static final Pattern SCM_URL_LINE_EXPR = Pattern.compile("\\s*url\\s*=(?:.*/)([a-zA-Z0-9\\-._]+)");
+
     private final Logger logger = GMLogger.getLogger(getClass());
-    private static final String SCM_URL_LINE_EXPR = "\\s*url\\s*=.*";
 
     @TaskAction
     public void perform() {
@@ -563,23 +565,18 @@ public class AlignmentTask extends DefaultTask {
         }
         try {
             List<String> lines = FileUtils.readLines(gitConfig, Charset.defaultCharset());
-            Optional<String> maybeScmUrlLine = lines.stream()
-                  .filter(line -> line.matches(SCM_URL_LINE_EXPR))
-                  .findFirst();
 
-            if (!maybeScmUrlLine.isPresent()) {
-                throw new ManipulationUncheckedException(
-                      ".git/config file doesn't define SCM URL, failed to determine the root project name");
-            }
+            for (String line : lines) {
+                Matcher matcher = SCM_URL_LINE_EXPR.matcher(line);
 
-            // the line should be of form
-            // url = .../.../[^\\.]+(.git)?
-            String line = maybeScmUrlLine.get();
-            if (line.endsWith("/")) {
-                line = line.substring(0, line.length() - 1);
+                if (matcher.find()) {
+                    return matcher.group(1).replaceAll("\\.git$", "");
+                }
             }
-            line = line.replace(".git", "");
-            return line.substring(line.lastIndexOf('/') + 1);
+            // Scanned the entire file and failed to find a match.
+            throw new ManipulationUncheckedException(
+                    ".git/config file doesn't define SCM URL, failed to determine the root project name. File contents: "
+                            + lines);
         } catch (IOException e) {
             throw new IOException("Unable to read .git/config file found, failed to determine the root project name", e);
         }

@@ -12,6 +12,8 @@ import static org.assertj.core.api.Assertions.tuple;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collection;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -56,7 +58,13 @@ public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest 
     public void ensureAlignmentFileCreated()
             throws IOException, URISyntaxException, ManipulationException {
         final File projectRoot = tempDir.newFolder("dynamic-project-with-locks");
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
+
+        org.apache.commons.io.FileUtils.copyDirectory(Paths
+                .get(TestUtils.class.getClassLoader().getResource(projectRoot.getName()).toURI()).toFile(), projectRoot);
+
+        final File gitDir = new File(projectRoot, "dotgit");
+        Files.move(gitDir.toPath(), projectRoot.toPath().resolve(".git"));
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, false);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
 
@@ -65,10 +73,10 @@ public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest 
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.jboss.gm.analyzer.functest");
-            assertThat(am.getName()).isEqualTo("rootProject");
-            assertThat(am.findCorrespondingChild("rootProject")).satisfies(root -> {
+            assertThat(am.getName()).isEqualTo("undertow");
+            assertThat(am.findCorrespondingChild("undertow")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("1.0.0.redhat-00001");
-                assertThat(root.getName()).isEqualTo("rootProject");
+                assertThat(root.getName()).isEqualTo("undertow");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
@@ -88,7 +96,7 @@ public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest 
         });
 
         // make sure the project name was added
-        assertEquals("rootProject.name='rootProject'",
+        assertEquals("rootProject.name='undertow'",
                 FileUtils.getLastLine(new File(projectRoot, "settings.gradle")));
     }
 }

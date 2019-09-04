@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -83,6 +84,7 @@ public class AlignmentTask extends DefaultTask {
     private static final AtomicBoolean configOutput = new AtomicBoolean();
 
     private final Logger logger = GMLogger.getLogger(getClass());
+    private static final String SCM_URL_LINE_EXPR = "\\s*url\\s*=.*";
 
     @TaskAction
     public void perform() {
@@ -540,7 +542,7 @@ public class AlignmentTask extends DefaultTask {
             }
         }
 
-        final String newProjectName = "rootProject";
+        final String newProjectName = extractProjectNameFromScmUrl(rootDir);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(settingsGradle, true))) {
             // Ensure the marker is on a line by itself.
@@ -552,6 +554,35 @@ public class AlignmentTask extends DefaultTask {
         }
 
         return newProjectName;
+    }
+
+    private String extractProjectNameFromScmUrl(File rootDir) throws IOException {
+        File gitConfig = new File(new File(rootDir, ".git"), "config");
+        if (!gitConfig.isFile()) {
+            throw new ManipulationUncheckedException("No .git/config file found, failed to determine the root project name");
+        }
+        try {
+            List<String> lines = FileUtils.readLines(gitConfig, Charset.defaultCharset());
+            Optional<String> maybeScmUrlLine = lines.stream()
+                  .filter(line -> line.matches(SCM_URL_LINE_EXPR))
+                  .findFirst();
+
+            if (!maybeScmUrlLine.isPresent()) {
+                throw new ManipulationUncheckedException(
+                      ".git/config file doesn't define SCM URL, failed to determine the root project name");
+            }
+
+            // the line should be of form
+            // url = .../.../[^\\.]+(.git)?
+            String line = maybeScmUrlLine.get();
+            if (line.endsWith("/")) {
+                line = line.substring(0, line.length() - 1);
+            }
+            line = line.replace(".git", "");
+            return line.substring(line.lastIndexOf('/') + 1);
+        } catch (IOException e) {
+            throw new IOException("Unable to read .git/config file found, failed to determine the root project name", e);
+        }
     }
 
     // for now we simply assume that the script is called gme.groovy and already resides in the project's root directory

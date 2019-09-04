@@ -10,9 +10,9 @@ import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.gradle.api.Action;
 import org.gradle.api.artifacts.DependencyResolveDetails;
 import org.gradle.api.artifacts.ModuleVersionSelector;
+import org.gradle.api.logging.Logger;
+import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
@@ -21,7 +21,7 @@ public class AlignedDependencyResolver implements Action<DependencyResolveDetail
     private final ManipulationModel module;
     private final ResolvedDependenciesRepository resolvedDependenciesRepository;
 
-    private static final Logger logger = LoggerFactory.getLogger(AlignedDependencyResolver.class);
+    private final Logger logger = GMLogger.getLogger(getClass());
 
     public AlignedDependencyResolver(ManipulationModel module, ResolvedDependenciesRepository resolvedDependenciesRepository) {
         this.module = module;

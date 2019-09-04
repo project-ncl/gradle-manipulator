@@ -13,9 +13,10 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.gradle.api.Project;
+import org.gradle.api.logging.Logger;
+import org.jboss.gm.analyzer.alignment.util.DependencyPropertyParser;
 import org.jboss.gm.common.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.gm.common.logging.GMLogger;
 
 /**
  * {@link org.jboss.gm.analyzer.alignment.AlignmentService.RequestCustomizer} that removes dependencies from a
@@ -29,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DependencyExclusionCustomizer implements AlignmentService.RequestCustomizer {
 
-    private static final Logger log = LoggerFactory.getLogger(DependencyExclusionCustomizer.class);
+    private static final Logger log = GMLogger.getLogger(DependencyExclusionCustomizer.class);
 
     private final Predicate<ProjectVersionRef> predicate;
 

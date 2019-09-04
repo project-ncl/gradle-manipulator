@@ -1,15 +1,8 @@
+import com.adarshr.gradle.testlogger.theme.ThemeType
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.text.SimpleDateFormat
 import java.util.*
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath("ca.cutterslade.gradle:gradle-dependency-analyze:1.3.0")
-    }
-}
 
 plugins {
     java
@@ -21,6 +14,8 @@ plugins {
     id("net.nemerosa.versioning") version "2.8.2"
     id("com.gradle.plugin-publish") version "0.10.1"
     id("net.researchgate.release") version "2.6.0"
+    id("com.adarshr.test-logger") version "1.7.0"
+    id("ca.cutterslade.analyze") version "1.3.3"
 }
 
 apply(plugin = "net.researchgate.release")
@@ -74,6 +69,7 @@ subprojects {
         apply(plugin = "java-gradle-plugin")
         apply(plugin = "com.github.johnrengelman.shadow")
         apply(plugin = "com.gradle.plugin-publish")
+        apply(plugin = "com.adarshr.test-logger")
 
         /**
          * The configuration below has been created by reading the documentation at:
@@ -87,7 +83,7 @@ subprojects {
         // it tries to shadow the entire gradle api
         // Moreover, the gradleApi and groovy dependencies in the plugins themselves
         // have been explicitly declared with the shadow configuration
-        configurations.get("compile").dependencies.remove(dependencies.gradleApi())
+        configurations["compile"].dependencies.remove(dependencies.gradleApi())
 
         // make build task depend on shadowJar
         val build: DefaultTask by tasks
@@ -127,10 +123,10 @@ subprojects {
                     // we publish the init gradle file to make it easy for tools that use
                     // the plugin to set it up without having to create their own init gradle file
                     if (project.name == "analyzer") {
-                        artifact("${sourceSets.main.get().output.resourcesDir}/analyzer-init.gradle", {
+                        artifact("${sourceSets.main.get().output.resourcesDir}/analyzer-init.gradle") {
                             classifier = "init"
                             extension = "gradle"
-                        })
+                        }
                     }
 
 
@@ -196,6 +192,13 @@ subprojects {
                 useGpgCmd()
                 this.sign(publishing.publications["shadow"])
             }
+        }
+
+        testlogger {
+            // Some of our tests take a _long_ time ; remove spurious warnings.
+            slowThreshold = 120000
+            // Nicer looking theme than default.
+            theme = ThemeType.MOCHA
         }
     }
 

@@ -14,6 +14,7 @@ dependencies {
     compile("com.fasterxml.jackson.core:jackson-annotations:${project.extra.get("jacksonVersion")}")
     compile("com.fasterxml.jackson.core:jackson-core:${project.extra.get("jacksonVersion")}")
 
+    compile("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
 
     compile("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
     compile("org.commonjava.maven.ext:pom-manipulation-core:${project.extra.get("pmeVersion")}")

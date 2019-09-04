@@ -3,16 +3,16 @@ package org.jboss.gm.manipulation.actions;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.logging.Logger;
+import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
  */
 public class OverrideDependenciesAction implements Action<Project> {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = GMLogger.getLogger(getClass());
 
     private final AlignedDependencyResolver resolver;
 

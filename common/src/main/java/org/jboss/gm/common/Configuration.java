@@ -84,6 +84,10 @@ public interface Configuration extends Accessible {
     @DefaultValue("false")
     boolean ignoreUnresolvableDependencies();
 
+    @Key("loggingClassnameLineNumber")
+    @DefaultValue("true")
+    boolean addLoggingClassnameLinenumber();
+
     @Key("groovyScripts")
     String[] groovyScripts();
 

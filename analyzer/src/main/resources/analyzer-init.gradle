@@ -1,5 +1,3 @@
-
-
 initscript {
     repositories {
         // Maven local isn't required for production but its useful during development.
@@ -14,18 +12,7 @@ initscript {
     }
 }
 
-
 allprojects {
-    // Quieten down logging from other parts of Gradle/Tasks.
-    gradle.taskGraph.beforeTask { Task task ->
-        if ( "generateAlignmentMetadata" == task.name ) {
-            logger.context.level = gradle.startParameter.logLevel
-        }
-    }
-    gradle.taskGraph.afterTask { Task task ->
-        logger.context.level = LogLevel.QUIET
-    }
-    logger.context.level = LogLevel.QUIET
 
     ext.gmeAnalyse = true
 

@@ -1,4 +1,4 @@
-package org.jboss.gm.analyzer.alignment;
+package org.jboss.gm.analyzer.alignment.io;
 
 import java.io.File;
 import java.net.URI;
@@ -19,8 +19,8 @@ import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.internal.artifacts.repositories.DefaultMavenLocalArtifactRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.gradle.api.logging.Logger;
+import org.jboss.gm.common.logging.GMLogger;
 
 /**
  * Exports artifact repositories in a maven settings format.
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RepositoryExporter {
 
-    private static final Logger logger = LoggerFactory.getLogger(RepositoryExporter.class);
+    private final Logger logger = GMLogger.getLogger(getClass());
 
     // only export remote URLs
     private static final Collection<String> SUPPORTED_SCHEMES = Arrays.asList("http", "https");

@@ -2,11 +2,12 @@ package org.jboss.gm.analyzer.alignment;
 
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.ManipulationCache;
+import org.jboss.gm.common.logging.FilteringCustomLogger;
+import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.ManifestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Results in adding a task with name {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME}.
@@ -15,10 +16,12 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("unused")
 public class AlignmentPlugin implements Plugin<Project> {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final Logger logger = GMLogger.getLogger(getClass());
 
     static {
         System.out.println("Injecting AlignmentPlugin ; version " + ManifestUtils.getManifestInformation());
+
+        FilteringCustomLogger.enableFilter();
     }
 
     @Override

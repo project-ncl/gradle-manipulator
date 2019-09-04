@@ -47,17 +47,19 @@ import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
+import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.analyzer.alignment.groovy.GMEBaseScript;
 import org.jboss.gm.analyzer.alignment.io.LockfileIO;
+import org.jboss.gm.analyzer.alignment.io.RepositoryExporter;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.io.ManipulationIO;
+import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.versioning.DynamicVersionParser;
 import org.jboss.gm.common.versioning.ProjectVersionFactory;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
-import org.slf4j.Logger;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
@@ -80,7 +82,7 @@ public class AlignmentTask extends DefaultTask {
 
     private static final AtomicBoolean configOutput = new AtomicBoolean();
 
-    private final Logger logger = getLogger();
+    private final Logger logger = GMLogger.getLogger(getClass());
 
     @TaskAction
     public void perform() {
@@ -383,7 +385,7 @@ public class AlignmentTask extends DefaultTask {
                     // if (StringUtils.isNotBlank(originalDep.getVersion())) {
 
                     if (depMap.put(relaxedProjectVersionRef, pvr) == null) {
-                        logger.info("For {}, with original key {}, adding dependency to scan {} ", configuration,
+                        logger.debug("For {}, with original key {}, adding dependency to scan {} ", configuration,
                                 relaxedProjectVersionRef, pvr);
                     }
 
@@ -471,7 +473,7 @@ public class AlignmentTask extends DefaultTask {
 
             new RepositoryExporter(repositories).export(repositoriesFile);
         } else {
-            getProject().getLogger().info("Repository export disabled.");
+            logger.info("Repository export disabled.");
         }
     }
 

@@ -33,6 +33,17 @@ public final class TestUtils {
 
         FileUtils.copyDirectory(Paths
                 .get(TestUtils.class.getClassLoader().getResource(projectDirName).toURI()).toFile(), projectRoot);
+        return align(projectRoot, expectFailure);
+    }
+
+    /**
+     * this method assumes the projectRoot directory already contains the gradle files (usually unpacked from resources)
+     * 
+     * @param projectRoot the root directory of the aligned project
+     * @param expectFailure if the the alignment should fail
+     * @return the manipulation model
+     */
+    static TestManipulationModel align(File projectRoot, boolean expectFailure) {
         assertThat(projectRoot.toPath().resolve("build.gradle")).exists();
 
         final BuildResult buildResult;

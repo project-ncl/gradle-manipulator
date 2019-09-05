@@ -23,7 +23,10 @@ public class FilteringCustomLogger implements OutputEventListener {
 
     private final List<String> ownCategories = Arrays.asList(
             "org.jboss.gm.analyzer.alignment.AlignmentTask_Decorated",
-            "org.jboss.gm.common.logging.FilteringCustomLogger");
+            "org.jboss.gm.common.logging.FilteringCustomLogger",
+            "org.jboss.gm.analyzer.alignment.AlignmentPlugin",
+            "org.jboss.gm.analyzer.alignment.DAAlignmentService",
+            "org.jboss.gm.analyzer.alignment.DAAlignmentService$GradleDefaultTranslator");
 
     @SuppressWarnings("FieldCanBeLocal")
     private final String defaultCategory = "org.gradle.api.Task";

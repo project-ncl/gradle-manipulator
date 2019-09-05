@@ -6,12 +6,15 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
@@ -100,5 +103,34 @@ public class AlignmentTaskEmptyVersionTest {
 
         assertEquals(1, allDependencies.size());
         assertEquals("org.apache.commons:commons-configuration2:2.4", allDependencies.toArray()[0].toString());
+    }
+
+    @Test
+    public void testParseScm() throws Exception {
+
+        Map<String, String> formats = new HashMap<>();
+
+        formats.put("  url = git@github.com:rnc/pom-manipulation-ext.git", "pom-manipulation-ext");
+        formats.put(" url = git+ssh://code.foo.com.com/apache/kafka", "kafka");
+        formats.put("url = git+ssh://code.foo.com/apache/kafka.git", "kafka");
+        formats.put("url = https://github.com/quarkusio/quarkus/", "quarkus");
+        formats.put("url = michalszynkiewicz/test.foo", "test.foo");
+        formats.put("url = michalszynkiewicz/_test.foo", "_test.foo");
+
+        AlignmentTask at = new AlignmentTask();
+        Method m = at.getClass().getDeclaredMethod("extractProjectNameFromScmUrl", File.class);
+        m.setAccessible(true);
+
+        File gitFolder = tempDir.newFolder(".git");
+
+        for (String line : formats.keySet()) {
+            File tempFile = new File(gitFolder, "config");
+            FileUtils.writeStringToFile(tempFile, line, Charset.defaultCharset());
+
+            String result = (String) m.invoke(at, new Object[] { tempDir.getRoot() });
+
+            //System.out.println ("### Got " + result);
+            assertEquals(result, formats.get(line));
+        }
     }
 }

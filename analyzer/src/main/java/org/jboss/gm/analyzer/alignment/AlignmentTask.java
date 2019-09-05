@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.Config;
@@ -81,6 +83,8 @@ public class AlignmentTask extends DefaultTask {
     static final String NAME = "generateAlignmentMetadata";
 
     private static final AtomicBoolean configOutput = new AtomicBoolean();
+
+    private static final Pattern SCM_URL_LINE_EXPR = Pattern.compile("\\s*url\\s*=(?:.*/)([a-zA-Z0-9\\-._]+)");
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
@@ -540,7 +544,7 @@ public class AlignmentTask extends DefaultTask {
             }
         }
 
-        final String newProjectName = "rootProject";
+        final String newProjectName = extractProjectNameFromScmUrl(rootDir);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(settingsGradle, true))) {
             // Ensure the marker is on a line by itself.
@@ -552,6 +556,30 @@ public class AlignmentTask extends DefaultTask {
         }
 
         return newProjectName;
+    }
+
+    private String extractProjectNameFromScmUrl(File rootDir) throws IOException {
+        File gitConfig = new File(new File(rootDir, ".git"), "config");
+        if (!gitConfig.isFile()) {
+            throw new ManipulationUncheckedException("No .git/config file found, failed to determine the root project name");
+        }
+        try {
+            List<String> lines = FileUtils.readLines(gitConfig, Charset.defaultCharset());
+
+            for (String line : lines) {
+                Matcher matcher = SCM_URL_LINE_EXPR.matcher(line);
+
+                if (matcher.find()) {
+                    return matcher.group(1).replaceAll("\\.git$", "");
+                }
+            }
+            // Scanned the entire file and failed to find a match.
+            throw new ManipulationUncheckedException(
+                    ".git/config file doesn't define SCM URL, failed to determine the root project name. File contents: "
+                            + lines);
+        } catch (IOException e) {
+            throw new IOException("Unable to read .git/config file found, failed to determine the root project name", e);
+        }
     }
 
     // for now we simply assume that the script is called gme.groovy and already resides in the project's root directory

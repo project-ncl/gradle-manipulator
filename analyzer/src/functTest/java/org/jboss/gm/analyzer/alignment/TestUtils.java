@@ -7,7 +7,12 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -24,16 +29,30 @@ public final class TestUtils {
     private TestUtils() {
     }
 
+    //TODO use a builder for these parameters
+
     static TestManipulationModel align(File projectRoot, String projectDirName) throws IOException, URISyntaxException {
-        return align(projectRoot, projectDirName, false);
+        return align(projectRoot, projectDirName, new HashMap<>());
+    }
+
+    static TestManipulationModel align(File projectRoot, String projectDirName, Map<String, String> systemProps)
+            throws IOException, URISyntaxException {
+        return align(projectRoot, projectDirName, false, systemProps);
     }
 
     static TestManipulationModel align(File projectRoot, String projectDirName, boolean expectFailure)
             throws IOException, URISyntaxException {
 
+        return align(projectRoot, projectDirName, expectFailure, new HashMap<>());
+    }
+
+    private static TestManipulationModel align(File projectRoot, String projectDirName, boolean expectFailure,
+            Map<String, String> systemProps)
+            throws IOException, URISyntaxException {
+
         FileUtils.copyDirectory(Paths
                 .get(TestUtils.class.getClassLoader().getResource(projectDirName).toURI()).toFile(), projectRoot);
-        return align(projectRoot, expectFailure);
+        return align(projectRoot, expectFailure, systemProps);
     }
 
     /**
@@ -41,17 +60,31 @@ public final class TestUtils {
      * 
      * @param projectRoot the root directory of the aligned project
      * @param expectFailure if the the alignment should fail
+     * @param systemProps the system properties to apply for the alignment run
      * @return the manipulation model
      */
-    static TestManipulationModel align(File projectRoot, boolean expectFailure) {
+    static TestManipulationModel align(File projectRoot, boolean expectFailure, Map<String, String> systemProps) {
         assertThat(projectRoot.toPath().resolve("build.gradle")).exists();
 
         final BuildResult buildResult;
         final TaskOutcome outcome;
 
+        final Map<String, String> finalSystemProps = new LinkedHashMap<>();
+        finalSystemProps.put("repoRemovalBackup", "settings.xml");
+        finalSystemProps.putAll(systemProps);
+        final List<String> systemPropsList = finalSystemProps.entrySet().stream()
+                .map(e -> "-D" + e.getKey() + "=" + e.getValue())
+                .collect(Collectors.toList());
+        final List<String> allArguments = new ArrayList<>(systemPropsList.size() + 4);
+        allArguments.add("-DgmeFunctionalTest=true"); // Used to indicate for the plugin to clear the cache.
+        allArguments.add("--stacktrace");
+        allArguments.add("--info");
+        allArguments.add(AlignmentTask.NAME);
+        allArguments.addAll(systemPropsList);
+
         final GradleRunner runner = GradleRunner.create()
                 .withProjectDir(projectRoot)
-                .withArguments("--stacktrace", "--info", AlignmentTask.NAME, "-DrepoRemovalBackup=settings.xml")
+                .withArguments(allArguments)
                 .withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath();

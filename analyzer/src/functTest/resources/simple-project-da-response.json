@@ -54,6 +54,23 @@
     "artifactId": "undertow-core"
   },
   {
+    "bestMatchVersion": "2.2.0-redhat-00001",
+    "availableVersions": [
+      "2.2.0-redhat-00001"
+    ],
+    "blacklisted": false,
+    "whitelisted": [
+      {
+        "name": "EAP",
+        "version": "7.1.3",
+        "supportStatus": "SUPPORTED"
+      }
+    ],
+    "version": "2.2.0",
+    "groupId": "com.yammer.metrics",
+    "artifactId": "metrics-core"
+  },
+  {
     "bestMatchVersion": "1.0.1.redhat-00001",
     "availableVersions": [],
     "blacklisted": false,

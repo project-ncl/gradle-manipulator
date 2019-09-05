@@ -64,7 +64,7 @@ public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest 
 
         final File gitDir = new File(projectRoot, "dotgit");
         Files.move(gitDir.toPath(), projectRoot.toPath().resolve(".git"));
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, false);
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), false);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
 

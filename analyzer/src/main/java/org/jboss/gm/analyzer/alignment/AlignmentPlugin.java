@@ -1,8 +1,12 @@
 package org.jboss.gm.analyzer.alignment;
 
+import java.util.stream.Collectors;
+
+import org.aeonbits.owner.ConfigCache;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
+import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.logging.FilteringCustomLogger;
 import org.jboss.gm.common.logging.GMLogger;
@@ -26,7 +30,6 @@ public class AlignmentPlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
-
         // we need to create an empty alignment file at the project root
         // this file will then be populated by the alignment task of each project
         if (project.getRootProject() == project) {
@@ -36,6 +39,15 @@ public class AlignmentPlugin implements Plugin<Project> {
 
                 logger.info("Setup cache for project {}", cache);
             });
+        }
+
+        if (System.getProperty("gmeFunctionalTest") != null) {
+            final Configuration config = ConfigCache.getOrCreate(Configuration.class);
+            logger.info("Running functional test and injecting {}",
+                    System.getProperties().stringPropertyNames().stream()
+                            .filter(k -> config.getProperties().getProperty(k) == null).collect(Collectors.toList()));
+
+            config.getProperties().putAll(System.getProperties());
         }
 
         project.getTasks().create(AlignmentTask.NAME, AlignmentTask.class);

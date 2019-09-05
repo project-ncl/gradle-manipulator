@@ -14,7 +14,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -62,7 +64,9 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
     public void ensureAlignmentFileCreated() throws IOException, URISyntaxException, ManipulationException {
         final File projectRoot = tempDir.newFolder("simple-project");
 
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
+        final TestManipulationModel alignmentModel = TestUtils.align(
+                projectRoot, projectRoot.getName(),
+                Collections.singletonMap("dependencyOverride.com.yammer.metrics:*@org.acme.gradle:root", ""));
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertTrue(new File(projectRoot, AlignmentTask.GRADLE + '/' + AlignmentTask.GME_REPOS).exists());

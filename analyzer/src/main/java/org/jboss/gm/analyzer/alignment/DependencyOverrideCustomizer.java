@@ -99,7 +99,7 @@ public class DependencyOverrideCustomizer implements AlignmentService.ResponseCu
                 return overrideMap.get(projectRef.get());
             }
 
-            return gav.getVersionString();
+            return originalResponse.getAlignedVersionOfGav(gav);
         }
 
         private Optional<ProjectRef> matchingProjectRef(ProjectRef gav) {

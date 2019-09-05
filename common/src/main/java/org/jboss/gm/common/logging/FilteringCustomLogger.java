@@ -21,15 +21,14 @@ public class FilteringCustomLogger implements OutputEventListener {
             "org.gradle.configuration.project.BuildScriptProcessor",
             "org.gradle.execution.TaskNameResolvingBuildConfigurationAction");
 
-    private final List<String> ownCategories = Arrays.asList(
-            "org.jboss.gm.analyzer.alignment.AlignmentTask_Decorated",
-            "org.jboss.gm.common.logging.FilteringCustomLogger",
-            "org.jboss.gm.analyzer.alignment.AlignmentPlugin",
-            "org.jboss.gm.analyzer.alignment.DAAlignmentService",
-            "org.jboss.gm.analyzer.alignment.DAAlignmentService$GradleDefaultTranslator");
-
     @SuppressWarnings("FieldCanBeLocal")
     private final String defaultCategory = "org.gradle.api.Task";
+
+    /**
+     * Don't filter our own categories
+     */
+    @SuppressWarnings("FieldCanBeLocal")
+    private final String ownCategory = "org.jboss.gm";
 
     public static void enableFilter() {
         OutputEventListenerBackedLoggerContext context = (OutputEventListenerBackedLoggerContext) LoggerFactory
@@ -47,8 +46,7 @@ public class FilteringCustomLogger implements OutputEventListener {
 
         if (!ignoreCategories.contains(logEvent.getCategory())) {
 
-            if (!ownCategories.contains(logEvent.getCategory()) &&
-                    !logEvent.getCategory().equals(defaultCategory)) {
+            if (!logEvent.getCategory().startsWith(ownCategory) && !logEvent.getCategory().startsWith(defaultCategory)) {
                 // Can't use logger to output the warning as causes stack overflow.
                 // TODO: Remove?
                 System.err.println("Unknown event using category " + logEvent.getCategory() + " : ");

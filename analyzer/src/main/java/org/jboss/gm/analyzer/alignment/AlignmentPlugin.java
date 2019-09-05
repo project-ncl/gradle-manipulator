@@ -1,5 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
+import org.aeonbits.owner.ConfigCache;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
@@ -26,6 +27,9 @@ public class AlignmentPlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
+        // this is a hack in order to ensure that plugin always reloads the configuration
+        // needed in the integration tests that can run with different configuration
+        ConfigCache.clear();
 
         // we need to create an empty alignment file at the project root
         // this file will then be populated by the alignment task of each project

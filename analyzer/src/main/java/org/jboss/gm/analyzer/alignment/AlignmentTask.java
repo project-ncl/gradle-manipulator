@@ -451,7 +451,7 @@ public class AlignmentTask extends DefaultTask {
 
         allModuleDependencies.forEach((d, p) -> {
             final String newDependencyVersion = alignmentResponse.getAlignedVersionOfGav(p);
-            if (newDependencyVersion != null) {
+            if (!StringUtils.isEmpty(newDependencyVersion)) {
                 final ProjectVersionRef newVersion = ProjectVersionFactory.withNewVersion(p, newDependencyVersion);
                 // we need to make sure that dynamic dependencies are stored with their original key
                 // in order for the manipulation plugin to be able to look them up properly

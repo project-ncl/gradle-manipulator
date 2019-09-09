@@ -21,7 +21,9 @@ import org.jboss.gm.common.Configuration;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
 
 public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
 
@@ -29,6 +31,9 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
 
     @Before
     public final void before() throws IOException {

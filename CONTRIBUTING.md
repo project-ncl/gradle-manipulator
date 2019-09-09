@@ -60,6 +60,30 @@ The Gradle logger interface extends `org.slf4j.Logger`. It is recommended to use
 * The `org.gradle.api.InvalidUserDataException` can be used for configuration errors.
 * Avoid throwing `RuntimeException` ; rather, use a more explicit exception.
 
+#### Gradle Test Runner
+
+The [test runner](https://docs.gradle.org/current/userguide/test_kit.html) may be used for functional testing. Note that it is
+recommended that `withDebug(true)` is **not** used in production but just enabled as required. This is because debug runs
+in-process which can lead to some strange side affects.
+
+To pass specific property / environment variables through the following pattern should be followed (which will also work when
+using single-test debugging):
+```java
+    @Rule
+    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+
+......
+        System.setProperty("AProxDeployUrl", "file://" + publishDirectory.toString());
+
+        final BuildResult buildResult = TestUtils.createGradleRunner ()
+                .withProjectDir(simpleProjectRoot)
+                .withArguments("--info", "publish")
+                .build();
+     ....
+```
+Note that instead of calling `GradleRunner.create` the `TestUtils` class is used instead which passes on the extra system 
+properties.
+
 ### Releasing
 
 The project has been configured to release both plugins to the Gradle Portal and to release to Maven Central. 

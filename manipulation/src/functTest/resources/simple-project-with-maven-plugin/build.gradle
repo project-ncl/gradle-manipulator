@@ -52,3 +52,27 @@ def customizePom(pom, gradleProject) {
         }
     }
 }
+
+allprojects {
+
+    jar {
+        from "$rootDir/build.gradle"
+    }
+
+    task srcJar(type: Jar) {
+        classifier = 'sources'
+        from "$rootDir/gradle.properties"
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    task docsJar(dependsOn: javadocJar)
+
+    artifacts {
+        archives srcJar
+        archives javadocJar
+    }
+}

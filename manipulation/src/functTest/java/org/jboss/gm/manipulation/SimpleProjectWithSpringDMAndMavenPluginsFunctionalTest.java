@@ -44,7 +44,7 @@ public class SimpleProjectWithSpringDMAndMavenPluginsFunctionalTest {
         final BuildResult buildResult = GradleRunner.create()
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("install")
-                .withDebug(true)
+                //.withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath()
                 .build();

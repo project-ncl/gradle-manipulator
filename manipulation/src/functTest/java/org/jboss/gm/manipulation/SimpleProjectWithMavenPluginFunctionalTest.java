@@ -39,7 +39,7 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
 
     @Test
-    public void ensureProperPomGenerated() throws IOException, URISyntaxException, XmlPullParserException {
+    public void ensureProperPomGeneratedForLegacyPlugin() throws IOException, URISyntaxException, XmlPullParserException {
         // this makes gradle use the set property as maven local directory
         // we do this in order to avoid polluting the maven local and also be absolutely sure
         // that no prior invocations affect the execution
@@ -57,7 +57,7 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
 
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
-                //                .withDebug(true)
+                //.withDebug(true)
                 .withArguments("uploadArchives", "--stacktrace", "--info")
                 .withPluginClasspath()
                 .forwardOutput()

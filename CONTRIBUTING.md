@@ -63,7 +63,7 @@ The Gradle logger interface extends `org.slf4j.Logger`. It is recommended to use
 #### Gradle Test Runner
 
 The [test runner](https://docs.gradle.org/current/userguide/test_kit.html) may be used for functional testing. Note that it is
-recommended that `withDebug(true)` is **not** used in production but just enabled as required. This is because debug runs
+recommended that `withDebug(true)` is **not** used in the manipulator sub-module by default but just enabled as required. This is because debug runs
 in-process which can lead to some strange side affects.
 
 To pass specific property / environment variables through the following pattern should be followed (which will also work when

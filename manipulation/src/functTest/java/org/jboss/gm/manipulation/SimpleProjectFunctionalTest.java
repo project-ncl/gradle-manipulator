@@ -88,7 +88,7 @@ public class SimpleProjectFunctionalTest {
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("distZip")
-                //.withDebug(true)
+                .withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath()
                 .build();

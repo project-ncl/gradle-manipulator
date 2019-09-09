@@ -50,6 +50,10 @@ public class ManipulationPlugin implements Plugin<Project> {
         final ManipulationModel alignmentModel = ManipulationIO.readManipulationModel(project.getRootDir());
         final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project);
 
+        if (System.getProperty("gmeFunctionalTest") != null) {
+            ConfigCache.getOrCreate(Configuration.class).reload();
+        }
+
         // we need to change the project version early so various tasks that ready early and create other vars based on it
         // (like the zip tasks) can use the correct version
         logger.info("Updating project version {} to {} ", project.getVersion(), alignmentModel.getVersion());

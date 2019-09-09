@@ -104,6 +104,8 @@ public final class TestUtils {
         for (String a : newKeys) {
             jvmArgs.add("-D" + a + '=' + System.getProperty(a));
         }
+        jvmArgs.add("-DgmeFunctionalTest=true"); // Used to indicate for the plugin to clear the cache.
+
         System.out.println("Will be using jvm args of " + jvmArgs);
 
         DefaultGradleRunner dgr = (DefaultGradleRunner) GradleRunner.create();

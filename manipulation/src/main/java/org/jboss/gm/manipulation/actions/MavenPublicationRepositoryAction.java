@@ -3,6 +3,7 @@ package org.jboss.gm.manipulation.actions;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
 import org.aeonbits.owner.ConfigCache;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.credentials.HttpHeaderCredentials;
@@ -43,7 +44,9 @@ public class MavenPublicationRepositoryAction implements Action<Project> {
     @Override
     public void execute(Project project) {
         if (!project.getPluginManager().hasPlugin("maven")) {
-            logger.warn("Legacy 'maven' plugin not detected, skipping publishing repository creation.");
+            // This should never happen due to prior checks in ManipulationPlugin
+            throw new ManipulationUncheckedException(
+                    "Legacy 'maven' plugin not detected, skipping publishing repository creation.");
         }
 
         Upload uploadArchives = project.getTasks().withType(Upload.class).findByName("uploadArchives");
@@ -70,10 +73,12 @@ public class MavenPublicationRepositoryAction implements Action<Project> {
             mavenArtifactRepository.setName("Manipulator Publishing Repository");
             mavenArtifactRepository.setUrl(config.deployUrl());
             if (config.accessToken() != null) {
+                //noinspection UnstableApiUsage
                 mavenArtifactRepository.credentials(HttpHeaderCredentials.class, cred -> {
                     cred.setName("Authorization");
                     cred.setValue("Bearer " + config.accessToken());
                 });
+                //noinspection UnstableApiUsage
                 mavenArtifactRepository.getAuthentication().create("header", HttpHeaderAuthentication.class);
             }
         });
@@ -92,9 +97,13 @@ public class MavenPublicationRepositoryAction implements Action<Project> {
         // create two new configurations and copy over the original artifacts
         org.gradle.api.artifacts.Configuration archives = project.getConfigurations().getByName("archives");
         org.gradle.api.artifacts.Configuration installArchives = project.getConfigurations().create("installArchives");
-        installArchives.getArtifacts().addAll(archives.getArtifacts());
         org.gradle.api.artifacts.Configuration publishArchives = project.getConfigurations().create("publishArchives");
-        publishArchives.getArtifacts().addAll(archives.getArtifacts());
+
+        // Clone the archive configuration to avoid ConcurrentModificationException.
+        installArchives.getArtifacts().addAll(archives.copy().getArtifacts());
+
+        // Clone the archive configuration to avoid ConcurrentModificationException.
+        publishArchives.getArtifacts().addAll(archives.copy().getArtifacts());
 
         // add an artifact referencing the POM
         project.getArtifacts().add("publishArchives",

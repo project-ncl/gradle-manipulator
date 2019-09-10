@@ -10,14 +10,15 @@ import org.apache.maven.model.Model;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.internal.Pair;
 import org.gradle.testkit.runner.BuildResult;
-import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
 
 public class SimpleProjectFunctionalTest {
 
@@ -27,6 +28,9 @@ public class SimpleProjectFunctionalTest {
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
+    @Rule
+    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+
     @Test
     public void ignoreMissingManipulationFile() throws IOException, URISyntaxException {
 
@@ -35,10 +39,10 @@ public class SimpleProjectFunctionalTest {
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
         new File(simpleProjectRoot, ManipulationIO.MANIPULATION_FILE_NAME).delete();
 
-        GradleRunner.create()
+        TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("generatePomFileForMainPublication")
-                .withDebug(true)
+                //.withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath()
                 .build();
@@ -54,10 +58,10 @@ public class SimpleProjectFunctionalTest {
 
         final ManipulationModel alignment = ManipulationIO.readManipulationModel(simpleProjectRoot);
 
-        final BuildResult buildResult = GradleRunner.create()
+        final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
-                .withArguments("generatePomFileForMainPublication")
-                .withDebug(true)
+                .withArguments("--info", "generatePomFileForMainPublication")
+                //.withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath()
                 .build();
@@ -81,7 +85,7 @@ public class SimpleProjectFunctionalTest {
         TestUtils.copyDirectory("simple-project", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
 
-        final BuildResult buildResult = GradleRunner.create()
+        final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("distZip")
                 .withDebug(true)
@@ -96,24 +100,24 @@ public class SimpleProjectFunctionalTest {
 
     @Test
     public void ensurePublish() throws IOException, URISyntaxException {
-        final File publishDirectory = tempDir.newFolder("publish");
-        System.setProperty("AProxDeployUrl", "file://" + publishDirectory.toString());
-
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         TestUtils.copyDirectory("simple-project", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
 
-        final BuildResult buildResult = GradleRunner.create()
+        final File publishDirectory = tempDir.newFolder("publish");
+        System.setProperty("AProxDeployUrl", "file://" + publishDirectory.toString());
+
+        final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
-                .withArguments("publish")
-                .withDebug(true)
+                .withArguments("--info", "publish")
                 .forwardOutput()
                 .withPluginClasspath()
+                //.withDebug(true)
                 .build();
 
         assertThat(buildResult.task(":" + "publishMainPublicationToJboss-snapshots-repositoryRepository").getOutcome())
                 .isEqualTo(TaskOutcome.SKIPPED);
-        assertThat(buildResult.task(":" + "publish").getOutcome()).isEqualTo(TaskOutcome.UP_TO_DATE);
+        assertThat(buildResult.task(":" + "publish").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
         assertThat(publishDirectory).exists();
     }
 }

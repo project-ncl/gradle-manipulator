@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
@@ -38,7 +39,7 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
 
     @Test
-    public void ensureProperPomGenerated() throws IOException, URISyntaxException, XmlPullParserException {
+    public void ensureProperPomGeneratedForLegacyPlugin() throws IOException, URISyntaxException, XmlPullParserException {
         // this makes gradle use the set property as maven local directory
         // we do this in order to avoid polluting the maven local and also be absolutely sure
         // that no prior invocations affect the execution
@@ -46,7 +47,7 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
         System.setProperty("maven.repo.local", m2Directory.getAbsolutePath());
 
         final File publishDirectory = tempDir.newFolder("publishDirectory");
-        System.setProperty("AProxDeployUrl", "file://" + publishDirectory.getAbsolutePath());
+        System.setProperty("AProxDeployUrl", "file://" + publishDirectory.toString());
 
         final File simpleProjectRoot = tempDir.newFolder("simple-project-with-maven-plugin");
         TestUtils.copyDirectory("simple-project-with-maven-plugin", simpleProjectRoot);
@@ -54,8 +55,9 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
 
         final ManipulationModel alignment = ManipulationIO.readManipulationModel(simpleProjectRoot);
 
-        final BuildResult buildResult = GradleRunner.create()
+        final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
+                //.withDebug(true)
                 .withArguments("uploadArchives", "--stacktrace", "--info")
                 .withPluginClasspath()
                 .forwardOutput()

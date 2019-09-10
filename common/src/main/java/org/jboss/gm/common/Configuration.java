@@ -1,19 +1,19 @@
 package org.jboss.gm.common;
 
-import static org.aeonbits.owner.Config.LoadType.MERGE;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-
 import org.aeonbits.owner.Accessible;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.Converter;
+import org.aeonbits.owner.Reloadable;
 import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
+
+import static org.aeonbits.owner.Config.LoadType.MERGE;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * This class is used to hold all configuration values for the two plugins. The naming scheme of
@@ -22,7 +22,7 @@ import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
  */
 @Sources({ "system:properties", "system:env" })
 @LoadPolicy(MERGE)
-public interface Configuration extends Accessible {
+public interface Configuration extends Accessible, Reloadable {
 
     /**
      * Cache is indexed to object instance : Properties - while in production

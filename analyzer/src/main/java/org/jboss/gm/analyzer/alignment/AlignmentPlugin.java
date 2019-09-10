@@ -1,7 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.util.stream.Collectors;
-
 import org.aeonbits.owner.ConfigCache;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -42,12 +40,7 @@ public class AlignmentPlugin implements Plugin<Project> {
         }
 
         if (System.getProperty("gmeFunctionalTest") != null) {
-            final Configuration config = ConfigCache.getOrCreate(Configuration.class);
-            logger.info("Running functional test and injecting {}",
-                    System.getProperties().stringPropertyNames().stream()
-                            .filter(k -> config.getProperties().getProperty(k) == null).collect(Collectors.toList()));
-
-            config.getProperties().putAll(System.getProperties());
+            ConfigCache.getOrCreate(Configuration.class).reload();
         }
 
         project.getTasks().create(AlignmentTask.NAME, AlignmentTask.class);

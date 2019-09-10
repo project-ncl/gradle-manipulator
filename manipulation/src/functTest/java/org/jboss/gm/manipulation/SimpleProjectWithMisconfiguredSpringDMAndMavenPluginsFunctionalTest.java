@@ -38,7 +38,7 @@ public class SimpleProjectWithMisconfiguredSpringDMAndMavenPluginsFunctionalTest
             GradleRunner.create()
                     .withProjectDir(simpleProjectRoot)
                     .withArguments("install")
-                    .withDebug(true)
+                    //.withDebug(true)
                     .forwardOutput()
                     .withPluginClasspath()
                     .build();

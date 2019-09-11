@@ -127,7 +127,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         GradleRunner.create()
                 .withProjectDir(projectRoot)
                 .withArguments("--stacktrace", "--info", AlignmentTask.NAME)
-                .withDebug(true)
+                //.withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath()
                 .build();

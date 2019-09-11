@@ -14,12 +14,13 @@ public class FilteringCustomLogger implements OutputEventListener {
     private final OutputEventListener delegate;
 
     private final List<String> ignoreCategories = Arrays.asList(
-            "org.gradle.internal.execution.steps.SkipUpToDateStep",
-            "org.gradle.internal.execution.steps.ResolveCachingStateStep",
             "org.gradle.api.internal.file.collections.DirectoryFileTree",
-            "org.gradle.execution.plan.DefaultPlanExecutor",
             "org.gradle.configuration.project.BuildScriptProcessor",
-            "org.gradle.execution.TaskNameResolvingBuildConfigurationAction");
+            "org.gradle.execution.TaskNameResolvingBuildConfigurationAction",
+            "org.gradle.execution.plan.DefaultPlanExecutor");
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private final String ignoreInternalCategory = "org.gradle.internal";
 
     @SuppressWarnings("FieldCanBeLocal")
     private final String defaultCategory = "org.gradle.api.Task";
@@ -43,8 +44,7 @@ public class FilteringCustomLogger implements OutputEventListener {
     @Override
     public void onOutput(OutputEvent event) {
         LogEvent logEvent = (LogEvent) event;
-
-        if (!ignoreCategories.contains(logEvent.getCategory())) {
+        if (!logEvent.getCategory().startsWith(ignoreInternalCategory) && !ignoreCategories.contains(logEvent.getCategory())) {
 
             if (!logEvent.getCategory().startsWith(ownCategory) && !logEvent.getCategory().startsWith(defaultCategory)) {
                 // Can't use logger to output the warning as causes stack overflow.

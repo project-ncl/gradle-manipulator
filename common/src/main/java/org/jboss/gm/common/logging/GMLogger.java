@@ -69,13 +69,17 @@ public class GMLogger implements Logger {
                 throw new ManipulationUncheckedException(
                         "Internal logging failure ; not enough stacktrace elements: " + Arrays.toString(result));
             }
-            sb.append(ANSI_DARK_GRAY);
+            if (configuration.addLoggingColours()) {
+                sb.append(ANSI_DARK_GRAY);
+            }
             sb.append('[');
             sb.append(result[3].getFileName());
             sb.append(':');
             sb.append(result[3].getLineNumber());
             sb.append("] ");
-            sb.append(ANSI_RESET);
+            if (configuration.addLoggingColours()) {
+                sb.append(ANSI_RESET);
+            }
         }
         sb.append(msg);
 

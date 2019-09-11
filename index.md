@@ -28,6 +28,16 @@ There are multiple ways that the plugins can be applied.
 It should also be noted that the project itself contains a properly configured init script for the `analyzer` plugin (which gets released along with the plugin).
 Furthermore, when the `analyzer` plugin executes, it alters the main gradle script of the target project to include the manipulation plugin.
 
+### General Configuration
+
+#### Unresolved Dependencies
+If the tool is not able to resolve certain dependencies then it may fail during the alignment phase. Set `ignoreUnresolvableDependencies` to true to ignore those (default: false).
+
+#### Logging
+
+The tool uses its own logging system (that backs onto the Gradle logging system). This can add classname and line numbers to messages if `loggingClassnameLineNumber` is set to true (default: true). It will also use colours if `loggingColours` is true (default: true).
+
+
 ### Feature Guide
 
 Below are links to more specific information about configuring sets of features in GME:

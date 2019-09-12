@@ -81,12 +81,12 @@ using single-test debugging):
                 .build();
      ....
 ```
-Note that instead of calling `GradleRunner.create` the `TestUtils` class is used instead which passes on the extra system 
+Note that instead of calling `GradleRunner.create` the `TestUtils` class is used instead which passes on the extra system
 properties.
 
 ### Releasing
 
-The project has been configured to release both plugins to the Gradle Portal and to release to Maven Central. 
+The project has been configured to release both plugins to the Gradle Portal and to release to Maven Central.
 
 <!-- Using diff syntax to highlight the warning in red -->
 ```diff
@@ -96,8 +96,8 @@ The project has been configured to release both plugins to the Gradle Portal and
 It uses the [gradle-release](https://github.com/researchgate/gradle-release) plugin to simulate a similar process to the Maven release plugin - it can increment the version, add tags, push the changes, etc. It supplies a hook task (`afterReleaseBuild`) that can be used to ensure that tasks after the release version has been changed - we have configured it as follows:
 
 ```
-tasks.afterReleaseBuild { 
-    dependsOn(":analyzer:publish", ":manipulation:publish", 
+tasks.afterReleaseBuild {
+    dependsOn(":analyzer:publish", ":manipulation:publish",
               ":analyzer:publishPlugins", ":manipulation:publishPlugins") }
 ```
 
@@ -106,7 +106,7 @@ The `publish` pushes to Sonatype staging while the `publishPlugins` pushes to th
 #### Prerequisites
 
 * Sign up for a Gradle account (see details [here](https://guides.gradle.org/publishing-plugins-to-gradle-plugin-portal/#create_an_account_on_the_gradle_plugin_portal))
-* Make sure you can push changes to Maven Central 
+* Make sure you can push changes to Maven Central
 * Create or update the required `$HOME/.gradle/gradle.properties` locally with data from the API key (which can be found in your gradle account)
 
 It should look something like this:
@@ -121,7 +121,7 @@ gradle.publish.secret=secret
 ```
 signing.gnupg.keyName=someKey
 signing.passphrase=pass
-```   
+```
 
 Note: By default the signing is configured to use GPG. It will automatically look for the `gpg2` executable. On Fedora systems this is normally a symbolic link e.g.
 ```
@@ -132,7 +132,7 @@ If this does not exist on your system then you may need to add a line like `sign
 
 <br>
 
-The configuration will also read your `$HOME/.m2/settings.xml` for a username/password associated with `sonatype-nexus-staging`. 
+The configuration will also read your `$HOME/.m2/settings.xml` for a username/password associated with `sonatype-nexus-staging`.
 
 
 See [this](https://docs.gradle.org/current/userguide/signing_plugin.html) for more details
@@ -141,19 +141,23 @@ See [this](https://docs.gradle.org/current/userguide/signing_plugin.html) for mo
 
 The plugins can be released using the following command (from the master branch of the repository):
 
+	./gradlew release -Drelease=true
 
-	./gradlew clean release -Drelease=true
-	
 The command will both publish the plugin to the Gradle Plugin Portal and to Maven Central.
 
-Note: It is **very** important to execute this exact command when releasing. Adding other tasks can cause the release to fail,
-or even worse leave the release in an inconsistent state. 
-	
+Note: It is **very** important to execute this exact command when releasing. Adding other tasks can cause the release to fail, or even worse leave the release in an inconsistent state.
+
+Note: It may be necessary to add the following to your `$HOME/.gradle/gradle.properties` to prevent timeouts:
+
+    systemProp.org.gradle.internal.http.connectionTimeout=600000
+    systemProp.org.gradle.internal.http.socketTimeout=600000
+    systemProp.http.socketTimeout=600000
+    systemProp.http.connectionTimeout=600000
+
 #### Publishing artifacts locally
 
 Both plugins can be published to maven local to make it easier to consume them in projects. The command to do so is:
 
 	./gradlew publishToMavenLocal
-	
-To change the version that will be deployed just add `-Pversion=whatever`.	
- 	     
+
+To change the version that will be deployed just add `-Pversion=whatever`.

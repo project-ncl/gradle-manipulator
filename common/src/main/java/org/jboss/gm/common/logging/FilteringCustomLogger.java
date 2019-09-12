@@ -14,22 +14,19 @@ public class FilteringCustomLogger implements OutputEventListener {
     private final OutputEventListener delegate;
 
     private final List<String> ignoreCategories = Arrays.asList(
-            "org.gradle.api.internal.file.collections.DirectoryFileTree",
+            "org.gradle.api",
+            "org.gradle.cache",
             "org.gradle.configuration.project.BuildScriptProcessor",
-            "org.gradle.execution.TaskNameResolvingBuildConfigurationAction",
-            "org.gradle.execution.plan.DefaultPlanExecutor");
+            "org.gradle.execution",
+            "org.gradle.internal",
+            "org.gradle.launcher.daemon.server.exec.ExecuteBuild",
+            "org.gradle.workers.internal.WorkerDaemonClientsManager");
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private final String ignoreInternalCategory = "org.gradle.internal";
-
-    @SuppressWarnings("FieldCanBeLocal")
-    private final String defaultCategory = "org.gradle.api.Task";
-
-    /**
-     * Don't filter our own categories
-     */
-    @SuppressWarnings("FieldCanBeLocal")
-    private final String ownCategory = "org.jboss.gm";
+    private final List<String> acceptableCategories = Arrays.asList(
+            "org.gradle.api.Task",
+            "io.spring.gradle.dependencymanagement",
+            "org.jboss.gm", // Don't filter our own categories
+            "org.gradle.groovy");
 
     public static void enableFilter() {
         OutputEventListenerBackedLoggerContext context = (OutputEventListenerBackedLoggerContext) LoggerFactory
@@ -44,9 +41,8 @@ public class FilteringCustomLogger implements OutputEventListener {
     @Override
     public void onOutput(OutputEvent event) {
         LogEvent logEvent = (LogEvent) event;
-        if (!logEvent.getCategory().startsWith(ignoreInternalCategory) && !ignoreCategories.contains(logEvent.getCategory())) {
-
-            if (!logEvent.getCategory().startsWith(ownCategory) && !logEvent.getCategory().startsWith(defaultCategory)) {
+        if (ignoreCategories.stream().noneMatch(i -> logEvent.getCategory().startsWith(i))) {
+            if (acceptableCategories.stream().noneMatch(i -> logEvent.getCategory().startsWith(i))) {
                 // Can't use logger to output the warning as causes stack overflow.
                 // TODO: Remove?
                 System.err.println("Unknown event using category " + logEvent.getCategory() + " : ");

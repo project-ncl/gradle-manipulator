@@ -76,7 +76,7 @@ public final class TestUtils {
                 .map(e -> "-D" + e.getKey() + "=" + e.getValue())
                 .collect(Collectors.toList());
         final List<String> allArguments = new ArrayList<>(systemPropsList.size() + 4);
-        allArguments.add("-DgmeFunctionalTest=true"); // Used to indicate for the plugin to clear the cache.
+        allArguments.add("-DgmeFunctionalTest=true"); // Used to indicate for the plugin to reinitialise the configuration.
         allArguments.add("--stacktrace");
         allArguments.add("--info");
         allArguments.add(AlignmentTask.NAME);

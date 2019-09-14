@@ -48,17 +48,7 @@ subprojects {
 
     apply(plugin = "com.diffplug.gradle.spotless")
     apply(plugin = "net.nemerosa.versioning")
-
-    spotless {
-        java {
-            importOrderFile("$rootDir/ide-config/eclipse.importorder")
-            eclipse().configFile("$rootDir/ide-config/eclipse-format.xml")
-        }
-    }
-
-    tasks.withType<JavaCompile>().configureEach {
-        dependsOn("spotlessApply")
-    }
+    apply(plugin = "com.adarshr.test-logger")
 
     if (project.name == "common") {
         apply(plugin = "java-library")
@@ -69,7 +59,6 @@ subprojects {
         apply(plugin = "java-gradle-plugin")
         apply(plugin = "com.github.johnrengelman.shadow")
         apply(plugin = "com.gradle.plugin-publish")
-        apply(plugin = "com.adarshr.test-logger")
 
         /**
          * The configuration below has been created by reading the documentation at:
@@ -193,13 +182,24 @@ subprojects {
                 this.sign(publishing.publications["shadow"])
             }
         }
+    }
 
-        testlogger {
-            // Some of our tests take a _long_ time ; remove spurious warnings.
-            slowThreshold = 120000
-            // Nicer looking theme than default.
-            theme = ThemeType.MOCHA
+    testlogger {
+        // Some of our tests take a _long_ time ; remove spurious warnings.
+        slowThreshold = 120000
+        // Nicer looking theme than default.
+        theme = ThemeType.MOCHA
+    }
+
+    spotless {
+        java {
+            importOrderFile("$rootDir/ide-config/eclipse.importorder")
+            eclipse().configFile("$rootDir/ide-config/eclipse-format.xml")
         }
+    }
+
+    tasks.withType<JavaCompile>().configureEach {
+        dependsOn("spotlessApply")
     }
 
     // Exclude logback from dependency tree/

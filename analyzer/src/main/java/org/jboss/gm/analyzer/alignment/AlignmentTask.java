@@ -173,6 +173,9 @@ public class AlignmentTask extends DefaultTask {
                 if ((newProjectName != null) && !newProjectName.isEmpty()) {
                     alignmentModel.setName(newProjectName);
                 }
+
+                runCustomGroovyScript(configuration, project.getRootProject(), alignmentModel);
+
                 writeManipulationModel(project.getRootDir(), alignmentModel);
                 // Ordering is important here ; we mustn't inject the gme-repos file before iterating over all *.gradle
                 // files.
@@ -181,8 +184,6 @@ public class AlignmentTask extends DefaultTask {
                 writeGmeReposMarkerFile();
                 writeGmeConfigMarkerFile();
                 writeRepositorySettingsFile(cache.getRepositories());
-
-                runCustomGroovyScript(configuration, project.getRootProject(), alignmentModel);
             }
 
             // this needs to happen for each project, not just the last one
@@ -276,7 +277,7 @@ public class AlignmentTask extends DefaultTask {
         if (rootGradle.exists()) {
 
             String line = org.jboss.gm.common.utils.FileUtils.getLastLine(rootGradle);
-            logger.debug("Read line '{}' from build.gradle", line);
+            logger.debug("Read last line '{}' from build.gradle", line);
 
             if (!line.trim().equals(INJECT_GME_END)) {
                 // Haven't appended it before.
@@ -582,7 +583,6 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    // for now we simply assume that the script is called gme.groovy and already resides in the project's root directory
     private void runCustomGroovyScript(Configuration configuration, Project rootProject, ManipulationModel alignmentModel)
             throws IOException, ManipulationException {
 
@@ -598,8 +598,6 @@ public class AlignmentTask extends DefaultTask {
                 groovyFiles.add(remote);
             }
         }
-        // Also check for a default gme.groovy as well as remote files.
-        groovyFiles.add(new File(rootProject.getRootDir(), "gme.groovy"));
 
         for (File scriptFile : groovyFiles) {
 

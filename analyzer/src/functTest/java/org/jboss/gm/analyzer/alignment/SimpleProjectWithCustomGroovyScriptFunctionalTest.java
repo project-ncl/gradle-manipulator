@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -53,10 +54,11 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
     }
 
     @Test
-    public void ensureAlignmentFileCreated() throws IOException, URISyntaxException, ManipulationException {
+    public void verifyGroovyInjection() throws IOException, URISyntaxException, ManipulationException {
         final File projectRoot = tempDir.newFolder("simple-project-with-custom-groovy-script");
 
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(),
+                Collections.singletonMap("groovyScripts", "file://" + projectRoot.getAbsolutePath() + "/gme.groovy"));
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertTrue(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS).exists());
@@ -66,10 +68,10 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
-            assertThat(am.getName()).isEqualTo("root");
-            assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
+            assertThat(am.getName()).isEqualTo("newRoot");
+            assertThat(am.findCorrespondingChild("newRoot")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00002");
-                assertThat(root.getName()).isEqualTo("root");
+                assertThat(root.getName()).isEqualTo("newRoot");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
@@ -83,9 +85,11 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
         final List<String> lines = FileUtils.readLines(new File(projectRoot, "build.gradle"), Charset.defaultCharset());
         assertThat(lines).filteredOn(
                 l -> l.contains("new CustomVersion"))
-                .hasOnlyOneElementSatisfying(l -> assertThat(l.contains("CustomVersion( '1.0.1.redhat-00002', project )")));
+                .hasOnlyOneElementSatisfying(e -> assertThat(e).contains("CustomVersion( '1.0.1.redhat-00002', project )"));
         assertThat(lines).filteredOn(l -> l.contains("undertowVersion ="))
-                .hasOnlyOneElementSatisfying(l -> assertThat(l.contains("2.0.15.Final-redhat-00001")));
+                .hasOnlyOneElementSatisfying(l -> assertThat(l).contains("2.0.15.Final-redhat-00001"));
+        assertTrue(lines.stream().anyMatch(s -> s.contains("CustomVersion( '1.0.1.redhat-00002', project )")));
+        assertTrue(systemOutRule.getLog().contains("Attempting to read URL"));
     }
 
 }

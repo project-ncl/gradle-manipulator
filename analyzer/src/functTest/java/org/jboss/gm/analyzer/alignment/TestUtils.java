@@ -46,6 +46,13 @@ public final class TestUtils {
         return align(projectRoot, projectDirName, expectFailure, new HashMap<>());
     }
 
+    static TestManipulationModel align(File projectRoot) {
+        if (!(new File(projectRoot, "build.gradle").exists())) {
+            throw new ManipulationUncheckedException("No valid test directory structure");
+        }
+        return align(projectRoot, true, new HashMap<>());
+    }
+
     private static TestManipulationModel align(File projectRoot, String projectDirName, boolean expectFailure,
             Map<String, String> systemProps)
             throws IOException, URISyntaxException {

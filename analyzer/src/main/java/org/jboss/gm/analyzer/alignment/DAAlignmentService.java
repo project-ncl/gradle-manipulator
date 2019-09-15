@@ -36,12 +36,12 @@ public class DAAlignmentService implements AlignmentService {
     public DAAlignmentService(Configuration configuration) {
         final String endpointUrl = configuration.daEndpoint();
 
-        if (endpointUrl == null) {
-            throw new ManipulationUncheckedException(
-                    String.format("'%s' must be configured in order for model to work", Configuration.DA));
-        }
-
         dependencySource = configuration.dependencyConfiguration();
+
+        if (endpointUrl == null && (dependencySource != NONE)) {
+            throw new ManipulationUncheckedException(
+                    String.format("'%s' must be configured in order for dependency scanning to work", Configuration.DA));
+        }
 
         restEndpoint = new GradleDefaultTranslator(
                 endpointUrl,

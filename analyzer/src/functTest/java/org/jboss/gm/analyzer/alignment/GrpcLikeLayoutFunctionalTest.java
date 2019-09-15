@@ -8,16 +8,19 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.Collection;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
@@ -71,7 +74,7 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
         assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
-            assertThat(am.getGroup()).isEqualTo(null);
+            assertThat(am.getGroup()).isEqualTo("org.acme");
             assertThat(am.getName()).isEqualTo("root");
             assertThat(am.getVersion()).isEqualTo("1.1.2.redhat-00004");
 
@@ -105,4 +108,23 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs")));
     }
 
+    @Test
+    public void ensureMissingGroupIdThrowsException() throws IOException, URISyntaxException {
+
+        final File projectRoot = tempDir.newFolder("grpc-like-layout");
+
+        //noinspection ConstantConditions
+        org.apache.commons.io.FileUtils.copyDirectory(Paths
+                .get(TestUtils.class.getClassLoader().getResource(projectRoot.getName()).toURI()).toFile(), projectRoot);
+        //noinspection ResultOfMethodCallIgnored
+        new File(projectRoot, "settings.gradle").delete();
+
+        try {
+            TestUtils.align(projectRoot);
+
+            fail("Should have thrown an exception");
+        } catch (ManipulationUncheckedException e) {
+            assertTrue(e.getMessage().contains("Empty groupId but no child modules to determine a replacement"));
+        }
+    }
 }

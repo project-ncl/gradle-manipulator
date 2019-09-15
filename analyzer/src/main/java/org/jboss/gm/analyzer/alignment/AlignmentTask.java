@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.Config;
@@ -52,8 +50,9 @@ import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultRe
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.analyzer.alignment.groovy.GMEBaseScript;
-import org.jboss.gm.analyzer.alignment.io.LockfileIO;
+import org.jboss.gm.analyzer.alignment.io.LockFileIO;
 import org.jboss.gm.analyzer.alignment.io.RepositoryExporter;
+import org.jboss.gm.analyzer.alignment.io.SettingsFileIO;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.io.ManipulationIO;
@@ -84,8 +83,6 @@ public class AlignmentTask extends DefaultTask {
 
     private static final AtomicBoolean configOutput = new AtomicBoolean();
 
-    private static final Pattern SCM_URL_LINE_EXPR = Pattern.compile("\\s*url\\s*=(?:.*/)([a-zA-Z0-9\\-._]+)");
-
     private final Logger logger = GMLogger.getLogger(getClass());
 
     @TaskAction
@@ -103,7 +100,7 @@ public class AlignmentTask extends DefaultTask {
                 projectName, project.getVersion());
 
         try {
-            final Set<ProjectVersionRef> lockFileDeps = LockfileIO
+            final Set<ProjectVersionRef> lockFileDeps = LockFileIO
                     .allProjectVersionRefsFromLockfiles(getLocksRootPath(project));
             final String currentProjectVersion = project.getVersion().toString();
             final HashMap<RelaxedProjectVersionRef, ProjectVersionRef> dependencies = processAnyExistingManipulationFile(
@@ -131,6 +128,8 @@ public class AlignmentTask extends DefaultTask {
             // when the set is empty, we know that this was the last alignment task to execute.
             if (cache.removeProject(projectName)) {
 
+                ManipulationModel al = cache.getModel();
+                logger.info("### Children are {} ", al.getChildren().values());
                 logger.info("Completed scanning projects; now processing for REST...");
                 Collection<ProjectVersionRef> allDeps = cache.getDependencies().values().stream()
                         .flatMap(m -> m.values().stream()).distinct().collect(Collectors.toList());
@@ -160,7 +159,7 @@ public class AlignmentTask extends DefaultTask {
                 projectDependencies.forEach((key, value) -> {
                     final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(key);
                     if (configuration.versionModificationEnabled()) {
-                        logger.info("Updating sub-project {} version to {} ", correspondingModule.getName(), newVersion);
+                        logger.info("Updating sub-project {} version to {} ", correspondingModule, newVersion);
                         correspondingModule.setVersion(newVersion);
                     }
                     updateModuleDynamicDependencies(correspondingModule, value);
@@ -169,9 +168,20 @@ public class AlignmentTask extends DefaultTask {
 
                 logger.info("Completed processing for alignment and writing {} ", cache.toString());
 
-                final String newProjectName = writeProjectNameIfNeeded();
-                if ((newProjectName != null) && !newProjectName.isEmpty()) {
-                    alignmentModel.setName(newProjectName);
+                // artifactId / rootProject.getName
+                final String artifactId = SettingsFileIO.writeProjectNameIfNeeded(getProject().getRootDir());
+                if (!isEmpty(artifactId)) {
+                    logger.debug("Located artifactId ({}) for {}::{}", artifactId, alignmentModel.getGroup(),
+                            alignmentModel.getVersion());
+                    alignmentModel.setName(artifactId);
+                }
+                // groupId
+                if (isEmpty(alignmentModel.getGroup())) {
+                    logger.debug("Empty groupId for :{}:{}", alignmentModel.getName(), alignmentModel.getVersion());
+                    logger.info("### {} ", alignmentModel.getChildren().values());
+                    alignmentModel.setGroup(alignmentModel.getChildren().values().stream().findAny().orElseThrow(
+                            () -> new ManipulationException("Empty groupId but no child modules to determine a replacement"))
+                            .getGroup());
                 }
 
                 runCustomGroovyScript(configuration, project.getRootProject(), alignmentModel);
@@ -187,7 +197,7 @@ public class AlignmentTask extends DefaultTask {
             }
 
             // this needs to happen for each project, not just the last one
-            LockfileIO.renameAllLockFiles(getLocksRootPath(project));
+            LockFileIO.renameAllLockFiles(getLocksRootPath(project));
 
         } catch (ManipulationException e) {
             throw new ManipulationUncheckedException(e);
@@ -523,64 +533,6 @@ public class AlignmentTask extends DefaultTask {
             }
         }
         return allDependencies;
-    }
-
-    // we need to make sure that the name of the root project is stored if not set
-    // this is because the manipulation plugin must use the same name
-    // otherwise the model won't be found
-    // see also: https://discuss.gradle.org/t/rootproject-name-in-settings-gradle-vs-projectname-in-build-gradle/5704/4
-
-    private String writeProjectNameIfNeeded() throws IOException {
-        File rootDir = getProject().getRootDir();
-        File settingsGradle = new File(rootDir, "settings.gradle");
-
-        if (!settingsGradle.exists()) {
-            return null;
-        }
-
-        List<String> lines = FileUtils.readLines(settingsGradle, Charset.defaultCharset());
-        for (String line : lines) {
-            if (line.contains("rootProject.name")) {
-                return null;
-            }
-        }
-
-        final String newProjectName = extractProjectNameFromScmUrl(rootDir);
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(settingsGradle, true))) {
-            // Ensure the marker is on a line by itself.
-            writer.newLine();
-
-            writer.write("rootProject.name='" + newProjectName + "'");
-            writer.newLine();
-            writer.flush();
-        }
-
-        return newProjectName;
-    }
-
-    private String extractProjectNameFromScmUrl(File rootDir) throws IOException {
-        File gitConfig = new File(new File(rootDir, ".git"), "config");
-        if (!gitConfig.isFile()) {
-            throw new ManipulationUncheckedException("No .git/config file found, failed to determine the root project name");
-        }
-        try {
-            List<String> lines = FileUtils.readLines(gitConfig, Charset.defaultCharset());
-
-            for (String line : lines) {
-                Matcher matcher = SCM_URL_LINE_EXPR.matcher(line);
-
-                if (matcher.find()) {
-                    return matcher.group(1).replaceAll("\\.git$", "");
-                }
-            }
-            // Scanned the entire file and failed to find a match.
-            throw new ManipulationUncheckedException(
-                    ".git/config file doesn't define SCM URL, failed to determine the root project name. File contents: "
-                            + lines);
-        } catch (IOException e) {
-            throw new IOException("Unable to read .git/config file found, failed to determine the root project name", e);
-        }
     }
 
     private void runCustomGroovyScript(Configuration configuration, Project rootProject, ManipulationModel alignmentModel)

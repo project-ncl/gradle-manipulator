@@ -15,14 +15,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-public class LockfileIOTest {
+public class LockFileIOTest {
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Test
     public void readNonExistingFileShouldReturnEmptySet() {
-        assertThat(LockfileIO.allProjectVersionRefsFromLockfiles(Paths.get("/lol"))).isEmpty();
+        assertThat(LockFileIO.allProjectVersionRefsFromLockfiles(Paths.get("/lol"))).isEmpty();
     }
 
     @Test
@@ -30,7 +30,7 @@ public class LockfileIOTest {
         copyToLockfilesRoot("compileClasspath.lockfile");
         copyToLockfilesRoot("runtimeClasspath.lockfile");
 
-        final Set<ProjectVersionRef> result = LockfileIO.allProjectVersionRefsFromLockfiles(tempDir.getRoot().toPath());
+        final Set<ProjectVersionRef> result = LockFileIO.allProjectVersionRefsFromLockfiles(tempDir.getRoot().toPath());
         assertThat(result)
                 .extracting("artifactId", "versionString")
                 .containsOnly(
@@ -43,7 +43,7 @@ public class LockfileIOTest {
 
     @Test
     public void renameNonExistingFileShouldNotResultInAnError() {
-        LockfileIO.renameAllLockFiles(Paths.get("/lol"));
+        LockFileIO.renameAllLockFiles(Paths.get("/lol"));
     }
 
     @Test
@@ -51,7 +51,7 @@ public class LockfileIOTest {
         copyToLockfilesRoot("compileClasspath.lockfile");
         copyToLockfilesRoot("runtimeClasspath.lockfile");
 
-        LockfileIO.renameAllLockFiles(tempDir.getRoot().toPath());
+        LockFileIO.renameAllLockFiles(tempDir.getRoot().toPath());
 
         final File[] oldLockFiles = tempDir.getRoot()
                 .listFiles((dir, filename) -> filename.endsWith(".lockfile"));
@@ -60,7 +60,7 @@ public class LockfileIOTest {
 
     private void copyToLockfilesRoot(String name) throws IOException, URISyntaxException {
         FileUtils.copyFile(
-                Paths.get(LockfileIOTest.class.getClassLoader().getResource(name).toURI()).toFile(),
+                Paths.get(LockFileIOTest.class.getClassLoader().getResource(name).toURI()).toFile(),
                 tempDir.newFile(name));
     }
 }

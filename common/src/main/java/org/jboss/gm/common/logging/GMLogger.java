@@ -102,7 +102,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void debug(String message, Object... objects) {
-        delegate.info(message, objects);
+        delegate.info(injectLoggerFormatting(message), objects);
     }
 
     /**
@@ -123,7 +123,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void lifecycle(String message, Object... objects) {
-        delegate.lifecycle(message, objects);
+        delegate.lifecycle(injectLoggerFormatting(message), objects);
     }
 
     /**
@@ -134,7 +134,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void lifecycle(String message, Throwable throwable) {
-        delegate.lifecycle(message, throwable);
+        delegate.lifecycle(injectLoggerFormatting(message), throwable);
     }
 
     /**
@@ -163,7 +163,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void quiet(String message, Object... objects) {
-        delegate.quiet(message, objects);
+        delegate.quiet(injectLoggerFormatting(message), objects);
     }
 
     /**
@@ -174,7 +174,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void info(String message, Object... objects) {
-        delegate.lifecycle(message, objects);
+        delegate.lifecycle(injectLoggerFormatting(message), objects);
     }
 
     /**
@@ -185,7 +185,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void quiet(String message, Throwable throwable) {
-        delegate.quiet(message, throwable);
+        delegate.quiet(injectLoggerFormatting(message), throwable);
     }
 
     /**
@@ -281,7 +281,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void trace(String format, Object arg) {
-        delegate.trace(injectLoggerFormatting(injectLoggerFormatting(format)), arg);
+        delegate.trace(injectLoggerFormatting(format), arg);
     }
 
     /**
@@ -300,7 +300,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void trace(String format, Object arg1, Object arg2) {
-        delegate.trace(injectLoggerFormatting(injectLoggerFormatting(format)), arg1, arg2);
+        delegate.trace(injectLoggerFormatting(format), arg1, arg2);
     }
 
     /**
@@ -375,7 +375,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void trace(Marker marker, String format, Object arg) {
-        delegate.trace(marker, format, arg);
+        delegate.trace(marker, injectLoggerFormatting(format), arg);
     }
 
     /**
@@ -391,7 +391,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void trace(Marker marker, String format, Object arg1, Object arg2) {
-        delegate.trace(marker, format, arg1, arg2);
+        delegate.trace(marker, injectLoggerFormatting(format), arg1, arg2);
     }
 
     /**
@@ -406,7 +406,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void trace(Marker marker, String format, Object... argArray) {
-        delegate.trace(marker, format, argArray);
+        delegate.trace(marker, injectLoggerFormatting(format), argArray);
     }
 
     /**
@@ -420,7 +420,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void trace(Marker marker, String msg, Throwable t) {
-        delegate.trace(marker, msg, t);
+        delegate.trace(marker, injectLoggerFormatting(msg), t);
     }
 
     /**
@@ -512,7 +512,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void debug(Marker marker, String msg) {
-        delegate.info(marker, msg);
+        delegate.info(marker, injectLoggerFormatting(msg));
     }
 
     /**
@@ -525,7 +525,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void debug(Marker marker, String format, Object arg) {
-        delegate.info(marker, format, arg);
+        delegate.info(marker, injectLoggerFormatting(format), arg);
     }
 
     /**
@@ -540,7 +540,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void debug(Marker marker, String format, Object arg1, Object arg2) {
-        delegate.info(marker, format, arg1, arg2);
+        delegate.info(marker, injectLoggerFormatting(format), arg1, arg2);
     }
 
     /**
@@ -554,7 +554,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void debug(Marker marker, String format, Object... arguments) {
-        delegate.info(marker, format, arguments);
+        delegate.info(marker, injectLoggerFormatting(format), arguments);
     }
 
     /**
@@ -567,7 +567,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void debug(Marker marker, String msg, Throwable t) {
-        delegate.info(marker, msg, t);
+        delegate.info(marker, injectLoggerFormatting(msg), t);
     }
 
     /**
@@ -588,7 +588,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void info(String msg) {
-        delegate.lifecycle(injectLoggerFormatting(injectLoggerFormatting(msg)));
+        delegate.lifecycle(injectLoggerFormatting(msg));
     }
 
     /**
@@ -826,7 +826,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void warn(Marker marker, String msg) {
-        delegate.warn(marker, msg);
+        delegate.warn(marker, injectLoggerFormatting(msg));
     }
 
     /**
@@ -839,7 +839,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void warn(Marker marker, String format, Object arg) {
-        delegate.warn(marker, format, arg);
+        delegate.warn(marker, injectLoggerFormatting(format), arg);
     }
 
     /**
@@ -854,7 +854,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void warn(Marker marker, String format, Object arg1, Object arg2) {
-        delegate.warn(marker, format, arg1, arg2);
+        delegate.warn(marker, injectLoggerFormatting(format), arg1, arg2);
     }
 
     /**
@@ -868,7 +868,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void warn(Marker marker, String format, Object... arguments) {
-        delegate.warn(marker, format, arguments);
+        delegate.warn(marker, injectLoggerFormatting(format), arguments);
     }
 
     /**
@@ -881,7 +881,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void warn(Marker marker, String msg, Throwable t) {
-        delegate.warn(marker, msg, t);
+        delegate.warn(marker, injectLoggerFormatting(msg), t);
     }
 
     /**
@@ -994,7 +994,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void error(Marker marker, String msg) {
-        delegate.error(marker, msg);
+        delegate.error(marker, injectLoggerFormatting(msg));
     }
 
     /**
@@ -1007,7 +1007,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void error(Marker marker, String format, Object arg) {
-        delegate.error(marker, format, arg);
+        delegate.error(marker, injectLoggerFormatting(format), arg);
     }
 
     /**
@@ -1022,7 +1022,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void error(Marker marker, String format, Object arg1, Object arg2) {
-        delegate.error(marker, format, arg1, arg2);
+        delegate.error(marker, injectLoggerFormatting(format), arg1, arg2);
     }
 
     /**
@@ -1036,7 +1036,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void error(Marker marker, String format, Object... arguments) {
-        delegate.error(marker, format, arguments);
+        delegate.error(marker, injectLoggerFormatting(format), arguments);
     }
 
     /**
@@ -1050,6 +1050,6 @@ public class GMLogger implements Logger {
      */
     @Override
     public void error(Marker marker, String msg, Throwable t) {
-        delegate.error(marker, msg, t);
+        delegate.error(marker, injectLoggerFormatting(msg), t);
     }
 }

@@ -79,7 +79,7 @@ public class SimpleExistingManipulationProjectFunctionalTest extends AbstractWir
                 assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00002");
                 assertThat(root.getName()).isEqualTo("root");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
-                assertThat(alignedDependencies.size() == 0);
+                assertThat(alignedDependencies).isEmpty();
             });
         });
 
@@ -117,7 +117,7 @@ public class SimpleExistingManipulationProjectFunctionalTest extends AbstractWir
                 assertThat(root.getVersion()).isEqualTo(null);
                 assertThat(root.getName()).isEqualTo("root");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
-                assertThat(alignedDependencies.size() == 0);
+                assertThat(alignedDependencies).isEmpty();
             });
         });
 

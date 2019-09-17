@@ -66,6 +66,11 @@ public class ManipulationModel {
         this.name = name;
     }
 
+    @Override
+    public String toString() {
+        return getGroup() + ':' + getName() + ':' + getVersion();
+    }
+
     /**
      * Returns the alignments for this project only, doesn't include children
      */
@@ -100,6 +105,10 @@ public class ManipulationModel {
 
     public String getGroup() {
         return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 
     public Map<String, ManipulationModel> getChildren() {

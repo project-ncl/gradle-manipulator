@@ -19,18 +19,16 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 
-public final class LockfileIO {
+public final class LockFileIO {
 
     private static final String LOCKFILE_EXTENSION = ".lockfile";
 
-    private LockfileIO() {
+    private LockFileIO() {
     }
 
     public static Set<ProjectVersionRef> allProjectVersionRefsFromLockfiles(Path locksRootPath) {
         final Set<ProjectVersionRef> result = new HashSet<>();
-        getAllLockfiles(locksRootPath).forEach(f -> {
-            result.addAll(readProjectVersionRefLocksOfFile(f));
-        });
+        getAllLockfiles(locksRootPath).forEach(f -> result.addAll(readProjectVersionRefLocksOfFile(f)));
         return result;
     }
 

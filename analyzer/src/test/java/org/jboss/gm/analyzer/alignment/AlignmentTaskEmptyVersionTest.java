@@ -31,11 +31,13 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMUnitConfig;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
+import org.jboss.gm.analyzer.alignment.io.SettingsFileIO;
 import org.jboss.gm.common.Configuration;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
@@ -54,6 +56,9 @@ public class AlignmentTaskEmptyVersionTest {
 
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     /**
      * We can't just create a new AlignmentTask as the base AbstractTask has checks to
@@ -117,8 +122,7 @@ public class AlignmentTaskEmptyVersionTest {
         formats.put("url = michalszynkiewicz/test.foo", "test.foo");
         formats.put("url = michalszynkiewicz/_test.foo", "_test.foo");
 
-        AlignmentTask at = new AlignmentTask();
-        Method m = at.getClass().getDeclaredMethod("extractProjectNameFromScmUrl", File.class);
+        Method m = SettingsFileIO.class.getDeclaredMethod("extractProjectNameFromScmUrl", File.class);
         m.setAccessible(true);
 
         File gitFolder = tempDir.newFolder(".git");
@@ -127,7 +131,7 @@ public class AlignmentTaskEmptyVersionTest {
             File tempFile = new File(gitFolder, "config");
             FileUtils.writeStringToFile(tempFile, line, Charset.defaultCharset());
 
-            String result = (String) m.invoke(at, new Object[] { tempDir.getRoot() });
+            String result = (String) m.invoke(null, new Object[] { tempDir.getRoot() });
 
             //System.out.println ("### Got " + result);
             assertEquals(result, formats.get(line));

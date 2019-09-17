@@ -59,6 +59,7 @@ public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest 
             throws IOException, URISyntaxException, ManipulationException {
         final File projectRoot = tempDir.newFolder("dynamic-project-with-locks");
 
+        //noinspection ConstantConditions
         org.apache.commons.io.FileUtils.copyDirectory(Paths
                 .get(TestUtils.class.getClassLoader().getResource(projectRoot.getName()).toURI()).toFile(), projectRoot);
 

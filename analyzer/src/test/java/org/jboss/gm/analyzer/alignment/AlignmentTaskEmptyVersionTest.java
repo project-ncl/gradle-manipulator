@@ -37,6 +37,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
@@ -55,6 +56,9 @@ public class AlignmentTaskEmptyVersionTest {
 
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     /**
      * We can't just create a new AlignmentTask as the base AbstractTask has checks to

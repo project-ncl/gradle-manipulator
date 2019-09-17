@@ -1,5 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
@@ -46,11 +47,11 @@ public final class TestUtils {
         return align(projectRoot, projectDirName, expectFailure, new HashMap<>());
     }
 
-    static TestManipulationModel align(File projectRoot) {
-        if (!(new File(projectRoot, "build.gradle").exists())) {
+    static TestManipulationModel align(File projectRoot, boolean expectFailure) {
+        if (!new File(projectRoot, "build.gradle").exists() && !new File(projectRoot, "build.gradle.kts").exists()) {
             throw new ManipulationUncheckedException("No valid test directory structure");
         }
-        return align(projectRoot, true, new HashMap<>());
+        return align(projectRoot, expectFailure, new HashMap<>());
     }
 
     private static TestManipulationModel align(File projectRoot, String projectDirName, boolean expectFailure,
@@ -71,7 +72,8 @@ public final class TestUtils {
      * @return the manipulation model
      */
     static TestManipulationModel align(File projectRoot, boolean expectFailure, Map<String, String> systemProps) {
-        assertThat(projectRoot.toPath().resolve("build.gradle")).exists();
+        assertTrue(projectRoot.toPath().resolve("build.gradle").toFile().exists() ||
+                projectRoot.toPath().resolve("build.gradle.kts").toFile().exists());
 
         final BuildResult buildResult;
         final TaskOutcome outcome;

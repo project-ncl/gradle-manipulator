@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
@@ -116,7 +115,18 @@ public class ManipulationCache {
         return projectDependencies;
     }
 
-    public void addGAV(ProjectVersionRef gav) {
+    /**
+     * As well as storing the GAV, at this point when the GAV is available the project group is now defined.
+     * Therefore update the model with the correct groupId.
+     *
+     * @param project the current Project instance
+     * @param gav the GAV to store.
+     */
+    public void addGAV(Project project, ProjectVersionRef gav) {
+        // Null check for some tests.
+        if (project != null && rootModel != null) {
+            rootModel.findCorrespondingChild(project).setGroup(project.getGroup().toString());
+        }
         projectVersionRefs.add(gav);
     }
 

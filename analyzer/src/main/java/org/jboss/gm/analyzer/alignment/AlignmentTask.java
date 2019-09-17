@@ -121,15 +121,13 @@ public class AlignmentTask extends DefaultTask {
                         currentProjectVersion);
 
                 logger.debug("Adding {} to cache for scanning.", current);
-                cache.addGAV(current);
-
+                cache.addGAV(project, current);
             }
 
             // when the set is empty, we know that this was the last alignment task to execute.
             if (cache.removeProject(projectName)) {
 
                 ManipulationModel al = cache.getModel();
-                logger.info("### Children are {} ", al.getChildren().values());
                 logger.info("Completed scanning projects; now processing for REST...");
                 Collection<ProjectVersionRef> allDeps = cache.getDependencies().values().stream()
                         .flatMap(m -> m.values().stream()).distinct().collect(Collectors.toList());
@@ -175,13 +173,23 @@ public class AlignmentTask extends DefaultTask {
                             alignmentModel.getVersion());
                     alignmentModel.setName(artifactId);
                 }
+
                 // groupId
                 if (isEmpty(alignmentModel.getGroup())) {
-                    logger.debug("Empty groupId for :{}:{}", alignmentModel.getName(), alignmentModel.getVersion());
-                    logger.info("### {} ", alignmentModel.getChildren().values());
-                    alignmentModel.setGroup(alignmentModel.getChildren().values().stream().findAny().orElseThrow(
-                            () -> new ManipulationException("Empty groupId but no child modules to determine a replacement"))
-                            .getGroup());
+                    String commonPrefix = StringUtils.stripEnd(
+                            StringUtils.getCommonPrefix(
+                                    alignmentModel.getChildren().values().stream().map(ManipulationModel::getGroup)
+                                            .collect(Collectors.toList()).toArray(new String[] {})),
+                            ".");
+
+                    if (isEmpty(commonPrefix)) {
+                        throw new ManipulationException(
+                                "Empty groupId but unable to determine a suitable replacement from any child modules.");
+                    }
+
+                    logger.warn("groupId for {} ({}) is empty. Defaulting to common prefix of '{}'", project.getRootProject(),
+                            project.getProjectDir(), commonPrefix);
+                    alignmentModel.setGroup(commonPrefix);
                 }
 
                 runCustomGroovyScript(configuration, project.getRootProject(), alignmentModel);

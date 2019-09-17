@@ -8,8 +8,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
-import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.tuple;
 
 import java.io.File;
@@ -119,12 +119,8 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
         //noinspection ResultOfMethodCallIgnored
         new File(projectRoot, "settings.gradle").delete();
 
-        try {
-            TestUtils.align(projectRoot);
-
-            fail("Should have thrown an exception");
-        } catch (ManipulationUncheckedException e) {
-            assertTrue(e.getMessage().contains("Empty groupId but no child modules to determine a replacement"));
-        }
+        assertThatExceptionOfType(ManipulationUncheckedException.class)
+                .isThrownBy(() -> TestUtils.align(projectRoot, true))
+                .withMessageContaining("Empty groupId but unable to determine a suitable replacement from any child modules");
     }
 }

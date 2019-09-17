@@ -22,6 +22,7 @@ import org.jboss.gm.common.ManipulationCache;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.mockito.stubbing.Answer;
@@ -33,6 +34,9 @@ public class UpdateProjectVersionCustomizerTest {
 
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Test
     public void ensureProjectVersionIsUpdatedWhenOriginalResponseHasNoProjectVersion() throws IOException {
@@ -56,9 +60,8 @@ public class UpdateProjectVersionCustomizerTest {
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
         final AlignmentService.Response customizedReq = sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull().satisfies(r -> {
-            assertThat(r.getNewProjectVersion()).isEqualTo("1.0.0.redhat-00001");
-        });
+        assertThat(customizedReq).isNotNull()
+                .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.0.0.redhat-00001"));
     }
 
     @Test
@@ -83,9 +86,8 @@ public class UpdateProjectVersionCustomizerTest {
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
         final AlignmentService.Response customizedReq = sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull().satisfies(r -> {
-            assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001");
-        });
+        assertThat(customizedReq).isNotNull()
+                .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001"));
     }
 
     @Test
@@ -113,9 +115,8 @@ public class UpdateProjectVersionCustomizerTest {
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
         final AlignmentService.Response customizedReq = sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull().satisfies(r -> {
-            assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-001");
-        });
+        assertThat(customizedReq).isNotNull()
+                .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-001"));
     }
 
     @Test
@@ -146,14 +147,13 @@ public class UpdateProjectVersionCustomizerTest {
         when(originalResp.getNewProjectVersion()).thenReturn(pvr.getVersionString());
 
         ManipulationCache cache = ManipulationCache.getCache(p);
-        cache.addGAV(pvr);
+        cache.addGAV(null, pvr);
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
         final AlignmentService.Response customizedReq = sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull().satisfies(r -> {
-            assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002");
-        });
+        assertThat(customizedReq).isNotNull()
+                .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002"));
     }
 }

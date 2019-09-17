@@ -372,6 +372,12 @@ public class AlignmentTask extends DefaultTask {
                                 dep.toString(), configuration.getName());
                         return;
                     }
+                    if (dep.getModuleGroup().isEmpty()) {
+                        logger.warn("Ignoring dependency {} with no groupId for configuration {}",
+                                dep.getName(), configuration.getName());
+                        return;
+                    }
+
                     String version = dep.getModuleVersion(); // this is the resolved version from gradle
                     // if the dependency is present in any of the lockfiles, then we use that version
                     for (ProjectVersionRef lockFileDep : lockFileDeps) {

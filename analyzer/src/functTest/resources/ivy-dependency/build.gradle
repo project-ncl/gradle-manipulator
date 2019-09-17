@@ -1,0 +1,21 @@
+plugins {
+    // including this plugin directly instead of by an init script, which allows to use the freshly build version
+    id 'org.jboss.gm.analyzer'
+    id 'java'
+}
+
+sourceCompatibility = 1.8
+
+
+repositories {
+    ivy {
+        url "http://download.eclipse.org/eclipse/updates/4.6/R-4.6.3-201703010400/plugins/"
+        layout "pattern", {
+            artifact "[artifact].[ext]"
+        }
+    }
+}
+
+dependencies {
+    compile name: "org.eclipse.swt.gtk.linux.x86_64_3.105.3.v20170228-0512"
+}

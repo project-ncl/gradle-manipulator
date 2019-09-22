@@ -130,8 +130,6 @@ public class AlignmentTask extends DefaultTask {
 
             // when the set is empty, we know that this was the last alignment task to execute.
             if (cache.removeProject(projectName)) {
-
-                ManipulationModel al = cache.getModel();
                 logger.info("Completed scanning projects; now processing for REST...");
                 Collection<ProjectVersionRef> allDeps = cache.getDependencies().values().stream()
                         .flatMap(m -> m.values().stream()).distinct().collect(Collectors.toList());
@@ -492,7 +490,7 @@ public class AlignmentTask extends DefaultTask {
     /**
      * Writes a maven settings file containing artifact repositories used by this project.
      *
-     * @param repositories
+     * @param repositories A map of repositories to the file path where it occurred.
      */
     private void writeRepositorySettingsFile(Map<ArtifactRepository, Path> repositories) {
         Configuration config = ConfigCache.getOrCreate(Configuration.class);
@@ -501,12 +499,12 @@ public class AlignmentTask extends DefaultTask {
         if (!isEmpty(repositoriesFilePath)) {
             File repositoriesFile;
             if (Paths.get(repositoriesFilePath).isAbsolute()) {
-                repositoriesFile = new File(config.repositoriesFile());
+                repositoriesFile = new File(repositoriesFilePath);
             } else {
                 repositoriesFile = new File(getProject().getRootDir(), repositoriesFilePath);
             }
 
-            new RepositoryExporter(repositories).export(repositoriesFile);
+            RepositoryExporter.export(repositories, repositoriesFile);
         } else {
             logger.info("Repository export disabled.");
         }

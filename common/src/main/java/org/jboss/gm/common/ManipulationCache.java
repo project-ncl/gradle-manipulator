@@ -1,10 +1,12 @@
 package org.jboss.gm.common;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
@@ -38,7 +40,7 @@ public class ManipulationCache {
      */
     private HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = new HashMap<>();
 
-    private Set<ArtifactRepository> repositories = new HashSet<>();
+    private Map<ArtifactRepository, Path> repositories = new HashMap<ArtifactRepository, Path>();
 
     /**
      * Retrieves the cache given any project. It will access the root project, check if the
@@ -143,11 +145,12 @@ public class ManipulationCache {
         return rootProject;
     }
 
-    public void addRepository(ArtifactRepository repository) {
-        repositories.add(repository);
+    public void addRepository(ArtifactRepository repository, Path projectDir) {
+
+        repositories.put(repository, projectDir);
     }
 
-    public Set<ArtifactRepository> getRepositories() {
+    public Map<ArtifactRepository, Path> getRepositories() {
         return repositories;
     }
 }

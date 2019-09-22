@@ -14,6 +14,9 @@ repositories {
             artifact "[artifact].[ext]"
         }
     }
+    ivy {
+        artifactPattern "https://artifacts.elastic.co/downloads/elasticsearch/[module]-[revision].[ext]"
+    }
 }
 
 dependencies {

@@ -108,8 +108,12 @@ public class AlignmentTask extends DefaultTask {
                     getDependencies(project, configuration, lockFileDeps));
 
             cache.addDependencies(project, dependencies);
-            project.getRepositories().forEach(cache::addRepository);
-            project.getBuildscript().getRepositories().forEach(cache::addRepository);
+
+            Path root = project.getRootDir().toPath();
+            project.getRepositories().forEach(r -> cache.addRepository(r,
+                    org.jboss.gm.common.utils.FileUtils.relativize(root, project.getProjectDir().toPath())));
+            project.getBuildscript().getRepositories().forEach(r -> cache.addRepository(r,
+                    org.jboss.gm.common.utils.FileUtils.relativize(root, project.getProjectDir().toPath())));
 
             if (StringUtils.isBlank(project.getGroup().toString()) ||
                     DEFAULT_VERSION.equals(project.getVersion().toString())) {
@@ -487,8 +491,10 @@ public class AlignmentTask extends DefaultTask {
 
     /**
      * Writes a maven settings file containing artifact repositories used by this project.
+     *
+     * @param repositories
      */
-    private void writeRepositorySettingsFile(Collection<ArtifactRepository> repositories) {
+    private void writeRepositorySettingsFile(Map<ArtifactRepository, Path> repositories) {
         Configuration config = ConfigCache.getOrCreate(Configuration.class);
 
         String repositoriesFilePath = config.repositoriesFile();

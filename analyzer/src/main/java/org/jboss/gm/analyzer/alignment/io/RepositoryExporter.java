@@ -2,9 +2,11 @@ package org.jboss.gm.analyzer.alignment.io;
 
 import java.io.File;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.settings.Profile;
@@ -39,7 +41,7 @@ public class RepositoryExporter {
     private int repositoryCounter = 0;
     private Set<String> exportedUrls = new HashSet<>();
 
-    public RepositoryExporter(Collection<ArtifactRepository> repositories) {
+    public RepositoryExporter(Map<ArtifactRepository, Path> repositories) {
         mavenSettings.getProfiles().add(mavenProfile);
         mavenProfile.setId("generated-by-gme");
         mavenSettings.addActiveProfile(mavenProfile.getId());
@@ -59,31 +61,37 @@ public class RepositoryExporter {
         }
     }
 
-    private void processRepositories(Collection<ArtifactRepository> repositories) {
-        for (ArtifactRepository repository : repositories) {
+    private void processRepositories(Map<ArtifactRepository, Path> repositories) {
+        for (ArtifactRepository repository : repositories.keySet()) {
             if (repository instanceof DefaultMavenLocalArtifactRepository) {
                 DefaultMavenLocalArtifactRepository artifactRepository = (DefaultMavenLocalArtifactRepository) repository;
-                logger.debug("Skipping local maven repository: {}", artifactRepository.getUrl());
+                logger.debug("Skipping local maven repository '{}' from {}", artifactRepository.getUrl(),
+                        repositories.get(repository));
             } else if (repository instanceof MavenArtifactRepository) {
                 MavenArtifactRepository artifactRepository = (MavenArtifactRepository) repository;
                 URI url = artifactRepository.getUrl();
+
                 if (isSuportedScheme(url)) {
                     logger.debug("Adding maven repository: {}", url);
                     addRepository(artifactRepository.getName(), url.toString());
                 } else {
-                    logger.debug("Skipping maven repository with unsupported scheme: {}", url);
+                    logger.debug("Skipping maven repository '{}' with unsupported scheme {} from {}", repository.getName(), url,
+                            repositories.get(repository));
                 }
             } else if (repository instanceof IvyArtifactRepository) {
                 IvyArtifactRepository artifactRepository = (IvyArtifactRepository) repository;
                 URI url = artifactRepository.getUrl();
+
                 if (isSuportedScheme(url)) {
                     logger.debug("Adding ivy repository: {}", url);
                     addRepository(artifactRepository.getName(), url.toString());
                 } else {
-                    logger.debug("Skipping ivy repository with unsupported scheme: {}", url);
+                    logger.debug("Skipping ivy repository '{}' with unsupported scheme {} from {}", repository.getName(), url,
+                            repositories.get(repository));
                 }
             } else {
-                logger.debug("Skipping repository of type {}", repository.getClass().getSimpleName());
+                logger.debug("Skipping repository of type {} from {}", repository.getClass().getSimpleName(),
+                        repositories.get(repository));
             }
         }
     }
@@ -106,7 +114,7 @@ public class RepositoryExporter {
     }
 
     private static boolean isSuportedScheme(URI url) {
-        return url.getScheme() != null && SUPPORTED_SCHEMES.contains(url.getScheme().toLowerCase());
+        return url != null && url.getScheme() != null && SUPPORTED_SCHEMES.contains(url.getScheme().toLowerCase());
     }
 
     private void addDefaultRepositories() {

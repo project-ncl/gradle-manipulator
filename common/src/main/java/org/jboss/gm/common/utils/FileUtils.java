@@ -1,10 +1,12 @@
 package org.jboss.gm.common.utils;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.apache.commons.io.input.ReversedLinesFileReader;
@@ -44,5 +46,24 @@ public class FileUtils {
             }
         }
         throw new ManipulationException("Unable to find a non blank line in the collection");
+    }
+
+    /**
+     * Returns either the relative path of target to root, or the root name. Used to establish
+     * whether something is derived from the root project or a submodule.
+     * 
+     * @param root The root project path.
+     * @param target The potential (sub?)project path.
+     * @return The resultant path.
+     */
+    public static Path relativize(Path root, Path target) {
+        Path result;
+
+        if (root.equals(target)) {
+            result = root.getFileName();
+        } else {
+            result = root.relativize(target);
+        }
+        return result;
     }
 }

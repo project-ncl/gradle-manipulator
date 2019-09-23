@@ -8,6 +8,7 @@ Contributions to the project are very welcome! Please submit pull requests with 
     * [Eclipse Setup](#eclipse-setup)
     * [IDEA Setup](#idea-setup)
  * [Code Recommendations](#code-recommendations)
+    * [Logging](#logging)
     * [Exceptions](#exceptions)
  * [Releasing](#releasing)
     * [Prerequisites](#prerequisites)

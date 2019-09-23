@@ -79,7 +79,9 @@ public final class TestUtils {
         final TaskOutcome outcome;
 
         final Map<String, String> finalSystemProps = new LinkedHashMap<>();
-        finalSystemProps.put("repoRemovalBackup", "settings.xml");
+        if (!systemProps.containsKey("repoRemovalBackup")) {
+            finalSystemProps.put("repoRemovalBackup", "settings.xml");
+        }
         finalSystemProps.putAll(systemProps);
         final List<String> systemPropsList = finalSystemProps.entrySet().stream()
                 .map(e -> "-D" + e.getKey() + "=" + e.getValue())

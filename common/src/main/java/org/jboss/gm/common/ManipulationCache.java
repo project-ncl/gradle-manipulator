@@ -40,7 +40,7 @@ public class ManipulationCache {
      */
     private HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = new HashMap<>();
 
-    private Map<ArtifactRepository, Path> repositories = new HashMap<ArtifactRepository, Path>();
+    private Map<ArtifactRepository, Path> repositories = new HashMap<>();
 
     /**
      * Retrieves the cache given any project. It will access the root project, check if the

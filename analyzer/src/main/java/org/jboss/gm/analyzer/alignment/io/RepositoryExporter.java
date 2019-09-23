@@ -29,39 +29,41 @@ import org.jboss.gm.common.logging.GMLogger;
  *
  * @author Tomas Hofman
  */
-public class RepositoryExporter {
+public final class RepositoryExporter {
 
-    private final Logger logger = GMLogger.getLogger(getClass());
+    private static final Logger logger = GMLogger.getLogger(RepositoryExporter.class);
 
     // only export remote URLs
     private static final Collection<String> SUPPORTED_SCHEMES = Arrays.asList("http", "https");
 
     private Settings mavenSettings = new Settings();
     private Profile mavenProfile = new Profile();
-    private int repositoryCounter = 0;
     private Set<String> exportedUrls = new HashSet<>();
+    private int repositoryCounter = 0;
 
-    public RepositoryExporter(Map<ArtifactRepository, Path> repositories) {
+    private RepositoryExporter() {
         mavenSettings.getProfiles().add(mavenProfile);
         mavenProfile.setId("generated-by-gme");
         mavenSettings.addActiveProfile(mavenProfile.getId());
-
-        addDefaultRepositories();
-        processRepositories(repositories);
     }
 
-    public void export(File settingsFile) {
+    public static void export(Map<ArtifactRepository, Path> repositories, File settingsFile) {
+        RepositoryExporter repositoryExporter = new RepositoryExporter();
+
+        addRepository(repositoryExporter, "Gradle Plugin Repository", "https://plugins.gradle.org/m2/");
+        processRepositories(repositoryExporter, repositories);
+
         SettingsIO settingsWriter = new SettingsIO(new DefaultSettingsBuilder());
         logger.debug("Writing repository settings into {}", settingsFile.getAbsolutePath());
         try {
-            settingsWriter.write(mavenSettings, settingsFile);
+            settingsWriter.write(repositoryExporter.mavenSettings, settingsFile);
         } catch (ManipulationException e) {
             throw new ManipulationUncheckedException("Could not write repository settings file into "
                     + settingsFile.getAbsolutePath());
         }
     }
 
-    private void processRepositories(Map<ArtifactRepository, Path> repositories) {
+    private static void processRepositories(RepositoryExporter repositoryExporter, Map<ArtifactRepository, Path> repositories) {
         for (ArtifactRepository repository : repositories.keySet()) {
             if (repository instanceof DefaultMavenLocalArtifactRepository) {
                 DefaultMavenLocalArtifactRepository artifactRepository = (DefaultMavenLocalArtifactRepository) repository;
@@ -71,9 +73,9 @@ public class RepositoryExporter {
                 MavenArtifactRepository artifactRepository = (MavenArtifactRepository) repository;
                 URI url = artifactRepository.getUrl();
 
-                if (isSuportedScheme(url)) {
+                if (isSupportedScheme(url)) {
                     logger.debug("Adding maven repository: {}", url);
-                    addRepository(artifactRepository.getName(), url.toString());
+                    addRepository(repositoryExporter, artifactRepository.getName(), url.toString());
                 } else {
                     logger.debug("Skipping maven repository '{}' with unsupported scheme {} from {}", repository.getName(), url,
                             repositories.get(repository));
@@ -82,9 +84,9 @@ public class RepositoryExporter {
                 IvyArtifactRepository artifactRepository = (IvyArtifactRepository) repository;
                 URI url = artifactRepository.getUrl();
 
-                if (isSuportedScheme(url)) {
+                if (isSupportedScheme(url)) {
                     logger.debug("Adding ivy repository: {}", url);
-                    addRepository(artifactRepository.getName(), url.toString());
+                    addRepository(repositoryExporter, artifactRepository.getName(), url.toString());
                 } else {
                     logger.debug("Skipping ivy repository '{}' with unsupported scheme {} from {}", repository.getName(), url,
                             repositories.get(repository));
@@ -96,28 +98,24 @@ public class RepositoryExporter {
         }
     }
 
-    private void addRepository(String name, String url) {
-        if (exportedUrls.contains(url)) {
+    private static void addRepository(RepositoryExporter repositoryExporter, String name, String url) {
+        if (repositoryExporter.exportedUrls.contains(url)) {
             // skip URLs we've already seen
             return;
         }
-        exportedUrls.add(url);
+        repositoryExporter.exportedUrls.add(url);
 
-        String repoId = name + "-" + repositoryCounter++; // counter ensures that the id is unique
+        String repoId = name + "-" + repositoryExporter.repositoryCounter++; // counter ensures that the id is unique
         Repository mavenRepository = new Repository();
         mavenRepository.setId(repoId);
         mavenRepository.setName(repoId);
         mavenRepository.setUrl(url);
         mavenRepository.setSnapshots(new RepositoryPolicy());
         mavenRepository.setReleases(new RepositoryPolicy());
-        mavenProfile.addRepository(mavenRepository);
+        repositoryExporter.mavenProfile.addRepository(mavenRepository);
     }
 
-    private static boolean isSuportedScheme(URI url) {
+    private static boolean isSupportedScheme(URI url) {
         return url != null && url.getScheme() != null && SUPPORTED_SCHEMES.contains(url.getScheme().toLowerCase());
-    }
-
-    private void addDefaultRepositories() {
-        addRepository("Gradle Plugin Repository", "https://plugins.gradle.org/m2/");
     }
 }

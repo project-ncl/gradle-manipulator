@@ -1,5 +1,7 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -155,5 +157,63 @@ public class UpdateProjectVersionCustomizerTest {
 
         assertThat(customizedReq).isNotNull()
                 .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002"));
+    }
+
+    @Test
+    public void validateVersionWithSnapshot() throws IOException {
+
+        System.setProperty("versionSuffixSnapshot", "true");
+
+        final AlignmentService.Response originalResp = mock(AlignmentService.Response.class);
+        // just return whatever was passed
+        when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
+            final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
+            return input.getVersionString();
+        });
+        when(originalResp.getNewProjectVersion()).thenReturn(null);
+
+        final File simpleProjectRoot = tempDir.newFolder("simple-project");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+        Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
+        p.setVersion("1.1-SNAPSHOT");
+        p.setGroup("org");
+        final Set<Project> projects = new HashSet<>();
+        projects.add(p);
+
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
+        final AlignmentService.Response customizedReq = sut.customize(originalResp);
+
+        assertThat(customizedReq).isNotNull()
+                .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001-SNAPSHOT"));
+        assertTrue(configuration.versionSuffixSnapshot());
+    }
+
+    @Test
+    public void validateVersionWithNoSnapshot() throws IOException {
+
+        final AlignmentService.Response originalResp = mock(AlignmentService.Response.class);
+        // just return whatever was passed
+        when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
+            final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
+            return input.getVersionString();
+        });
+        when(originalResp.getNewProjectVersion()).thenReturn(null);
+
+        final File simpleProjectRoot = tempDir.newFolder("simple-project");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+        Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
+        p.setVersion("1.1-SNAPSHOT");
+        p.setGroup("org");
+        final Set<Project> projects = new HashSet<>();
+        projects.add(p);
+
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
+        final AlignmentService.Response customizedReq = sut.customize(originalResp);
+
+        assertThat(customizedReq).isNotNull()
+                .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001"));
+        assertFalse(configuration.versionSuffixSnapshot());
     }
 }

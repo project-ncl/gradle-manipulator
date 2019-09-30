@@ -47,11 +47,6 @@ public class MavenPublishingRepositoryAction implements Action<Project> {
     @Override
     public void execute(Project project) {
 
-        // TODO: Should this be called MavenPublishing and MavenPublicationRepositoryAction be called LegacyMavenPublishing.... ?
-        // TODO: Same naming point about PomTransformer and UploadTaskTransformer - naming might be better as LegacyMavenPomTransformer and MavenPomTransformer
-
-        // TODO: Why doesn't the legacy one remove tasks?
-
         // disable existing publishing tasks but make sure we keep ours
         project.afterEvaluate(p -> p.getTasks().stream()
                 .filter(t -> t.getName().startsWith("publish") && t.getName().endsWith("Repository")

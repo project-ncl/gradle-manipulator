@@ -72,6 +72,10 @@ public interface Configuration extends Accessible, Reloadable {
     @DefaultValue("true")
     boolean versionModificationEnabled();
 
+    @Key("versionSuffixSnapshot")
+    @DefaultValue("false")
+    boolean versionSuffixSnapshot();
+
     @Key("restRepositoryGroup")
     String restRepositoryGroup();
 

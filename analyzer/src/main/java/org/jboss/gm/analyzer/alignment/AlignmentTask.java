@@ -9,7 +9,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -25,7 +24,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import org.aeonbits.owner.Config;
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -35,6 +33,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.commonjava.maven.ext.core.impl.Version;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
@@ -138,9 +137,11 @@ public class AlignmentTask extends DefaultTask {
                         .getAlignmentService(cache.getDependencies().keySet());
 
                 final AlignmentService.Response alignmentResponse = alignmentService.align(
-                        new AlignmentService.Request(
-                                cache.getGAV(),
-                                allDeps));
+                        new AlignmentService.Request(cache.getGAV().stream()
+                                .map(p -> new SimpleProjectVersionRef(p.asProjectRef(),
+                                        !configuration.versionSuffixSnapshot() ? Version.removeSnapshot(p.getVersionString())
+                                                : p.getVersionString()))
+                                .collect(Collectors.toList()), allDeps));
 
                 final ManipulationModel alignmentModel = cache.getModel();
                 final HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = cache
@@ -586,23 +587,5 @@ public class AlignmentTask extends DefaultTask {
                 script.run();
             }
         }
-    }
-
-    private void dumpCurrentConfig(Configuration configuration) {
-
-        StringBuilder currentProperties = new StringBuilder("Current properties are");
-        for (Method method : Configuration.class.getMethods()) {
-
-            if (method.isAnnotationPresent(Config.Key.class)) {
-                Config.Key val = method.getAnnotation(Config.Key.class);
-                currentProperties.append(System.lineSeparator());
-                currentProperties.append('\t');
-                currentProperties.append(val.value());
-                currentProperties.append(" : ");
-
-                currentProperties.append(configuration.getProperties().get(val.value()));
-            }
-        }
-        logger.info(currentProperties.toString());
     }
 }

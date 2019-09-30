@@ -4,7 +4,6 @@ import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.component.SoftwareComponent;
 import org.gradle.api.logging.Logger;
-import org.gradle.api.publish.PublicationContainer;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.jboss.gm.common.logging.GMLogger;
@@ -36,22 +35,11 @@ public class PublishingArtifactsAction implements Action<Project> {
     public void execute(Project project) {
         SoftwareComponent javaComponent = project.getComponents().findByName("java");
         if (javaComponent != null) {
-            project.getExtensions().configure(PublishingExtension.class, new Action<PublishingExtension>() {
-                @Override
-                public void execute(PublishingExtension publishingExtension) {
-                    publishingExtension.publications(new Action<PublicationContainer>() {
-                        @Override
-                        public void execute(PublicationContainer publications) {
-                            publications.create("mavenJava", MavenPublication.class, new Action<MavenPublication>() {
-                                @Override
-                                public void execute(MavenPublication mavenPublication) {
-                                    mavenPublication.from(javaComponent);
-                                }
-                            });
-                        }
-                    });
-                }
-            });
+            project.getExtensions().configure(PublishingExtension.class,
+                    publishingExtension -> publishingExtension.publications(publications -> {
+                        publications.create("mavenJava", MavenPublication.class,
+                                mavenPublication -> mavenPublication.from(javaComponent));
+                    }));
         } else {
             logger.warn("No java component found for project {}, no artifact to publish.", project.getName());
         }

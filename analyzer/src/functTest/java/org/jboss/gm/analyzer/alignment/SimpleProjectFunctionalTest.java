@@ -1,9 +1,12 @@
 package org.jboss.gm.analyzer.alignment;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.notMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,10 +16,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -95,7 +98,6 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(extraGradleFile).exists();
         assertThat(FileUtils.readLines(extraGradleFile, Charset.defaultCharset()))
                 .filteredOn(l -> l.trim().equals(AlignmentTask.APPLY_GME_REPOS)).hasSize(1);
-
     }
 
     @Test
@@ -146,4 +148,36 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(lines).filteredOn(l -> l.startsWith(AlignmentTask.INJECT_GME_START)).hasSize(1);
     }
 
+    @Test
+    public void verifySnapshotHandling() throws IOException, URISyntaxException, ManipulationException {
+        final File projectRoot = tempDir.newFolder("simple-project");
+        FileUtils.copyDirectory(Paths
+                .get(TestUtils.class.getClassLoader().getResource(projectRoot.getName()).toURI()).toFile(), projectRoot);
+        File props = new File(projectRoot, "gradle.properties");
+        FileUtils.writeStringToFile(props,
+                FileUtils.readFileToString(props, Charset.defaultCharset()).replace(
+                        "version=1.0.1", "version=1.0.1-SNAPSHOT"),
+                Charset.defaultCharset());
+
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, false);
+
+        verify(postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
+                .withRequestBody(notMatching(".*SNAPSHOT.*")));
+
+        assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
+        assertTrue(new File(projectRoot, AlignmentTask.GRADLE + '/' + AlignmentTask.GME_REPOS).exists());
+        assertTrue(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS).exists());
+        assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_END,
+                org.jboss.gm.common.utils.FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+
+        assertThat(alignmentModel).isNotNull().satisfies(am -> {
+            assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
+            assertThat(am.getName()).isEqualTo("root");
+            assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
+                assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00001");
+                assertThat(root.getName()).isEqualTo("root");
+            });
+        });
+    }
 }

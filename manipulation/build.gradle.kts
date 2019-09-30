@@ -40,7 +40,6 @@ dependencies {
     // GradleAPI in test compile to get access to org.gradle.internal.Pair
     testCompile(gradleApi())
 
-    // TODO: New task to cover functional tests
     permitTestUnusedDeclared("junit:junit:${project.extra.get("junitVersion")}")
     permitTestUnusedDeclared("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
     permitTestUnusedDeclared("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")

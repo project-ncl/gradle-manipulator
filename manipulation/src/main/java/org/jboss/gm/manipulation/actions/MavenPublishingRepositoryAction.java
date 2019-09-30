@@ -38,22 +38,33 @@ import org.jboss.gm.common.logging.GMLogger;
  *     }
  * </pre>
  */
-public class PublishingRepositoryAction implements Action<Project> {
+public class MavenPublishingRepositoryAction implements Action<Project> {
+
+    static final String REPO_NAME = "GME";
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
     @Override
     public void execute(Project project) {
+
+        // TODO: Should this be called MavenPublishing and MavenPublicationRepositoryAction be called LegacyMavenPublishing.... ?
+        // TODO: Same naming point about PomTransformer and UploadTaskTransformer - naming might be better as LegacyMavenPomTransformer and MavenPomTransformer
+
+        // TODO: Why doesn't the legacy one remove tasks?
+
         // disable existing publishing tasks but make sure we keep ours
         project.afterEvaluate(p -> p.getTasks().stream()
                 .filter(t -> t.getName().startsWith("publish") && t.getName().endsWith("Repository")
-                        && !t.getName().contains("Manipulator"))
+                        && !t.getName().contains(REPO_NAME))
                 .forEach(t -> {
                     logger.info("Disabling publishing task " + t.getName());
                     t.setEnabled(false);
                 }));
 
-        if (!project.getPluginManager().hasPlugin("maven-publish")) {
+        if (project.getProjectDir().getName().equals("buildSrc")) {
+            logger.warn("Not adding publishing extension to project {} as buildSrc is build-time only.", project);
+            return;
+        } else if (!project.getPluginManager().hasPlugin("maven-publish")) {
             // This should never happen due to prior checks in ManipulationPlugin
             throw new ManipulationUncheckedException(
                     "Cannot configure publishing repository, maven-publish plugin was not detected.");
@@ -71,7 +82,9 @@ public class PublishingRepositoryAction implements Action<Project> {
         }
 
         project.getExtensions().getByType(PublishingExtension.class).getRepositories().maven(repository -> {
-            repository.setName("Manipulator Publishing Repository");
+            // To avoid names like "publishPluginMavenPublicationToManipulator Publishing RepositoryRepository"
+            // rather than naming this "Manipulator Publishing Repository" use GME for relative uniqueness.
+            repository.setName(REPO_NAME);
             repository.setUrl(config.deployUrl());
             if (!isEmpty(config.accessToken())) {
                 //noinspection UnstableApiUsage

@@ -15,6 +15,7 @@ import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.Converter;
 import org.aeonbits.owner.Reloadable;
 import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
+import org.gradle.api.logging.Logger;
 
 /**
  * This class is used to hold all configuration values for the two plugins. The naming scheme of
@@ -132,5 +133,26 @@ public interface Configuration extends Accessible, Reloadable {
             }
             return DependencyPrecedence.valueOf(input.toUpperCase());
         }
+    }
+
+    /**
+     * Dumps the current configuration to the supplied logger.
+     *
+     * @param logger the logger to dump the configuration to.
+     */
+    default void dumpCurrentConfig(Logger logger) {
+
+        StringBuilder currentProperties = new StringBuilder("Current properties are");
+        for (Method method : Configuration.class.getMethods()) {
+            if (method.isAnnotationPresent(Config.Key.class)) {
+                Config.Key val = method.getAnnotation(Config.Key.class);
+                currentProperties.append(System.lineSeparator());
+                currentProperties.append('\t');
+                currentProperties.append(val.value());
+                currentProperties.append(" : ");
+                currentProperties.append(this.getProperties().get(val.value()));
+            }
+        }
+        logger.info(currentProperties.toString());
     }
 }

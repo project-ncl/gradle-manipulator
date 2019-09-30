@@ -1,6 +1,7 @@
 package org.jboss.gm.manipulation.actions;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.jboss.gm.manipulation.actions.MavenPublishingRepositoryAction.REPO_NAME;
 
 import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -37,7 +38,7 @@ import org.jboss.gm.common.logging.GMLogger;
  *     }
  * </pre>
  */
-public class MavenPublicationRepositoryAction implements Action<Project> {
+public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
@@ -70,7 +71,7 @@ public class MavenPublicationRepositoryAction implements Action<Project> {
 
         // add a maven repository and configure authentication token
         uploadArchives.getRepositories().maven(mavenArtifactRepository -> {
-            mavenArtifactRepository.setName("Manipulator Publishing Repository");
+            mavenArtifactRepository.setName(REPO_NAME);
             mavenArtifactRepository.setUrl(config.deployUrl());
             if (config.accessToken() != null) {
                 //noinspection UnstableApiUsage
@@ -105,6 +106,7 @@ public class MavenPublicationRepositoryAction implements Action<Project> {
         // Clone the archive configuration to avoid ConcurrentModificationException.
         publishArchives.getArtifacts().addAll(archives.copy().getArtifacts());
 
+        logger.info("### Adding publishArchives / pom-default for " + project.getProjectDir());
         // add an artifact referencing the POM
         project.getArtifacts().add("publishArchives",
                 project.file(project.getBuildDir().toPath().resolve("poms/pom-default.xml")),

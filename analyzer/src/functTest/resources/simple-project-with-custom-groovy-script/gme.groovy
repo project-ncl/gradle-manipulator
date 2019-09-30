@@ -28,3 +28,9 @@ newContent = information.text.replace('2.0.15.Final', newUndertowVersion)
 information.text = newContent
 
 println "New content is " + newContent
+
+information = new File(gmeScript.getProject().getRootDir(), "settings.gradle")
+newContent = information.text.replaceAll("addSubProjects.*x-pack'[)][)]", "")
+information.text = newContent
+
+println "New content is " + newContent

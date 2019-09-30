@@ -5,6 +5,7 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.maven.MavenResolver;
 import org.gradle.api.tasks.Upload;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.manipulation.ResolvedDependenciesRepository;
 
 /**
  * Fixes pom.xml generation in old "maven" plugin.
@@ -30,7 +31,8 @@ public class UploadTaskTransformerAction implements Action<Project> {
 
         project.getTasks().withType(Upload.class).all(upload -> upload.getRepositories()
                 .withType(MavenResolver.class).all(resolver -> {
-                    resolver.getPom().withXml(new PomTransformer(alignmentConfiguration, resolvedDependenciesRepository));
+                    resolver.getPom().withXml(
+                            new LegacyMavenPomTransformerAction(alignmentConfiguration, resolvedDependenciesRepository));
                 }));
     }
 }

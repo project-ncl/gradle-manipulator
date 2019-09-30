@@ -1,1 +1,4 @@
 rootProject.name = 'root'
+void addSubProjects(String path, File dir) {}
+addSubProjects('', new File(rootProject.projectDir, 'another-pack'))
+addSubProjects('', new File(rootProject.projectDir, 'x-pack'))

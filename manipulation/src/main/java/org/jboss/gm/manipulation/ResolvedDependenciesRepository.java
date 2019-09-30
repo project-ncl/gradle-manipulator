@@ -1,4 +1,4 @@
-package org.jboss.gm.manipulation.actions;
+package org.jboss.gm.manipulation;
 
 import java.util.HashMap;
 import java.util.Map;

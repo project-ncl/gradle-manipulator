@@ -13,17 +13,19 @@ import org.gradle.api.artifacts.ModuleVersionSelector;
 import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.manipulation.ResolvedDependenciesRepository;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
  */
-public class AlignedDependencyResolver implements Action<DependencyResolveDetails> {
+public class AlignedDependencyResolverAction implements Action<DependencyResolveDetails> {
     private final ManipulationModel module;
     private final ResolvedDependenciesRepository resolvedDependenciesRepository;
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
-    public AlignedDependencyResolver(ManipulationModel module, ResolvedDependenciesRepository resolvedDependenciesRepository) {
+    public AlignedDependencyResolverAction(ManipulationModel module,
+            ResolvedDependenciesRepository resolvedDependenciesRepository) {
         this.module = module;
         this.resolvedDependenciesRepository = resolvedDependenciesRepository;
     }

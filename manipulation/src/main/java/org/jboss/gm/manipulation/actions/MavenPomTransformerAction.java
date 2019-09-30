@@ -5,6 +5,7 @@ import org.gradle.api.Project;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.manipulation.ResolvedDependenciesRepository;
 
 /**
  * Fixes pom.xml generation in "maven-publish" plugin.
@@ -12,12 +13,12 @@ import org.jboss.gm.common.model.ManipulationModel;
  * Applies PomTransformer, that overrides dependencies versions according to given configuration, to all maven
  * publications.
  */
-public class PublishingPomTransformerAction implements Action<Project> {
+public class MavenPomTransformerAction implements Action<Project> {
 
     private final ManipulationModel alignmentConfiguration;
     private final ResolvedDependenciesRepository resolvedDependenciesRepository;
 
-    public PublishingPomTransformerAction(ManipulationModel alignmentConfiguration,
+    public MavenPomTransformerAction(ManipulationModel alignmentConfiguration,
             ResolvedDependenciesRepository resolvedDependenciesRepository) {
         this.alignmentConfiguration = alignmentConfiguration;
         this.resolvedDependenciesRepository = resolvedDependenciesRepository;
@@ -32,7 +33,9 @@ public class PublishingPomTransformerAction implements Action<Project> {
         project.getExtensions().getByType(PublishingExtension.class).getPublications().withType(MavenPublication.class)
                 .all(maven -> {
                     if (maven.getPom() != null) {
-                        maven.getPom().withXml(new PomTransformer(alignmentConfiguration, resolvedDependenciesRepository));
+                        maven.getPom()
+                                .withXml(new LegacyMavenPomTransformerAction(alignmentConfiguration,
+                                        resolvedDependenciesRepository));
                     }
                 });
     }

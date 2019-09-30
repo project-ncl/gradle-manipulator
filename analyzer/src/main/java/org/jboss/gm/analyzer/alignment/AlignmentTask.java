@@ -94,7 +94,7 @@ public class AlignmentTask extends DefaultTask {
 
         if (configOutput.compareAndSet(false, true)) {
             // Only output the config once to avoid noisy logging.
-            dumpCurrentConfig(configuration);
+            configuration.dumpCurrentConfig(logger);
         }
         logger.info("Starting model task for project {} with GAV {}:{}:{}", project.getDisplayName(), project.getGroup(),
                 projectName, project.getVersion());
@@ -388,9 +388,7 @@ public class AlignmentTask extends DefaultTask {
                             version = lockFileDep.getVersionString();
                         }
                     }
-                    ProjectVersionRef pvr = ProjectVersionFactory.withGAVAndConfiguration(dep.getModuleGroup(),
-                            dep.getModuleName(),
-                            version, configuration.getName());
+                    ProjectVersionRef pvr = ProjectVersionFactory.withGAV(dep.getModuleGroup(), dep.getModuleName(), version);
 
                     List<Dependency> originalDeps = allDependencies.stream()
                             .filter(d -> StringUtils.equals(d.getGroup(), dep.getModuleGroup()) &&
@@ -411,8 +409,7 @@ public class AlignmentTask extends DefaultTask {
                         relaxedProjectVersionRef = new RelaxedProjectVersionRef(originalDeps.get(0));
                     }
 
-                    // TODO: What if originalDep has an empty version - then its from the BOM. Should we record it
-                    // at all?
+                    // TODO: What if originalDep has an empty version - then its from the BOM. Should we record it at all?
                     // if (StringUtils.isNotBlank(originalDep.getVersion())) {
 
                     if (depMap.put(relaxedProjectVersionRef, pvr) == null) {

@@ -17,10 +17,4 @@ public final class ProjectVersionFactory {
     public static ProjectVersionRef withGAV(String group, String artifact, String version) {
         return new SimpleProjectVersionRef(group, artifact, version);
     }
-
-    public static ProjectVersionRef withGAVAndConfiguration(String group, String artifact, String version,
-            String configuration) {
-        // todo: add configuration support?
-        return withGAV(group, artifact, version);
-    }
 }

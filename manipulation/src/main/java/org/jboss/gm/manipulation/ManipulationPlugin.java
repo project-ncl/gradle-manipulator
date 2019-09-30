@@ -4,6 +4,7 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -18,13 +19,12 @@ import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.ManifestUtils;
+import org.jboss.gm.manipulation.actions.LegacyMavenPublishingRepositoryAction;
 import org.jboss.gm.manipulation.actions.ManifestUpdateAction;
-import org.jboss.gm.manipulation.actions.MavenPublicationRepositoryAction;
+import org.jboss.gm.manipulation.actions.MavenPomTransformerAction;
+import org.jboss.gm.manipulation.actions.MavenPublishingRepositoryAction;
 import org.jboss.gm.manipulation.actions.OverrideDependenciesAction;
 import org.jboss.gm.manipulation.actions.PublishingArtifactsAction;
-import org.jboss.gm.manipulation.actions.PublishingPomTransformerAction;
-import org.jboss.gm.manipulation.actions.PublishingRepositoryAction;
-import org.jboss.gm.manipulation.actions.ResolvedDependenciesRepository;
 import org.jboss.gm.manipulation.actions.UploadTaskTransformerAction;
 
 @SuppressWarnings("unused")
@@ -39,6 +39,8 @@ public class ManipulationPlugin implements Plugin<Project> {
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
+    private static final AtomicBoolean configOutput = new AtomicBoolean();
+
     @Override
     public void apply(Project project) {
 
@@ -46,13 +48,22 @@ public class ManipulationPlugin implements Plugin<Project> {
             logger.error("No {} found in {}; exiting plugin.", ManipulationIO.MANIPULATION_FILE_NAME, project.getRootDir());
             return;
         }
-        // get the previously performed alignment
-        final ManipulationModel alignmentModel = ManipulationIO.readManipulationModel(project.getRootDir());
-        final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project);
+        // We can't ignore projects like buildSrc (which are purely build-time) here as we still might need to process them to
+        // e.g. remove any publishing tasks.
 
         if (System.getProperty("gmeFunctionalTest") != null) {
             ConfigCache.getOrCreate(Configuration.class).reload();
         }
+
+        Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
+        if (configOutput.compareAndSet(false, true)) {
+            // Only output the config once to avoid noisy logging.
+            configuration.dumpCurrentConfig(logger);
+        }
+
+        // get the previously performed alignment
+        final ManipulationModel alignmentModel = ManipulationIO.readManipulationModel(project.getRootDir());
+        final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project);
 
         // we need to change the project version early so various tasks that ready early and create other vars based on it
         // (like the zip tasks) can use the correct version
@@ -85,7 +96,7 @@ public class ManipulationPlugin implements Plugin<Project> {
         project.afterEvaluate(new OverrideDependenciesAction(correspondingModule, resolvedDependenciesRepository));
         project.afterEvaluate(new ManifestUpdateAction(correspondingModule));
 
-        configurePublishingTask(project, correspondingModule, resolvedDependenciesRepository);
+        configurePublishingTask(configuration, project, correspondingModule, resolvedDependenciesRepository);
     }
 
     // Ensure that if the Spring Dependency Management plugin is applied,
@@ -110,13 +121,12 @@ public class ManipulationPlugin implements Plugin<Project> {
     /**
      * TODO: add functional tests for publishing
      */
-    private void configurePublishingTask(Project project, ManipulationModel correspondingModule,
+    private void configurePublishingTask(Configuration config, Project project, ManipulationModel correspondingModule,
             ResolvedDependenciesRepository resolvedDependenciesRepository) {
         project.afterEvaluate(evaluatedProject -> {
             // we need to determine which plugin to configure for publication
 
             // first, let the choice be enforced via a system property
-            Configuration config = ConfigCache.getOrCreate(Configuration.class);
             String deployPlugin = config.deployPlugin();
             if (!isEmpty(deployPlugin)) {
                 logger.info("Enforcing artifact deployment plugin `{}`.", deployPlugin);
@@ -149,13 +159,13 @@ public class ManipulationPlugin implements Plugin<Project> {
                 logger.info("Configuring 'maven' plugin for project " + evaluatedProject.getName());
                 evaluatedProject
                         .afterEvaluate(new UploadTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
-                evaluatedProject.afterEvaluate(new MavenPublicationRepositoryAction());
+                evaluatedProject.afterEvaluate(new LegacyMavenPublishingRepositoryAction());
             } else if (MAVEN_PUBLISH_PLUGIN.equals(deployPlugin)) {
                 logger.info("Configuring 'maven-publish' plugin for project " + evaluatedProject.getName());
 
-                evaluatedProject.afterEvaluate(new PublishingRepositoryAction());
+                evaluatedProject.afterEvaluate(new MavenPublishingRepositoryAction());
                 evaluatedProject
-                        .afterEvaluate(new PublishingPomTransformerAction(correspondingModule, resolvedDependenciesRepository));
+                        .afterEvaluate(new MavenPomTransformerAction(correspondingModule, resolvedDependenciesRepository));
             } else {
                 logger.warn("No publishing plugin was configured!");
             }

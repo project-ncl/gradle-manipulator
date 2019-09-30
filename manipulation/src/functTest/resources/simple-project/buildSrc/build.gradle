@@ -1,0 +1,36 @@
+
+plugins {
+  id 'java-gradle-plugin'
+  id 'groovy'
+
+  id 'nebula.maven-base-publish' version '4.4.4'
+  id 'nebula.maven-scm' version '4.4.4'
+}
+
+
+if (project == rootProject) {
+  // change the build dir used during build init, so that doing a clean
+  // won't wipe out the buildscript jar
+  buildDir = 'build-bootstrap'
+}
+
+
+repositories {
+  jcenter()
+}
+
+dependencies {
+  compile localGroovy()
+}
+
+// this happens when included as a normal project in the build, which we do
+// to enforce precommit checks like forbidden apis, as well as setup publishing
+if (project != rootProject) {
+  apply plugin: 'nebula.maven-base-publish'
+  apply plugin: 'nebula.maven-scm'
+
+  afterEvaluate {
+    generatePomFileForPluginMavenPublication.enabled = false
+  }
+}
+

@@ -7,7 +7,13 @@ plugins {
 
 sourceCompatibility = 1.8
 
+allprojects {
+    group = 'org.acme'
 
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+    apply plugin: 'org.jboss.gm.manipulation'
+}
 
 repositories {
     mavenCentral()
@@ -54,7 +60,7 @@ task distZip(type: Zip, dependsOn: [docsZip]) {
             "suitable for community download page."
 
     ext.baseDir = "${baseName}-${project.version}";
-    
+
 
     from(zipTree(docsZip.archivePath)) {
         into "${baseDir}/docs"

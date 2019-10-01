@@ -24,3 +24,7 @@ Note that if `manipulation.json` already exists then this will also be used as a
 #### Version increment padding
 
 When using the automatic increment it is also possible to configure padding for the increment. For instance, by setting `versionIncrementalSuffixPadding` to `3` the version will be `rebuild-003`. This is enabled by default and set to 5.
+
+### Snapshot Detection
+
+The tool can detect snapshot versions and either preserve the snapshot or replace it with a real version. This is controlled by the property `versionSuffixSnapshot`. The default is false (i.e. remove SNAPSHOT and replace by the suffix).

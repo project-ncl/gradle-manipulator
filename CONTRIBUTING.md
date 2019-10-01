@@ -162,3 +162,11 @@ Both plugins can be published to maven local to make it easier to consume them i
 	./gradlew publishToMavenLocal
 
 To change the version that will be deployed just add `-Pversion=whatever`.
+
+#### Releasing SNAPSHOT version
+
+The artifacts can be pushed to the Sonatype snapshot repository (e.g. https://oss.sonatype.org/content/repositories/snapshots/org/jboss/gm/analyzer/analyzer/) wit the following command:
+
+    gradle publishAllPublicationsToSonatype-nexus-snapshotsRepository
+
+Note that your username/password in `$HOME/.m2/settings.xml` for Sonatype must be setup.

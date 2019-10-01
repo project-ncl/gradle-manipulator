@@ -11,6 +11,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.internal.Pair;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
+import org.gradle.testkit.runner.UnexpectedBuildFailure;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Rule;
@@ -119,5 +120,43 @@ public class SimpleProjectFunctionalTest {
                 .isEqualTo(TaskOutcome.SKIPPED);
         assertThat(buildResult.task(":" + "publish").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
         assertThat(publishDirectory).exists();
+    }
+
+    @Test
+    public void enforceDeployPluginThatWasAlreadyConfigured() throws Exception {
+        final File simpleProjectRoot = tempDir.newFolder("simple-project");
+        TestUtils.copyDirectory("simple-project", simpleProjectRoot);
+        assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
+
+        final File publishDirectory = tempDir.newFolder("publish");
+        System.setProperty("AProxDeployUrl", "file://" + publishDirectory.toString());
+
+        final BuildResult buildResult = TestUtils.createGradleRunner()
+                .withProjectDir(simpleProjectRoot)
+                .withArguments("--info", "publish", "-DdeployPlugin=maven-publish")
+                .forwardOutput()
+                .withPluginClasspath()
+                //.withDebug(true)
+                .build();
+
+        assertThat(buildResult.task(":" + "publish").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
+    }
+
+    @Test(expected = UnexpectedBuildFailure.class)
+    public void enforceDifferentDeployPluginThanConfigured() throws Exception {
+        final File simpleProjectRoot = tempDir.newFolder("simple-project");
+        TestUtils.copyDirectory("simple-project", simpleProjectRoot);
+        assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
+
+        final File publishDirectory = tempDir.newFolder("publish");
+        System.setProperty("AProxDeployUrl", "file://" + publishDirectory.toString());
+
+        final BuildResult buildResult = TestUtils.createGradleRunner()
+                .withProjectDir(simpleProjectRoot)
+                .withArguments("--info", "publish", "-DdeployPlugin=maven")
+                .forwardOutput()
+                .withPluginClasspath()
+                //.withDebug(true)
+                .build();
     }
 }

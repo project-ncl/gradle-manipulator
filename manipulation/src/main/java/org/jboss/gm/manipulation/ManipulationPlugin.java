@@ -130,18 +130,22 @@ public class ManipulationPlugin implements Plugin<Project> {
             String deployPlugin = config.deployPlugin();
             if (!isEmpty(deployPlugin)) {
                 logger.info("Enforcing artifact deployment plugin `{}`.", deployPlugin);
-            }
 
-            // if enforced plugin is not configured in the project, apply it
-            if (LEGACY_MAVEN_PLUGIN.equals(deployPlugin)
-                    && !evaluatedProject.getPluginManager().hasPlugin(LEGACY_MAVEN_PLUGIN)) {
-                evaluatedProject.getPluginManager().apply(MavenPlugin.class);
-            } else if (MAVEN_PUBLISH_PLUGIN.equals(deployPlugin)
-                    && !evaluatedProject.getPluginManager().hasPlugin(MAVEN_PUBLISH_PLUGIN)) {
-                evaluatedProject.getPluginManager().apply(MavenPublishPlugin.class);
-                evaluatedProject.afterEvaluate(new PublishingArtifactsAction());
-            } else if (deployPlugin != null) {
-                throw new InvalidUserDataException("Invalid publishing plugin preference: " + deployPlugin);
+                checkEnforcedPluginSetting(evaluatedProject, deployPlugin);
+
+                // if enforced plugin is not configured in the project, apply it
+                if (LEGACY_MAVEN_PLUGIN.equals(deployPlugin)) {
+                    if (!evaluatedProject.getPluginManager().hasPlugin(LEGACY_MAVEN_PLUGIN)) {
+                        evaluatedProject.getPluginManager().apply(MavenPlugin.class);
+                    }
+                } else if (MAVEN_PUBLISH_PLUGIN.equals(deployPlugin)) {
+                    if (!evaluatedProject.getPluginManager().hasPlugin(MAVEN_PUBLISH_PLUGIN)) {
+                        evaluatedProject.getPluginManager().apply(MavenPublishPlugin.class);
+                        evaluatedProject.afterEvaluate(new PublishingArtifactsAction());
+                    }
+                } else {
+                    throw new InvalidUserDataException("Unknown publishing plugin preference: " + deployPlugin);
+                }
             }
 
             // if no plugin is enforced by configuration, look at which plugin is used by the project
@@ -170,5 +174,13 @@ public class ManipulationPlugin implements Plugin<Project> {
                 logger.warn("No publishing plugin was configured!");
             }
         });
+    }
+
+    private static void checkEnforcedPluginSetting(Project evaluatedProject, String enforcedPlugin) {
+        String otherPlugin = LEGACY_MAVEN_PLUGIN.equals(enforcedPlugin) ? MAVEN_PUBLISH_PLUGIN : LEGACY_MAVEN_PLUGIN;
+        if (evaluatedProject.getPluginManager().hasPlugin(otherPlugin)) {
+            throw new InvalidUserDataException("User configuration enforces " + enforcedPlugin
+                    + " but project already uses " + otherPlugin);
+        }
     }
 }

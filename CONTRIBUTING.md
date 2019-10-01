@@ -14,6 +14,7 @@ Contributions to the project are very welcome! Please submit pull requests with 
     * [Prerequisites](#prerequisites)
     * [Release command](#release-command)
     * [Publishing artifacts locally](#publishing-artifacts-locally)
+    * [Releasing SNAPSHOT version](#releasing-snapshot-version)
 
 
 

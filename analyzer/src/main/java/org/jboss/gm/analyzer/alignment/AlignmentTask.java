@@ -210,10 +210,8 @@ public class AlignmentTask extends DefaultTask {
             // this needs to happen for each project, not just the last one
             LockFileIO.renameAllLockFiles(getLocksRootPath(project));
 
-        } catch (ManipulationException e) {
+        } catch (ManipulationException | IOException e) {
             throw new ManipulationUncheckedException(e);
-        } catch (IOException e) {
-            throw new ManipulationUncheckedException("Failed to write marker file", e);
         }
     }
 

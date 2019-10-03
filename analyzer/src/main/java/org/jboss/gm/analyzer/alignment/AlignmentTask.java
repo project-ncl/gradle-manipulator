@@ -71,14 +71,14 @@ import groovy.lang.Script;
  */
 public class AlignmentTask extends DefaultTask {
 
-    static final String INJECT_GME_START = "buildscript { apply from: \"gme.gradle\" }";
-    static final String GME = "gme.gradle";
-    static final String GRADLE = "gradle";
-    static final String GME_REPOS = "gme-repos.gradle";
-    static final String APPLY_GME_REPOS = "buildscript { apply from: new File(buildscript.getSourceFile().getParentFile(),\"gme-repos.gradle\"), to: buildscript }";
-    static final String INJECT_GME_END = "apply from: \"gme-pluginconfigs.gradle\"";
-    static final String GME_PLUGINCONFIGS = "gme-pluginconfigs.gradle";
-    static final String NAME = "generateAlignmentMetadata";
+    public static final String INJECT_GME_START = "buildscript { apply from: \"gme.gradle\" }";
+    public static final String GME = "gme.gradle";
+    public static final String GRADLE = "gradle";
+    public static final String GME_REPOS = "gme-repos.gradle";
+    public static final String APPLY_GME_REPOS = "buildscript { apply from: new File(buildscript.getSourceFile().getParentFile(),\"gme-repos.gradle\"), to: buildscript }";
+    public static final String INJECT_GME_END = "apply from: \"gme-pluginconfigs.gradle\"";
+    public static final String GME_PLUGINCONFIGS = "gme-pluginconfigs.gradle";
+    public static final String NAME = "generateAlignmentMetadata";
 
     private static final AtomicBoolean configOutput = new AtomicBoolean();
 

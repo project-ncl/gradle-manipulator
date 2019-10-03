@@ -61,11 +61,13 @@ dependencies {
 
 // separate source set and task for functional tests
 
-sourceSets.create("functionalTest") {
-    java.srcDir("src/functTest/java")
-    resources.srcDir("src/functTest/resources")
-    compileClasspath += sourceSets["main"].output + configurations.testRuntime
-    runtimeClasspath += output + compileClasspath
+sourceSets {
+    create("functionalTest") {
+        java.srcDir("src/functTest/java")
+        resources.srcDir("src/functTest/resources")
+        compileClasspath += sourceSets["main"].output + configurations.testRuntime
+        runtimeClasspath += output + compileClasspath
+    }
 }
 
 val functionalTest = task<Test>("functionalTest") {
@@ -76,6 +78,21 @@ val functionalTest = task<Test>("functionalTest") {
     mustRunAfter(tasks["test"])
     //this will be used in the Wiremock tests - the port needs to match what Wiremock is setup to use
     environment("DA_ENDPOINT_URL", "http://localhost:8089/da/rest/v-1")
+}
+
+val testJar by tasks.registering(Jar::class) {
+    mustRunAfter(tasks["functionalTest"])
+    archiveClassifier.set("tests")
+    from(sourceSets["functionalTest"].output)
+    from(sourceSets.test.get().output)
+}
+
+configure<PublishingExtension> {
+    publications {
+        getByName<MavenPublication>("shadow") {
+            artifact(testJar.get())
+        }
+    }
 }
 
 tasks.check { dependsOn(functionalTest) }

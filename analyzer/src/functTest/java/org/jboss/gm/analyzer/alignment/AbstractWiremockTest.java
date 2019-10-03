@@ -15,7 +15,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 
 public abstract class AbstractWiremockTest {
 
-    static final int PORT = 8089;
+    protected static final int PORT = 8089;
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(PORT);
@@ -27,7 +27,7 @@ public abstract class AbstractWiremockTest {
         Log.setLog(el);
     }
 
-    String readSampleDAResponse(String responseFileName) throws URISyntaxException, IOException {
+    protected String readSampleDAResponse(String responseFileName) throws URISyntaxException, IOException {
         return FileUtils.readFileToString(
                 Paths.get(AbstractWiremockTest.class.getClassLoader().getResource(responseFileName)
                         .toURI()).toFile(),

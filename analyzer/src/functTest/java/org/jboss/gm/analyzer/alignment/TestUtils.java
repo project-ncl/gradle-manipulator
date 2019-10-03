@@ -65,7 +65,7 @@ public final class TestUtils {
 
     /**
      * this method assumes the projectRoot directory already contains the gradle files (usually unpacked from resources)
-     * 
+     *
      * @param projectRoot the root directory of the aligned project
      * @param expectFailure if the the alignment should fail
      * @param systemProps the system properties to apply for the alignment run
@@ -125,7 +125,7 @@ public final class TestUtils {
     }
 
     public static class TestManipulationModel extends ManipulationModel {
-        TestManipulationModel(ManipulationModel m) {
+        public TestManipulationModel(ManipulationModel m) {
             group = m.getGroup();
             name = m.getName();
             version = m.getVersion();

@@ -34,7 +34,7 @@ public class ManipulationPlugin implements Plugin<Project> {
     private static final String MAVEN_PUBLISH_PLUGIN = "maven-publish";
 
     static {
-        System.out.println("Injecting ManipulationPlugin ; version " + ManifestUtils.getManifestInformation());
+        System.out.println("Running Gradle Manipulation Plugin " + ManifestUtils.getManifestInformation());
     }
 
     private final Logger logger = GMLogger.getLogger(getClass());

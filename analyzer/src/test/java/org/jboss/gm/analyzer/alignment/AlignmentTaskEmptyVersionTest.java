@@ -1,6 +1,7 @@
 package org.jboss.gm.analyzer.alignment;
 
 import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -108,6 +109,13 @@ public class AlignmentTaskEmptyVersionTest {
 
         assertEquals(1, allDependencies.size());
         assertEquals("org.apache.commons:commons-configuration2:2.4", allDependencies.toArray()[0].toString());
+    }
+
+    @Test
+    public void verifyPluginLog()
+    {
+        new AlignmentPlugin();
+        assertTrue (systemOutRule.getLog().contains("Running Gradle Alignment Plugin"));
     }
 
     @Test

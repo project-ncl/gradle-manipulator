@@ -21,7 +21,7 @@ public class AlignmentPlugin implements Plugin<Project> {
     private final Logger logger = GMLogger.getLogger(getClass());
 
     static {
-        System.out.println("Injecting AlignmentPlugin ; version " + ManifestUtils.getManifestInformation());
+        System.out.println("Running Gradle Alignment Plugin (GME) " + ManifestUtils.getManifestInformation());
 
         FilteringCustomLogger.enableFilter();
     }

@@ -1,7 +1,5 @@
 package org.jboss.gm.analyzer.alignment.io;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -16,6 +14,8 @@ import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.logging.GMLogger;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 public final class SettingsFileIO {
     private static final Pattern SETTINGS_ROOT_PROJECT = Pattern.compile(".*rootProject.name\\s*=\\s*['\"](.*)['\"]");

@@ -9,7 +9,7 @@ plugins {
     signing
     `maven-publish`
     id("org.datlowe.maven-publish-auth") version "2.0.2"
-    id("com.diffplug.gradle.spotless") version "3.21.0"
+    id("com.diffplug.gradle.spotless") version "3.25.0"
     id("com.github.johnrengelman.shadow") version "5.0.0"
     id("net.nemerosa.versioning") version "2.8.2"
     id("com.gradle.plugin-publish") version "0.10.1"

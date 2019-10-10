@@ -1,10 +1,10 @@
 package org.jboss.gm.common;
 
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
-
 import org.jboss.gm.common.versioning.DynamicVersionParser;
 import org.junit.Test;
+
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 
 public class VersionSelectorTest {
 

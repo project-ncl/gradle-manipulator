@@ -1,8 +1,5 @@
 package org.jboss.gm.common;
 
-import static org.aeonbits.owner.Config.LoadType.MERGE;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +13,9 @@ import org.aeonbits.owner.Converter;
 import org.aeonbits.owner.Reloadable;
 import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
 import org.gradle.api.logging.Logger;
+
+import static org.aeonbits.owner.Config.LoadType.MERGE;
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * This class is used to hold all configuration values for the two plugins. The naming scheme of

@@ -1,8 +1,5 @@
 package org.jboss.gm.manipulation;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -25,6 +22,9 @@ import org.gradle.internal.SystemProperties;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.internal.DefaultGradleRunner;
 import org.jboss.gm.common.model.ManipulationModel;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 public final class TestUtils {
 

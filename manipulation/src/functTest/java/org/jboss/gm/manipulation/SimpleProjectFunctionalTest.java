@@ -1,7 +1,5 @@
 package org.jboss.gm.manipulation;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -20,6 +18,8 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SimpleProjectFunctionalTest {
 

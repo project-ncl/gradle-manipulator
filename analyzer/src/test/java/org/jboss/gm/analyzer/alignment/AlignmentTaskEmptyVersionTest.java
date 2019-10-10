@@ -1,10 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.io.File;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
@@ -42,6 +37,11 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
+
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(BMUnitRunner.class)
 @BMUnitConfig(bmunitVerbose = true)
@@ -112,10 +112,9 @@ public class AlignmentTaskEmptyVersionTest {
     }
 
     @Test
-    public void verifyPluginLog()
-    {
+    public void verifyPluginLog() {
         new AlignmentPlugin();
-        assertTrue (systemOutRule.getLog().contains("Running Gradle Alignment Plugin"));
+        assertTrue(systemOutRule.getLog().contains("Running Gradle Alignment Plugin"));
     }
 
     @Test

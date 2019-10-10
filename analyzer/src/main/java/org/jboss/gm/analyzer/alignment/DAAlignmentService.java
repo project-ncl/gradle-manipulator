@@ -1,8 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence.NONE;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +15,9 @@ import org.commonjava.maven.ext.io.rest.Translator;
 import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
+
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence.NONE;
 
 /**
  * An implementation of {@link org.jboss.gm.analyzer.alignment.AlignmentService} that uses the Dependency Analyzer service

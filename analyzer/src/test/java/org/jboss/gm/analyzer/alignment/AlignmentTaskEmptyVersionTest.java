@@ -112,10 +112,9 @@ public class AlignmentTaskEmptyVersionTest {
     }
 
     @Test
-    public void verifyPluginLog()
-    {
+    public void verifyPluginLog() {
         new AlignmentPlugin();
-        assertTrue (systemOutRule.getLog().contains("Running Gradle Alignment Plugin"));
+        assertTrue(systemOutRule.getLog().contains("Running Gradle Alignment Plugin"));
     }
 
     @Test

@@ -1,7 +1,5 @@
 package org.jboss.gm.manipulation;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -26,6 +24,8 @@ import org.jboss.gm.manipulation.actions.MavenPublishingRepositoryAction;
 import org.jboss.gm.manipulation.actions.OverrideDependenciesAction;
 import org.jboss.gm.manipulation.actions.PublishingArtifactsAction;
 import org.jboss.gm.manipulation.actions.UploadTaskTransformerAction;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 @SuppressWarnings("unused")
 public class ManipulationPlugin implements Plugin<Project> {

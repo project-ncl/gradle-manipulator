@@ -1,8 +1,5 @@
 package org.jboss.gm.analyzer.alignment.io;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -14,6 +11,9 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 public class LockFileIOTest {
 

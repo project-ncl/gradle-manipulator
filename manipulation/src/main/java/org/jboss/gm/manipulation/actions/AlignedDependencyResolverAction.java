@@ -1,8 +1,5 @@
 package org.jboss.gm.manipulation.actions;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
-
 import java.util.Map;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -14,6 +11,9 @@ import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.manipulation.ResolvedDependenciesRepository;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>

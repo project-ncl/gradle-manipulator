@@ -1,10 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-import static org.gradle.api.Project.DEFAULT_VERSION;
-import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -64,6 +59,11 @@ import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.gradle.api.Project.DEFAULT_VERSION;
+import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
 
 /**
  * The actual Gradle task that creates the {@code manipulation.json} file for the whole project

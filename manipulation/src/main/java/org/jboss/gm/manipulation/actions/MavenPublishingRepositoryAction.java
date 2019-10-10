@@ -1,7 +1,5 @@
 package org.jboss.gm.manipulation.actions;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-
 import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Action;
@@ -12,6 +10,8 @@ import org.gradle.api.publish.PublishingExtension;
 import org.gradle.authentication.http.HttpHeaderAuthentication;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * Adds a publishing repository specific to PNC environment.

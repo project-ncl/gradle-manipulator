@@ -10,11 +10,11 @@ plugins {
     `maven-publish`
     id("org.datlowe.maven-publish-auth") version "2.0.2"
     id("com.diffplug.gradle.spotless") version "3.25.0"
-    id("com.github.johnrengelman.shadow") version "5.0.0"
+    id("com.github.johnrengelman.shadow") version "5.1.0"
     id("net.nemerosa.versioning") version "2.8.2"
     id("com.gradle.plugin-publish") version "0.10.1"
-    id("net.researchgate.release") version "2.6.0"
-    id("com.adarshr.test-logger") version "1.7.0"
+    id("net.researchgate.release") version "2.8.1"
+    id("com.adarshr.test-logger") version "2.0.0"
     id("ca.cutterslade.analyze") version "1.3.3"
 }
 
@@ -67,12 +67,6 @@ subprojects {
          * Another great source of information is the configuration of the shadow plugin itself:
          * https://github.com/johnrengelman/shadow/blob/master/build.gradle
          */
-
-        // We need to do this otherwise the shadowJar tasks takes forever since
-        // it tries to shadow the entire gradle api
-        // Moreover, the gradleApi and groovy dependencies in the plugins themselves
-        // have been explicitly declared with the shadow configuration
-        configurations["compile"].dependencies.remove(dependencies.gradleApi())
 
         // make build task depend on shadowJar
         val build: DefaultTask by tasks

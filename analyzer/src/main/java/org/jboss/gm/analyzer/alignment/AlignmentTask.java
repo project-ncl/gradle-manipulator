@@ -134,7 +134,7 @@ public class AlignmentTask extends DefaultTask {
                         .flatMap(m -> m.values().stream()).distinct().collect(Collectors.toList());
 
                 final AlignmentService alignmentService = AlignmentServiceFactory
-                        .getAlignmentService(cache.getDependencies().keySet());
+                        .getAlignmentService(configuration, cache.getDependencies().keySet());
 
                 final AlignmentService.Response alignmentResponse = alignmentService.align(
                         new AlignmentService.Request(cache.getGAV().stream()

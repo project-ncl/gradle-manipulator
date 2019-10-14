@@ -1,8 +1,12 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.gradle.api.logging.Logger;
+import org.jboss.gm.common.logging.GMLogger;
 
 /**
  * An implementation of {@link org.jboss.gm.analyzer.alignment.AlignmentService} that
@@ -17,29 +21,39 @@ import java.util.List;
  */
 public class WithCustomizersDelegatingAlignmentService implements AlignmentService {
 
-    private final AlignmentService delegate;
+    private final DAAlignmentService delegate;
     private final List<AlignmentService.RequestCustomizer> requestCustomizers;
     private final List<AlignmentService.ResponseCustomizer> responseCustomizers;
 
-    public WithCustomizersDelegatingAlignmentService(AlignmentService delegate,
+    public WithCustomizersDelegatingAlignmentService(DAAlignmentService delegate,
             List<RequestCustomizer> requestCustomizers, List<ResponseCustomizer> responseCustomizers) {
         this.delegate = delegate;
-        this.requestCustomizers = requestCustomizers != null ? requestCustomizers : new ArrayList<>();
-        this.responseCustomizers = responseCustomizers != null ? responseCustomizers : new ArrayList<>();
-
-        this.requestCustomizers.sort(Comparator.comparingInt(RequestCustomizer::order));
-        this.responseCustomizers.sort(Comparator.comparingInt(ResponseCustomizer::order));
+        logger.info("#### request  {} and response {} ", requestCustomizers, responseCustomizers);
+        this.requestCustomizers = requestCustomizers != null
+                ? requestCustomizers.stream().sorted(Comparator.comparingInt(RequestCustomizer::order))
+                        .collect(Collectors.toList())
+                : Collections.emptyList();
+        this.responseCustomizers = responseCustomizers != null
+                ? responseCustomizers.stream().sorted(Comparator.comparingInt(ResponseCustomizer::order))
+                        .collect(Collectors.toList())
+                : Collections.emptyList();
     }
+
+    private final Logger logger = GMLogger.getLogger(getClass());
 
     @Override
     public Response align(Request request) {
+        logger.info("### Aligning with request {}", request);
+
         for (RequestCustomizer requestCustomizer : requestCustomizers) {
+            logger.info("### Running request customizer {}", requestCustomizer);
             request = requestCustomizer.customize(request);
         }
 
         Response response = delegate.align(request);
 
         for (ResponseCustomizer responseCustomizer : responseCustomizers) {
+            logger.info("### Running response customizer {}", responseCustomizer);
             response = responseCustomizer.customize(response);
         }
 

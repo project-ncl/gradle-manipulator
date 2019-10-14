@@ -25,7 +25,7 @@ import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrec
  *
  * The heavy lifting is done by {@link org.commonjava.maven.ext.io.rest.DefaultTranslator}
  */
-public class DAAlignmentService implements AlignmentService {
+public class DAAlignmentService /*implements AlignmentService*/ {
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
@@ -53,8 +53,8 @@ public class DAAlignmentService implements AlignmentService {
                 configuration.logContext());
     }
 
-    @Override
-    public Response align(Request request) {
+    //    @Override
+    public Response align(AlignmentService.Request request) {
         final List<ProjectVersionRef> translateRequest = new ArrayList<>(request.getDependencies().size() + 1);
 
         if (dependencySource == NONE) {
@@ -73,7 +73,10 @@ public class DAAlignmentService implements AlignmentService {
         return new Response(request.getProject(), translationMap);
     }
 
-    private static class Response implements AlignmentService.Response {
+    /**
+     * Used to convert the incoming request to a response.
+     */
+    static class Response implements AlignmentService.Response {
 
         private final Logger logger = GMLogger.getLogger(getClass());
 

@@ -41,6 +41,7 @@ public interface AlignmentService {
         }
     }
 
+    // TODO: How is this used?
     interface Response {
 
         String getNewProjectVersion();
@@ -66,19 +67,6 @@ public interface AlignmentService {
         default int order() {
             return 0;
         }
-
-        RequestCustomizer NOOP = new RequestCustomizer() {
-            @Override
-            public Request customize(Request request) {
-                return request;
-            }
-
-            @Override
-            public int order() {
-                return Integer.MAX_VALUE;
-            }
-        };
-
     }
 
     /**
@@ -98,18 +86,5 @@ public interface AlignmentService {
         default int order() {
             return 0;
         }
-
-        ResponseCustomizer NOOP = new ResponseCustomizer() {
-            @Override
-            public Response customize(Response response) {
-                return response;
-            }
-
-            @Override
-            public int order() {
-                return Integer.MAX_VALUE;
-            }
-        };
-
     }
 }

@@ -56,7 +56,7 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
         final AlignmentService.ResponseCustomizer sut = DependencyOverrideCustomizer.fromConfigurationForModule(configuration,
                 projects);
 
-        assertThat(sut).isSameAs(AlignmentService.ResponseCustomizer.NOOP);
+        assertThat(sut).isSameAs(null);
     }
 
     @Test(expected = InvalidUserDataException.class)

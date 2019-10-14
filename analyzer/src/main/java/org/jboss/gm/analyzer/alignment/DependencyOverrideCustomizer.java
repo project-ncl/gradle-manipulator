@@ -41,34 +41,33 @@ public class DependencyOverrideCustomizer implements AlignmentService.ResponseCu
 
     public static AlignmentService.ResponseCustomizer fromConfigurationForModule(Configuration configuration,
             Set<Project> projects) {
+
+        DependencyOverrideCustomizer result = null;
+        final Map<ProjectRef, String> overrideMap = new LinkedHashMap<>();
         final Map<String, String> prefixed = PropertiesUtils.getPropertiesByPrefix(configuration.getProperties(),
                 "dependencyOverride.");
-        if (prefixed.isEmpty()) {
-            return AlignmentService.ResponseCustomizer.NOOP;
-        }
 
-        final Map<ProjectRef, String> overrideMap = new LinkedHashMap<>();
-
-        //the idea is to create one DependencyOverrideCustomizer per configuration property
-        for (String key : prefixed.keySet()) {
-            final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
-            for (Project project : projects) {
-                final ProjectVersionRef projectRef = new SimpleProjectVersionRef(project.getGroup().toString(),
-                        project.getName(), project.getVersion().toString());
-                if (keyParseResult.matchesModule(projectRef)) {
-                    final String overrideVersion = prefixed.get(key);
-                    log.debug("Overriding dependency {} from in module {} with version {}",
-                            keyParseResult.getDependency(), projectRef, overrideVersion);
-                    overrideMap.put(keyParseResult.getDependency(), overrideVersion);
+        if (!prefixed.isEmpty()) {
+            //the idea is to create one DependencyOverrideCustomizer per configuration property
+            for (String key : prefixed.keySet()) {
+                final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
+                for (Project project : projects) {
+                    final ProjectVersionRef projectRef = new SimpleProjectVersionRef(project.getGroup().toString(),
+                            project.getName(), project.getVersion().toString());
+                    if (keyParseResult.matchesModule(projectRef)) {
+                        final String overrideVersion = prefixed.get(key);
+                        log.debug("Overriding dependency {} from in module {} with version {}",
+                                keyParseResult.getDependency(), projectRef, overrideVersion);
+                        overrideMap.put(keyParseResult.getDependency(), overrideVersion);
+                    }
                 }
             }
         }
 
-        if (overrideMap.isEmpty()) {
-            return AlignmentService.ResponseCustomizer.NOOP;
+        if (!overrideMap.isEmpty()) {
+            result = new DependencyOverrideCustomizer(overrideMap);
         }
-
-        return new DependencyOverrideCustomizer(overrideMap);
+        return result;
     }
 
     private static class DependencyOverrideCustomizerResponse implements AlignmentService.Response {

@@ -178,6 +178,11 @@ subprojects {
         }
     }
 
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
     testlogger {
         // Some of our tests take a _long_ time ; remove spurious warnings.
         slowThreshold = 120000

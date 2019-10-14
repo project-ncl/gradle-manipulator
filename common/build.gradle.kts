@@ -28,7 +28,3 @@ dependencies {
     permitUnusedDeclared("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
     permitUsedUndeclared("org.aeonbits.owner:owner:${project.extra.get("ownerVersion")}")
 }
-
-configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-}

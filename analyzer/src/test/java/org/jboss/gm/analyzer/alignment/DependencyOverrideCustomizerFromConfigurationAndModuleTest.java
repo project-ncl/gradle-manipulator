@@ -3,7 +3,6 @@ package org.jboss.gm.analyzer.alignment;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -108,7 +107,7 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
 
         gavs.forEach(d -> translationMap.put(d, d.getVersionString()));
 
-        final AlignmentService.Response originalResp = new AlignmentService.Response(Collections.singletonList(PROJECT),
+        final AlignmentService.Response originalResp = new AlignmentService.Response(
                 translationMap);
         originalResp.setNewProjectVersion(PROJECT.getVersionString());
 

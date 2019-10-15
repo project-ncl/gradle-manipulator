@@ -59,7 +59,7 @@ public class DAAlignmentService implements AlignmentService {
 
         if (dependencySource == NONE) {
             logger.warn("No dependencySource configured ; unable to call endpoint");
-            return new Response(request.getProject(), Collections.emptyMap());
+            return new Response(Collections.emptyMap());
         }
 
         translateRequest.addAll(request.getProject());
@@ -70,7 +70,7 @@ public class DAAlignmentService implements AlignmentService {
         final Map<ProjectVersionRef, String> translationMap = restEndpoint.translateVersions(translateRequest);
         logger.info("REST Client returned {} ", translationMap);
 
-        Response result = new Response(request.getProject(), translationMap);
+        Response result = new Response(translationMap);
 
         if (!request.getProject().isEmpty()) {
             logger.info("Retrieving project version {} and returning {} ", request.getProject().get(0),

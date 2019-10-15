@@ -106,7 +106,7 @@ public class UpdateProjectVersionCustomizerTest {
 
         final ProjectVersionRef pvr = SimpleProjectVersionRef.parse("org:dummy:1.1.0.redhat-00001");
 
-        final Response originalResp = new Response(null,
+        final Response originalResp = new Response(
                 new HashMap<ProjectVersionRef, String>() {
                     {
                         put(pvr, pvr.getVersionString());

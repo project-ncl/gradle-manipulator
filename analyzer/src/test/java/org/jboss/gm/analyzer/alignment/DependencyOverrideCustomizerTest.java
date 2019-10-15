@@ -28,7 +28,7 @@ public class DependencyOverrideCustomizerTest {
         final DependencyOverrideCustomizer sut = new DependencyOverrideCustomizer(Collections.singletonMap(
                 new SimpleProjectRef("org.hibernate", "*"), "5.3.10.Final-redhat-00001"));
 
-        Response originalResp = new Response(null,
+        Response originalResp = new Response(
                 new HashMap<ProjectVersionRef, String>() {
                     {
                         put(hibernateGav, hibernateGav.getVersionString() + DEFAULT_SUFFIX);

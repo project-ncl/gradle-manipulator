@@ -1,6 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -56,11 +55,12 @@ public interface AlignmentService {
         Map<ProjectRef, String> overrideMap;
         String newProjectVersion;
 
+        // Only used by tests.
         Response() {
-            this(new ArrayList<>(), new HashMap<>());
+            this(new HashMap<>());
         }
 
-        Response(List<ProjectVersionRef> refOfProject, Map<ProjectVersionRef, String> translationMap) {
+        Response(Map<ProjectVersionRef, String> translationMap) {
             this.translationMap = translationMap;
         }
 

@@ -43,7 +43,6 @@ public class DependencyOverrideCustomizer implements ResponseCustomizer {
         response.setOverrideMap(overrideMap);
 
         return response;
-        //        return new DependencyOverrideCustomizerResponse(overrideMap, response);
     }
 
     public static ResponseCustomizer fromConfigurationForModule(Configuration configuration,
@@ -83,43 +82,4 @@ public class DependencyOverrideCustomizer implements ResponseCustomizer {
         }
         return result;
     }
-
-    /*
-    private static class DependencyOverrideCustomizerResponse implements AlignmentService.Response {
-    
-        private final Map<ProjectRef, String> overrideMap;
-        private final AlignmentService.Response originalResponse;
-    
-        DependencyOverrideCustomizerResponse(Map<ProjectRef, String> overrideMap,
-                AlignmentService.Response originalResponse) {
-            this.overrideMap = overrideMap;
-            this.originalResponse = originalResponse;
-        }
-    
-        @Override
-        public String getNewProjectVersion() {
-            return originalResponse.getNewProjectVersion();
-        }
-    
-        @Override
-        public Map<ProjectVersionRef, String> getTranslationMap() {
-            throw new UnsupportedOperationException();
-        }
-    
-        @Override
-        public String getAlignedVersionOfGav(ProjectVersionRef gav) {
-            final Optional<ProjectRef> projectRef = matchingProjectRef(gav);
-            if (projectRef.isPresent()) {
-                return overrideMap.get(projectRef.get());
-            }
-    
-            return originalResponse.getAlignedVersionOfGav(gav);
-        }
-    
-        private Optional<ProjectRef> matchingProjectRef(ProjectRef gav) {
-            return overrideMap.keySet().stream().filter(p -> p.matches(gav)).findFirst();
-        }
-    }
-    
-     */
 }

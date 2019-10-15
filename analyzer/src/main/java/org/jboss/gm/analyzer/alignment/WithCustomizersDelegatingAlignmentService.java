@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.commonjava.maven.ext.common.ManipulationException;
-import org.gradle.api.logging.Logger;
-import org.jboss.gm.common.logging.GMLogger;
 
 /**
  * An implementation of {@link org.jboss.gm.analyzer.alignment.AlignmentService} that
@@ -27,9 +25,9 @@ public class WithCustomizersDelegatingAlignmentService implements AlignmentServi
     private final List<AlignmentService.ResponseCustomizer> responseCustomizers;
 
     public WithCustomizersDelegatingAlignmentService(DAAlignmentService delegate,
-            List<RequestCustomizer> requestCustomizers, List<ResponseCustomizer> responseCustomizers) {
+            List<RequestCustomizer> requestCustomizers,
+            List<ResponseCustomizer> responseCustomizers) {
         this.delegate = delegate;
-        logger.info("#### request  {} and response {} ", requestCustomizers, responseCustomizers);
         this.requestCustomizers = requestCustomizers != null
                 ? requestCustomizers.stream().sorted(Comparator.comparingInt(RequestCustomizer::order))
                         .collect(Collectors.toList())
@@ -40,21 +38,16 @@ public class WithCustomizersDelegatingAlignmentService implements AlignmentServi
                 : Collections.emptyList();
     }
 
-    private final Logger logger = GMLogger.getLogger(getClass());
-
     @Override
     public Response align(Request request) throws ManipulationException {
-        logger.info("### Aligning with request {}", request);
 
         for (RequestCustomizer requestCustomizer : requestCustomizers) {
-            logger.info("### Running request customizer {}", requestCustomizer);
             request = requestCustomizer.customize(request);
         }
 
         Response response = delegate.align(request);
 
         for (ResponseCustomizer responseCustomizer : responseCustomizers) {
-            logger.info("### Running response customizer {}", responseCustomizer);
             response = responseCustomizer.customize(response);
         }
 

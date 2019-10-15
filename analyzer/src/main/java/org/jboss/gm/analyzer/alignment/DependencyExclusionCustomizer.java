@@ -31,9 +31,9 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
 
     private static final Logger log = GMLogger.getLogger(DependencyExclusionCustomizer.class);
 
-    private final Predicate<ProjectVersionRef> predicate;
+    private final Predicate<ProjectRef> predicate;
 
-    public DependencyExclusionCustomizer(Predicate<ProjectVersionRef> predicate) {
+    public DependencyExclusionCustomizer(Predicate<ProjectRef> predicate) {
         this.predicate = predicate;
     }
 
@@ -47,11 +47,10 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
 
     public static AlignmentService.RequestCustomizer fromConfigurationForModule(Configuration configuration,
             Set<Project> projects) {
-
-        DependencyExclusionCustomizer result = null;
-        final List<Predicate> predicates = new ArrayList<>();
+        final List<Predicate<ProjectRef>> predicates = new ArrayList<>();
         final Map<String, String> prefixed = PropertiesUtils.getPropertiesByPrefix(configuration.getProperties(),
                 "dependencyExclusion.");
+        DependencyExclusionCustomizer result = null;
 
         if (!prefixed.isEmpty()) {
             //the idea is to start with a predicate that passes all artifacts and add one predicate per configured exclusion

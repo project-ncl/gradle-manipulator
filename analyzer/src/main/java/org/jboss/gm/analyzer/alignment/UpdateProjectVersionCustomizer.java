@@ -70,66 +70,7 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Response
                 vc.calculate(root.getGroup().toString(), root.getName(), root.getVersion().toString(), state));
 
         return response;
-
-        //        return new ProjectVersionCustomizerResponse(response, projects, configuration);
     }
-
-    /*
-    private static class ProjectVersionCustomizerResponse implements Response {
-    
-        private final Logger logger = GMLogger.getLogger(getClass());
-    
-        private final GradleVersionCalculator vc = new GradleVersionCalculator();
-        private final Response originalResponse;
-        private final VersioningState state;
-        private final ManipulationCache cache;
-        private final Project root;
-    
-        ProjectVersionCustomizerResponse(Response originalResponse, Set<Project> projects,
-                                         Configuration configuration) {
-            this.originalResponse = originalResponse;
-    
-            Project tmp = projects.toArray(new Project[] {})[0].getRootProject();
-            if (DefaultProject.DEFAULT_VERSION.equals(tmp.getVersion())) {
-                // Root project has a non-valid version. Find another one to use.
-                for (Project p : projects) {
-                    if (!DefaultProject.DEFAULT_VERSION.equals(p.getVersion())) {
-                        tmp = p;
-                        break;
-                    }
-                }
-            }
-            root = tmp;
-    
-            cache = ManipulationCache.getCache(root);
-    
-            logger.info("Creating versioning state with {} and {}", configuration.versionIncrementalSuffix(),
-                    configuration.versionIncrementalSuffixPadding());
-            this.state = new VersioningState(configuration.getProperties());
-        }
-    
-        @Override
-        public String getNewProjectVersion() {
-            try {
-                return vc.calculate(root.getGroup().toString(), root.getName(), root.getVersion().toString(), state);
-            } catch (ManipulationException e) {
-                throw new ManipulationUncheckedException(e);
-            }
-        }
-    
-        @Override
-        public Map<ProjectVersionRef, String> getTranslationMap() {
-            return originalResponse.getTranslationMap();
-        }
-    
-        @Override
-        public String getAlignedVersionOfGav(ProjectVersionRef gav) {
-            return originalResponse.getAlignedVersionOfGav(gav);
-        }
-    
-    }
-    
-     */
 
     private class GradleVersionCalculator extends VersionCalculator {
         private Map<ProjectVersionRef, String> translationMap = null;

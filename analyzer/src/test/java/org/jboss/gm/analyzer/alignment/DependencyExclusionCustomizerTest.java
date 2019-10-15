@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.Predicate;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.junit.Test;
 
@@ -19,7 +20,7 @@ public class DependencyExclusionCustomizerTest {
         final ProjectVersionRef undertowGav = withGAV("io.undertow", "undertow-core", "2.0.15.Final");
         final ProjectVersionRef mockitoGav = withGAV("org.mockito", "mockito-core", "2.27.0");
 
-        final Predicate<ProjectVersionRef> excludeHibernatePredicate = (gav -> !"org.hibernate".equals(gav.getGroupId()));
+        final Predicate<ProjectRef> excludeHibernatePredicate = (gav -> !"org.hibernate".equals(gav.getGroupId()));
         final DependencyExclusionCustomizer sut = new DependencyExclusionCustomizer(excludeHibernatePredicate);
 
         final AlignmentService.Request originalReq = new AlignmentService.Request(Collections.singletonList(project),

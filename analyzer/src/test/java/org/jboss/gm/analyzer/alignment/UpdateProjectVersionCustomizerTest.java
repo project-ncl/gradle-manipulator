@@ -41,17 +41,6 @@ public class UpdateProjectVersionCustomizerTest {
     public void ensureProjectVersionIsUpdatedWhenOriginalResponseHasNoProjectVersion()
             throws IOException, ManipulationException {
         final Response originalResp = new Response();
-
-        /*
-        // just return whatever was passed
-        when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
-            final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
-            return input.getVersionString();
-        });
-        when(originalResp.getNewProjectVersion()).thenReturn(null);
-        
-         */
-
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
@@ -72,16 +61,6 @@ public class UpdateProjectVersionCustomizerTest {
     public void ensureProjectVersionIsUpdatedWhenOriginalResponseHasNoProjectVersion2()
             throws IOException, ManipulationException {
         final Response originalResp = new Response();
-        /*
-        // just return whatever was passed
-        when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
-            final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
-            return input.getVersionString();
-        });
-        when(originalResp.getNewProjectVersion()).thenReturn(null);
-        
-         */
-
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
@@ -105,16 +84,6 @@ public class UpdateProjectVersionCustomizerTest {
         System.setProperty("versionIncrementalSuffixPadding", "3");
 
         final Response originalResp = new Response();
-        /*
-        // just return whatever was passed
-        when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
-            final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
-            return input.getVersionString();
-        });
-        when(originalResp.getNewProjectVersion()).thenReturn(null);
-        
-        
-         */
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
@@ -143,18 +112,6 @@ public class UpdateProjectVersionCustomizerTest {
                         put(pvr, pvr.getVersionString());
                     }
                 });
-        /*
-        // just return whatever was passed
-        when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
-            final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
-            return input.getVersionString();
-        });
-        when(originalResp.getTranslationMap()).thenAnswer((Answer<Map<ProjectVersionRef, String>>) invocation -> {
-            Map<ProjectVersionRef, String> result = new HashMap<>();
-            result.put(pvr, pvr.getVersionString());
-            return result;
-        });
-         */
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
@@ -162,8 +119,6 @@ public class UpdateProjectVersionCustomizerTest {
         p.setGroup("org");
         final Set<Project> projects = new HashSet<>();
         projects.add(p);
-
-        //        when(originalResp.getNewProjectVersion()).thenReturn(pvr.getVersionString());
 
         ManipulationCache cache = ManipulationCache.getCache(p);
         cache.addGAV(null, pvr);
@@ -182,15 +137,6 @@ public class UpdateProjectVersionCustomizerTest {
         System.setProperty("versionSuffixSnapshot", "true");
 
         final Response originalResp = new Response();
-        /*        // just return whatever was passed
-        when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
-            final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
-            return input.getVersionString();
-        });
-        when(originalResp.getNewProjectVersion()).thenReturn(null);
-        
-        
-         */
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
@@ -212,16 +158,6 @@ public class UpdateProjectVersionCustomizerTest {
     public void validateVersionWithNoSnapshot() throws IOException, ManipulationException {
 
         final Response originalResp = new Response();
-        /*
-        // just return whatever was passed
-        when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
-            final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
-            return input.getVersionString();
-        });
-        when(originalResp.getNewProjectVersion()).thenReturn(null);
-        
-        
-         */
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();

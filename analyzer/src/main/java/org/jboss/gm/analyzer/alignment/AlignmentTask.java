@@ -43,6 +43,7 @@ import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.TaskAction;
+import org.jboss.gm.analyzer.alignment.AlignmentService.Response;
 import org.jboss.gm.analyzer.alignment.groovy.GMEBaseScript;
 import org.jboss.gm.analyzer.alignment.io.LockFileIO;
 import org.jboss.gm.analyzer.alignment.io.RepositoryExporter;
@@ -136,7 +137,7 @@ public class AlignmentTask extends DefaultTask {
                 final AlignmentService alignmentService = AlignmentServiceFactory
                         .getAlignmentService(configuration, cache.getDependencies().keySet());
 
-                final AlignmentService.Response alignmentResponse = alignmentService.align(
+                final Response alignmentResponse = alignmentService.align(
                         new AlignmentService.Request(cache.getGAV().stream()
                                 .map(p -> new SimpleProjectVersionRef(p.asProjectRef(),
                                         !configuration.versionSuffixSnapshot() ? Version.removeSnapshot(p.getVersionString())
@@ -470,7 +471,7 @@ public class AlignmentTask extends DefaultTask {
 
     private void updateModuleDependencies(ManipulationModel correspondingModule,
             HashMap<RelaxedProjectVersionRef, ProjectVersionRef> allModuleDependencies,
-            AlignmentService.Response alignmentResponse) {
+            Response alignmentResponse) {
 
         allModuleDependencies.forEach((d, p) -> {
             final String newDependencyVersion = alignmentResponse.getAlignedVersionOfGav(p);

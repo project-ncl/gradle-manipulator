@@ -47,32 +47,20 @@ public interface AlignmentService {
         }
     }
 
-    /*
-    interface Response {
-    
-        String getNewProjectVersion();
-    
-        Map<ProjectVersionRef, String> getTranslationMap();
-    
-        String getAlignedVersionOfGav(ProjectVersionRef gav);
-    }*/
-
     /**
      * Contains the resulting aligned dependencies from the dependency analyzer. It will be processed further
      * by the response customizers such as DependencyOverride, ProjectVersionOverride.
      */
     class Response {
-        private final List<ProjectVersionRef> refOfProject;
         private final Map<ProjectVersionRef, String> translationMap;
-        protected Map<ProjectRef, String> overrideMap;
-        protected String newProjectVersion;
+        Map<ProjectRef, String> overrideMap;
+        String newProjectVersion;
 
         Response() {
             this(new ArrayList<>(), new HashMap<>());
         }
 
         Response(List<ProjectVersionRef> refOfProject, Map<ProjectVersionRef, String> translationMap) {
-            this.refOfProject = refOfProject;
             this.translationMap = translationMap;
         }
 

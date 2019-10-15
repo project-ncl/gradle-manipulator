@@ -13,7 +13,6 @@ import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.Translator;
 import org.gradle.api.logging.Logger;
-import org.jboss.gm.analyzer.alignment.AlignmentService.Response;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
 
@@ -26,7 +25,7 @@ import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrec
  *
  * The heavy lifting is done by {@link org.commonjava.maven.ext.io.rest.DefaultTranslator}
  */
-public class DAAlignmentService /*implements AlignmentService*/ {
+public class DAAlignmentService implements AlignmentService {
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
@@ -54,7 +53,7 @@ public class DAAlignmentService /*implements AlignmentService*/ {
                 configuration.logContext());
     }
 
-    //    @Override
+    @Override
     public Response align(AlignmentService.Request request) {
         final List<ProjectVersionRef> translateRequest = new ArrayList<>(request.getDependencies().size() + 1);
 
@@ -80,42 +79,6 @@ public class DAAlignmentService /*implements AlignmentService*/ {
         }
         return result;
     }
-
-    /**
-     * Used to convert the incoming request to a response.
-     * static class RResponse implements Response {
-     * 
-     * private final Logger logger = GMLogger.getLogger(getClass());
-     * 
-     * private final List<ProjectVersionRef> refOfProject;
-     * private final Map<ProjectVersionRef, String> translationMap;
-     * 
-     * Response(List<ProjectVersionRef> refOfProject, Map<ProjectVersionRef, String> translationMap) {
-     * this.refOfProject = refOfProject;
-     * this.translationMap = translationMap;
-     * }
-     * 
-     * // TODO: Verify this is safe - do we need to find the highest projectref version?
-     * // TODO: When is this used / called ?
-     * 
-     * @Override
-     *           public String getNewProjectVersion() {
-     *           logger.info("Retrieving project version {} and returning {} ", refOfProject.get(0),
-     *           translationMap.get(refOfProject.get(0)));
-     *           return translationMap.get(refOfProject.get(0));
-     *           }
-     * 
-     * @Override
-     *           public Map<ProjectVersionRef, String> getTranslationMap() {
-     *           return translationMap;
-     *           }
-     * 
-     * @Override
-     *           public String getAlignedVersionOfGav(ProjectVersionRef gav) {
-     *           return translationMap.get(gav);
-     *           }
-     *           }
-     */
 
     static class GradleDefaultTranslator extends DefaultTranslator {
         // TODO: Replace with PME Random on new release of PME.

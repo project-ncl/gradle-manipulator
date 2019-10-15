@@ -36,18 +36,6 @@ public class DependencyOverrideCustomizerTest {
                     }
                 });
         originalResp.setNewProjectVersion(newProjectVersion);
-        /*
-        when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
-            final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
-            // ensure that jackson is not included in the original response
-            if (input.getGroupId().equals(jacksonGav.getGroupId())) {
-                return null;
-            }
-            // the default behavior of the response will be to add '-redhat-00001' suffix
-            return input.getVersionString() + DEFAULT_SUFFIX;
-        });
-        when(originalResp.getNewProjectVersion()).thenReturn(newProjectVersion);
-        */
 
         // here we simply ensure that our original response has been properly setup
         assertThat(originalResp).isNotNull().satisfies(r -> {

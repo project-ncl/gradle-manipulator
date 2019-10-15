@@ -2,6 +2,7 @@ package org.jboss.gm.analyzer.alignment;
 
 import java.util.Arrays;
 
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -11,10 +12,10 @@ import static org.mockito.Mockito.when;
 public class WithCustomizersDelegatingAlignmentServiceTest {
 
     @Test
-    public void nullCustomizersShouldBeAllowed() {
+    public void nullCustomizersShouldBeAllowed() throws ManipulationException {
         final DAAlignmentService delegate = mock(DAAlignmentService.class);
         final AlignmentService.Request request = mock(AlignmentService.Request.class);
-        final DAAlignmentService.Response response = mock(DAAlignmentService.Response.class);
+        final AlignmentService.Response response = mock(AlignmentService.Response.class);
 
         when(delegate.align(request)).thenReturn(response);
 
@@ -24,14 +25,14 @@ public class WithCustomizersDelegatingAlignmentServiceTest {
     }
 
     @Test
-    public void requestCustomizersShouldBeInvokedInOrder() {
+    public void requestCustomizersShouldBeInvokedInOrder() throws ManipulationException {
         final DAAlignmentService delegate = mock(DAAlignmentService.class);
         final AlignmentService.RequestCustomizer reqCustomizer1 = mock(AlignmentService.RequestCustomizer.class);
         final AlignmentService.RequestCustomizer reqCustomizer2 = mock(AlignmentService.RequestCustomizer.class);
         final AlignmentService.Request originalReq = mock(AlignmentService.Request.class);
         final AlignmentService.Request customizedReq1 = mock(AlignmentService.Request.class);
         final AlignmentService.Request customizedReq2 = mock(AlignmentService.Request.class);
-        final DAAlignmentService.Response response = mock(DAAlignmentService.Response.class);
+        final AlignmentService.Response response = mock(AlignmentService.Response.class);
 
         when(reqCustomizer1.customize(originalReq)).thenReturn(customizedReq1);
         when(reqCustomizer1.order()).thenReturn(0);
@@ -46,12 +47,12 @@ public class WithCustomizersDelegatingAlignmentServiceTest {
     }
 
     @Test
-    public void responseCustomizersShouldBeInvokedInOrder() {
+    public void responseCustomizersShouldBeInvokedInOrder() throws ManipulationException {
         final DAAlignmentService delegate = mock(DAAlignmentService.class);
         final AlignmentService.Request request = mock(AlignmentService.Request.class);
         final AlignmentService.ResponseCustomizer respCustomizer1 = mock(AlignmentService.ResponseCustomizer.class);
         final AlignmentService.ResponseCustomizer respCustomizer2 = mock(AlignmentService.ResponseCustomizer.class);
-        final DAAlignmentService.Response originalResponse = mock(DAAlignmentService.Response.class);
+        final AlignmentService.Response originalResponse = mock(AlignmentService.Response.class);
         final AlignmentService.Response customizedResp1 = mock(AlignmentService.Response.class);
         final AlignmentService.Response customizedResp2 = mock(AlignmentService.Response.class);
 

@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.logging.GMLogger;
 
@@ -42,7 +43,7 @@ public class WithCustomizersDelegatingAlignmentService implements AlignmentServi
     private final Logger logger = GMLogger.getLogger(getClass());
 
     @Override
-    public Response align(Request request) {
+    public Response align(Request request) throws ManipulationException {
         logger.info("### Aligning with request {}", request);
 
         for (RequestCustomizer requestCustomizer : requestCustomizers) {

@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.gradle.api.Project;
 import org.jboss.gm.analyzer.alignment.AlignmentService.RequestCustomizer;
 import org.jboss.gm.analyzer.alignment.AlignmentService.ResponseCustomizer;
@@ -43,6 +44,7 @@ final class AlignmentServiceFactory {
     private static List<ResponseCustomizer> getResponseCustomizers(Configuration configuration,
             Set<Project> projects) {
         return Stream.of(DependencyOverrideCustomizer.fromConfigurationForModule(configuration, projects),
-                new UpdateProjectVersionCustomizer(projects, configuration)).filter(Objects::nonNull).collect(Collectors.toList());
+                new UpdateProjectVersionCustomizer(projects, configuration)).filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }

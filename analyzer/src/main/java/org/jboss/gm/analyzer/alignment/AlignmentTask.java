@@ -129,7 +129,7 @@ public class AlignmentTask extends DefaultTask {
 
             // when the set is empty, we know that this was the last alignment task to execute.
             if (cache.removeProject(projectName)) {
-                logger.info("Completed scanning projects; now processing for REST...");
+                logger.info("Completed scanning {} projects; now processing for REST...", cache.getDependencies().size());
                 Collection<ProjectVersionRef> allDeps = cache.getDependencies().values().stream()
                         .flatMap(m -> m.values().stream()).distinct().collect(Collectors.toList());
 

@@ -28,7 +28,7 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
     private static final Path PATH_IN_REPOSITORY = Paths.get("org/acme/root/1.0.1-redhat-00001/");
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();

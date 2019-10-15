@@ -1,10 +1,16 @@
 package org.jboss.gm.analyzer.alignment;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 
 /**
  * Used by {@link org.jboss.gm.analyzer.alignment.AlignmentTask} in order to perform the alignment
@@ -13,7 +19,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
  */
 public interface AlignmentService {
 
-    Response align(Request request);
+    Response align(Request request) throws ManipulationException;
 
     /**
      * Contains both the collected project dependencies GAVs and the project GAV.
@@ -41,14 +47,66 @@ public interface AlignmentService {
         }
     }
 
-    // TODO: How is this used?
+    /*
     interface Response {
-
+    
         String getNewProjectVersion();
-
+    
         Map<ProjectVersionRef, String> getTranslationMap();
-
+    
         String getAlignedVersionOfGav(ProjectVersionRef gav);
+    }*/
+
+    /**
+     * Contains the resulting aligned dependencies from the dependency analyzer. It will be processed further
+     * by the response customizers such as DependencyOverride, ProjectVersionOverride.
+     */
+    class Response {
+        private final List<ProjectVersionRef> refOfProject;
+        private final Map<ProjectVersionRef, String> translationMap;
+        protected Map<ProjectRef, String> overrideMap;
+        protected String newProjectVersion;
+
+        Response() {
+            this(new ArrayList<>(), new HashMap<>());
+        }
+
+        Response(List<ProjectVersionRef> refOfProject, Map<ProjectVersionRef, String> translationMap) {
+            this.refOfProject = refOfProject;
+            this.translationMap = translationMap;
+        }
+
+        void setNewProjectVersion(String version) {
+            newProjectVersion = version;
+        }
+
+        void setOverrideMap(Map<ProjectRef, String> overrideMap) {
+            this.overrideMap = overrideMap;
+        }
+
+        String getNewProjectVersion() {
+            return newProjectVersion;
+        }
+
+        Map<ProjectVersionRef, String> getTranslationMap() {
+            return translationMap;
+        }
+
+        String getAlignedVersionOfGav(ProjectVersionRef gav) {
+            final Optional<ProjectRef> projectRef = matchingProjectRef(gav);
+            if (projectRef.isPresent()) {
+                return overrideMap.get(projectRef.get());
+            }
+            if (translationMap == null) {
+                throw new ManipulationUncheckedException("Translation map has not been initialised");
+            }
+            return translationMap.get(gav);
+        }
+
+        private Optional<ProjectRef> matchingProjectRef(ProjectRef gav) {
+            return overrideMap == null ? Optional.empty()
+                    : overrideMap.keySet().stream().filter(p -> p.matches(gav)).findFirst();
+        }
     }
 
     /**
@@ -78,7 +136,7 @@ public interface AlignmentService {
      */
     interface ResponseCustomizer {
 
-        Response customize(Response response);
+        Response customize(Response response) throws ManipulationException;
 
         // Integer.MIN_VALUE is the max order. This means that if we have 2 services for example
         // we with the first one to be invoked before the second, we would give the first one a

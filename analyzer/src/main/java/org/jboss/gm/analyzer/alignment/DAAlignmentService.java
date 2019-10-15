@@ -13,6 +13,7 @@ import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.Translator;
 import org.gradle.api.logging.Logger;
+import org.jboss.gm.analyzer.alignment.AlignmentService.Response;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
 
@@ -70,43 +71,51 @@ public class DAAlignmentService /*implements AlignmentService*/ {
         final Map<ProjectVersionRef, String> translationMap = restEndpoint.translateVersions(translateRequest);
         logger.info("REST Client returned {} ", translationMap);
 
-        return new Response(request.getProject(), translationMap);
+        Response result = new Response(request.getProject(), translationMap);
+
+        if (!request.getProject().isEmpty()) {
+            logger.info("Retrieving project version {} and returning {} ", request.getProject().get(0),
+                    translationMap.get(request.getProject().get(0)));
+            result.setNewProjectVersion(translationMap.get(request.getProject().get(0)));
+        }
+        return result;
     }
 
     /**
      * Used to convert the incoming request to a response.
+     * static class RResponse implements Response {
+     * 
+     * private final Logger logger = GMLogger.getLogger(getClass());
+     * 
+     * private final List<ProjectVersionRef> refOfProject;
+     * private final Map<ProjectVersionRef, String> translationMap;
+     * 
+     * Response(List<ProjectVersionRef> refOfProject, Map<ProjectVersionRef, String> translationMap) {
+     * this.refOfProject = refOfProject;
+     * this.translationMap = translationMap;
+     * }
+     * 
+     * // TODO: Verify this is safe - do we need to find the highest projectref version?
+     * // TODO: When is this used / called ?
+     * 
+     * @Override
+     *           public String getNewProjectVersion() {
+     *           logger.info("Retrieving project version {} and returning {} ", refOfProject.get(0),
+     *           translationMap.get(refOfProject.get(0)));
+     *           return translationMap.get(refOfProject.get(0));
+     *           }
+     * 
+     * @Override
+     *           public Map<ProjectVersionRef, String> getTranslationMap() {
+     *           return translationMap;
+     *           }
+     * 
+     * @Override
+     *           public String getAlignedVersionOfGav(ProjectVersionRef gav) {
+     *           return translationMap.get(gav);
+     *           }
+     *           }
      */
-    static class Response implements AlignmentService.Response {
-
-        private final Logger logger = GMLogger.getLogger(getClass());
-
-        private final List<ProjectVersionRef> refOfProject;
-        private final Map<ProjectVersionRef, String> translationMap;
-
-        Response(List<ProjectVersionRef> refOfProject, Map<ProjectVersionRef, String> translationMap) {
-            this.refOfProject = refOfProject;
-            this.translationMap = translationMap;
-        }
-
-        // TODO: Verify this is safe - do we need to find the highest projectref version?
-        // TODO: When is this used / called ?
-        @Override
-        public String getNewProjectVersion() {
-            logger.info("Retrieving project version {} and returning {} ", refOfProject.get(0),
-                    translationMap.get(refOfProject.get(0)));
-            return translationMap.get(refOfProject.get(0));
-        }
-
-        @Override
-        public Map<ProjectVersionRef, String> getTranslationMap() {
-            return translationMap;
-        }
-
-        @Override
-        public String getAlignedVersionOfGav(ProjectVersionRef gav) {
-            return translationMap.get(gav);
-        }
-    }
 
     static class GradleDefaultTranslator extends DefaultTranslator {
         // TODO: Replace with PME Random on new release of PME.

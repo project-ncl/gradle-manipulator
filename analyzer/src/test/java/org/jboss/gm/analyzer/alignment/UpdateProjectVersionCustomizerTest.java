@@ -4,14 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
+import org.jboss.gm.analyzer.alignment.AlignmentService.Response;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.junit.Rule;
@@ -20,14 +21,10 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-import org.mockito.stubbing.Answer;
 
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class UpdateProjectVersionCustomizerTest {
 
@@ -41,14 +38,19 @@ public class UpdateProjectVersionCustomizerTest {
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Test
-    public void ensureProjectVersionIsUpdatedWhenOriginalResponseHasNoProjectVersion() throws IOException {
-        final AlignmentService.Response originalResp = mock(AlignmentService.Response.class);
+    public void ensureProjectVersionIsUpdatedWhenOriginalResponseHasNoProjectVersion()
+            throws IOException, ManipulationException {
+        final Response originalResp = new Response();
+
+        /*
         // just return whatever was passed
         when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
             final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
             return input.getVersionString();
         });
         when(originalResp.getNewProjectVersion()).thenReturn(null);
+        
+         */
 
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
@@ -60,21 +62,25 @@ public class UpdateProjectVersionCustomizerTest {
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final AlignmentService.Response customizedReq = sut.customize(originalResp);
+        final Response customizedReq = sut.customize(originalResp);
 
         assertThat(customizedReq).isNotNull()
                 .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.0.0.redhat-00001"));
     }
 
     @Test
-    public void ensureProjectVersionIsUpdatedWhenOriginalResponseHasNoProjectVersion2() throws IOException {
-        final AlignmentService.Response originalResp = mock(AlignmentService.Response.class);
+    public void ensureProjectVersionIsUpdatedWhenOriginalResponseHasNoProjectVersion2()
+            throws IOException, ManipulationException {
+        final Response originalResp = new Response();
+        /*
         // just return whatever was passed
         when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
             final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
             return input.getVersionString();
         });
         when(originalResp.getNewProjectVersion()).thenReturn(null);
+        
+         */
 
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
@@ -86,25 +92,29 @@ public class UpdateProjectVersionCustomizerTest {
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final AlignmentService.Response customizedReq = sut.customize(originalResp);
+        final Response customizedReq = sut.customize(originalResp);
 
         assertThat(customizedReq).isNotNull()
                 .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001"));
     }
 
     @Test
-    public void ensureProjectVersionIsUpdatedWhenOriginalResponseHasNoProjectVersion3() throws IOException {
+    public void ensureProjectVersionIsUpdatedWhenOriginalResponseHasNoProjectVersion3()
+            throws IOException, ManipulationException {
 
         System.setProperty("versionIncrementalSuffixPadding", "3");
 
-        final AlignmentService.Response originalResp = mock(AlignmentService.Response.class);
+        final Response originalResp = new Response();
+        /*
         // just return whatever was passed
         when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
             final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
             return input.getVersionString();
         });
         when(originalResp.getNewProjectVersion()).thenReturn(null);
-
+        
+        
+         */
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
@@ -115,18 +125,25 @@ public class UpdateProjectVersionCustomizerTest {
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final AlignmentService.Response customizedReq = sut.customize(originalResp);
+        final Response customizedReq = sut.customize(originalResp);
 
         assertThat(customizedReq).isNotNull()
                 .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-001"));
     }
 
     @Test
-    public void ensureProjectVersionIsUpdatedWhenOriginalResponseHasProperProjectVersion() throws IOException {
+    public void ensureProjectVersionIsUpdatedWhenOriginalResponseHasProperProjectVersion()
+            throws IOException, ManipulationException {
 
         final ProjectVersionRef pvr = SimpleProjectVersionRef.parse("org:dummy:1.1.0.redhat-00001");
 
-        final AlignmentService.Response originalResp = mock(AlignmentService.Response.class);
+        final Response originalResp = new Response(null,
+                new HashMap<ProjectVersionRef, String>() {
+                    {
+                        put(pvr, pvr.getVersionString());
+                    }
+                });
+        /*
         // just return whatever was passed
         when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
             final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
@@ -137,7 +154,7 @@ public class UpdateProjectVersionCustomizerTest {
             result.put(pvr, pvr.getVersionString());
             return result;
         });
-
+         */
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
@@ -146,32 +163,34 @@ public class UpdateProjectVersionCustomizerTest {
         final Set<Project> projects = new HashSet<>();
         projects.add(p);
 
-        when(originalResp.getNewProjectVersion()).thenReturn(pvr.getVersionString());
+        //        when(originalResp.getNewProjectVersion()).thenReturn(pvr.getVersionString());
 
         ManipulationCache cache = ManipulationCache.getCache(p);
         cache.addGAV(null, pvr);
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final AlignmentService.Response customizedReq = sut.customize(originalResp);
+        final Response customizedReq = sut.customize(originalResp);
 
         assertThat(customizedReq).isNotNull()
                 .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002"));
     }
 
     @Test
-    public void validateVersionWithSnapshot() throws IOException {
+    public void validateVersionWithSnapshot() throws IOException, ManipulationException {
 
         System.setProperty("versionSuffixSnapshot", "true");
 
-        final AlignmentService.Response originalResp = mock(AlignmentService.Response.class);
-        // just return whatever was passed
+        final Response originalResp = new Response();
+        /*        // just return whatever was passed
         when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
             final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
             return input.getVersionString();
         });
         when(originalResp.getNewProjectVersion()).thenReturn(null);
-
+        
+        
+         */
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
@@ -182,7 +201,7 @@ public class UpdateProjectVersionCustomizerTest {
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final AlignmentService.Response customizedReq = sut.customize(originalResp);
+        final Response customizedReq = sut.customize(originalResp);
 
         assertThat(customizedReq).isNotNull()
                 .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001-SNAPSHOT"));
@@ -190,16 +209,19 @@ public class UpdateProjectVersionCustomizerTest {
     }
 
     @Test
-    public void validateVersionWithNoSnapshot() throws IOException {
+    public void validateVersionWithNoSnapshot() throws IOException, ManipulationException {
 
-        final AlignmentService.Response originalResp = mock(AlignmentService.Response.class);
+        final Response originalResp = new Response();
+        /*
         // just return whatever was passed
         when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
             final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
             return input.getVersionString();
         });
         when(originalResp.getNewProjectVersion()).thenReturn(null);
-
+        
+        
+         */
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
@@ -210,7 +232,7 @@ public class UpdateProjectVersionCustomizerTest {
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
         final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final AlignmentService.Response customizedReq = sut.customize(originalResp);
+        final Response customizedReq = sut.customize(originalResp);
 
         assertThat(customizedReq).isNotNull()
                 .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001"));

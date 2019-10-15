@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.tuple;
 public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();

@@ -1,5 +1,6 @@
 import com.adarshr.gradle.testlogger.theme.ThemeType
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import io.freefair.gradle.plugins.lombok.LombokExtension
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -16,6 +17,7 @@ plugins {
     id("net.researchgate.release") version "2.8.1"
     id("com.adarshr.test-logger") version "2.0.0"
     id("ca.cutterslade.analyze") version "1.3.3"
+    id("io.freefair.lombok") version "4.1.2" apply false
 }
 
 apply(plugin = "net.researchgate.release")
@@ -49,6 +51,13 @@ subprojects {
     apply(plugin = "com.diffplug.gradle.spotless")
     apply(plugin = "net.nemerosa.versioning")
     apply(plugin = "com.adarshr.test-logger")
+    apply(plugin = "io.freefair.lombok")
+
+    extra["lombokVersion"] = extensions.findByType(LombokExtension::class)?.version?.get()
+    tasks.named("generateLombokConfig") {
+        // Don't generate lombok.config files ( https://docs.freefair.io/gradle-plugins/3.6.6/reference/#_lombok_config_handling )
+        enabled = false
+    }
 
     if (project.name == "common") {
         apply(plugin = "java-library")
@@ -177,6 +186,7 @@ subprojects {
             }
         }
     }
+
 
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8

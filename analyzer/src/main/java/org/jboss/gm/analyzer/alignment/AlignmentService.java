@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -28,56 +32,28 @@ public interface AlignmentService {
      * It might make sense to break this up since other types of AlignmentService implementations might
      * not be handle the project GAV
      */
+    @Getter
+    @RequiredArgsConstructor
     class Request {
         private final Collection<? extends ProjectVersionRef> dependencies;
         private final List<ProjectVersionRef> project;
-
-        public Request(List<ProjectVersionRef> projectVersionRefs, Collection<? extends ProjectVersionRef> dependencies) {
-            this.dependencies = dependencies;
-            this.project = projectVersionRefs;
-        }
-
-        Collection<? extends ProjectVersionRef> getDependencies() {
-            return dependencies;
-        }
-
-        List<ProjectVersionRef> getProject() {
-            return project;
-        }
     }
 
     /**
      * Contains the resulting aligned dependencies from the dependency analyzer. It will be processed further
      * by the response customizers such as DependencyOverride, ProjectVersionOverride.
      */
+    @Getter
+    @Setter
+    @RequiredArgsConstructor
     class Response {
         private final Map<ProjectVersionRef, String> translationMap;
-        Map<ProjectRef, String> overrideMap;
-        String newProjectVersion;
+        private Map<ProjectRef, String> overrideMap;
+        private String newProjectVersion;
 
         // Only used by tests.
         Response() {
             this(new HashMap<>());
-        }
-
-        Response(Map<ProjectVersionRef, String> translationMap) {
-            this.translationMap = translationMap;
-        }
-
-        void setNewProjectVersion(String version) {
-            newProjectVersion = version;
-        }
-
-        void setOverrideMap(Map<ProjectRef, String> overrideMap) {
-            this.overrideMap = overrideMap;
-        }
-
-        String getNewProjectVersion() {
-            return newProjectVersion;
-        }
-
-        Map<ProjectVersionRef, String> getTranslationMap() {
-            return translationMap;
         }
 
         String getAlignedVersionOfGav(ProjectVersionRef gav) {

@@ -13,6 +13,7 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
+import lombok.Getter;
 
 /**
  * Cache that is stored in the root project extensions.
@@ -22,6 +23,7 @@ public class ManipulationCache {
     private static final String NAME_PREFIX = "manipulationModelCache";
 
     /** Root project */
+    @Getter
     private Project rootProject;
 
     /**
@@ -30,16 +32,20 @@ public class ManipulationCache {
      */
     private HashSet<String> projectCounter = new HashSet<>();
 
+    @Getter
     private ManipulationModel rootModel;
 
+    @Getter
     private List<ProjectVersionRef> projectVersionRefs = new ArrayList<>();
 
     /**
      * Represents a mapping of project module to a map of the original Dependency (which might be dynamic) to
      * the fully resolved GAV.
      */
+    @Getter
     private HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = new HashMap<>();
 
+    @Getter
     private Map<ArtifactRepository, Path> repositories = new HashMap<>();
 
     /**
@@ -105,16 +111,8 @@ public class ManipulationCache {
         return projectCounter.isEmpty();
     }
 
-    public ManipulationModel getModel() {
-        return rootModel;
-    }
-
     public void addDependencies(Project project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef> deps) {
         projectDependencies.put(project, deps);
-    }
-
-    public HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> getDependencies() {
-        return projectDependencies;
     }
 
     /**
@@ -132,25 +130,14 @@ public class ManipulationCache {
         projectVersionRefs.add(gav);
     }
 
-    public List<ProjectVersionRef> getGAV() {
-        return projectVersionRefs;
-    }
-
     @Override
     public String toString() {
         return rootProject.getName();
     }
 
-    public Project getRootProject() {
-        return rootProject;
-    }
 
     public void addRepository(ArtifactRepository repository, Path projectDir) {
 
         repositories.put(repository, projectDir);
-    }
-
-    public Map<ArtifactRepository, Path> getRepositories() {
-        return repositories;
     }
 }

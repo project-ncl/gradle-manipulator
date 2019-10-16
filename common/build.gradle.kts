@@ -24,6 +24,10 @@ dependencies {
     testCompile("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
     testCompile(gradleApi())
 
+    // Lombok comes via plugin
+    permitUsedUndeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
+    permitTestUnusedDeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
+
     // Owner: Need Java8 dependency which pulls in owner itself.
     permitUnusedDeclared("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
     permitUsedUndeclared("org.aeonbits.owner:owner:${project.extra.get("ownerVersion")}")

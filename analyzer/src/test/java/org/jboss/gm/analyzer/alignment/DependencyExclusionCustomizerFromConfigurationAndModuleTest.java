@@ -2,10 +2,11 @@ package org.jboss.gm.analyzer.alignment;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -94,8 +95,8 @@ public class DependencyExclusionCustomizerFromConfigurationAndModuleTest {
 
         final AlignmentService.Request originalReq = new AlignmentService.Request(
                 Collections.singletonList(project),
-                Arrays.asList(hibernateGav, hibernateValidatorGav, undertowGav, jacksonDatabindGav, mongoGav, mockitoGav,
-                        wiremockGav));
+                Stream.of(hibernateGav, hibernateValidatorGav, undertowGav, jacksonDatabindGav, mongoGav, mockitoGav,
+                        wiremockGav).collect(Collectors.toSet()));
         final AlignmentService.Request customizedReq = sut.customize(originalReq);
 
         assertThat(customizedReq).isNotNull().satisfies(r -> {

@@ -131,14 +131,14 @@ public class AlignmentTask extends DefaultTask {
             // when the set is empty, we know that this was the last alignment task to execute.
             if (cache.removeProject(projectName)) {
                 logger.info("Completed scanning {} projects; now processing for REST...", cache.getDependencies().size());
-                Collection<ProjectVersionRef> allDeps = cache.getDependencies().values().stream()
-                        .flatMap(m -> m.values().stream()).distinct().collect(Collectors.toList());
+                Set<ProjectVersionRef> allDeps = cache.getDependencies().values().stream()
+                        .flatMap(m -> m.values().stream()).collect(Collectors.toSet());
 
                 final AlignmentService alignmentService = AlignmentServiceFactory
                         .getAlignmentService(configuration, cache.getDependencies().keySet());
 
                 final Response alignmentResponse = alignmentService.align(
-                        new AlignmentService.Request(cache.getGAV().stream()
+                        new AlignmentService.Request(cache.getProjectVersionRefs().stream()
                                 .map(p -> new SimpleProjectVersionRef(p.asProjectRef(),
                                         !configuration.versionSuffixSnapshot() ? Version.removeSnapshot(p.getVersionString())
                                                 : p.getVersionString()))

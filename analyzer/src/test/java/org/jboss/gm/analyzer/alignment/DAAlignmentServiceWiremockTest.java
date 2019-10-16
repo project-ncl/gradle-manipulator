@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.io.FileUtils;
@@ -59,10 +60,9 @@ public class DAAlignmentServiceWiremockTest {
         final ProjectVersionRef mockitoGav = withGAV("org.mockito", "mockito-core", "2.27.0");
         final AlignmentService.Response response = sut.align(new AlignmentService.Request(
                 Collections.singletonList(projectGav),
-                Arrays.asList(
-                        hibernateGav,
+                Stream.of(hibernateGav,
                         undertowGav,
-                        mockitoGav)));
+                        mockitoGav).collect(Collectors.toSet())));
 
         assertThat(response).isNotNull().satisfies(r -> {
             assertThat(r.getNewProjectVersion()).isNull();

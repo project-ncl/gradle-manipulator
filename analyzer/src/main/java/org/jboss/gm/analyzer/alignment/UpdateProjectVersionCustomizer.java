@@ -93,13 +93,13 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Response
             if (m.exists()) {
                 result.add(ManipulationIO.readManipulationModel(root.getRootDir()).getVersion());
             }
-            logger.debug("Adding project version candidates from cache {} ", cache.getGAV());
+            logger.debug("Adding project version candidates from cache {} ", cache.getProjectVersionRefs());
 
             if (translationMap == null) {
                 throw new ManipulationUncheckedException("Translation map has not been initialised");
             }
 
-            cache.getGAV().forEach(pvr -> {
+            cache.getProjectVersionRefs().forEach(pvr -> {
                 String t = translationMap.get(pvr);
                 if (StringUtils.isNotBlank(t)) {
                     result.add(t.trim());

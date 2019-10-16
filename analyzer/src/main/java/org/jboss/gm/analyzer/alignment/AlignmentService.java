@@ -1,10 +1,10 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +35,8 @@ public interface AlignmentService {
     @Getter
     @RequiredArgsConstructor
     class Request {
-        private final Collection<? extends ProjectVersionRef> dependencies;
         private final List<ProjectVersionRef> project;
+        private final Set<ProjectVersionRef> dependencies;
     }
 
     /**

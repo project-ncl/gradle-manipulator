@@ -7,13 +7,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import lombok.Getter;
+
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
-import lombok.Getter;
 
 /**
  * Cache that is stored in the root project extensions.
@@ -32,18 +33,19 @@ public class ManipulationCache {
      */
     private HashSet<String> projectCounter = new HashSet<>();
 
+    /** Root model **/
     @Getter
-    private ManipulationModel rootModel;
+    private ManipulationModel model;
 
     @Getter
     private List<ProjectVersionRef> projectVersionRefs = new ArrayList<>();
 
     /**
-     * Represents a mapping of project module to a map of the original Dependency (which might be dynamic) to
-     * the fully resolved GAV.
+     * This is the project dependencies - it represents a mapping of project module to a map of the original Dependency
+     * (which might be dynamic) to the fully resolved GAV.
      */
     @Getter
-    private HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = new HashMap<>();
+    private HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> dependencies = new HashMap<>();
 
     @Getter
     private Map<ArtifactRepository, Path> repositories = new HashMap<>();
@@ -61,7 +63,7 @@ public class ManipulationCache {
      */
     public static ManipulationCache getCache(Project project, ManipulationModel model) {
         ManipulationCache cache = getCache(project);
-        cache.rootModel = model;
+        cache.model = model;
         return cache;
     }
 
@@ -112,7 +114,7 @@ public class ManipulationCache {
     }
 
     public void addDependencies(Project project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef> deps) {
-        projectDependencies.put(project, deps);
+        dependencies.put(project, deps);
     }
 
     /**
@@ -124,17 +126,16 @@ public class ManipulationCache {
      */
     public void addGAV(Project project, ProjectVersionRef gav) {
         // Null check for some tests.
-        if (project != null && rootModel != null) {
-            rootModel.findCorrespondingChild(project).setGroup(project.getGroup().toString());
+        if (project != null && model != null) {
+            model.findCorrespondingChild(project).setGroup(project.getGroup().toString());
         }
-        projectVersionRefs.add(gav);
+        this.projectVersionRefs.add(gav);
     }
 
     @Override
     public String toString() {
         return rootProject.getName();
     }
-
 
     public void addRepository(ArtifactRepository repository, Path projectDir) {
 

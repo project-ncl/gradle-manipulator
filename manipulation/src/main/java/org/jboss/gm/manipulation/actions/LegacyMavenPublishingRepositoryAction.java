@@ -107,7 +107,6 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
         // Clone the archive configuration to avoid ConcurrentModificationException.
         publishArchives.getArtifacts().addAll(archives.copy().getArtifacts());
 
-        logger.info("### Adding publishArchives / pom-default for " + project.getProjectDir());
         // add an artifact referencing the POM
         project.getArtifacts().add("publishArchives",
                 project.file(project.getBuildDir().toPath().resolve("poms/pom-default.xml")),

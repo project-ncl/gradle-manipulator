@@ -1,17 +1,15 @@
 package org.jboss.gm.analyzer.alignment;
 
 import java.util.Collections;
+import java.util.HashMap;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
+import org.jboss.gm.analyzer.alignment.AlignmentService.Response;
 import org.junit.Test;
-import org.mockito.stubbing.Answer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class DependencyOverrideCustomizerTest {
 
@@ -24,23 +22,20 @@ public class DependencyOverrideCustomizerTest {
         // this gav will not be part of the original response
         final ProjectVersionRef jacksonGav = withGAV("com.fasterxml.jackson.core", "undertow-core", "2.9.9.3");
 
+        final String newProjectVersion = "1.0.0" + DEFAULT_SUFFIX;
+
         // make a customizer that overrides any hibernate dependency but no other gavs
         final DependencyOverrideCustomizer sut = new DependencyOverrideCustomizer(Collections.singletonMap(
                 new SimpleProjectRef("org.hibernate", "*"), "5.3.10.Final-redhat-00001"));
 
-        final AlignmentService.Response originalResp = mock(AlignmentService.Response.class);
-
-        when(originalResp.getAlignedVersionOfGav(any(ProjectVersionRef.class))).thenAnswer((Answer<String>) invocation -> {
-            final ProjectVersionRef input = (ProjectVersionRef) invocation.getArguments()[0];
-            // ensure that jackson is not included in the original response
-            if (input.getGroupId().equals(jacksonGav.getGroupId())) {
-                return null;
-            }
-            // the default behavior of the response will be to add '-redhat-00001' suffix
-            return input.getVersionString() + DEFAULT_SUFFIX;
-        });
-        final String newProjectVersion = "1.0.0" + DEFAULT_SUFFIX;
-        when(originalResp.getNewProjectVersion()).thenReturn(newProjectVersion);
+        Response originalResp = new Response(
+                new HashMap<ProjectVersionRef, String>() {
+                    {
+                        put(hibernateGav, hibernateGav.getVersionString() + DEFAULT_SUFFIX);
+                        put(undertowGav, undertowGav.getVersionString() + DEFAULT_SUFFIX);
+                    }
+                });
+        originalResp.setNewProjectVersion(newProjectVersion);
 
         // here we simply ensure that our original response has been properly setup
         assertThat(originalResp).isNotNull().satisfies(r -> {
@@ -50,7 +45,7 @@ public class DependencyOverrideCustomizerTest {
             assertThat(r.getAlignedVersionOfGav(jacksonGav)).isEqualTo(null);
         });
 
-        final AlignmentService.Response customizedResp = sut.customize(originalResp);
+        final Response customizedResp = sut.customize(originalResp);
         assertThat(customizedResp).isNotNull().satisfies(r -> {
             assertThat(r.getNewProjectVersion()).isEqualTo(newProjectVersion);
             // make sure the matched dependency's version was changed by the dependency override customizer

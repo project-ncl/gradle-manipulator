@@ -1,7 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,9 +31,9 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
 
     private static final Logger log = GMLogger.getLogger(DependencyExclusionCustomizer.class);
 
-    private final Predicate<ProjectVersionRef> predicate;
+    private final Predicate<ProjectRef> predicate;
 
-    public DependencyExclusionCustomizer(Predicate<ProjectVersionRef> predicate) {
+    public DependencyExclusionCustomizer(Predicate<ProjectRef> predicate) {
         this.predicate = predicate;
     }
 
@@ -48,35 +47,32 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
 
     public static AlignmentService.RequestCustomizer fromConfigurationForModule(Configuration configuration,
             Set<Project> projects) {
-        Map<String, String> prefixed = PropertiesUtils.getPropertiesByPrefix(configuration.getProperties(),
+        final List<Predicate<ProjectRef>> predicates = new ArrayList<>();
+        final Map<String, String> prefixed = PropertiesUtils.getPropertiesByPrefix(configuration.getProperties(),
                 "dependencyExclusion.");
-        if (prefixed.isEmpty()) {
-            return AlignmentService.RequestCustomizer.NOOP;
-        }
-        final Iterator<String> keys = prefixed.keySet().iterator();
-        //the idea is to start with a predicate that passes all artifacts and add one predicate per configured exclusion
-        final List<Predicate> predicates = new ArrayList<>();
-        while (keys.hasNext()) {
-            final String key = keys.next();
+        DependencyExclusionCustomizer result = null;
 
-            final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
-            for (Project project : projects) {
-                final ProjectVersionRef projectRef = new SimpleProjectVersionRef(project.getGroup().toString(),
-                        project.getName(), project.getVersion().toString());
-                if (keyParseResult.matchesModule(projectRef)) {
-                    log.debug("Excluding dependency {} from alignment of module {}", keyParseResult.getDependency(),
-                            projectRef);
-                    // if the key matches this module, add a predicate that rejects the artifact that was configured in the property
-                    predicates.add(new DependencyExclusionPredicate(keyParseResult.getDependency()));
+        if (!prefixed.isEmpty()) {
+            //the idea is to start with a predicate that passes all artifacts and add one predicate per configured exclusion
+            for (String key : prefixed.keySet()) {
+                final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
+                for (Project project : projects) {
+                    final ProjectVersionRef projectRef = new SimpleProjectVersionRef(project.getGroup().toString(),
+                            project.getName(), project.getVersion().toString());
+                    if (keyParseResult.matchesModule(projectRef)) {
+                        log.debug("Excluding dependency {} from alignment of module {}", keyParseResult.getDependency(),
+                                projectRef);
+                        // if the key matches this module, add a predicate that rejects the artifact that was configured in the property
+                        predicates.add(new DependencyExclusionPredicate(keyParseResult.getDependency()));
+                    }
                 }
             }
         }
 
-        if (predicates.isEmpty()) {
-            return AlignmentService.RequestCustomizer.NOOP;
+        if (!predicates.isEmpty()) {
+            result = new DependencyExclusionCustomizer(predicates.stream().reduce(x -> true, Predicate::and));
         }
-
-        return new DependencyExclusionCustomizer(predicates.stream().reduce(x -> true, Predicate::and));
+        return result;
     }
 
     private static class DependencyExclusionPredicate implements Predicate<ProjectRef> {

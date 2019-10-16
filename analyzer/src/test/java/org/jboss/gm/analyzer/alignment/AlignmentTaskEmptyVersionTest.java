@@ -140,7 +140,6 @@ public class AlignmentTaskEmptyVersionTest {
 
             String result = (String) m.invoke(null, new Object[] { tempDir.getRoot() });
 
-            //System.out.println ("### Got " + result);
             assertEquals(result, formats.get(line));
         }
     }

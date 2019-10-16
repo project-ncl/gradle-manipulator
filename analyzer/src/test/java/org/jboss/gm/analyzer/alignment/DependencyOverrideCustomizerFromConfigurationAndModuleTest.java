@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
@@ -56,7 +57,7 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
         final AlignmentService.ResponseCustomizer sut = DependencyOverrideCustomizer.fromConfigurationForModule(configuration,
                 projects);
 
-        assertThat(sut).isSameAs(AlignmentService.ResponseCustomizer.NOOP);
+        assertThat(sut).isSameAs(null);
     }
 
     @Test(expected = InvalidUserDataException.class)
@@ -68,7 +69,7 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
     }
 
     @Test
-    public void ensureOverrideMatches() {
+    public void ensureOverrideMatches() throws ManipulationException {
         final ProjectVersionRef hibernateCoreGav = withGAV("org.hibernate", "hibernate-core",
                 "5.3.9.Final-redhat-00001");
         final ProjectVersionRef hibernateValidatorGav = withGAV("org.hibernate", "hibernate-validator",
@@ -99,10 +100,17 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
 
         final AlignmentService.ResponseCustomizer sut = DependencyOverrideCustomizer.fromConfigurationForModule(configuration,
                 projects);
+        final Map<ProjectVersionRef, String> translationMap = new HashMap<>();
+        final List<ProjectVersionRef> gavs = Arrays.asList(hibernateCoreGav, hibernateValidatorGav, undertowGav, jacksonCoreGav,
+                jacksonMapperGav,
+                mongoGav, mockitoGav, wiremockGav);
 
-        final AlignmentService.Response originalResp = new DummyResponse(PROJECT,
-                Arrays.asList(hibernateCoreGav, hibernateValidatorGav, undertowGav, jacksonCoreGav, jacksonMapperGav,
-                        mongoGav, mockitoGav, wiremockGav));
+        gavs.forEach(d -> translationMap.put(d, d.getVersionString()));
+
+        final AlignmentService.Response originalResp = new AlignmentService.Response(
+                translationMap);
+        originalResp.setNewProjectVersion(PROJECT.getVersionString());
+
         final AlignmentService.Response finalResp = sut.customize(originalResp);
 
         assertThat(finalResp).isNotNull().satisfies(r -> {
@@ -114,30 +122,5 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
             assertThat(r.getAlignedVersionOfGav(mockitoGav)).isEqualTo("2.27.0-redhat-00002");
             assertThat(r.getAlignedVersionOfGav(wiremockGav)).isEqualTo(wiremockGav.getVersionString());
         });
-    }
-
-    private static class DummyResponse implements AlignmentService.Response {
-        private final ProjectVersionRef project;
-        private final Map<ProjectVersionRef, String> alignedVersionsMap = new HashMap<>();
-
-        DummyResponse(ProjectVersionRef project, List<? extends ProjectVersionRef> dependencies) {
-            this.project = project;
-            dependencies.forEach(d -> this.alignedVersionsMap.put(d, d.getVersionString()));
-        }
-
-        @Override
-        public String getNewProjectVersion() {
-            return project.getVersionString();
-        }
-
-        @Override
-        public Map<ProjectVersionRef, String> getTranslationMap() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public String getAlignedVersionOfGav(ProjectVersionRef gav) {
-            return alignedVersionsMap.get(gav);
-        }
     }
 }

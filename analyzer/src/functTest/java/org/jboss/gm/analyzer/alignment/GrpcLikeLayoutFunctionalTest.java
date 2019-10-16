@@ -3,6 +3,7 @@ package org.jboss.gm.analyzer.alignment;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.Collection;
 
@@ -116,11 +117,32 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
         //noinspection ConstantConditions
         org.apache.commons.io.FileUtils.copyDirectory(Paths
                 .get(TestUtils.class.getClassLoader().getResource(projectRoot.getName()).toURI()).toFile(), projectRoot);
+        // Remove the settings so we can't use a child project to establish groupId
+        //noinspection ResultOfMethodCallIgnored
+        new File(projectRoot, "settings.gradle").delete();
+        // Write a version so this error isn't found first.
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                new File(projectRoot, "gradle.properties"), "    version = \"1.1.2\"\n", Charset.defaultCharset());
+
+        assertThatExceptionOfType(ManipulationUncheckedException.class)
+                .isThrownBy(() -> TestUtils.align(projectRoot, true))
+                .withMessageContaining("Empty groupId but unable to determine a suitable replacement from any child modules");
+    }
+
+    @Test
+    public void ensureMissingVersionThrowsException() throws IOException, URISyntaxException {
+
+        final File projectRoot = tempDir.newFolder("grpc-like-layout");
+
+        //noinspection ConstantConditions
+        org.apache.commons.io.FileUtils.copyDirectory(Paths
+                .get(TestUtils.class.getClassLoader().getResource(projectRoot.getName()).toURI()).toFile(), projectRoot);
+        // Remove the settings so we can't use a child project to establish version
         //noinspection ResultOfMethodCallIgnored
         new File(projectRoot, "settings.gradle").delete();
 
         assertThatExceptionOfType(ManipulationUncheckedException.class)
                 .isThrownBy(() -> TestUtils.align(projectRoot, true))
-                .withMessageContaining("Empty groupId but unable to determine a suitable replacement from any child modules");
+                .withMessageContaining("Unable to find suitable project version");
     }
 }

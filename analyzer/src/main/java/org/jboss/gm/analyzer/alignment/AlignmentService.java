@@ -1,10 +1,15 @@
 package org.jboss.gm.analyzer.alignment;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 
 /**
  * Used by {@link org.jboss.gm.analyzer.alignment.AlignmentTask} in order to perform the alignment
@@ -13,7 +18,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
  */
 public interface AlignmentService {
 
-    Response align(Request request);
+    Response align(Request request) throws ManipulationException;
 
     /**
      * Contains both the collected project dependencies GAVs and the project GAV.
@@ -41,13 +46,55 @@ public interface AlignmentService {
         }
     }
 
-    interface Response {
+    /**
+     * Contains the resulting aligned dependencies from the dependency analyzer. It will be processed further
+     * by the response customizers such as DependencyOverride, ProjectVersionOverride.
+     */
+    class Response {
+        private final Map<ProjectVersionRef, String> translationMap;
+        Map<ProjectRef, String> overrideMap;
+        String newProjectVersion;
 
-        String getNewProjectVersion();
+        // Only used by tests.
+        Response() {
+            this(new HashMap<>());
+        }
 
-        Map<ProjectVersionRef, String> getTranslationMap();
+        Response(Map<ProjectVersionRef, String> translationMap) {
+            this.translationMap = translationMap;
+        }
 
-        String getAlignedVersionOfGav(ProjectVersionRef gav);
+        void setNewProjectVersion(String version) {
+            newProjectVersion = version;
+        }
+
+        void setOverrideMap(Map<ProjectRef, String> overrideMap) {
+            this.overrideMap = overrideMap;
+        }
+
+        String getNewProjectVersion() {
+            return newProjectVersion;
+        }
+
+        Map<ProjectVersionRef, String> getTranslationMap() {
+            return translationMap;
+        }
+
+        String getAlignedVersionOfGav(ProjectVersionRef gav) {
+            final Optional<ProjectRef> projectRef = matchingProjectRef(gav);
+            if (projectRef.isPresent()) {
+                return overrideMap.get(projectRef.get());
+            }
+            if (translationMap == null) {
+                throw new ManipulationUncheckedException("Translation map has not been initialised");
+            }
+            return translationMap.get(gav);
+        }
+
+        private Optional<ProjectRef> matchingProjectRef(ProjectRef gav) {
+            return overrideMap == null ? Optional.empty()
+                    : overrideMap.keySet().stream().filter(p -> p.matches(gav)).findFirst();
+        }
     }
 
     /**
@@ -66,19 +113,6 @@ public interface AlignmentService {
         default int order() {
             return 0;
         }
-
-        RequestCustomizer NOOP = new RequestCustomizer() {
-            @Override
-            public Request customize(Request request) {
-                return request;
-            }
-
-            @Override
-            public int order() {
-                return Integer.MAX_VALUE;
-            }
-        };
-
     }
 
     /**
@@ -90,7 +124,7 @@ public interface AlignmentService {
      */
     interface ResponseCustomizer {
 
-        Response customize(Response response);
+        Response customize(Response response) throws ManipulationException;
 
         // Integer.MIN_VALUE is the max order. This means that if we have 2 services for example
         // we with the first one to be invoked before the second, we would give the first one a
@@ -98,18 +132,5 @@ public interface AlignmentService {
         default int order() {
             return 0;
         }
-
-        ResponseCustomizer NOOP = new ResponseCustomizer() {
-            @Override
-            public Response customize(Response response) {
-                return response;
-            }
-
-            @Override
-            public int order() {
-                return Integer.MAX_VALUE;
-            }
-        };
-
     }
 }

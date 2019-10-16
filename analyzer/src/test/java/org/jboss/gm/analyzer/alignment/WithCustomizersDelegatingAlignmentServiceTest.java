@@ -2,6 +2,7 @@ package org.jboss.gm.analyzer.alignment;
 
 import java.util.Arrays;
 
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -11,8 +12,8 @@ import static org.mockito.Mockito.when;
 public class WithCustomizersDelegatingAlignmentServiceTest {
 
     @Test
-    public void nullCustomizersShouldBeAllowed() {
-        final AlignmentService delegate = mock(AlignmentService.class);
+    public void nullCustomizersShouldBeAllowed() throws ManipulationException {
+        final DAAlignmentService delegate = mock(DAAlignmentService.class);
         final AlignmentService.Request request = mock(AlignmentService.Request.class);
         final AlignmentService.Response response = mock(AlignmentService.Response.class);
 
@@ -24,8 +25,8 @@ public class WithCustomizersDelegatingAlignmentServiceTest {
     }
 
     @Test
-    public void requestCustomizersShouldBeInvokedInOrder() {
-        final AlignmentService delegate = mock(AlignmentService.class);
+    public void requestCustomizersShouldBeInvokedInOrder() throws ManipulationException {
+        final DAAlignmentService delegate = mock(DAAlignmentService.class);
         final AlignmentService.RequestCustomizer reqCustomizer1 = mock(AlignmentService.RequestCustomizer.class);
         final AlignmentService.RequestCustomizer reqCustomizer2 = mock(AlignmentService.RequestCustomizer.class);
         final AlignmentService.Request originalReq = mock(AlignmentService.Request.class);
@@ -46,8 +47,8 @@ public class WithCustomizersDelegatingAlignmentServiceTest {
     }
 
     @Test
-    public void responseCustomizersShouldBeInvokedInOrder() {
-        final AlignmentService delegate = mock(AlignmentService.class);
+    public void responseCustomizersShouldBeInvokedInOrder() throws ManipulationException {
+        final DAAlignmentService delegate = mock(DAAlignmentService.class);
         final AlignmentService.Request request = mock(AlignmentService.Request.class);
         final AlignmentService.ResponseCustomizer respCustomizer1 = mock(AlignmentService.ResponseCustomizer.class);
         final AlignmentService.ResponseCustomizer respCustomizer2 = mock(AlignmentService.ResponseCustomizer.class);

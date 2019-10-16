@@ -52,7 +52,7 @@ public class DependencyExclusionCustomizerFromConfigurationAndModuleTest {
         final AlignmentService.RequestCustomizer sut = DependencyExclusionCustomizer.fromConfigurationForModule(configuration,
                 projects);
 
-        assertThat(sut).isSameAs(AlignmentService.RequestCustomizer.NOOP);
+        assertThat(sut).isSameAs(null);
     }
 
     @Test(expected = InvalidUserDataException.class)

@@ -1,9 +1,5 @@
 group = "org.jboss.gm.analyzer"
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-}
-
 pluginBundle {
     website = "https://project-ncl.github.io/gradle-manipulator/"
     vcsUrl = "https://github.com/project-ncl/gradle-manipulator/tree/master/analyzer"

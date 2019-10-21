@@ -89,7 +89,8 @@ public class GMEFunctionalTest extends AbstractWiremockTest {
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.jboss.gm");
             assertThat(am.getName()).isEqualTo("gradle-manipulator");
-            assertThat(am.getChildren().keySet()).hasSize(3).containsExactlyInAnyOrder("common", "analyzer", "manipulation");
+            assertThat(am.getChildren().keySet()).hasSize(4).containsExactlyInAnyOrder("common", "analyzer", "manipulation",
+                    "cli");
         });
 
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs")));

@@ -44,7 +44,7 @@ subprojects {
     extra["junitVersion"] = "4.12"
     extra["mavenVersion"] = "3.5.0"
     extra["ownerVersion"] = "1.0.10"
-    extra["pmeVersion"] = "3.8"
+    extra["pmeVersion"] = "3.9-SNAPSHOT"
     extra["slf4jVersion"] = "1.7.25"
     extra["systemRulesVersion"] = "1.19.0"
 
@@ -226,7 +226,7 @@ subprojects {
     }
 
     if (project.name != "cli") {
-        // Exclude logback from dependency tree/
+        // Exclude logback from dependency tree.
         configurations {
             "compile" {
                 exclude(group = "ch.qos.logback", module = "logback-classic")

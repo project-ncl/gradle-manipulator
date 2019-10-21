@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import lombok.Getter;
+
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.tooling.BuildLauncher;
 import org.gradle.tooling.GradleConnector;
@@ -21,7 +23,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 @SuppressWarnings("unused")
 @Command(name = "GradleAnalyser",
-        description = "Wrap SourceClear and invoke it.",
+        description = "CLI to optionally run Groovy scripts and then invoke Gradle.",
         mixinStandardHelpOptions = true, // add --help and --version options
         versionProvider = ManifestVersionProvider.class)
 public class Main implements Callable<Void> {
@@ -48,10 +50,15 @@ public class Main implements Callable<Void> {
     Main() {
     }
 
-    public void executeGradle() {
+    private void executeGradle() throws ManipulationException {
 
         if (installation != null) {
-            connector = connector.useInstallation(installation);
+            if (!installation.exists()) {
+                throw new ManipulationException("Unable to locate Gradle installation at " + installation);
+            }
+            connector.useInstallation(installation);
+        } else {
+            connector.useBuildDistribution();
         }
 
         ProjectConnection connection = connector.connect();
@@ -68,11 +75,23 @@ public class Main implements Callable<Void> {
         connection.close();
     }
 
-    public static void main(String[] args) {
+    int run(String[] args) throws Exception {
+        CommandLine cl = new CommandLine(this);
+        ExceptionHandler handler = new ExceptionHandler();
 
-        CommandLine cl = new CommandLine(new Main());
         cl.setExecutionStrategy(new CommandLine.RunAll());
-        System.exit(cl.execute(args));
+        cl.setExecutionExceptionHandler(handler);
+
+        int result = cl.execute(args);
+        if (handler.getException() != null) {
+            throw handler.getException();
+        }
+        return result;
+    }
+
+    public static void main(String[] args) throws Exception {
+        Main m = new Main();
+        System.exit(m.run(args));
     }
 
     /**
@@ -105,12 +124,31 @@ public class Main implements Callable<Void> {
             //      Should we duplicate the PME model of FIRST/LAST/BOTH?
 
         }
-        // TODO: Should we use a system gradle or built in (or configurable?)
-        connector.useBuildDistribution();
+
         connector.forProjectDirectory(target);
         executeGradle();
 
         return null;
     }
 
+    @Getter
+    private static class ExceptionHandler implements CommandLine.IExecutionExceptionHandler {
+
+        private Exception exception;
+
+        /**
+         * Handles an {@code Exception} that occurred while executing the {@code Runnable} or
+         * {@code Callable} command and returns an exit code suitable for returning from execute.
+         *
+         * @param ex the Exception thrown by the {@code Runnable}, {@code Callable} or {@code Method} user object of the command
+         * @param commandLine the CommandLine representing the command or subcommand where the exception occurred
+         * @param parseResult the result of parsing the command line arguments
+         * @return an exit code
+         */
+        @Override
+        public int handleExecutionException(Exception ex, CommandLine commandLine, CommandLine.ParseResult parseResult) {
+            this.exception = ex;
+            return 1;
+        }
+    }
 }

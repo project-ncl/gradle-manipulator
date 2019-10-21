@@ -45,7 +45,6 @@ public class DAAlignmentService implements AlignmentService {
 
         restEndpoint = new GradleDefaultTranslator(
                 endpointUrl,
-                Translator.RestProtocol.CURRENT,
                 configuration.restMaxSize(),
                 DefaultTranslator.CHUNK_SPLIT_COUNT,
                 configuration.restRepositoryGroup(),
@@ -86,9 +85,9 @@ public class DAAlignmentService implements AlignmentService {
 
         private final String logContext;
 
-        GradleDefaultTranslator(String endpointUrl, RestProtocol current, int restMaxSize, int restMinSize,
+        GradleDefaultTranslator(String endpointUrl, int restMaxSize, int restMinSize,
                 String repositoryGroup, String incrementalSerialSuffix, String logContext) {
-            super(endpointUrl, current, restMaxSize, restMinSize, repositoryGroup, incrementalSerialSuffix);
+            super(endpointUrl, restMaxSize, restMinSize, repositoryGroup, incrementalSerialSuffix);
             this.logContext = logContext;
         }
 

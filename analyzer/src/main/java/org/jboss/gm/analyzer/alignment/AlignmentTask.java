@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -28,6 +27,8 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.commonjava.maven.ext.core.groovy.InvocationPoint;
+import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.commonjava.maven.ext.core.impl.Version;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
@@ -44,7 +45,7 @@ import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultRe
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.analyzer.alignment.AlignmentService.Response;
-import org.jboss.gm.analyzer.alignment.groovy.GMEBaseScript;
+import org.jboss.gm.analyzer.alignment.groovy.BaseScript;
 import org.jboss.gm.analyzer.alignment.io.LockFileIO;
 import org.jboss.gm.analyzer.alignment.io.RepositoryExporter;
 import org.jboss.gm.analyzer.alignment.io.SettingsFileIO;
@@ -56,7 +57,6 @@ import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.versioning.DynamicVersionParser;
 import org.jboss.gm.common.versioning.ProjectVersionFactory;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
-
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
@@ -550,6 +550,8 @@ public class AlignmentTask extends DefaultTask {
         return allDependencies;
     }
 
+
+    // TODO: Extract to utillity class.
     private void runCustomGroovyScript(Configuration configuration, Project rootProject, ManipulationModel alignmentModel)
             throws IOException, ManipulationException {
 
@@ -574,16 +576,40 @@ public class AlignmentTask extends DefaultTask {
                 // groovy API.
                 final GroovyShell groovyShell = new GroovyShell(this.getClass().getClassLoader(), binding);
                 final Script script = groovyShell.parse(scriptFile);
+                final InvocationStage stage;
+
+                InvocationPoint invocationPoint = script.getClass().getAnnotation(InvocationPoint.class);
 
                 logger.info("Attempting to invoke groovy script {} ", scriptFile);
+                if (invocationPoint != null) {
+                    logger.debug("InvocationPoint is {}", invocationPoint.invocationPoint().toString());
+                    stage = invocationPoint.invocationPoint();
+                } else {
+                    throw new ManipulationException("Mandatory annotation '@InvocationPoint(invocationPoint = ' not declared");
+                }
 
                 // Inject the values via a new BaseScript so user's can have completion.
-                if (script instanceof GMEBaseScript) {
-                    ((GMEBaseScript) script).setValues(rootProject, alignmentModel);
+                if (script instanceof BaseScript) {
+                    ((BaseScript) script).setValues(stage, rootProject.getRootDir(), rootProject, alignmentModel);
                 } else {
                     throw new ManipulationException("Cannot cast " + script + " to a BaseScript to set values.");
                 }
-                script.run();
+                if (stage == InvocationStage.LAST || stage == InvocationStage.BOTH) {
+                    try {
+                        logger.info("Executing {} on {} at invocation point {}", script, rootProject, stage);
+
+                        script.run();
+                    } catch (Exception e) {
+                        //noinspection ConstantConditions
+                        if (e instanceof ManipulationException) {
+                            throw ((ManipulationException) e);
+                        } else {
+                            throw new ManipulationException("Problem running script", e);
+                        }
+                    }
+                } else {
+                    logger.debug("Ignoring script {} as invocation point {} does not match.", script, stage);
+                }
             }
         }
     }

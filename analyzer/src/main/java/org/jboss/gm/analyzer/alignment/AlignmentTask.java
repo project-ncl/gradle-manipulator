@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -57,6 +58,7 @@ import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.versioning.DynamicVersionParser;
 import org.jboss.gm.common.versioning.ProjectVersionFactory;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
+
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
@@ -550,8 +552,7 @@ public class AlignmentTask extends DefaultTask {
         return allDependencies;
     }
 
-
-    // TODO: Extract to utillity class.
+    // TODO: Extract to utility class.
     private void runCustomGroovyScript(Configuration configuration, Project rootProject, ManipulationModel alignmentModel)
             throws IOException, ManipulationException {
 

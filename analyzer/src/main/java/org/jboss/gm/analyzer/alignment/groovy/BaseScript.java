@@ -4,7 +4,8 @@ import java.io.File;
 import java.util.Properties;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.core.groovy.GradleBaseScriptAPI;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.commonjava.maven.ext.core.groovy.GradleBaseScript;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
@@ -15,7 +16,7 @@ import org.jboss.gm.common.model.ManipulationModel;
  * Abstract class that should be used by developers wishing to implement groovy scripts
  * for GME.
  */
-public abstract class BaseScript extends GradleBaseScriptAPI {
+public abstract class BaseScript extends GradleBaseScript {
     protected final Logger logger = GMLogger.getLogger(getClass());
 
     private ManipulationModel model;
@@ -36,6 +37,10 @@ public abstract class BaseScript extends GradleBaseScriptAPI {
      * @return a {@link Project} instance.
      */
     public Project getProject() {
+        if (stage == InvocationStage.FIRST) {
+            logger.error("getProject unsupported for InvocationStage FIRST");
+            throw new ManipulationUncheckedException("getProject is not supported for Groovy in initial stage.");
+        }
         return rootProject;
     }
 
@@ -45,6 +50,10 @@ public abstract class BaseScript extends GradleBaseScriptAPI {
      * @return a {@link ManipulationModel} reference.
      */
     public ManipulationModel getModel() {
+        if (stage == InvocationStage.FIRST) {
+            logger.error("getModel unsupported for InvocationStage FIRST");
+            throw new ManipulationUncheckedException("Model is not supported for Groovy in initial stage.");
+        }
         return model;
     }
 
@@ -72,6 +81,10 @@ public abstract class BaseScript extends GradleBaseScriptAPI {
      * @return a {@link java.util.Properties} reference.
      */
     public Properties getUserProperties() {
+        if ( stage == InvocationStage.FIRST ) {
+            logger.error("getUserProperties unsupported for InvocationStage FIRST");
+            throw new ManipulationUncheckedException("NYI.");
+        }
         return userProperties;
     }
 
@@ -98,9 +111,9 @@ public abstract class BaseScript extends GradleBaseScriptAPI {
         this.rootProject = rootProject;
         this.model = model;
         this.basedir = rootDir;
-        //
-        //        this.userProperties = rootProject.getProperties();
 
+        // TODO: Remained of initialization.
+        
         logger.info("Injecting values. Project is " + rootProject + " with basedir " + rootProject.getRootDir());
     }
 

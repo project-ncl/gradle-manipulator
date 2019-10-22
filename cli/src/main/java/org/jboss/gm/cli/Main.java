@@ -3,21 +3,22 @@ package org.jboss.gm.cli;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.Callable;
-
-import lombok.Getter;
-
+import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.gradle.tooling.BuildLauncher;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
+import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.utils.GroovyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import ch.qos.logback.classic.Level;
+import lombok.Getter;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
-import ch.qos.logback.classic.Level;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
@@ -101,11 +102,9 @@ public class Main implements Callable<Void> {
      */
     @Override
     public Void call() throws ManipulationException {
-
-        logger.info("### Inside call {} with debug {} ", gradleArgs, debug);
-
         final Logger rootLogger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
         final ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) rootLogger;
+        final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
 
         if (debug) {
             root.setLevel(Level.DEBUG);
@@ -116,13 +115,12 @@ public class Main implements Callable<Void> {
         }
 
         if (isNotBlank(groovy)) {
-            logger.debug("### groovy {}", groovy);
 
-            // TODO: Implement processing of 'first' groovy script.
-            //   To consider:
-            //      What are valid values (i.e. the Model won't be, but the Gradle files are).
-            //      Should we duplicate the PME model of FIRST/LAST/BOTH?
-
+            // By passing the command line into the configuration object have a standard place to retrieve
+            // the configuration which makes the underlying code simpler.
+            System.setProperty("groovyScripts", groovy);
+            configuration.reload();
+            GroovyUtils.runCustomGroovyScript(logger, InvocationStage.FIRST, target, configuration, null, null);
         }
 
         connector.forProjectDirectory(target);

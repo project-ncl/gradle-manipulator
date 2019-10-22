@@ -8,7 +8,7 @@ import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef
 import org.commonjava.maven.ext.core.groovy.GMEBaseScript
 import org.commonjava.maven.ext.core.groovy.InvocationPoint
 import org.commonjava.maven.ext.core.groovy.InvocationStage
-import org.jboss.gm.analyzer.alignment.groovy.BaseScript
+import org.jboss.gm.common.groovy.BaseScript
 
 
 // Use BaseScript annotation to set script for evaluating the DSL.

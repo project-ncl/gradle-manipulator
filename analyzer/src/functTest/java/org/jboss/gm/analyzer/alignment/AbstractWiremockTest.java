@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.StdErrLog;
 import org.junit.BeforeClass;
 import org.junit.Rule;
+
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;

@@ -28,6 +28,9 @@ dependencies {
     permitUsedUndeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
     permitTestUnusedDeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
 
+    // Groovy is built into Gradle
+    permitUsedUndeclared("org.codehaus.groovy:groovy:2.5.7")
+
     // Owner: Need Java8 dependency which pulls in owner itself.
     permitUnusedDeclared("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
     permitUsedUndeclared("org.aeonbits.owner:owner:${project.extra.get("ownerVersion")}")

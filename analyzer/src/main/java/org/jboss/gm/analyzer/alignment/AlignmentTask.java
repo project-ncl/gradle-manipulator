@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,7 +27,6 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
-import org.commonjava.maven.ext.core.groovy.InvocationPoint;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.commonjava.maven.ext.core.impl.Version;
 import org.gradle.api.DefaultTask;
@@ -46,7 +44,6 @@ import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultRe
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.analyzer.alignment.AlignmentService.Response;
-import org.jboss.gm.analyzer.alignment.groovy.BaseScript;
 import org.jboss.gm.analyzer.alignment.io.LockFileIO;
 import org.jboss.gm.analyzer.alignment.io.RepositoryExporter;
 import org.jboss.gm.analyzer.alignment.io.SettingsFileIO;
@@ -55,13 +52,10 @@ import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.common.utils.GroovyUtils;
 import org.jboss.gm.common.versioning.DynamicVersionParser;
 import org.jboss.gm.common.versioning.ProjectVersionFactory;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
-
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
-import groovy.lang.Script;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -198,7 +192,9 @@ public class AlignmentTask extends DefaultTask {
                     alignmentModel.setGroup(commonPrefix);
                 }
 
-                runCustomGroovyScript(configuration, project.getRootProject(), alignmentModel);
+                GroovyUtils.runCustomGroovyScript(logger, InvocationStage.LAST, project.getRootDir(), configuration,
+                        project.getRootProject(),
+                        alignmentModel);
 
                 writeManipulationModel(project.getRootDir(), alignmentModel);
                 // Ordering is important here ; we mustn't inject the gme-repos file before iterating over all *.gradle
@@ -552,66 +548,4 @@ public class AlignmentTask extends DefaultTask {
         return allDependencies;
     }
 
-    // TODO: Extract to utility class.
-    private void runCustomGroovyScript(Configuration configuration, Project rootProject, ManipulationModel alignmentModel)
-            throws IOException, ManipulationException {
-
-        final List<File> groovyFiles = new ArrayList<>();
-        final String[] scripts = configuration.groovyScripts();
-
-        if (scripts != null) {
-            int i = 0;
-            for (String script : scripts) {
-                logger.info("Attempting to read URL {} ", script);
-                File remote = new File(rootProject.getRootDir(), "gme-" + i + "groovy");
-                FileUtils.copyURLToFile(new URL(script), remote);
-                groovyFiles.add(remote);
-            }
-        }
-
-        for (File scriptFile : groovyFiles) {
-
-            if (scriptFile.exists()) {
-                final Binding binding = new Binding();
-                // We use the current class' classloader so the script has access to this plugin's API and the
-                // groovy API.
-                final GroovyShell groovyShell = new GroovyShell(this.getClass().getClassLoader(), binding);
-                final Script script = groovyShell.parse(scriptFile);
-                final InvocationStage stage;
-
-                InvocationPoint invocationPoint = script.getClass().getAnnotation(InvocationPoint.class);
-
-                logger.info("Attempting to invoke groovy script {} ", scriptFile);
-                if (invocationPoint != null) {
-                    logger.debug("InvocationPoint is {}", invocationPoint.invocationPoint().toString());
-                    stage = invocationPoint.invocationPoint();
-                } else {
-                    throw new ManipulationException("Mandatory annotation '@InvocationPoint(invocationPoint = ' not declared");
-                }
-
-                // Inject the values via a new BaseScript so user's can have completion.
-                if (script instanceof BaseScript) {
-                    ((BaseScript) script).setValues(stage, rootProject.getRootDir(), rootProject, alignmentModel);
-                } else {
-                    throw new ManipulationException("Cannot cast " + script + " to a BaseScript to set values.");
-                }
-                if (stage == InvocationStage.LAST || stage == InvocationStage.BOTH) {
-                    try {
-                        logger.info("Executing {} on {} at invocation point {}", script, rootProject, stage);
-
-                        script.run();
-                    } catch (Exception e) {
-                        //noinspection ConstantConditions
-                        if (e instanceof ManipulationException) {
-                            throw ((ManipulationException) e);
-                        } else {
-                            throw new ManipulationException("Problem running script", e);
-                        }
-                    }
-                } else {
-                    logger.debug("Ignoring script {} as invocation point {} does not match.", script, stage);
-                }
-            }
-        }
-    }
 }

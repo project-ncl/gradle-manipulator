@@ -1,29 +1,28 @@
-package org.jboss.gm.analyzer.alignment.groovy;
+package org.jboss.gm.common.groovy;
 
 import java.io.File;
 import java.util.Properties;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.core.groovy.GradleBaseScript;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.gradle.api.Project;
-import org.gradle.api.logging.Logger;
-import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract class that should be used by developers wishing to implement groovy scripts
  * for GME.
  */
 public abstract class BaseScript extends GradleBaseScript {
-    protected final Logger logger = GMLogger.getLogger(getClass());
+
+    // Explicitly using LoggerFactory not GMLogger to avoid NoClassDefFound issues with cli jar.
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private ManipulationModel model;
 
     private Project rootProject;
-
-    private ProjectVersionRef gav;
 
     private File basedir;
 
@@ -36,6 +35,7 @@ public abstract class BaseScript extends GradleBaseScript {
      * 
      * @return a {@link Project} instance.
      */
+    @Override
     public Project getProject() {
         if (stage == InvocationStage.FIRST) {
             logger.error("getProject unsupported for InvocationStage FIRST");
@@ -49,6 +49,7 @@ public abstract class BaseScript extends GradleBaseScript {
      * 
      * @return a {@link ManipulationModel} reference.
      */
+    @Override
     public ManipulationModel getModel() {
         if (stage == InvocationStage.FIRST) {
             logger.error("getModel unsupported for InvocationStage FIRST");
@@ -58,19 +59,11 @@ public abstract class BaseScript extends GradleBaseScript {
     }
 
     /**
-     * Obtain the GAV of the current project
-     * 
-     * @return a {@link org.commonjava.maven.atlas.ident.ref.ProjectVersionRef}
-     */
-    public ProjectVersionRef getGAV() {
-        return gav;
-    }
-
-    /**
      * Get the working directory (the execution root).
      * 
      * @return a {@link java.io.File} reference.
      */
+    @Override
     public File getBaseDir() {
         return basedir;
     }
@@ -81,7 +74,7 @@ public abstract class BaseScript extends GradleBaseScript {
      * @return a {@link java.util.Properties} reference.
      */
     public Properties getUserProperties() {
-        if ( stage == InvocationStage.FIRST ) {
+        if (stage == InvocationStage.FIRST) {
             logger.error("getUserProperties unsupported for InvocationStage FIRST");
             throw new ManipulationUncheckedException("NYI.");
         }
@@ -93,12 +86,13 @@ public abstract class BaseScript extends GradleBaseScript {
      * 
      * @return a {@link InvocationStage} reference.
      */
+    @Override
     public InvocationStage getInvocationStage() {
         return stage;
     }
 
     /**
-     * Internal use only - the {@link org.jboss.gm.analyzer.alignment.AlignmentTask} uses this to
+     * Internal use only - the org.jboss.gm.analyzer.alignment.AlignmentTask uses this to
      * initialise the values
      *
      * @param stage the current invocation stage
@@ -113,8 +107,8 @@ public abstract class BaseScript extends GradleBaseScript {
         this.basedir = rootDir;
 
         // TODO: Remained of initialization.
-        
-        logger.info("Injecting values. Project is " + rootProject + " with basedir " + rootProject.getRootDir());
+
+        logger.info("Injecting values. Project is " + rootProject + " with basedir " + rootDir);
     }
 
 }

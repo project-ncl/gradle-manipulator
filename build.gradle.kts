@@ -28,6 +28,9 @@ allprojects {
     repositories {
         mavenCentral()
         mavenLocal()
+        maven {
+            url = uri("https://repo.gradle.org/gradle/libs-releases-local/")
+        }
     }
     apply(plugin = "ca.cutterslade.analyze" )
 }
@@ -105,6 +108,7 @@ subprojects {
                 exclude(dependency("org.commonjava.maven.ext:.*:.*"))
                 exclude(dependency("org.commonjava.maven.atlas:.*:.*"))
                 exclude(dependency("org.aeonbits.owner:.*:.*"))
+                exclude(dependency("org.slf4j:.*:.*"))
             }
         }
 

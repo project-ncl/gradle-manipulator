@@ -31,6 +31,9 @@ allprojects {
         maven {
             url = uri("https://repo.gradle.org/gradle/libs-releases-local/")
         }
+        maven {
+            url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+        }
     }
     apply(plugin = "ca.cutterslade.analyze" )
 }

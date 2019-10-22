@@ -26,7 +26,7 @@ public abstract class BaseScript extends GradleBaseScript {
 
     private File basedir;
 
-    private Properties userProperties;
+    private Properties properties;
 
     private InvocationStage stage;
 
@@ -74,11 +74,7 @@ public abstract class BaseScript extends GradleBaseScript {
      * @return a {@link java.util.Properties} reference.
      */
     public Properties getUserProperties() {
-        if (stage == InvocationStage.FIRST) {
-            logger.error("getUserProperties unsupported for InvocationStage FIRST");
-            throw new ManipulationUncheckedException("NYI.");
-        }
-        return userProperties;
+        return properties;
     }
 
     /**
@@ -94,21 +90,22 @@ public abstract class BaseScript extends GradleBaseScript {
     /**
      * Internal use only - the org.jboss.gm.analyzer.alignment.AlignmentTask uses this to
      * initialise the values
-     *
+     * 
      * @param stage the current invocation stage
      * @param rootDir the root directory of the project.
+     * @param properties the current configuration properties
      * @param rootProject Current project
      * @param model the current aligned model.
      */
-    public void setValues(InvocationStage stage, File rootDir, Project rootProject, ManipulationModel model) {
+    public void setValues(InvocationStage stage, File rootDir, Properties properties, Project rootProject,
+            ManipulationModel model) {
         this.stage = stage;
         this.rootProject = rootProject;
         this.model = model;
         this.basedir = rootDir;
+        this.properties = properties;
 
-        // TODO: Remained of initialization.
-
-        logger.info("Injecting values. Project is " + rootProject + " with basedir " + rootDir);
+        logger.info("Injecting values for stage {}. Project is {} with basedir {}", stage, rootProject, rootDir);
     }
 
 }

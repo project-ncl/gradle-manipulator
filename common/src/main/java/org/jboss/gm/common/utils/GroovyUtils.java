@@ -32,8 +32,9 @@ public class GroovyUtils {
      * @param alignmentModel The current model ; may be null.
      * @throws ManipulationException if an error occurs.
      */
-    public static void runCustomGroovyScript(Logger logger, InvocationStage targetStage, File target, Configuration configuration, Project rootProject,
-                                             ManipulationModel alignmentModel) throws ManipulationException {
+    public static void runCustomGroovyScript(Logger logger, InvocationStage targetStage, File target,
+            Configuration configuration, Project rootProject,
+            ManipulationModel alignmentModel) throws ManipulationException {
 
         final List<File> groovyFiles = new ArrayList<>();
         final String[] scripts = configuration.groovyScripts();
@@ -66,8 +67,7 @@ public class GroovyUtils {
                     throw new ManipulationException("Unable to parse script");
                 }
                 final InvocationStage stage;
-
-                InvocationPoint invocationPoint = script.getClass().getAnnotation(InvocationPoint.class);
+                final InvocationPoint invocationPoint = script.getClass().getAnnotation(InvocationPoint.class);
 
                 logger.info("Attempting to invoke groovy script {} ", scriptFile);
                 if (invocationPoint != null) {
@@ -77,10 +77,11 @@ public class GroovyUtils {
                     throw new ManipulationException("Mandatory annotation '@InvocationPoint(invocationPoint = ' not declared");
                 }
 
-                if ( targetStage == stage || InvocationStage.BOTH == stage) {
+                if (targetStage == stage || InvocationStage.BOTH == stage) {
                     // Inject the values via a new BaseScript so user's can have completion.
                     if (script instanceof BaseScript) {
-                        ((BaseScript) script).setValues(stage, target, rootProject, alignmentModel);
+                        ((BaseScript) script).setValues(stage, target, configuration.getProperties(), rootProject,
+                                alignmentModel);
                     } else {
                         throw new ManipulationException("Cannot cast " + script + " to a BaseScript to set values.");
                     }

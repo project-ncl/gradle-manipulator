@@ -15,6 +15,7 @@ dependencies {
     compile("com.fasterxml.jackson.core:jackson-core:${project.extra.get("jacksonVersion")}")
 
     compile("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
+    compile("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
 
     compile("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
     compile("org.commonjava.maven.ext:pom-manipulation-core:${project.extra.get("pmeVersion")}")
@@ -29,7 +30,7 @@ dependencies {
     permitTestUnusedDeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
 
     // Groovy is built into Gradle
-    permitUsedUndeclared("org.codehaus.groovy:groovy:2.5.7")
+    permitUsedUndeclared("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
 
     // Owner: Need Java8 dependency which pulls in owner itself.
     permitUnusedDeclared("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")

@@ -34,6 +34,9 @@ allprojects {
         maven {
             url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
         }
+        maven {
+            url = uri("http://maven.repository.redhat.com/techpreview/all")
+        }
     }
     apply(plugin = "ca.cutterslade.analyze" )
 }

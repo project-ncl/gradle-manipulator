@@ -1,0 +1,34 @@
+sudo: required
+
+language: java
+
+jdk:
+   - openjdk8
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/bin
+
+# https://github.com/crazy-max/travis-wait-enhanced
+before_install: |
+  if ! [ -f $HOME/bin/travis-wait-enhanced ]; then
+  wget -qO- "https://github.com/crazy-max/travis-wait-enhanced/releases/download/v0.2.0/travis-wait-enhanced_0.2.0_linux_x86_64.tar.gz" | tar -zxvf - travis-wait-enhanced
+  mv travis-wait-enhanced $HOME/bin
+  fi
+
+
+install: /bin/true
+
+jobs:
+  include:
+  - name: deploy
+    if: branch = master AND type = push
+    script: "cp .travis.settings.xml $HOME/.m2/settings.xml && travis-wait-enhanced --timeout=60m --interval=4m -- ./gradlew clean build publish"
+
+  - name: pr
+    if: type = pull_request
+    script: "travis-wait-enhanced --timeout=60m --interval=4m -- ./gradlew clean build"

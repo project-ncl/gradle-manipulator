@@ -48,58 +48,56 @@ public class GroovyUtils {
                     FileUtils.copyURLToFile(new URL(script), remote);
                     groovyFiles.add(remote);
                 } catch (IOException e) {
-                    throw new ManipulationException("Unable to create URL for script {} ", script);
+                    logger.error("Ignoring script {} as unable to locate it.", script);
+                    logger.debug("Problem with script URL is", e);
                 }
             }
         }
 
         for (File scriptFile : groovyFiles) {
+            final Binding binding = new Binding();
+            // We use the current class' classloader so the script has access to this plugin's API and the
+            // groovy API.
+            final GroovyShell groovyShell = new GroovyShell(logger.getClass().getClassLoader(), binding);
+            final Script script;
+            try {
+                script = groovyShell.parse(scriptFile);
+            } catch (IOException e) {
+                throw new ManipulationException("Unable to parse script");
+            }
+            final InvocationStage stage;
+            final InvocationPoint invocationPoint = script.getClass().getAnnotation(InvocationPoint.class);
 
-            if (scriptFile.exists()) {
-                final Binding binding = new Binding();
-                // We use the current class' classloader so the script has access to this plugin's API and the
-                // groovy API.
-                final GroovyShell groovyShell = new GroovyShell(logger.getClass().getClassLoader(), binding);
-                final Script script;
+            logger.info("Attempting to invoke groovy script {} ", scriptFile);
+            if (invocationPoint != null) {
+                logger.debug("InvocationPoint is {}", invocationPoint.invocationPoint().toString());
+                stage = invocationPoint.invocationPoint();
+            } else {
+                throw new ManipulationException("Mandatory annotation '@InvocationPoint(invocationPoint = ' not declared");
+            }
+
+            if (targetStage == stage || InvocationStage.BOTH == stage) {
+                // Inject the values via a new BaseScript so user's can have completion.
+                if (script instanceof BaseScript) {
+                    ((BaseScript) script).setValues(stage, target, configuration.getProperties(), rootProject,
+                            alignmentModel);
+                } else {
+                    throw new ManipulationException("Cannot cast " + script + " to a BaseScript to set values.");
+                }
                 try {
-                    script = groovyShell.parse(scriptFile);
-                } catch (IOException e) {
-                    throw new ManipulationException("Unable to parse script");
-                }
-                final InvocationStage stage;
-                final InvocationPoint invocationPoint = script.getClass().getAnnotation(InvocationPoint.class);
+                    logger.info("Executing {} on {} at invocation point {}", script, rootProject, stage);
 
-                logger.info("Attempting to invoke groovy script {} ", scriptFile);
-                if (invocationPoint != null) {
-                    logger.debug("InvocationPoint is {}", invocationPoint.invocationPoint().toString());
-                    stage = invocationPoint.invocationPoint();
-                } else {
-                    throw new ManipulationException("Mandatory annotation '@InvocationPoint(invocationPoint = ' not declared");
-                }
-
-                if (targetStage == stage || InvocationStage.BOTH == stage) {
-                    // Inject the values via a new BaseScript so user's can have completion.
-                    if (script instanceof BaseScript) {
-                        ((BaseScript) script).setValues(stage, target, configuration.getProperties(), rootProject,
-                                alignmentModel);
+                    script.run();
+                } catch (Exception e) {
+                    //noinspection ConstantConditions
+                    if (e instanceof ManipulationException) {
+                        throw ((ManipulationException) e);
                     } else {
-                        throw new ManipulationException("Cannot cast " + script + " to a BaseScript to set values.");
+                        throw new ManipulationException("Problem running script", e);
                     }
-                    try {
-                        logger.info("Executing {} on {} at invocation point {}", script, rootProject, stage);
-
-                        script.run();
-                    } catch (Exception e) {
-                        //noinspection ConstantConditions
-                        if (e instanceof ManipulationException) {
-                            throw ((ManipulationException) e);
-                        } else {
-                            throw new ManipulationException("Problem running script", e);
-                        }
-                    }
-                } else {
-                    logger.debug("Ignoring script {} as invocation point {} does not match.", script, stage);
                 }
+            } else {
+                logger.debug("Ignoring script {} as invocation point {} does not match.", script, stage);
             }
         }
     }

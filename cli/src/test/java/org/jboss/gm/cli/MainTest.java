@@ -13,6 +13,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
 import static junit.framework.TestCase.fail;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class MainTest {
@@ -49,7 +50,25 @@ public class MainTest {
                 .getParentFile();
 
         Main m = new Main();
-        String[] args = new String[] { "-t", projectRoot.getAbsolutePath(), "--", "help" };
+        String[] args = new String[] { "-d", "-t", projectRoot.getAbsolutePath(), "help" };
+        m.run(args);
+
+        assertTrue(systemOutRule.getLog().contains("Welcome to Gradle"));
+    }
+
+    @Test
+    public void testInvokeGradleWithProperties() throws Exception {
+
+        final File projectRoot = new File(Thread.currentThread().getContextClassLoader().getResource("").getPath())
+                .getParentFile()
+                .getParentFile()
+                .getParentFile()
+                .getParentFile()
+                .getParentFile();
+
+        Main m = new Main();
+        String[] args = new String[] { "-d", "-t", projectRoot.getAbsolutePath(), "help", "--info", "-Dfoobar=nothing",
+                "-Dfoobar=barfoo", "-DdependencyOverride.org.jboss.slf4j:*@*=", "-DgroovyScripts=file:///tmp/fake-file" };
         m.run(args);
 
         assertTrue(systemOutRule.getLog().contains("Welcome to Gradle"));
@@ -68,10 +87,15 @@ public class MainTest {
         final URL groovy = Thread.currentThread().getContextClassLoader().getResource("sample.groovy");
 
         Main m = new Main();
-        String[] args = new String[] { "-t", projectRoot.getAbsolutePath(), "-g", groovy.toString(), "--", "tasks" };
+        String[] args = new String[] { "-t", projectRoot.getAbsolutePath(), "tasks", "-DgroovyScripts=" + groovy.toString(),
+                "-DdependencyOverride.org.jboss.slf4j:*@*=", };
         m.run(args);
 
         assertTrue(systemOutRule.getLog().contains("Running Groovy script on"));
         assertTrue(systemOutRule.getLog().contains("Tasks runnable from root project"));
+        assertTrue(systemOutRule.getLog().contains("dependencyOverride.org.jboss.slf4j:*@*="));
+        assertTrue(systemOutRule.getLog().contains("with JVM args '[-DdependencyOverride.org.jboss.slf4j:*@*="));
+        assertFalse(systemOutRule.getLog().contains(", DdependencyOverride.org.jboss.slf4j:*@*="));
+        assertTrue(systemOutRule.getLog().contains("groovyScripts="));
     }
 }

@@ -7,3 +7,4 @@ import org.jboss.gm.common.groovy.BaseScript
 @GMEBaseScript BaseScript gmeScript
 
 println("Running Groovy script on " + gmeScript.getBaseDir())
+println("Known properties " + gmeScript.getUserProperties())

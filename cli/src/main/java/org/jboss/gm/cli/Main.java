@@ -1,11 +1,12 @@
 package org.jboss.gm.cli;
 
 import java.io.File;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
-
-import lombok.Getter;
-
+import java.util.stream.Collectors;
 import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
@@ -16,14 +17,12 @@ import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.GroovyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import ch.qos.logback.classic.Level;
+import lombok.Getter;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
-import ch.qos.logback.classic.Level;
-
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import picocli.CommandLine.Unmatched;
 
 @SuppressWarnings("unused")
 @Command(name = "GradleAnalyser",
@@ -42,41 +41,33 @@ public class Main implements Callable<Void> {
     @Option(names = { "-t", "--target" }, required = true, description = "Target Gradle directory.")
     private File target;
 
-    @Option(names = { "-g", "--groovy" }, description = "Run a groovy script.")
-    private String groovy;
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+    @Option(names = "-D", description = "Pass supplemental arguments (e.g. groovy script commands)")
+    private Map<String, String> jvmPropertyParams = new LinkedHashMap<>();
 
     @Option(names = "-l", description = "Location of Gradle installation.")
     private File installation;
 
-    @Parameters(description = "Anything following '--' is used as arguments to the Gradle process.")
+    @Unmatched
     private List<String> gradleArgs;
 
-    Main() {
+    /**
+     * This allows the tool to be invoked. The command line parsing allows for:
+     *
+     * <p>
+     * {@code
+     * <cli-tool> [-d] [-l <location>]  -t <target>   ...gradle arguments... -Dkey-value
+     * }
+     *
+     * @param args Arguments to the process
+     * @throws Exception if an error occurs.
+     */
+    public static void main(String[] args) throws Exception {
+        Main m = new Main();
+        System.exit(m.run(args));
     }
 
-    private void executeGradle() throws ManipulationException {
-
-        if (installation != null) {
-            if (!installation.exists()) {
-                throw new ManipulationException("Unable to locate Gradle installation at " + installation);
-            }
-            connector.useInstallation(installation);
-        } else {
-            connector.useBuildDistribution();
-        }
-
-        ProjectConnection connection = connector.connect();
-        BuildLauncher build = connection.newBuild();
-
-        logger.info("Executing Gradle project {} with arguments '{}'", target, gradleArgs);
-
-        build.withArguments(gradleArgs);
-        build.setColorOutput(true);
-        build.setStandardOutput(System.out);
-        build.setStandardError(System.err);
-
-        build.run();
-        connection.close();
+    Main() {
     }
 
     int run(String[] args) throws Exception {
@@ -93,9 +84,32 @@ public class Main implements Callable<Void> {
         return result;
     }
 
-    public static void main(String[] args) throws Exception {
-        Main m = new Main();
-        System.exit(m.run(args));
+    private void executeGradle() throws ManipulationException {
+
+        if (installation != null) {
+            if (!installation.exists()) {
+                throw new ManipulationException("Unable to locate Gradle installation at " + installation);
+            }
+            connector.useInstallation(installation);
+        } else {
+            connector.useBuildDistribution();
+        }
+
+        ProjectConnection connection = connector.connect();
+        BuildLauncher build = connection.newBuild();
+        Set<String> jvmArgs = jvmPropertyParams.entrySet().stream().map(entry -> "-D" + entry.getKey() + '=' + entry.getValue())
+                .collect(Collectors.toSet());
+
+        logger.info("Executing Gradle project {} with JVM args '{}' and arguments '{}'", target, jvmArgs, gradleArgs);
+
+        build.setJvmArguments(jvmArgs);
+        build.withArguments(gradleArgs);
+        build.setColorOutput(true);
+        build.setStandardOutput(System.out);
+        build.setStandardError(System.err);
+
+        build.run();
+        connection.close();
     }
 
     /**
@@ -117,12 +131,15 @@ public class Main implements Callable<Void> {
             throw new ManipulationException("Unable to locate target directory: " + target);
         }
 
-        if (isNotBlank(groovy)) {
+        if (!jvmPropertyParams.isEmpty()) {
 
             // By passing the command line into the configuration object have a standard place to retrieve
             // the configuration which makes the underlying code simpler.
-            System.setProperty("groovyScripts", groovy);
+            System.getProperties().putAll(jvmPropertyParams);
             configuration.reload();
+
+            logger.debug("Configuration now has properties {}", configuration.getProperties());
+
             GroovyUtils.runCustomGroovyScript(logger, InvocationStage.FIRST, target, configuration, null, null);
         }
 

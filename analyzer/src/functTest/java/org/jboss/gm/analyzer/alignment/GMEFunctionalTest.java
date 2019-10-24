@@ -44,7 +44,7 @@ public class GMEFunctionalTest extends AbstractWiremockTest {
 
         stubDACall();
 
-        System.setProperty(Configuration.DA, "http://127.0.0.1:" + AbstractWiremockTest.PORT + "/da/rest/v-1");
+        System.setProperty(Configuration.DA, "http://127.0.0.1:" + getPort() + "/da/rest/v-1");
     }
 
     private void stubDACall() throws IOException, URISyntaxException {
@@ -89,7 +89,8 @@ public class GMEFunctionalTest extends AbstractWiremockTest {
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.jboss.gm");
             assertThat(am.getName()).isEqualTo("gradle-manipulator");
-            assertThat(am.getChildren().keySet()).hasSize(3).containsExactlyInAnyOrder("common", "analyzer", "manipulation");
+            assertThat(am.getChildren().keySet()).hasSize(4).containsExactlyInAnyOrder("common", "analyzer", "manipulation",
+                    "cli");
         });
 
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs")));

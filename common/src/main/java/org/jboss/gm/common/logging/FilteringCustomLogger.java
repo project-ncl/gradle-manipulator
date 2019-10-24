@@ -19,7 +19,7 @@ public class FilteringCustomLogger implements OutputEventListener {
             "org.gradle.configuration.project.BuildScriptProcessor",
             "org.gradle.execution",
             "org.gradle.internal",
-            "org.gradle.launcher.daemon.server.exec.ExecuteBuild",
+            "org.gradle.launcher.daemon",
             "org.gradle.workers.internal.WorkerDaemonClientsManager");
 
     private final List<String> acceptableCategories = Arrays.asList(

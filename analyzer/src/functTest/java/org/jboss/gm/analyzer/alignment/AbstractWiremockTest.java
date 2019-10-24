@@ -13,12 +13,12 @@ import org.junit.Rule;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+
 public abstract class AbstractWiremockTest {
 
-    protected static final int PORT = 8089;
-
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(PORT);
+    public WireMockRule wireMockRule = new WireMockRule(wireMockConfig().dynamicPort());
 
     @BeforeClass
     public static void beforeClass() {
@@ -32,5 +32,9 @@ public abstract class AbstractWiremockTest {
                 Paths.get(AbstractWiremockTest.class.getClassLoader().getResource(responseFileName)
                         .toURI()).toFile(),
                 StandardCharsets.UTF_8.name());
+    }
+
+    protected int getPort() {
+        return wireMockRule.port();
     }
 }

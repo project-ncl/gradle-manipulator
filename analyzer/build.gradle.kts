@@ -48,7 +48,7 @@ dependencies {
     testCompile("com.github.tomakehurst:wiremock-jre8:2.23.2")
 
     // Groovy is built into Gradle
-    permitUsedUndeclared("org.codehaus.groovy:groovy:2.5.7")
+    permitUsedUndeclared("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
 
     // Lombok comes via plugin
     permitUsedUndeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")

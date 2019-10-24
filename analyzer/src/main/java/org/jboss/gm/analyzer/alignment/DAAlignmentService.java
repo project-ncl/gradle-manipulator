@@ -18,6 +18,7 @@ import org.jboss.gm.common.logging.GMLogger;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence.NONE;
+import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol.CURRENT;
 
 /**
  * An implementation of {@link org.jboss.gm.analyzer.alignment.AlignmentService} that uses the Dependency Analyzer service
@@ -45,7 +46,6 @@ public class DAAlignmentService implements AlignmentService {
 
         restEndpoint = new GradleDefaultTranslator(
                 endpointUrl,
-                Translator.RestProtocol.CURRENT,
                 configuration.restMaxSize(),
                 DefaultTranslator.CHUNK_SPLIT_COUNT,
                 configuration.restRepositoryGroup(),
@@ -81,14 +81,11 @@ public class DAAlignmentService implements AlignmentService {
     }
 
     static class GradleDefaultTranslator extends DefaultTranslator {
-        // TODO: Replace with PME Random on new release of PME.
-        private final Random RANDOM = new Random();
-
         private final String logContext;
 
-        GradleDefaultTranslator(String endpointUrl, RestProtocol current, int restMaxSize, int restMinSize,
+        GradleDefaultTranslator(String endpointUrl, int restMaxSize, int restMinSize,
                 String repositoryGroup, String incrementalSerialSuffix, String logContext) {
-            super(endpointUrl, current, restMaxSize, restMinSize, repositoryGroup, incrementalSerialSuffix);
+            super(endpointUrl, CURRENT, restMaxSize, restMinSize, repositoryGroup, incrementalSerialSuffix);
             this.logContext = logContext;
         }
 
@@ -102,8 +99,7 @@ public class DAAlignmentService implements AlignmentService {
                 // If we have no MDC PME has been used as the entry point. Dummy one up for DA.
                 byte[] randomBytes = new byte[20];
                 RANDOM.nextBytes(randomBytes);
-                // TODO: Replace with PME CODEC on new release of PME
-                headerContext = "gme-" + new Base32().encodeAsString(randomBytes);
+                headerContext = "gme-" + CODEC.encodeAsString(randomBytes);
             }
 
             return headerContext;

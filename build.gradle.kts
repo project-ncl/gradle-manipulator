@@ -28,6 +28,15 @@ allprojects {
     repositories {
         mavenCentral()
         mavenLocal()
+        maven {
+            url = uri("https://repo.gradle.org/gradle/libs-releases-local/")
+        }
+        maven {
+            url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+        }
+        maven {
+            url = uri("http://maven.repository.redhat.com/techpreview/all")
+        }
     }
     apply(plugin = "ca.cutterslade.analyze" )
 }
@@ -42,9 +51,11 @@ subprojects {
     extra["commonsVersion"] = "2.6"
     extra["jacksonVersion"] = "2.10.0.pr1"
     extra["junitVersion"] = "4.12"
+    extra["groovyVersion"] = "2.5.8"
+    extra["logbackVersion"] = "1.2.3"
     extra["mavenVersion"] = "3.5.0"
     extra["ownerVersion"] = "1.0.10"
-    extra["pmeVersion"] = "3.8"
+    extra["pmeVersion"] = "3.8.1"
     extra["slf4jVersion"] = "1.7.25"
     extra["systemRulesVersion"] = "1.19.0"
 
@@ -59,15 +70,24 @@ subprojects {
         enabled = false
     }
 
-    if (project.name == "common") {
+    if (project.name == "common" || project.name == "cli") {
         apply(plugin = "java-library")
     } else {
+        // Don't apply Gradle plugin code to the cli tool.
+        apply(plugin = "java-gradle-plugin")
+        apply(plugin = "com.gradle.plugin-publish")
+
+        tasks.withType<ShadowJar> {
+            dependencies {
+                exclude(dependency("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}"))
+            }
+        }
+    }
+    if ( project.name != "common") {
         apply(plugin = "signing")
         apply(plugin = "maven-publish")
         apply(plugin = "org.datlowe.maven-publish-auth")
-        apply(plugin = "java-gradle-plugin")
         apply(plugin = "com.github.johnrengelman.shadow")
-        apply(plugin = "com.gradle.plugin-publish")
 
         /**
          * The configuration below has been created by reading the documentation at:
@@ -87,11 +107,17 @@ subprojects {
             // Using non-deprecated archiveClassifier.set doesn't seem to work.
             @Suppress("DEPRECATION")
             classifier = ""
-            dependencies {
-                exclude(dependency("org.slf4j:slf4j-api:1.7.25"))
-            }
             // no need to add analyzer.init.gradle in the jar since it will never be used from inside the plugin itself
             exclude("analyzer-init.gradle")
+            // Minimise the resulting uber-jars to ensure we don't have massive jars
+            minimize() {
+                // Sometimes minimisation takes away too much ... ensure we keep these.
+                exclude(dependency("com.fasterxml.jackson.core:.*:.*"))
+                exclude(dependency("org.commonjava.maven.ext:.*:.*"))
+                exclude(dependency("org.commonjava.maven.atlas:.*:.*"))
+                exclude(dependency("org.aeonbits.owner:.*:.*"))
+                exclude(dependency("org.slf4j:.*:.*"))
+            }
         }
 
         val sourcesJar by tasks.registering(Jar::class) {
@@ -182,7 +208,7 @@ subprojects {
         if (isReleaseBuild) {
             signing {
                 useGpgCmd()
-                this.sign(publishing.publications["shadow"])
+                sign(publishing.publications["shadow"])
             }
         }
     }
@@ -211,13 +237,15 @@ subprojects {
         dependsOn("spotlessApply")
     }
 
-    // Exclude logback from dependency tree/
-    configurations {
-        "compile" {
-            exclude(group="ch.qos.logback", module="logback-classic")
-        }
-        "compile" {
-            exclude(group="ch.qos.logback", module="logback-core")
+    if (project.name != "cli") {
+        // Exclude logback from dependency tree.
+        configurations {
+            "compile" {
+                exclude(group = "ch.qos.logback", module = "logback-classic")
+            }
+            "compile" {
+                exclude(group = "ch.qos.logback", module = "logback-core")
+            }
         }
     }
 

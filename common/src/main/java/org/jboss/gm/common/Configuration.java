@@ -12,7 +12,6 @@ import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.Converter;
 import org.aeonbits.owner.Reloadable;
 import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
-import org.slf4j.Logger;
 
 import static org.aeonbits.owner.Config.LoadType.MERGE;
 import static org.apache.commons.lang.StringUtils.isEmpty;
@@ -140,13 +139,11 @@ public interface Configuration extends Accessible, Reloadable {
     }
 
     /**
-     * Dumps the current configuration to the supplied logger.
-     *
-     * @param logger The logger to use. Note: this is specifically using SLF4J logging to allow interaction with the CLI.
+     * Return the current configuration as a formatted string.
      */
-    default void dumpCurrentConfig(Logger logger) {
+    default String dumpCurrentConfig() {
 
-        StringBuilder currentProperties = new StringBuilder("Current properties are");
+        StringBuilder currentProperties = new StringBuilder();
         for (Method method : Configuration.class.getMethods()) {
             if (method.isAnnotationPresent(Config.Key.class)) {
                 Config.Key val = method.getAnnotation(Config.Key.class);
@@ -157,6 +154,6 @@ public interface Configuration extends Accessible, Reloadable {
                 currentProperties.append(this.getProperties().get(val.value()));
             }
         }
-        logger.info(currentProperties.toString());
+        return currentProperties.toString();
     }
 }

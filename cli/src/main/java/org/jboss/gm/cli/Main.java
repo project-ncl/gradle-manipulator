@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
+
 import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
@@ -17,12 +20,12 @@ import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.GroovyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ch.qos.logback.classic.Level;
-import lombok.Getter;
+
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Unmatched;
+import ch.qos.logback.classic.Level;
 
 @SuppressWarnings("unused")
 @Command(name = "GradleAnalyser",
@@ -137,8 +140,7 @@ public class Main implements Callable<Void> {
             // the configuration which makes the underlying code simpler.
             System.getProperties().putAll(jvmPropertyParams);
             configuration.reload();
-
-            logger.debug("Configuration now has properties {}", configuration.getProperties());
+            logger.debug("Configuration reloaded with {}", configuration.dumpCurrentConfig());
 
             GroovyUtils.runCustomGroovyScript(logger, InvocationStage.FIRST, target, configuration, null, null);
         }

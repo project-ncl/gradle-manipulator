@@ -45,6 +45,7 @@ public class GroovyUtils {
                 logger.info("Attempting to read URL {} ", script);
                 try {
                     File remote = File.createTempFile("gme-" + i, "groovy");
+                    remote.deleteOnExit();
                     FileUtils.copyURLToFile(new URL(script), remote);
                     groovyFiles.add(remote);
                 } catch (IOException e) {

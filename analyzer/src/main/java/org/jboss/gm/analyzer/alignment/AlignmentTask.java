@@ -90,7 +90,7 @@ public class AlignmentTask extends DefaultTask {
 
         if (configOutput.compareAndSet(false, true)) {
             // Only output the config once to avoid noisy logging.
-            configuration.dumpCurrentConfig(logger);
+            logger.info("Configuration now has properties {}", configuration.dumpCurrentConfig());
         }
         logger.info("Starting model task for project {} with GAV {}:{}:{}", project.getDisplayName(), project.getGroup(),
                 projectName, project.getVersion());

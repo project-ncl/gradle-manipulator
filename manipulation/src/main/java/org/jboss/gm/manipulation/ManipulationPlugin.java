@@ -58,7 +58,7 @@ public class ManipulationPlugin implements Plugin<Project> {
         Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
         if (configOutput.compareAndSet(false, true)) {
             // Only output the config once to avoid noisy logging.
-            configuration.dumpCurrentConfig(logger);
+            logger.info("Configuration now has properties {}", configuration.dumpCurrentConfig());
         }
 
         // get the previously performed alignment

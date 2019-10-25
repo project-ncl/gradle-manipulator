@@ -1,11 +1,11 @@
 import com.adarshr.gradle.testlogger.theme.ThemeType
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.freefair.gradle.plugins.lombok.LombokExtension
-import java.text.SimpleDateFormat
-import java.util.*
+import org.ajoberstar.grgit.Grgit
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-import org.ajoberstar.grgit.Grgit
+import java.text.SimpleDateFormat
+import java.util.*
 
 plugins {
     java
@@ -25,25 +25,29 @@ plugins {
 
 apply(plugin = "net.researchgate.release")
 
-val isReleaseBuild = "true" == System.getProperty("release")
-
 tasks.afterReleaseBuild { dependsOn(":analyzer:publish", ":manipulation:publish", ":analyzer:publishPlugins", ":manipulation:publishPlugins") }
 tasks.beforeReleaseBuild {
-    doFirst {
-        if (isReleaseBuild && project == project.rootProject) {
+    doLast {
+        if ("true" == System.getProperty("release","") && project == project.rootProject) {
             val tmp = File(System.getProperty("java.io.tmpdir"))
             val source = File(project.rootDir, "README.md")
+            val searchString = "http://central.maven.org/maven2/org/jboss/gm/analyzer/analyzer"
+
+            if (!source.exists() || Files.readAllLines(source.toPath()).filter { s -> s.contains(searchString) }.isEmpty()) {
+                throw GradleException ("Unable to find '$searchString' in README.md")
+            }
+
             project.copy {
                 from(source)
                 into(tmp)
                 filter { line: String ->
-                    if (line.contains("http://central.maven.org/maven2/org/jboss/gm/analyzer/analyzer")) {
-                        line.replaceFirst("(http://central.maven.org/maven2/org/jboss/gm/analyzer/analyzer)(.*)".toRegex(),
+                    if (line.contains(searchString)) {
+                        line.replaceFirst("($searchString)(.*)".toRegex(),
                                 "$1-${project.version}/analyzer-${project.version}-init.gradle".replace("-SNAPSHOT", ""))
                     } else line
                 }
             }
-            Files.move(File(tmp, "/README.md").toPath(), source.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            Files.move(File(tmp, "README.md").toPath(), source.toPath(), StandardCopyOption.REPLACE_EXISTING)
 
             val grgit = Grgit.open()
             grgit.add {
@@ -75,6 +79,9 @@ allprojects {
 }
 
 subprojects {
+
+    val isReleaseBuild = ("true" == System.getProperty("release",""))
+
     extra["atlasVersion"] = "0.17.2"
     extra["assertjVersion"] = "3.12.2"
     extra["bytemanVersion"] = "4.0.7"

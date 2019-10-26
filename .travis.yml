@@ -16,7 +16,7 @@ cache:
 # https://github.com/crazy-max/travis-wait-enhanced
 before_install: |
   if ! [ -f $HOME/bin/travis-wait-enhanced ]; then
-  wget -qO- "https://github.com/crazy-max/travis-wait-enhanced/releases/download/v0.2.0/travis-wait-enhanced_0.2.0_linux_x86_64.tar.gz" | tar -zxvf - travis-wait-enhanced
+  wget -qO- "https://github.com/crazy-max/travis-wait-enhanced/releases/download/v1.0.0/travis-wait-enhanced_1.0.0_linux_x86_64.tar.gz" | tar -zxvf - travis-wait-enhanced
   mv travis-wait-enhanced $HOME/bin
   fi
 
@@ -27,7 +27,7 @@ jobs:
   include:
   - name: deploy
     if: branch = master AND type = push
-    script: "cp .travis.settings.xml $HOME/.m2/settings.xml && travis-wait-enhanced --timeout=60m --interval=4m -- ./gradlew clean build publish -DSONATYPE_PASSWORD=$(echo $SONATYPE_PASSWORD) -DSONATYPE_USERNAME=$(echo $SONATYPE_USERNAME)"
+    script: "cp .travis.settings.xml $HOME/.m2/settings.xml && ls -la $HOME/.m2 && chmod -R og+r $HOME/.m2 && travis-wait-enhanced --timeout=60m --interval=4m -- ./gradlew clean build publish -DSONATYPE_PASSWORD=$(echo $SONATYPE_PASSWORD) -DSONATYPE_USERNAME=$(echo $SONATYPE_USERNAME)"
 
   - name: pr
     if: type = pull_request

@@ -9,11 +9,11 @@ plugins {
     java
     signing
     `maven-publish`
-    id("org.datlowe.maven-publish-auth") version "2.0.2"
     id("com.diffplug.gradle.spotless") version "3.25.0"
     id("com.github.johnrengelman.shadow") version "5.1.0"
     id("net.nemerosa.versioning") version "2.8.2"
     id("com.gradle.plugin-publish") version "0.10.1"
+    id("net.linguica.maven-settings") version "0.5"
     id("net.researchgate.release") version "2.8.1"
     id("com.adarshr.test-logger") version "2.0.0"
     id("ca.cutterslade.analyze") version "1.3.3"
@@ -86,8 +86,8 @@ subprojects {
     if ( project.name != "common") {
         apply(plugin = "signing")
         apply(plugin = "maven-publish")
-        apply(plugin = "org.datlowe.maven-publish-auth")
         apply(plugin = "com.github.johnrengelman.shadow")
+        apply(plugin = "net.linguica.maven-settings")
 
         /**
          * The configuration below has been created by reading the documentation at:

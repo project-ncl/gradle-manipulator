@@ -1,3 +1,5 @@
+[![Build Status (Travis CI)](https://travis-ci.org/project-ncl/gradle-manipulator.svg?branch=master)](https://travis-ci.org/project-ncl/gradle-manipulator.svg?branch=master)
+
 # Source code for Gradle manipulation plugins
 
 Both plugins work in conjunction and therefore the same version is required for each. The analyzer plugin will inject a reference

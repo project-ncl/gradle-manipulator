@@ -1,5 +1,8 @@
 # Source code for Gradle manipulation plugins
 
+Both plugins work in conjunction and therefore the same version is required for each. The analyzer plugin will inject a reference
+ to the manipulation plugin. It has been tested with Gradle 5.4.1 and later.
+
 ## Analyzer
 
 The `analyzer` directory contains the gradle plugin that generates metadata information about aligned dependencies and the project version.
@@ -14,15 +17,18 @@ modifies the project to use those dependencies and project version.
 
 The plugins can be tested on real projects like so:
 
-An init script is required. If a development version is being used it is built into `analyzer/build/resources/main/analyzer-init.gradle`. If a released version is being used it is deployed as `analyzer-<version>-init.gradle` e.g. http://central.maven.org/maven2/org/jboss/gm/analyzer/analyzer/1.0/analyzer-1.0-init.gradle
+An init script is required. If a development version is being used it is processed during the build into
+`analyzer/build/resources/main/analyzer-init.gradle`.  If a released version is being used it is deployed as `analyzer-<version>-init.gradle`
+and may be found in Maven Central i.e. http://central.maven.org/maven2/org/jboss/gm/analyzer/analyzer/1.0/analyzer-1.0-init.gradle
 
 Now by executing the following command:
 
 ```
-./gradlew --no-daemon --stacktrace --info --init-script analyzer-init.gradle generateAlignmentMetadata -DrestURL=http://some.da.server
+./gradlew --info --init-script analyzer-init.gradle generateAlignmentMetadata -DrestURL=http://some.da.server
 ```
 
-you should get the `manipulation.json` file in the root of the project.
+you should get the `manipulation.json` file in the root of the project. For detailed documentation on the parameters please see
+[here](https://project-ncl.github.io/gradle-manipulator/).
 
 ## Contributions
 

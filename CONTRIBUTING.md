@@ -95,7 +95,9 @@ The project has been configured to release both plugins to the Gradle Portal and
 - Before running the release notify the team to lock down the repository until the release is finished. -
 ```
 
-It uses the [gradle-release](https://github.com/researchgate/gradle-release) plugin to simulate a similar process to the Maven release plugin - it can increment the version, add tags, push the changes, etc. It supplies a hook task (`afterReleaseBuild`) that can be used to ensure that tasks after the release version has been changed - we have configured it as follows:
+It uses the [gradle-release](https://github.com/researchgate/gradle-release) plugin to simulate a similar process to the Maven
+release plugin - it can increment the version, add tags, push the changes, etc. It supplies a hook task (`afterReleaseBuild`) that
+can be used to ensure that tasks after the release version has been changed - we have configured it as follows:
 
 ```
 tasks.afterReleaseBuild {
@@ -103,7 +105,8 @@ tasks.afterReleaseBuild {
               ":analyzer:publishPlugins", ":manipulation:publishPlugins") }
 ```
 
-The `publish` pushes to Sonatype staging while the `publishPlugins` pushes to the Gradle Plugin Portal.
+The `publish` pushes to Sonatype staging while the `publishPlugins` pushes to the Gradle Plugin Portal. The build script will also
+modify `README.md` to ensure it points to the correct version.
 
 #### Prerequisites
 

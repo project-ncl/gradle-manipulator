@@ -1,28 +1,65 @@
 import com.adarshr.gradle.testlogger.theme.ThemeType
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.freefair.gradle.plugins.lombok.LombokExtension
+import org.ajoberstar.grgit.Grgit
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.text.SimpleDateFormat
 import java.util.*
-
 
 plugins {
     java
     signing
     `maven-publish`
+    id("ca.cutterslade.analyze") version "1.3.3"
+    id("com.adarshr.test-logger") version "2.0.0"
     id("com.diffplug.gradle.spotless") version "3.25.0"
     id("com.github.johnrengelman.shadow") version "5.1.0"
-    id("net.nemerosa.versioning") version "2.8.2"
     id("com.gradle.plugin-publish") version "0.10.1"
-    id("net.linguica.maven-settings") version "0.5"
-    id("net.researchgate.release") version "2.8.1"
-    id("com.adarshr.test-logger") version "2.0.0"
-    id("ca.cutterslade.analyze") version "1.3.3"
     id("io.freefair.lombok") version "4.1.2" apply false
+    id("net.linguica.maven-settings") version "0.5"
+    id("net.nemerosa.versioning") version "2.8.2"
+    id("net.researchgate.release") version "2.8.1"
+    id("org.ajoberstar.grgit") version "3.1.0"
 }
 
 apply(plugin = "net.researchgate.release")
 
 tasks.afterReleaseBuild { dependsOn(":analyzer:publish", ":manipulation:publish", ":analyzer:publishPlugins", ":manipulation:publishPlugins") }
+tasks.beforeReleaseBuild {
+    doLast {
+        if ("true" == System.getProperty("release","") && project == project.rootProject) {
+            val tmp = File(System.getProperty("java.io.tmpdir"))
+            val source = File(project.rootDir, "README.md")
+            val searchString = "http://central.maven.org/maven2/org/jboss/gm/analyzer/analyzer"
+
+            if (!source.exists() || Files.readAllLines(source.toPath()).filter { s -> s.contains(searchString) }.isEmpty()) {
+                throw GradleException ("Unable to find '$searchString' in README.md")
+            }
+
+            project.copy {
+                from(source)
+                into(tmp)
+                filter { line: String ->
+                    if (line.contains(searchString)) {
+                        line.replaceFirst("($searchString)(.*)".toRegex(),
+                                "$1-${project.version}/analyzer-${project.version}-init.gradle".replace("-SNAPSHOT", ""))
+                    } else line
+                }
+            }
+            Files.move(File(tmp, "README.md").toPath(), source.toPath(), StandardCopyOption.REPLACE_EXISTING)
+
+            val grgit = Grgit.open()
+            grgit.add {
+                patterns = Collections.singleton("README.md")
+            }
+            grgit.commit {
+                message = "Committing README Version Changes"
+            }
+            grgit.push()
+        }
+    }
+}
 
 allprojects {
     repositories {
@@ -43,7 +80,7 @@ allprojects {
 
 subprojects {
 
-    val isReleaseBuild = "true" == System.getProperty("release")
+    val isReleaseBuild = ("true" == System.getProperty("release",""))
 
     extra["atlasVersion"] = "0.17.2"
     extra["assertjVersion"] = "3.12.2"

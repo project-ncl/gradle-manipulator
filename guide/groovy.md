@@ -24,7 +24,7 @@ Each script <b>must</b> use the following annotations:
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    <b>NOTE</b> : Prior to GME 1.3 the annotations used the simpler <a href="http://docs.groovy-lang.org/latest/html/gapi/groovy/transform/BaseScript.html">BaseScript</a> annotation e.g.
+    <b>NOTE</b> : Prior to GME 1.4 the annotations used the simpler <a href="http://docs.groovy-lang.org/latest/html/gapi/groovy/transform/BaseScript.html">BaseScript</a> annotation e.g.
 <br/>
 <i>@BaseScript GMEBaseScript gmeScript</i>
 </td>

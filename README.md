@@ -3,7 +3,7 @@
 # Source code for Gradle manipulation plugins
 
 Both plugins work in conjunction and therefore the same version is required for each. The analyzer plugin will inject a reference
- to the manipulation plugin. It has been tested with Gradle 5.4.1 and later.
+ to the manipulation plugin. It requires Gradle 5.x to _build_ and can _run_ with Gradle 4.10.x or later.
 
 ## Analyzer
 

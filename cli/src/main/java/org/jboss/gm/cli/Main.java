@@ -7,12 +7,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lombok.Getter;
 
 import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
+import org.gradle.internal.Pair;
 import org.gradle.tooling.BuildLauncher;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
@@ -53,6 +55,14 @@ public class Main implements Callable<Void> {
 
     @Unmatched
     private List<String> gradleArgs;
+
+    // Partial workaround for https://github.com/gradle/gradle/issues/3117
+    // It may still be necessary on Gradle < 5.3 to do ' LC_ALL=en_US LANG=en_US java -jar '
+    private Map<String, String> envVars = Stream.of(
+            Pair.of("LC_ALL", "en_US"),
+            Pair.of("LANG", "en_US"),
+            Pair.of("PROMPT", "$"),
+            Pair.of("RPROMPT", "")).collect(Collectors.toMap(Pair::left, Pair::right));
 
     /**
      * This allows the tool to be invoked. The command line parsing allows for:
@@ -105,6 +115,7 @@ public class Main implements Callable<Void> {
 
         logger.info("Executing Gradle project {} with JVM args '{}' and arguments '{}'", target, jvmArgs, gradleArgs);
 
+        build.setEnvironmentVariables(envVars);
         build.setJvmArguments(jvmArgs);
         build.withArguments(gradleArgs);
         build.setColorOutput(true);

@@ -42,15 +42,10 @@ public class MainTest {
     @Test
     public void testInvokeGradle() throws Exception {
 
-        final File projectRoot = new File(Thread.currentThread().getContextClassLoader().getResource("").getPath())
-                .getParentFile()
-                .getParentFile()
-                .getParentFile()
-                .getParentFile()
-                .getParentFile();
+        final File projectRoot = new File(Thread.currentThread().getContextClassLoader().getResource("build.gradle").getPath());
 
         Main m = new Main();
-        String[] args = new String[] { "-d", "-t", projectRoot.getAbsolutePath(), "help" };
+        String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "help" };
         m.run(args);
 
         assertTrue(systemOutRule.getLog().contains("Welcome to Gradle"));
@@ -59,15 +54,11 @@ public class MainTest {
     @Test
     public void testInvokeGradleWithProperties() throws Exception {
 
-        final File projectRoot = new File(Thread.currentThread().getContextClassLoader().getResource("").getPath())
-                .getParentFile()
-                .getParentFile()
-                .getParentFile()
-                .getParentFile()
-                .getParentFile();
+        final File projectRoot = new File(Thread.currentThread().getContextClassLoader().getResource("build.gradle").getPath());
 
         Main m = new Main();
-        String[] args = new String[] { "-d", "-t", projectRoot.getAbsolutePath(), "help", "--info", "-Dfoobar=nothing",
+        String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "help", "--info",
+                "-Dfoobar=nothing",
                 "-Dfoobar=barfoo", "-DdependencyOverride.org.jboss.slf4j:*@*=", "-DgroovyScripts=file:///tmp/fake-file" };
         m.run(args);
 
@@ -77,17 +68,13 @@ public class MainTest {
     @Test
     public void testInvokeGroovy() throws Exception {
 
-        final File projectRoot = new File(Thread.currentThread().getContextClassLoader().getResource("").getPath())
-                .getParentFile()
-                .getParentFile()
-                .getParentFile()
-                .getParentFile()
-                .getParentFile();
+        final File projectRoot = new File(Thread.currentThread().getContextClassLoader().getResource("build.gradle").getPath());
 
         final URL groovy = Thread.currentThread().getContextClassLoader().getResource("sample.groovy");
 
         Main m = new Main();
-        String[] args = new String[] { "-t", projectRoot.getAbsolutePath(), "tasks", "-DgroovyScripts=" + groovy.toString(),
+        String[] args = new String[] { "-t", projectRoot.getParentFile().getAbsolutePath(), "tasks",
+                "-DgroovyScripts=" + groovy.toString(),
                 "-DdependencyOverride.org.jboss.slf4j:*@*=", };
         m.run(args);
 

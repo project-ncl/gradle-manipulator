@@ -29,6 +29,12 @@ public final class DependencyPropertyParser {
                     "Property '" + key + "' is not a properly formatted key since it is not properly split by '@'");
         }
 
+        final String[] artifactAndModuleSplit = artifactAndModule[0].split( ":" );
+        if (artifactAndModuleSplit.length != 2) {
+            throw new InvalidUserDataException(
+                            "Possible missing wildcard. Property '" + key + "' is not a properly formatted key since it is not properly split by '@' and '*");
+        }
+
         return new ResultImpl(SimpleProjectRef.parse(artifactAndModule[0]), createMatchesModulePredicate(artifactAndModule[1]));
     }
 

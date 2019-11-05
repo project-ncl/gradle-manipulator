@@ -6,6 +6,8 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -68,7 +70,8 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
     public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException, ManipulationException {
 
         final File projectRoot = tempDir.newFolder("grpc-like-layout");
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
+        final Map<String, String> props = Collections.singletonMap( "dependencyExclusion.io.netty:*@*", "4.1.42.Final-redhat-00001");
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), props);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));

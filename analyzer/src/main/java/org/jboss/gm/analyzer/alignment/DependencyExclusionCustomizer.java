@@ -17,6 +17,8 @@ import org.jboss.gm.analyzer.alignment.util.DependencyPropertyParser;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
 /**
  * {@link org.jboss.gm.analyzer.alignment.AlignmentService.RequestCustomizer} that removes dependencies from a
  * {@link org.jboss.gm.analyzer.alignment.AlignmentService.Request}
@@ -57,13 +59,19 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
             for (String key : prefixed.keySet()) {
                 final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
                 for (Project project : projects) {
-                    final ProjectVersionRef projectRef = new SimpleProjectVersionRef(project.getGroup().toString(),
-                            project.getName(), project.getVersion().toString());
-                    if (keyParseResult.matchesModule(projectRef)) {
-                        log.debug("Excluding dependency {} from alignment of module {}", keyParseResult.getDependency(),
-                                projectRef);
-                        // if the key matches this module, add a predicate that rejects the artifact that was configured in the property
-                        predicates.add(new DependencyExclusionPredicate(keyParseResult.getDependency()));
+                    if (isNotEmpty(project.getVersion().toString()) &&
+                                    isNotEmpty(project.getGroup().toString()) &&
+                                    isNotEmpty(project.getName())) {
+                        final ProjectVersionRef projectRef =
+                                        new SimpleProjectVersionRef( project.getGroup().toString(), project.getName(),
+                                                                     project.getVersion().toString() );
+                        if ( keyParseResult.matchesModule( projectRef ) )
+                        {
+                            log.debug( "Excluding dependency {} from alignment of module {}", keyParseResult.getDependency(),
+                                       projectRef );
+                            // if the key matches this module, add a predicate that rejects the artifact that was configured in the property
+                            predicates.add( new DependencyExclusionPredicate( keyParseResult.getDependency() ) );
+                        }
                     }
                 }
             }

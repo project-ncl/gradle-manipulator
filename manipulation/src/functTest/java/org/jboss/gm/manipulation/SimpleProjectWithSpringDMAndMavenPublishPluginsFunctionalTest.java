@@ -21,7 +21,7 @@ import org.junit.rules.TemporaryFolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SimpleProjectWithSpringDMAndMavenPluginsFunctionalTest {
+public class SimpleProjectWithSpringDMAndMavenPublishPluginsFunctionalTest {
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
@@ -37,32 +37,31 @@ public class SimpleProjectWithSpringDMAndMavenPluginsFunctionalTest {
         final File m2Directory = tempDir.newFolder(".m2");
         System.setProperty("maven.repo.local", m2Directory.getAbsolutePath());
 
-        final File simpleProjectRoot = tempDir.newFolder("simple-project-with-spring-dm-and-maven-plugins");
-        TestUtils.copyDirectory("simple-project-with-spring-dm-and-maven-plugins", simpleProjectRoot);
+        final File simpleProjectRoot = tempDir.newFolder("simple-project-with-spring-dm-and-maven-publish-plugins");
+        TestUtils.copyDirectory("simple-project-with-spring-dm-and-maven-publish-plugins", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
 
         final ManipulationModel alignment = ManipulationIO.readManipulationModel(simpleProjectRoot);
 
         final BuildResult buildResult = GradleRunner.create()
                 .withProjectDir(simpleProjectRoot)
-                .withArguments("install")
+                .withArguments("publishToMavenLocal")
                 //.withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath()
                 .build();
-        assertThat(Objects.requireNonNull(buildResult.task(":install")).getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
+        assertThat(Objects.requireNonNull(buildResult.task(":publishToMavenLocal")).getOutcome())
+                .isEqualTo(TaskOutcome.SUCCESS);
 
         final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(m2Directory, alignment,
                 "org/acme/root/1.0.1-redhat-00001/root-1.0.1-redhat-00001.pom", true);
-        final ManipulationModel module = Objects.requireNonNull(modelAndModule.getRight());
         assertThat(Objects.requireNonNull(modelAndModule.getLeft()).getDependencies())
                 .extracting("artifactId", "version")
                 .containsOnly(
-                        TestUtils.getAlignedTuple(module, "commons-lang3", "3.8.1"),
-                        TestUtils.getAlignedTuple(module, "hibernate-core"),
-                        Tuple.tuple("hsqldb", null), // not present in manipulation model
-                        TestUtils.getAlignedTuple(module, "undertow-core"),
-                        TestUtils.getAlignedTuple(module, "junit", "4.12"));
+                        Tuple.tuple("commons-lang3", "3.8.1"),
+                        Tuple.tuple("hibernate-core", "5.0.11.Final"),
+                        Tuple.tuple("hsqldb", null),
+                        Tuple.tuple("undertow-core", "1.4.25.Final"));
         // check that BOM is present as managed dependency
         assertThat(Objects.requireNonNull(modelAndModule.getLeft().getDependencyManagement()).getDependencies())
                 .extracting("artifactId", "version", "scope", "type")

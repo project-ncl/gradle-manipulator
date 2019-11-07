@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.UnexpectedBuildFailure;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
@@ -23,6 +24,7 @@ public class SimpleProjectWithMisconfiguredSpringDMAndMavenPluginsFunctionalTest
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Test
+    @Ignore("Disabling generatedPomCustomization is no longer necessary.")
     public void ensureProperPomGenerated() throws IOException, URISyntaxException {
         // this makes gradle use the set property as maven local directory
         // we do this in order to avoid polluting the maven local and also be absolutely sure

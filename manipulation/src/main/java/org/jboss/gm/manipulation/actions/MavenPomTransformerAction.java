@@ -2,8 +2,11 @@ package org.jboss.gm.manipulation.actions;
 
 import org.gradle.api.Action;
 import org.gradle.api.Project;
+import org.gradle.api.logging.Logger;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
+import org.gradle.api.publish.maven.tasks.GenerateMavenPom;
+import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.manipulation.ResolvedDependenciesRepository;
 
@@ -18,6 +21,8 @@ public class MavenPomTransformerAction implements Action<Project> {
     private final ManipulationModel alignmentConfiguration;
     private final ResolvedDependenciesRepository resolvedDependenciesRepository;
 
+    private final Logger logger = GMLogger.getLogger(getClass());
+
     public MavenPomTransformerAction(ManipulationModel alignmentConfiguration,
             ResolvedDependenciesRepository resolvedDependenciesRepository) {
         this.alignmentConfiguration = alignmentConfiguration;
@@ -30,10 +35,18 @@ public class MavenPomTransformerAction implements Action<Project> {
             return;
         }
 
-        project.getExtensions().getByType(PublishingExtension.class).getPublications().withType(MavenPublication.class)
-                .all(maven -> {
-                    if (maven.getPom() != null) {
-                        maven.getPom()
+        // GenerateMavenPom tasks need to be postponed until after compileJava task, because that's where artifact
+        // resolution is normally triggered and ResolvedDependenciesRepository is filled. If GenerateMavenPom runs
+        // before compileJava, we will see empty ResolvedDependenciesRepository here.
+        project.getTasks().withType(GenerateMavenPom.class).all(task -> task.dependsOn("compileJava"));
+
+        project.getExtensions().getByType(PublishingExtension.class).getPublications()
+                .withType(MavenPublication.class)
+                .configureEach(publication -> {
+                    logger.debug("Applying POM transformer to publication " + publication.getName());
+
+                    if (publication.getPom() != null) {
+                        publication.getPom()
                                 .withXml(new LegacyMavenPomTransformerAction(alignmentConfiguration,
                                         resolvedDependenciesRepository));
                     }

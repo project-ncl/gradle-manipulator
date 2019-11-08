@@ -3,6 +3,7 @@ package org.jboss.gm.common.logging;
 import java.util.Arrays;
 
 import org.aeonbits.owner.ConfigCache;
+import org.apache.commons.beanutils.ContextClassLoaderLocal;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.api.logging.Logger;
@@ -25,7 +26,12 @@ public class GMLogger implements Logger {
     private static final String ANSI_WHITE = "\u001B[37m";
     private static final String ANSI_DARK_GRAY = "\u001B[90m";
 
-    private static boolean loggingWarning;
+    private static final ContextClassLoaderLocal<Boolean> loggingWarning = new ContextClassLoaderLocal<Boolean>() {
+        @Override
+        protected Boolean initialValue() {
+            return false;
+        }
+    };
 
     private Logger delegate;
 
@@ -39,16 +45,16 @@ public class GMLogger implements Logger {
         delegate = Logging.getLogger(name);
         configuration = ConfigCache.getOrCreate(Configuration.class);
 
-        if (!loggingWarning &&
+        if (!loggingWarning.get() &&
                 (delegate.isLifecycleEnabled() || delegate.isInfoEnabled() || delegate.isDebugEnabled())) {
 
-            loggingWarning = true;
+            loggingWarning.set(true);
 
-            delegate.warn(ANSI_BRIGHT_YELLOW +
+            delegate.warn((configuration.addLoggingColours() ? ANSI_BRIGHT_YELLOW : "") +
                     "This plugin overrides default logging output for info and debug.\n" +
                     "\tIt sends info output to Lifecycle category\n" +
                     "\tIt sends debug output to info category." +
-                    ANSI_RESET);
+                    (configuration.addLoggingColours() ? ANSI_RESET : ""));
         }
     }
 

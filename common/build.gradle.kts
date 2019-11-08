@@ -8,6 +8,8 @@ dependencies {
     compile("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
     compile("commons-lang:commons-lang:${project.extra.get("commonsVersion")}")
     compile("commons-io:commons-io:${project.extra.get("commonsVersion")}")
+    compile("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
+
     compile("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")
 
     compile("com.fasterxml.jackson.core:jackson-databind:2.9.8")

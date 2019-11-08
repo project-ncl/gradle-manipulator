@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigCache;
+import org.apache.commons.beanutils.ContextClassLoaderLocal;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
@@ -77,7 +78,12 @@ public class AlignmentTask extends DefaultTask {
     public static final String GME_PLUGINCONFIGS = "gme-pluginconfigs.gradle";
     public static final String NAME = "generateAlignmentMetadata";
 
-    private static final AtomicBoolean configOutput = new AtomicBoolean();
+    private static final ContextClassLoaderLocal<AtomicBoolean> configOutput = new ContextClassLoaderLocal<AtomicBoolean>() {
+        @Override
+        protected AtomicBoolean initialValue() {
+            return new AtomicBoolean();
+        }
+    };
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
@@ -88,7 +94,7 @@ public class AlignmentTask extends DefaultTask {
         final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
         final ManipulationCache cache = ManipulationCache.getCache(project);
 
-        if (configOutput.compareAndSet(false, true)) {
+        if (!configOutput.get().compareAndSet(false, true)) {
             // Only output the config once to avoid noisy logging.
             logger.info("Configuration now has properties {}", configuration.dumpCurrentConfig());
         }

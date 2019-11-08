@@ -40,6 +40,12 @@ public class Main implements Callable<Void> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    @Option(names = "--colour",
+            negatable = true,
+            defaultValue = "true",
+            description = "Enable (or disable with '--no-colour') colour output on logging.")
+    private boolean colour;
+
     @Option(names = "-d", description = "Enable debug.")
     private boolean debug;
 
@@ -113,12 +119,18 @@ public class Main implements Callable<Void> {
         Set<String> jvmArgs = jvmPropertyParams.entrySet().stream().map(entry -> "-D" + entry.getKey() + '=' + entry.getValue())
                 .collect(Collectors.toSet());
 
+        if ( colour ) {
+            build.setColorOutput( true );
+        }
+        else {
+            jvmArgs.add("-DloggingColours=false");
+        }
+
         logger.info("Executing Gradle project {} with JVM args '{}' and arguments '{}'", target, jvmArgs, gradleArgs);
 
         build.setEnvironmentVariables(envVars);
         build.setJvmArguments(jvmArgs);
         build.withArguments(gradleArgs);
-        build.setColorOutput(true);
         build.setStandardOutput(System.out);
         build.setStandardError(System.err);
 

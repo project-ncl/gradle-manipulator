@@ -26,6 +26,8 @@ dependencies {
     shadow(gradleApi())
 
     compile("commons-lang:commons-lang:${project.extra.get("commonsVersion")}")
+    compile ("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
+
     compile("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
     compile("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")
 

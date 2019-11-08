@@ -70,7 +70,8 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
     public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException, ManipulationException {
 
         final File projectRoot = tempDir.newFolder("grpc-like-layout");
-        final Map<String, String> props = Collections.singletonMap( "dependencyExclusion.io.netty:*@*", "4.1.42.Final-redhat-00001");
+        final Map<String, String> props = Collections.singletonMap("dependencyExclusion.io.netty:*@*",
+                "4.1.42.Final-redhat-00001");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), props);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());

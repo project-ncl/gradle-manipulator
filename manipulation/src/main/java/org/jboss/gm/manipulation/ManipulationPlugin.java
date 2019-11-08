@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.aeonbits.owner.ConfigCache;
+import org.apache.commons.beanutils.ContextClassLoaderLocal;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Plugin;
@@ -39,7 +40,12 @@ public class ManipulationPlugin implements Plugin<Project> {
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
-    private static final AtomicBoolean configOutput = new AtomicBoolean();
+    private static final ContextClassLoaderLocal<AtomicBoolean> configOutput = new ContextClassLoaderLocal<AtomicBoolean>() {
+        @Override
+        protected AtomicBoolean initialValue() {
+            return new AtomicBoolean();
+        }
+    };
 
     @Override
     public void apply(Project project) {
@@ -56,7 +62,7 @@ public class ManipulationPlugin implements Plugin<Project> {
         }
 
         Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
-        if (configOutput.compareAndSet(false, true)) {
+        if (configOutput.get().compareAndSet(false, true)) {
             // Only output the config once to avoid noisy logging.
             logger.info("Configuration now has properties {}", configuration.dumpCurrentConfig());
         }

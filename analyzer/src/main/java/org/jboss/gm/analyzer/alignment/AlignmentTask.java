@@ -399,16 +399,14 @@ public class AlignmentTask extends DefaultTask {
                     }
 
                     RelaxedProjectVersionRef relaxedProjectVersionRef;
-                    // If we haven't found any original dependency we'll default to the current resolved dependency
-                    // value. This might be possible if the dependency has come from a lock file.
-                    if (originalDeps.size() == 0) {
+                    // If we haven't found any original dependency, or its' version is empty, we'll default to
+                    // the current resolved dependency value. This might be possible if the dependency has come from
+                    // a lock file or the version comes from a BOM.
+                    if (originalDeps.size() == 0 || StringUtils.isBlank(originalDeps.get(0).getVersion())) {
                         relaxedProjectVersionRef = new RelaxedProjectVersionRef(dep);
                     } else {
                         relaxedProjectVersionRef = new RelaxedProjectVersionRef(originalDeps.get(0));
                     }
-
-                    // TODO: What if originalDep has an empty version - then its from the BOM. Should we record it at all?
-                    // if (StringUtils.isNotBlank(originalDep.getVersion())) {
 
                     if (depMap.put(relaxedProjectVersionRef, pvr) == null) {
                         logger.debug("For {}, with original key {}, adding dependency to scan {} ", configuration,

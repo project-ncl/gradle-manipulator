@@ -24,7 +24,8 @@ dependencyManagement {
 dependencies {
     // define dependencies without versions
     implementation("org.infinispan:infinispan-core")
-    
+    implementation("org.infinispan:infinispan-cli")
+
     // define dependency not in BOM
     implementation("io.smallrye:smallrye-open-api:1.1.3")
 }

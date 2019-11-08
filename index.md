@@ -33,6 +33,8 @@ The CLI is capable of running arbitrary groovy scripts prior to the build. See [
 Usage: GradleAnalyser [-dhV] [-l=<installation>] -t=<target>
                       [-D=<String=String>]...
 CLI to optionally run Groovy scripts and then invoke Gradle.
+  --[no-]colour           Enable (or disable with '--no-colour') colour output
+                            on logging.
   -d                      Enable debug.
   -D=<String=String>      Pass supplemental arguments (e.g. groovy script
                             commands)

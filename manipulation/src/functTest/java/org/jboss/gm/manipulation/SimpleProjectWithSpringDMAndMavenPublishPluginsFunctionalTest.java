@@ -3,7 +3,6 @@ package org.jboss.gm.manipulation;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Objects;
 
 import org.apache.maven.model.Model;
 import org.assertj.core.groups.Tuple;
@@ -46,25 +45,33 @@ public class SimpleProjectWithSpringDMAndMavenPublishPluginsFunctionalTest {
         final BuildResult buildResult = GradleRunner.create()
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("publishToMavenLocal")
-                //.withDebug(true)
+                .withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath()
                 .build();
-        assertThat(Objects.requireNonNull(buildResult.task(":publishToMavenLocal")).getOutcome())
-                .isEqualTo(TaskOutcome.SUCCESS);
+        assertThat(buildResult.task(":publishToMavenLocal")).isNotNull()
+                .satisfies(t -> assertThat(t.getOutcome())
+                        .isEqualTo(TaskOutcome.SUCCESS));
 
         final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(m2Directory, alignment,
                 "org/acme/root/1.0.1-redhat-00001/root-1.0.1-redhat-00001.pom", true);
-        assertThat(Objects.requireNonNull(modelAndModule.getLeft()).getDependencies())
-                .extracting("artifactId", "version")
-                .containsOnly(
-                        Tuple.tuple("commons-lang3", "3.8.1"),
-                        Tuple.tuple("hibernate-core", "5.0.11.Final"),
-                        Tuple.tuple("hsqldb", null),
-                        Tuple.tuple("undertow-core", "1.4.25.Final"));
+        assertThat(modelAndModule.getLeft()).isNotNull()
+                .satisfies(m -> assertThat(m.getDependencies())
+                        .extracting("artifactId", "version")
+                        .containsOnly(
+                                Tuple.tuple("commons-lang3", "3.8.1"),
+                                Tuple.tuple("hibernate-core", "5.0.11.Final"),
+                                Tuple.tuple("hsqldb", null),
+                                Tuple.tuple("undertow-core", "1.4.25.Final"),
+                                Tuple.tuple("slf4j-api", "1.7.26"),
+                                Tuple.tuple("slf4j-ext", null)));
         // check that BOM is present as managed dependency
-        assertThat(Objects.requireNonNull(modelAndModule.getLeft().getDependencyManagement()).getDependencies())
-                .extracting("artifactId", "version", "scope", "type")
-                .containsOnly(Tuple.tuple("spring-boot-dependencies", "1.5.19.RELEASE", "import", "pom"));
+        assertThat(modelAndModule.getLeft().getDependencyManagement()).isNotNull()
+                .satisfies(dm -> assertThat(dm.getDependencies())
+                        .extracting("artifactId", "version", "scope", "type")
+                        .containsOnly(
+                                Tuple.tuple("spring-boot-dependencies", "1.5.19.RELEASE", "import", "pom"),
+                                Tuple.tuple("slf4j-api", "1.7.25", null, "jar"),
+                                Tuple.tuple("slf4j-ext", "1.7.25", null, "jar")));
     }
 }

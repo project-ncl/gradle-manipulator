@@ -79,22 +79,12 @@ public class ManipulationPlugin implements Plugin<Project> {
         final ResolvedDependenciesRepository resolvedDependenciesRepository = new ResolvedDependenciesRepository();
 
         project.afterEvaluate(p -> {
-
             // This double version set is required - sometimes other plugins seem to override the version we set initially.
             // We need to set it at the start as other plugins also require it there. Hence this belt and braces approach.
             if (!alignmentModel.getVersion().equals(project.getVersion())) {
                 logger.warn("Another plugin has reset the version to {}. Resetting to {}",
                         project.getVersion(), alignmentModel.getVersion());
                 project.setVersion(alignmentModel.getVersion());
-            }
-
-            // dependencyManagement is the extension that the Spring Dependency Management Plugin registers
-            final Object obj = p.getExtensions().findByName("dependencyManagement");
-            if (obj != null) {
-                if (isDependencyManagementPluginPomCustomizationEnabled(obj)) {
-                    throw new InvalidUserDataException(
-                            "The ManipulationPlugin cannot be used together with the Spring Dependency Management unless the latter has disabled generatedPomCustomization");
-                }
             }
         });
 

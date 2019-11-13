@@ -2,7 +2,7 @@ plugins {
     // including this plugin directly instead of by an init script, which allows to use the freshly build version
     id 'org.jboss.gm.manipulation'
     id 'java'
-    id 'maven'
+    id 'maven-publish'
     id "io.spring.dependency-management" version "1.0.6.RELEASE"
 }
 
@@ -17,11 +17,26 @@ dependencyManagement {
     imports {
         mavenBom "org.springframework.boot:spring-boot-dependencies:1.5.19.RELEASE"
     }
+    dependencies {
+        dependency "org.slf4j:slf4j-api:1.7.25"
+        dependency "org.slf4j:slf4j-ext:1.7.25"
+    }
 }
 
 dependencies {
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
-    compile group: 'org.hibernate', name: 'hibernate-core'
+    compile group: 'org.hibernate', name: 'hibernate-core' // 5.0.12.Final in BOM
+    compile group: 'org.hsqldb', name: 'hsqldb' // 2.3.6 in BOM
     compile group: 'io.undertow', name: 'undertow-core', version: '1.4.26.Final'
+    compile group: 'org.slf4j', name: 'slf4j-api'
+    compile group: 'org.slf4j', name: 'slf4j-ext'
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+publishing {
+    publications {
+        artifactPublication(MavenPublication) {
+            from components.java
+        }
+    }
 }

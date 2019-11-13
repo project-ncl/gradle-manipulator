@@ -3,9 +3,7 @@ package org.jboss.gm.analyzer.alignment;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Collection;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.api.Project;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
@@ -65,8 +63,10 @@ public class SimpleProjectWithSpringDMPluginFunctionalTest extends AbstractWirem
             assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00001");
                 assertThat(root.getName()).isEqualTo("root");
-                final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
-                assertThat(alignedDependencies)
+                // only infinispan-core should be present
+                assertThat(root.getAlignedDependencies().keySet())
+                        .containsOnly("org.infinispan:infinispan-core:8.2.11.Final"); // key includes version!
+                assertThat(root.getAlignedDependencies().values())
                         .extracting("artifactId", "versionString")
                         .containsOnly(
                                 tuple("infinispan-core", "8.2.11.Final-redhat-00004"));

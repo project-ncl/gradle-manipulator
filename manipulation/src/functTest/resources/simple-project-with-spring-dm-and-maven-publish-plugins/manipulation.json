@@ -12,6 +12,11 @@
       "groupId": "io.undertow",
       "artifactId": "undertow-core",
       "version": "1.4.25.Final"
+    },
+    "org.slf4j:slf4j-api:1.7.25": {
+      "groupId": "org.slf4j",
+      "artifactId": "slf4j-api",
+      "version": "1.7.26"
     }
   }
 }

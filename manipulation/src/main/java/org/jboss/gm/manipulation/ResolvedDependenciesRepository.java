@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
+import org.gradle.api.logging.Logger;
+import org.jboss.gm.common.logging.GMLogger;
 
 /**
  * Used in order to record the dependencies that don't have a declared version, but a version
@@ -13,7 +15,10 @@ public class ResolvedDependenciesRepository {
 
     private Map<ProjectRef, String> gaToVersion = new HashMap<>();
 
+    private final Logger logger = GMLogger.getLogger(getClass());
+
     public void record(ProjectRef projectRef, String version) {
+        logger.debug("Recording resolved dependency " + projectRef.toString());
         gaToVersion.put(projectRef, version);
     }
 

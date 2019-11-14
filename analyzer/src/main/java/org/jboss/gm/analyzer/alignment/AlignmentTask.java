@@ -94,7 +94,7 @@ public class AlignmentTask extends DefaultTask {
         final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
         final ManipulationCache cache = ManipulationCache.getCache(project);
 
-        if (!configOutput.get().compareAndSet(false, true)) {
+        if (!configOutput.get().getAndSet(true)) {
             // Only output the config once to avoid noisy logging.
             logger.info("Configuration now has properties {}", configuration.dumpCurrentConfig());
         }

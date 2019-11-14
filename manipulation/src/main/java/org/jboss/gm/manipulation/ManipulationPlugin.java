@@ -62,7 +62,7 @@ public class ManipulationPlugin implements Plugin<Project> {
         }
 
         Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
-        if (configOutput.get().compareAndSet(false, true)) {
+        if (!configOutput.get().getAndSet(true)) {
             // Only output the config once to avoid noisy logging.
             logger.info("Configuration now has properties {}", configuration.dumpCurrentConfig());
         }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -55,7 +56,7 @@ public final class LockFileIO {
         getAllLockfiles(locksRootPath).forEach(f -> {
             final Path path = f.toPath();
             try {
-                Files.move(path, path.resolveSibling(path.getFileName() + ".unused"));
+                Files.move(path, path.resolveSibling(path.getFileName() + ".unused"), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 throw new ManipulationUncheckedException("Unable to rename lockfile " + f, e);
             }

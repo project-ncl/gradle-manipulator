@@ -13,16 +13,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 
-import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 
 public abstract class AbstractWiremockTest {
 
-    @SuppressWarnings( "WeakerAccess" )
-    protected int port = Options.DYNAMIC_PORT;
-
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(port);
+    public WireMockRule wireMockRule = new WireMockRule();
 
     @BeforeClass
     public static void beforeClass() {

@@ -31,4 +31,4 @@ jobs:
 
   - name: pr
     if: type = pull_request
-    script: "travis-wait-enhanced --timeout=60m --interval=4m -- ./gradlew clean build"
+    script: "travis-wait-enhanced --timeout=60m --interval=4m -- ./gradlew --stacktrace clean build"

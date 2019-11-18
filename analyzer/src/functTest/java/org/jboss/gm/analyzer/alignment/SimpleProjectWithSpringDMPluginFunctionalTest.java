@@ -45,7 +45,7 @@ public class SimpleProjectWithSpringDMPluginFunctionalTest extends AbstractWirem
                         .withHeader("Content-Type", "application/json;charset=utf-8")
                         .withBody(readSampleDAResponse("simple-project-with-spring-dm-plugin-da-response.json"))));
 
-        System.setProperty(Configuration.DA, "http://127.0.0.1:" + getPort() + "/da/rest/v-1");
+        System.setProperty(Configuration.DA, "http://127.0.0.1:" + wireMockRule.port() + "/da/rest/v-1");
     }
 
     @Test

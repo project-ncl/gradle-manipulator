@@ -47,7 +47,7 @@ public class ComplexWithExistingManipulationProjectFunctionalTest extends Abstra
                         .withHeader("Content-Type", "application/json;charset=utf-8")
                         .withBody(readSampleDAResponse("complex-project-da-response-with-existing-manipulation.json"))));
 
-        System.setProperty(Configuration.DA, "http://127.0.0.1:" + getPort() + "/da/rest/v-1");
+        System.setProperty(Configuration.DA, "http://127.0.0.1:" + wireMockRule.port() + "/da/rest/v-1");
     }
 
     @Test

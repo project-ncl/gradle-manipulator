@@ -1,5 +1,5 @@
 
-group = "org.jboss.gm.common"
+group = "org.jboss.gm"
 
 dependencies {
     compileOnly(localGroovy())

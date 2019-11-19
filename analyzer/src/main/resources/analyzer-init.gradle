@@ -8,7 +8,7 @@ initscript {
         }
     }
     dependencies {
-        classpath "org.jboss.gm.analyzer:analyzer:${project.version}"
+        classpath "org.jboss.gm:analyzer:${project.version}"
     }
 }
 

@@ -31,7 +31,7 @@ buildscript {
     // just rerun the analyzer plugin
     if (!project.hasProperty("gmeAnalyse")) {
         dependencies {
-            classpath "org.jboss.gm.manipulation:manipulation:${project.version}"
+            classpath "org.jboss.gm:manipulation:${project.version}"
         }
     }
 }

@@ -40,6 +40,7 @@ public class Main implements Callable<Void> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    @SuppressWarnings("FieldCanBeLocal")
     @Option(names = "--no-colour",
             negatable = true,
             description = "Enable (or disable with '--no-colour') colour output on logging.")
@@ -85,10 +86,7 @@ public class Main implements Callable<Void> {
         System.exit(m.run(args));
     }
 
-    Main() {
-    }
-
-    int run(String[] args) throws Exception {
+    public int run(String[] args) throws Exception {
         CommandLine cl = new CommandLine(this);
         ExceptionHandler handler = new ExceptionHandler();
 

@@ -25,7 +25,7 @@ plugins {
 
 apply(plugin = "net.researchgate.release")
 
-tasks.afterReleaseBuild { dependsOn(":analyzer:publish", ":manipulation:publish", ":analyzer:publishPlugins", ":manipulation:publishPlugins") }
+tasks.afterReleaseBuild { dependsOn(":analyzer:publish", ":manipulation:publish", ":cli:publish", ":analyzer:publishPlugins", ":manipulation:publishPlugins") }
 tasks.beforeReleaseBuild {
     doLast {
         if ("true" == System.getProperty("release","") && project == project.rootProject) {

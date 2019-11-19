@@ -1,4 +1,4 @@
-group = "org.jboss.gm.manipulation"
+group = "org.jboss.gm"
 
 pluginBundle {
     website = "https://project-ncl.github.io/gradle-manipulator/"

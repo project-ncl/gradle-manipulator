@@ -188,7 +188,6 @@ subprojects {
                         }
                     }
 
-
                     pom {
                         name.set("Gradle Manipulation Extension")
                         description.set("A tool to work with ProjectNCL to manipulate Gradle builds.")

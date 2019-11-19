@@ -44,7 +44,7 @@ public class GroovyUtils {
             for (String script : scripts) {
                 logger.info("Attempting to read URL {} ", script);
                 try {
-                    File remote = File.createTempFile("gme-" + i, "groovy");
+                    File remote = File.createTempFile("gme-" + i, ".groovy");
                     remote.deleteOnExit();
                     FileUtils.copyURLToFile(new URL(script), remote);
                     groovyFiles.add(remote);
@@ -69,7 +69,7 @@ public class GroovyUtils {
             final InvocationStage stage;
             final InvocationPoint invocationPoint = script.getClass().getAnnotation(InvocationPoint.class);
 
-            logger.info("Attempting to invoke groovy script {} ", scriptFile);
+            logger.info("For target stage {} attempting to invoke groovy script {} ", targetStage, scriptFile);
             if (invocationPoint != null) {
                 logger.debug("InvocationPoint is {}", invocationPoint.invocationPoint().toString());
                 stage = invocationPoint.invocationPoint();

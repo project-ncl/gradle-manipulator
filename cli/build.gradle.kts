@@ -1,5 +1,5 @@
 
-group = "org.jboss.gm.cli"
+group = "org.jboss.gm"
 
 dependencies {
 

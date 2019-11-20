@@ -131,10 +131,10 @@ public interface Configuration extends Accessible, Reloadable {
          */
         @Override
         public DependencyPrecedence convert(Method method, String input) {
-            if (isEmpty(input)) {
-                return DependencyPrecedence.NONE;
+            if (input != null) {
+                input = input.toUpperCase();
             }
-            return DependencyPrecedence.valueOf(input.toUpperCase());
+            return DependencyPrecedence.valueOf(input);
         }
     }
 

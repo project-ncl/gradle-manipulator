@@ -11,14 +11,16 @@ import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.StdErrLog;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.contrib.java.lang.system.SystemErrRule;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 
 public abstract class AbstractWiremockTest {
 
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule();
+    @ClassRule
+    public static final SystemErrRule systemErrRule = new SystemErrRule().enableLog().muteForSuccessfulTests();
 
     @BeforeClass
     public static void beforeClass() {
@@ -26,6 +28,9 @@ public abstract class AbstractWiremockTest {
         el.setLevel(10);
         Log.setLog(el);
     }
+
+    @Rule
+    public WireMockRule wireMockRule = new WireMockRule();
 
     @Before
     public void before() {

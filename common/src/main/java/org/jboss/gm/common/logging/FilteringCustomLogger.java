@@ -43,11 +43,10 @@ public class FilteringCustomLogger implements OutputEventListener {
         LogEvent logEvent = (LogEvent) event;
         if (ignoreCategories.stream().noneMatch(i -> logEvent.getCategory().startsWith(i))) {
             if (acceptableCategories.stream().noneMatch(i -> logEvent.getCategory().startsWith(i))) {
-                // Can't use logger to output the warning as causes stack overflow.
+                // Can't use logger to output a warning as causes stack overflow.
                 // TODO: Remove?
                 // System.err.println("Unknown event using category " + logEvent.getCategory() + " : ");
                 delegate.onOutput(event);
-                // System.err.println(".... completed unknown event.");
             }
             delegate.onOutput(event);
         }

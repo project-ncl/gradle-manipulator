@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,9 +16,11 @@ import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.gradle.internal.Pair;
+import org.gradle.tooling.BuildException;
 import org.gradle.tooling.BuildLauncher;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
+import org.gradle.tooling.internal.consumer.DefaultGradleConnector;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.GroovyUtils;
 import org.slf4j.Logger;
@@ -110,28 +113,35 @@ public class Main implements Callable<Void> {
         } else {
             connector.useBuildDistribution();
         }
-
-        ProjectConnection connection = connector.connect();
-        BuildLauncher build = connection.newBuild();
-        Set<String> jvmArgs = jvmPropertyParams.entrySet().stream().map(entry -> "-D" + entry.getKey() + '=' + entry.getValue())
-                .collect(Collectors.toSet());
-
-        if (colour) {
-            build.setColorOutput(true);
-        } else {
-            jvmArgs.add("-DloggingColours=false");
+        // Set the timeout to a low value (default is 3 minutes) so that it expires quickly.
+        if (connector instanceof DefaultGradleConnector) {
+            ((DefaultGradleConnector) connector).daemonMaxIdleTime(10, TimeUnit.SECONDS);
         }
 
-        logger.info("Executing Gradle project {} with JVM args '{}' and arguments '{}'", target, jvmArgs, gradleArgs);
+        try (ProjectConnection connection = connector.connect()) {
+            BuildLauncher build = connection.newBuild();
+            Set<String> jvmArgs = jvmPropertyParams.entrySet().stream()
+                    .map(entry -> "-D" + entry.getKey() + '=' + entry.getValue())
+                    .collect(Collectors.toSet());
 
-        build.setEnvironmentVariables(envVars);
-        build.setJvmArguments(jvmArgs);
-        build.withArguments(gradleArgs);
-        build.setStandardOutput(System.out);
-        build.setStandardError(System.err);
+            if (colour) {
+                build.setColorOutput(true);
+            } else {
+                jvmArgs.add("-DloggingColours=false");
+            }
 
-        build.run();
-        connection.close();
+            logger.info("Executing Gradle project {} with JVM args '{}' and arguments '{}'", target, jvmArgs, gradleArgs);
+
+            build.setEnvironmentVariables(envVars);
+            build.setJvmArguments(jvmArgs);
+            build.withArguments(gradleArgs);
+            build.setStandardOutput(System.out);
+            build.setStandardError(System.err);
+            build.run();
+        } catch (BuildException e) {
+            logger.error("Caught exception running build", e.getCause());
+            throw new ManipulationException("Caught exception running build", e.getCause());
+        }
     }
 
     /**

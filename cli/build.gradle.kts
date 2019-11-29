@@ -1,4 +1,3 @@
-
 group = "org.jboss.gm"
 
 dependencies {
@@ -18,6 +17,8 @@ dependencies {
     compile("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
     compile("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
 
+    testCompile("commons-io:commons-io:${project.extra.get("commonsVersion")}")
+    testCompile(project(":analyzer"))
     testCompile("junit:junit:${project.extra.get("junitVersion")}")
     testCompile("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
 

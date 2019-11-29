@@ -22,7 +22,8 @@ public class ManifestUtils {
             while (resources.hasMoreElements()) {
                 final URL jarUrl = resources.nextElement();
 
-                if (jarUrl.getFile().contains("analyzer-") || jarUrl.getFile().contains("manipulation-")) {
+                if (jarUrl.getFile().contains("/cli-") || jarUrl.getFile().contains("/analyzer-")
+                        || jarUrl.getFile().contains("/manipulation-")) {
                     final Manifest manifest = new Manifest(jarUrl.openStream());
 
                     result = manifest.getMainAttributes()

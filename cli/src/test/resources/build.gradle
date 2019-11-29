@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'maven-publish'
 }
+version=1.0
 
 sourceCompatibility = 1.8
 

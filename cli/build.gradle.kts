@@ -6,10 +6,10 @@ dependencies {
     compile("ch.qos.logback:logback-core:${project.extra.get("logbackVersion")}")
 
     // Minimum Gradle API to provide the Project. Not using gradleApi as that pulls in too much.
-    compile("org.gradle:gradle-core-api:5.6.2")
+    compile("org.gradle:gradle-core-api:${project.extra.get("gradleVersion")}")
 
     compile(project(":common"))
-    compile("org.gradle:gradle-tooling-api:5.6.3")
+    compile("org.gradle:gradle-tooling-api:${project.extra.get("gradleVersion")}")
     compile("info.picocli:picocli:4.0.4")
 
     compile("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
@@ -39,7 +39,7 @@ dependencies {
     permitUnusedDeclared("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
 
     // The CLI needs to be able to run groovy.
-    permitUnusedDeclared("org.gradle:gradle-core-api:5.6.2")
+    permitUnusedDeclared("org.gradle:gradle-core-api:${project.extra.get("gradleVersion")}")
 }
 
 tasks {

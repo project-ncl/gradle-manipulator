@@ -14,9 +14,9 @@ plugins {
     id("ca.cutterslade.analyze") version "1.3.3"
     id("com.adarshr.test-logger") version "2.0.0"
     id("com.diffplug.gradle.spotless") version "3.25.0"
-    id("com.github.johnrengelman.shadow") version "5.1.0"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
     id("com.gradle.plugin-publish") version "0.10.1"
-    id("io.freefair.lombok") version "4.1.2" apply false
+    id("io.freefair.lombok") version "4.1.6" apply false
     id("net.linguica.maven-settings") version "0.5"
     id("net.nemerosa.versioning") version "2.8.2"
     id("net.researchgate.release") version "2.8.1"
@@ -85,6 +85,7 @@ subprojects {
 
     val isReleaseBuild = ("true" == System.getProperty("release",""))
 
+    extra["gradleVersion"] = "5.6.2"
     extra["atlasVersion"] = "0.17.2"
     extra["assertjVersion"] = "3.12.2"
     extra["bytemanVersion"] = "4.0.7"

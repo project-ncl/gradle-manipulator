@@ -10,6 +10,7 @@ import org.jboss.gm.common.logging.FilteringCustomLogger;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.ManifestUtils;
+import org.jboss.gm.common.utils.ProjectUtils;
 
 /**
  * Results in adding a task with name {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME}.
@@ -49,8 +50,9 @@ public class AlignmentPlugin implements Plugin<Project> {
     private ManipulationModel getManipulationModel(Project project) {
         final String name = project.getName();
         final ManipulationCache cache = ManipulationCache.getCache(project);
-        final ManipulationModel alignmentModel = new ManipulationModel(name, project.getGroup().toString());
+        final ManipulationModel alignmentModel = new ManipulationModel(name, ProjectUtils.getRealGroupId(project));
 
+        logger.debug("Adding project {} to cache", name);
         cache.addProject(name);
         project.getChildProjects().forEach((n, p) -> alignmentModel.addChild(getManipulationModel(p)));
 

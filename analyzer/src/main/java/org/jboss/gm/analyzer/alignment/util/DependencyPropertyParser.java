@@ -2,6 +2,8 @@ package org.jboss.gm.analyzer.alignment.util;
 
 import java.util.function.Predicate;
 
+import lombok.experimental.UtilityClass;
+
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.gradle.api.InvalidUserDataException;
@@ -12,10 +14,8 @@ import org.gradle.api.InvalidUserDataException;
  * See section "Exclusions and Overrides" of
  * https://release-engineering.github.io/pom-manipulation-ext/guide/dep-manip.html
  */
+@UtilityClass
 public final class DependencyPropertyParser {
-
-    private DependencyPropertyParser() {
-    }
 
     public static Result parse(String key) {
         if (!key.contains("@")) {

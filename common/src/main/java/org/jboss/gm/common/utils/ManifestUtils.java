@@ -5,8 +5,11 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.jar.Manifest;
 
+import lombok.experimental.UtilityClass;
+
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 
+@UtilityClass
 public class ManifestUtils {
     /**
      * Retrieves the Version and SHA this was built with.

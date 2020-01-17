@@ -2,6 +2,8 @@ package org.jboss.gm.common.utils;
 
 import java.io.IOException;
 
+import lombok.experimental.UtilityClass;
+
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.jboss.gm.common.versioning.ProjectVersionFactory;
 
@@ -16,14 +18,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+@UtilityClass
 public final class SerializationUtils {
 
     private static final String GROUP_ID = "groupId";
     private static final String ARTIFACT_ID = "artifactId";
     private static final String VERSION = "version";
-
-    private SerializationUtils() {
-    }
 
     private static final ObjectMapper mapper;
 

@@ -13,7 +13,10 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
+import org.gradle.api.logging.Logger;
+import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.common.utils.ProjectUtils;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
 
 /**
@@ -127,10 +130,12 @@ public class ManipulationCache {
     public void addGAV(Project project, ProjectVersionRef gav) {
         // Null check for some tests.
         if (project != null && model != null) {
-            model.findCorrespondingChild(project).setGroup(project.getGroup().toString());
+            model.findCorrespondingChild(project).setGroup(ProjectUtils.getRealGroupId(project));
         }
         this.projectVersionRefs.add(gav);
     }
+
+    private final Logger logger = GMLogger.getLogger(getClass());
 
     @Override
     public String toString() {

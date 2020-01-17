@@ -15,6 +15,7 @@ import org.jboss.gm.analyzer.alignment.AlignmentService.ResponseCustomizer;
 import org.jboss.gm.analyzer.alignment.util.DependencyPropertyParser;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
+import org.jboss.gm.common.utils.ProjectUtils;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
@@ -59,11 +60,12 @@ public class DependencyOverrideCustomizer implements ResponseCustomizer {
                 final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
 
                 for (Project project : projects) {
+                    String group = ProjectUtils.getRealGroupId(project);
                     if (isNotEmpty(project.getVersion().toString()) &&
-                            isNotEmpty(project.getGroup().toString()) &&
+                            isNotEmpty(group) &&
                             isNotEmpty(project.getName())) {
 
-                        final ProjectVersionRef projectRef = new SimpleProjectVersionRef(project.getGroup().toString(),
+                        final ProjectVersionRef projectRef = new SimpleProjectVersionRef(group,
                                 project.getName(), project.getVersion().toString());
                         if (keyParseResult.matchesModule(projectRef)) {
                             final String overrideVersion = prefixed.get(key);

@@ -54,6 +54,7 @@ import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.GroovyUtils;
+import org.jboss.gm.common.utils.ProjectUtils;
 import org.jboss.gm.common.versioning.DynamicVersionParser;
 import org.jboss.gm.common.versioning.ProjectVersionFactory;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
@@ -93,12 +94,13 @@ public class AlignmentTask extends DefaultTask {
         final String projectName = project.getName();
         final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
         final ManipulationCache cache = ManipulationCache.getCache(project);
+        final String groupId = ProjectUtils.getRealGroupId(project);
 
         if (!configOutput.get().getAndSet(true)) {
             // Only output the config once to avoid noisy logging.
             logger.info("Configuration now has properties {}", configuration.dumpCurrentConfig());
         }
-        logger.info("Starting model task for project {} with GAV {}:{}:{}", project.getDisplayName(), project.getGroup(),
+        logger.info("Starting model task for project {} with GAV {}:{}:{}", project.getDisplayName(), groupId,
                 projectName, project.getVersion());
 
         try {
@@ -117,13 +119,12 @@ public class AlignmentTask extends DefaultTask {
             project.getBuildscript().getRepositories().forEach(r -> cache.addRepository(r,
                     org.jboss.gm.common.utils.FileUtils.relativize(root, project.getProjectDir().toPath())));
 
-            if (StringUtils.isBlank(project.getGroup().toString()) ||
+            if (StringUtils.isBlank(groupId) ||
                     DEFAULT_VERSION.equals(project.getVersion().toString())) {
-
-                logger.warn("Project '{}:{}:{}' is not fully defined ; skipping. ", project.getGroup(), projectName,
+                logger.warn("Project '{}:{}:{}' is not fully defined ; skipping. ", groupId, projectName,
                         project.getVersion());
             } else {
-                ProjectVersionRef current = ProjectVersionFactory.withGAV(project.getGroup().toString(), projectName,
+                ProjectVersionRef current = ProjectVersionFactory.withGAV(groupId, projectName,
                         currentProjectVersion);
 
                 logger.debug("Adding {} to cache for scanning.", current);
@@ -182,10 +183,14 @@ public class AlignmentTask extends DefaultTask {
 
                 // groupId
                 if (isEmpty(alignmentModel.getGroup())) {
-                    String commonPrefix = StringUtils.stripEnd(
-                            StringUtils.getCommonPrefix(
-                                    alignmentModel.getChildren().values().stream().map(ManipulationModel::getGroup)
-                                            .collect(Collectors.toList()).toArray(new String[] {})),
+                    List<String> candidates = ManipulationCache.getCache(project.getRootProject()).getModel().getChildren()
+                            .values()
+                            .stream().map(ManipulationModel::getGroup)
+                            .filter(StringUtils::isNotBlank)
+                            .collect(Collectors.toList());
+
+                    logger.debug("Found potential candidates of {} to establish a groupId.", candidates);
+                    String commonPrefix = StringUtils.stripEnd(StringUtils.getCommonPrefix(candidates.toArray(new String[] {})),
                             ".");
 
                     if (isEmpty(commonPrefix)) {

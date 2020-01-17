@@ -14,10 +14,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Contains the information extracted from a gradle project and its sub-project required to perform model and version
  * change
- * 
+ *
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
  */
 public class ManipulationModel {
+
     @JsonProperty
     protected String group;
 

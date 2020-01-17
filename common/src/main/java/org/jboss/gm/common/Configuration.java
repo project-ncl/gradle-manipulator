@@ -14,7 +14,6 @@ import org.aeonbits.owner.Reloadable;
 import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
 
 import static org.aeonbits.owner.Config.LoadType.MERGE;
-import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * This class is used to hold all configuration values for the two plugins. The naming scheme of

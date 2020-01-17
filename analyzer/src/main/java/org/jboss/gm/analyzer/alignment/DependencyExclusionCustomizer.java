@@ -16,6 +16,7 @@ import org.gradle.api.logging.Logger;
 import org.jboss.gm.analyzer.alignment.util.DependencyPropertyParser;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
+import org.jboss.gm.common.utils.ProjectUtils;
 
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
@@ -59,10 +60,11 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
             for (String key : prefixed.keySet()) {
                 final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
                 for (Project project : projects) {
+                    String group = ProjectUtils.getRealGroupId(project);
                     if (isNotEmpty(project.getVersion().toString()) &&
-                            isNotEmpty(project.getGroup().toString()) &&
+                            isNotEmpty(group) &&
                             isNotEmpty(project.getName())) {
-                        final ProjectVersionRef projectRef = new SimpleProjectVersionRef(project.getGroup().toString(),
+                        final ProjectVersionRef projectRef = new SimpleProjectVersionRef(group,
                                 project.getName(),
                                 project.getVersion().toString());
                         if (keyParseResult.matchesModule(projectRef)) {

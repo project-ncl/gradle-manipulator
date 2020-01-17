@@ -1,0 +1,6 @@
+include "subproject1"
+include "subproject2"
+rootProject.name = "mongo-java-driver-reactivestreams"
+rootProject.children.each {project ->
+    project.buildFileName = "${project.name}.gradle"
+}

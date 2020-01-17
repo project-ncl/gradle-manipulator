@@ -6,6 +6,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
 
+import lombok.experimental.UtilityClass;
+
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -13,6 +15,7 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
+@UtilityClass
 public class FileUtils {
 
     /**

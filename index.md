@@ -71,6 +71,11 @@ There are multiple ways that the plugins can be applied.
 It should also be noted that the project itself contains a properly configured init script for the `analyzer` plugin (which gets released along with the plugin).
 Furthermore, when the `analyzer` plugin executes, it alters the main gradle script of the target project to include the manipulation plugin.
 
+##### Troubleshooting
+
+* Gradle build daemon disappeared unexpectedly
+   * This may happen in Gradle versions prior to 5.x if the shell environment contains non ASCII characters (e.g. the PROMPT symbol).
+
 ### General Configuration
 
 #### Unresolved Dependencies

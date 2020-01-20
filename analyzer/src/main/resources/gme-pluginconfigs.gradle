@@ -18,6 +18,13 @@ if (!project.hasProperty("gmeAnalyse")) {
             // Disable any user-configured external links.
             externalDocumentationLinks.clear()
         }
+    }
 
+    allprojects {
+        project.pluginManager.withPlugin("com.bmuschko.nexus") {
+            nexus {
+                sign = false
+            }
+        }
     }
 }

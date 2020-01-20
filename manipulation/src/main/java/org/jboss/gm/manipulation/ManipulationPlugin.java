@@ -95,25 +95,6 @@ public class ManipulationPlugin implements Plugin<Project> {
         configurePublishingTask(configuration, project, correspondingModule, resolvedDependenciesRepository);
     }
 
-    // Ensure that if the Spring Dependency Management plugin is applied,
-    // that it's configured to not generate a "dependencyManagement" section in the generated bom
-    // This is needed because if we don't do it, the "dependencyManagement" section (which is a bom inclusion) will override our dependencies
-    // On the implementation side of things, we need to use reflection because we can get a nasty classloader errors
-    // when trying to cast the object to the known type
-    private boolean isDependencyManagementPluginPomCustomizationEnabled(Object obj) {
-        try {
-            final Method getPomCustomizationSettingsMethod = obj.getClass().getMethod("getPomCustomizationSettings");
-            final Object getPomCustomizationSettingsObj = getPomCustomizationSettingsMethod.invoke(obj);
-            final Method isEnabledMethod = getPomCustomizationSettingsObj.getClass().getMethod("isEnabled");
-            return (boolean) isEnabledMethod.invoke(getPomCustomizationSettingsObj);
-        } catch (Exception e) {
-            logger.error(
-                    "ManipulationPlugin is being used with an unsupported version of the Spring Dependency Management Plugin",
-                    e);
-            throw new ManipulationUncheckedException(e);
-        }
-    }
-
     /**
      * TODO: add functional tests for publishing
      */

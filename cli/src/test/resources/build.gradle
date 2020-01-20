@@ -35,3 +35,16 @@ task api(type: Javadoc) {
         project.sourceSets.main.allJava
     }
 }
+task getGitVersion {
+    def outputAsString=""
+    new ByteArrayOutputStream().withStream { os ->
+        exec {
+            executable 'git'
+            args 'describe', '--tags', '--always', '--dirty'
+            standardOutput = os
+            setIgnoreExitValue(true)
+        }
+        outputAsString = os.toString().trim()
+    }
+    println(outputAsString)
+}

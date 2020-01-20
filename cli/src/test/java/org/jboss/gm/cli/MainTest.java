@@ -13,10 +13,9 @@ import org.jboss.gm.analyzer.alignment.AlignmentPlugin;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
-import org.junit.rules.TestRule;
 
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertFalse;
@@ -28,7 +27,7 @@ public class MainTest {
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemErrRule systemErrRule = new SystemErrRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -136,5 +135,17 @@ public class MainTest {
         assertTrue(gmeGradle.exists());
         assertTrue(FileUtils.readFileToString(gmeGradle, Charset.defaultCharset())
                 .contains("org.jboss.gm:manipulation:" + actualVersion.getProperty("version")));
+    }
+
+    @Test
+    public void testInvokeGradleWithExternal() throws Exception {
+
+        final File projectRoot = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
+
+        Main m = new Main();
+        String[] args = new String[] { "--trace", "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "getGitVersion" };
+        m.run(args);
+
+        assertTrue(systemOutRule.getLog().contains("Process 'command 'git'' finished with exit value"));
     }
 }

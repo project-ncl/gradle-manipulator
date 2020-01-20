@@ -52,6 +52,9 @@ public class Main implements Callable<Void> {
     @Option(names = "-d", description = "Enable debug.")
     private boolean debug;
 
+    @Option(names = "--trace", description = "Enable trace.")
+    private boolean trace;
+
     @Option(names = { "-t", "--target" }, required = true, description = "Target Gradle directory.")
     private File target;
 
@@ -71,7 +74,9 @@ public class Main implements Callable<Void> {
             Pair.of("LC_ALL", "en_US"),
             Pair.of("LANG", "en_US"),
             Pair.of("PROMPT", "$"),
-            Pair.of("RPROMPT", "")).collect(Collectors.toMap(Pair::left, Pair::right));
+            Pair.of("RPROMPT", ""),
+            // Also add the System PATH so external executables may be found.
+            Pair.of("PATH", System.getenv("PATH"))).collect(Collectors.toMap(Pair::left, Pair::right));
 
     /**
      * This allows the tool to be invoked. The command line parsing allows for:
@@ -115,7 +120,12 @@ public class Main implements Callable<Void> {
         }
         // Set the timeout to a low value (default is 3 minutes) so that it expires quickly.
         if (connector instanceof DefaultGradleConnector) {
-            ((DefaultGradleConnector) connector).daemonMaxIdleTime(10, TimeUnit.SECONDS);
+            DefaultGradleConnector dgc = ((DefaultGradleConnector) connector);
+            dgc.daemonMaxIdleTime(10, TimeUnit.SECONDS);
+
+            if (trace) {
+                dgc.setVerboseLogging(true);
+            }
         }
 
         try (ProjectConnection connection = connector.connect()) {

@@ -27,10 +27,9 @@ import org.jboss.gm.manipulation.actions.UploadTaskTransformerAction;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
-@SuppressWarnings("unused")
 public class ManipulationPlugin implements Plugin<Project> {
 
-    private static final String LEGACY_MAVEN_PLUGIN = "maven";
+    public static final String LEGACY_MAVEN_PLUGIN = "maven";
     // This plugin wraps the legacy maven plugin.
     private static final String LEGACY_MAVEN_PLUGIN_NEXUS = "com.bmuschko.nexus";
     private static final String MAVEN_PUBLISH_PLUGIN = "maven-publish";
@@ -132,20 +131,20 @@ public class ManipulationPlugin implements Plugin<Project> {
                 // see hibernate-enhance-maven-plugin
                 if (evaluatedProject.getPluginManager().hasPlugin(MAVEN_PUBLISH_PLUGIN)) {
                     deployPlugin = MAVEN_PUBLISH_PLUGIN;
-                } else if (evaluatedProject.getPluginManager().hasPlugin(LEGACY_MAVEN_PLUGIN)) {
-                    deployPlugin = LEGACY_MAVEN_PLUGIN;
                 } else if (evaluatedProject.getPluginManager().hasPlugin(LEGACY_MAVEN_PLUGIN_NEXUS)) {
                     deployPlugin = LEGACY_MAVEN_PLUGIN_NEXUS;
+                } else if (evaluatedProject.getPluginManager().hasPlugin(LEGACY_MAVEN_PLUGIN)) {
+                    deployPlugin = LEGACY_MAVEN_PLUGIN;
                 }
             }
 
             if (LEGACY_MAVEN_PLUGIN.equals(deployPlugin) || LEGACY_MAVEN_PLUGIN_NEXUS.equals(deployPlugin)) {
-                logger.info("Configuring 'maven' plugin for project " + evaluatedProject.getName());
+                logger.info("Configuring {} plugin for project {}", deployPlugin, evaluatedProject.getName());
                 evaluatedProject
                         .afterEvaluate(new UploadTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
                 evaluatedProject.afterEvaluate(new LegacyMavenPublishingRepositoryAction());
             } else if (MAVEN_PUBLISH_PLUGIN.equals(deployPlugin)) {
-                logger.info("Configuring 'maven-publish' plugin for project " + evaluatedProject.getName());
+                logger.info("Configuring {}} plugin for project {}", deployPlugin, evaluatedProject.getName());
 
                 evaluatedProject.afterEvaluate(new MavenPublishingRepositoryAction());
                 evaluatedProject

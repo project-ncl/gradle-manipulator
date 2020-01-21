@@ -22,6 +22,8 @@ if (!project.hasProperty("gmeAnalyse")) {
 
     allprojects {
         project.pluginManager.withPlugin("com.bmuschko.nexus") {
+            project.ext.nexusUsername = ""
+            project.ext.nexusPassword = ""
             nexus {
                 sign = false
             }

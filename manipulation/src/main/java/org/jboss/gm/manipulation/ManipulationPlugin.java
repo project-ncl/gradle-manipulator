@@ -1,12 +1,10 @@
 package org.jboss.gm.manipulation;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.beanutils.ContextClassLoaderLocal;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -27,11 +25,13 @@ import org.jboss.gm.manipulation.actions.PublishingArtifactsAction;
 import org.jboss.gm.manipulation.actions.UploadTaskTransformerAction;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
-@SuppressWarnings("unused")
 public class ManipulationPlugin implements Plugin<Project> {
 
-    private static final String LEGACY_MAVEN_PLUGIN = "maven";
+    public static final String LEGACY_MAVEN_PLUGIN = "maven";
+    // This plugin wraps the legacy maven plugin.
+    private static final String LEGACY_MAVEN_PLUGIN_NEXUS = "com.bmuschko.nexus";
     private static final String MAVEN_PUBLISH_PLUGIN = "maven-publish";
 
     static {
@@ -95,25 +95,6 @@ public class ManipulationPlugin implements Plugin<Project> {
         configurePublishingTask(configuration, project, correspondingModule, resolvedDependenciesRepository);
     }
 
-    // Ensure that if the Spring Dependency Management plugin is applied,
-    // that it's configured to not generate a "dependencyManagement" section in the generated bom
-    // This is needed because if we don't do it, the "dependencyManagement" section (which is a bom inclusion) will override our dependencies
-    // On the implementation side of things, we need to use reflection because we can get a nasty classloader errors
-    // when trying to cast the object to the known type
-    private boolean isDependencyManagementPluginPomCustomizationEnabled(Object obj) {
-        try {
-            final Method getPomCustomizationSettingsMethod = obj.getClass().getMethod("getPomCustomizationSettings");
-            final Object getPomCustomizationSettingsObj = getPomCustomizationSettingsMethod.invoke(obj);
-            final Method isEnabledMethod = getPomCustomizationSettingsObj.getClass().getMethod("isEnabled");
-            return (boolean) isEnabledMethod.invoke(getPomCustomizationSettingsObj);
-        } catch (Exception e) {
-            logger.error(
-                    "ManipulationPlugin is being used with an unsupported version of the Spring Dependency Management Plugin",
-                    e);
-            throw new ManipulationUncheckedException(e);
-        }
-    }
-
     /**
      * TODO: add functional tests for publishing
      */
@@ -124,7 +105,7 @@ public class ManipulationPlugin implements Plugin<Project> {
 
             // first, let the choice be enforced via a system property
             String deployPlugin = config.deployPlugin();
-            if (!isEmpty(deployPlugin)) {
+            if (isNotEmpty(deployPlugin)) {
                 logger.info("Enforcing artifact deployment plugin `{}`.", deployPlugin);
 
                 checkEnforcedPluginSetting(evaluatedProject, deployPlugin);
@@ -150,18 +131,20 @@ public class ManipulationPlugin implements Plugin<Project> {
                 // see hibernate-enhance-maven-plugin
                 if (evaluatedProject.getPluginManager().hasPlugin(MAVEN_PUBLISH_PLUGIN)) {
                     deployPlugin = MAVEN_PUBLISH_PLUGIN;
+                } else if (evaluatedProject.getPluginManager().hasPlugin(LEGACY_MAVEN_PLUGIN_NEXUS)) {
+                    deployPlugin = LEGACY_MAVEN_PLUGIN_NEXUS;
                 } else if (evaluatedProject.getPluginManager().hasPlugin(LEGACY_MAVEN_PLUGIN)) {
                     deployPlugin = LEGACY_MAVEN_PLUGIN;
                 }
             }
 
-            if (LEGACY_MAVEN_PLUGIN.equals(deployPlugin)) {
-                logger.info("Configuring 'maven' plugin for project " + evaluatedProject.getName());
+            if (LEGACY_MAVEN_PLUGIN.equals(deployPlugin) || LEGACY_MAVEN_PLUGIN_NEXUS.equals(deployPlugin)) {
+                logger.info("Configuring {} plugin for project {}", deployPlugin, evaluatedProject.getName());
                 evaluatedProject
                         .afterEvaluate(new UploadTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
                 evaluatedProject.afterEvaluate(new LegacyMavenPublishingRepositoryAction());
             } else if (MAVEN_PUBLISH_PLUGIN.equals(deployPlugin)) {
-                logger.info("Configuring 'maven-publish' plugin for project " + evaluatedProject.getName());
+                logger.info("Configuring {}} plugin for project {}", deployPlugin, evaluatedProject.getName());
 
                 evaluatedProject.afterEvaluate(new MavenPublishingRepositoryAction());
                 evaluatedProject

@@ -10,8 +10,10 @@ import org.gradle.api.tasks.Upload;
 import org.gradle.authentication.http.HttpHeaderAuthentication;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
+import org.jboss.gm.manipulation.ManipulationPlugin;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.jboss.gm.manipulation.ManipulationPlugin.LEGACY_MAVEN_PLUGIN;
 import static org.jboss.gm.manipulation.actions.MavenPublishingRepositoryAction.REPO_NAME;
 
 /**
@@ -44,7 +46,7 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
 
     @Override
     public void execute(Project project) {
-        if (!project.getPluginManager().hasPlugin("maven")) {
+        if (!project.getPluginManager().hasPlugin(LEGACY_MAVEN_PLUGIN)) {
             // This should never happen due to prior checks in ManipulationPlugin
             throw new ManipulationUncheckedException(
                     "Legacy 'maven' plugin not detected, skipping publishing repository creation.");

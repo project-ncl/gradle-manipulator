@@ -7,6 +7,8 @@ import org.gradle.api.tasks.Upload;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.manipulation.ResolvedDependenciesRepository;
 
+import static org.jboss.gm.manipulation.ManipulationPlugin.LEGACY_MAVEN_PLUGIN;
+
 /**
  * Fixes pom.xml generation in old "maven" plugin.
  * <p>
@@ -25,7 +27,7 @@ public class UploadTaskTransformerAction implements Action<Project> {
 
     @Override
     public void execute(Project project) {
-        if (!project.getPluginManager().hasPlugin("maven")) {
+        if (!project.getPluginManager().hasPlugin(LEGACY_MAVEN_PLUGIN)) {
             return;
         }
 

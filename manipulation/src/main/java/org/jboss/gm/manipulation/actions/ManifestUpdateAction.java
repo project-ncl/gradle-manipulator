@@ -1,5 +1,7 @@
 package org.jboss.gm.manipulation.actions;
 
+import java.io.ByteArrayOutputStream;
+
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.java.archives.internal.DefaultManifest;
@@ -47,7 +49,10 @@ public class ManifestUpdateAction implements Action<Project> {
                 }
             } else if (jar.getManifest() instanceof DefaultManifest) {
                 // TODO: what are common entries here?
-                logger.warn("NYI : Found DefaultManifest with current entries {}", jar.getManifest().getAttributes());
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                ((DefaultManifest) jar.getManifest()).writeTo(byteArrayOutputStream);
+                logger.warn("NYI : Found DefaultManifest with current entries: {}",
+                        byteArrayOutputStream.toString());
             }
         });
     }

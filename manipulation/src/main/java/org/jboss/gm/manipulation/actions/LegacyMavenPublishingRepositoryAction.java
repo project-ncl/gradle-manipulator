@@ -1,6 +1,7 @@
 package org.jboss.gm.manipulation.actions;
 
 import org.aeonbits.owner.ConfigCache;
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
@@ -10,7 +11,6 @@ import org.gradle.api.tasks.Upload;
 import org.gradle.authentication.http.HttpHeaderAuthentication;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
-import org.jboss.gm.manipulation.ManipulationPlugin;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.jboss.gm.manipulation.ManipulationPlugin.LEGACY_MAVEN_PLUGIN;
@@ -53,6 +53,7 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
         }
 
         Upload uploadArchives = project.getTasks().withType(Upload.class).findByName("uploadArchives");
+
         if (uploadArchives == null) {
             logger.info("Creating uploadArchives task");
             uploadArchives = project.getTasks().create("uploadArchives", Upload.class);
@@ -74,12 +75,15 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
 
         // add a maven repository and configure authentication token
         uploadArchives.getRepositories().maven(mavenArtifactRepository -> {
+
             mavenArtifactRepository.setName(REPO_NAME);
             mavenArtifactRepository.setUrl(config.deployUrl());
             if (config.accessToken() != null) {
                 //noinspection UnstableApiUsage
                 mavenArtifactRepository.credentials(HttpHeaderCredentials.class, cred -> {
+                    //noinspection UnstableApiUsage
                     cred.setName("Authorization");
+                    //noinspection UnstableApiUsage
                     cred.setValue("Bearer " + config.accessToken());
                 });
                 //noinspection UnstableApiUsage
@@ -109,11 +113,34 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
         // Clone the archive configuration to avoid ConcurrentModificationException.
         publishArchives.getArtifacts().addAll(archives.copy().getArtifacts());
 
+        final Object abn = project.findProperty("archivesBaseName");
+        final String originalName = project.getName();
+        uploadArchives.doFirst(action -> {
+            // TODO: Find a better method
+            // This is a horrendous hack. We can't find any way of adding HttpHeaderCredentials to the MavenDeployer
+            // which is removed above. Equally we can't find any way of ensuring the new publish configuration correctly
+            // checks the archivesBaseName value - overriding 'configurablePublishArtifact.setName' is insufficient.
+            // We add it as an action to minimise any side affects.
+            if (abn != null) {
+                logger.warn("Located archivesBaseName override ; forcing project name to {} from {} for correct deployment",
+                        abn, originalName);
+                updateNameField(project, abn);
+            }
+        });
+        uploadArchives.doLast(action -> {
+            // TODO: Find a better method
+            // Now revert the action performed above.
+            if (abn != null) {
+                logger.warn("Resetting project name after archivesBaseName override to {} from {}", originalName, abn);
+                updateNameField(project, abn);
+            }
+        });
+
         // add an artifact referencing the POM
         project.getArtifacts().add("publishArchives",
                 project.file(project.getBuildDir().toPath().resolve("poms/pom-default.xml")),
                 configurablePublishArtifact -> {
-                    configurablePublishArtifact.setName(project.getName());
+                    configurablePublishArtifact.setName(abn == null ? originalName : abn.toString());
                     configurablePublishArtifact.setExtension("pom");
                 });
 
@@ -121,5 +148,13 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
         Upload install = project.getTasks().withType(Upload.class).getByName("install");
         install.setConfiguration(installArchives);
         uploadArchives.setConfiguration(publishArchives);
+    }
+
+    private void updateNameField(Project project, Object replacement) {
+        try {
+            FieldUtils.writeField(project, "name", replacement, true);
+        } catch (IllegalAccessException e) {
+            throw new ManipulationUncheckedException("Unable to update name field to " + replacement, e);
+        }
     }
 }

@@ -1,0 +1,50 @@
+
+
+plugins {
+    // including this plugin directly instead of by an init script, which allows to use the freshly build version
+    id 'org.jboss.gm.manipulation'
+
+    id 'java'
+    id 'maven'
+}
+
+allprojects {
+    apply plugin: 'org.jboss.gm.manipulation'
+}
+
+
+archivesBaseName = 'base-name'
+
+install {
+    repositories.mavenInstaller {
+        customizePom(pom, project)
+    }
+}
+
+uploadArchives {
+    repositories {
+
+        mavenDeployer {
+            repository(url: "file:///tmp/repo")
+        }
+    }
+}
+
+def customizePom(pom, gradleProject) {
+    // just add some additional info into generated POM
+    pom.whenConfigured { generatedPom ->
+        generatedPom.project {
+            organization {
+                name = "JBoss"
+                url = "https://www.jboss.org"
+            }
+            licenses {
+                license {
+                    name "Apache License, Version 2.0"
+                    url "https://www.apache.org/licenses/LICENSE-2.0"
+                    distribution "repo"
+                }
+            }
+        }
+    }
+}

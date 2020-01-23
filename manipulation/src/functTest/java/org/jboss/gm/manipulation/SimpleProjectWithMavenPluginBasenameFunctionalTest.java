@@ -7,11 +7,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
-import org.jboss.gm.common.io.ManipulationIO;
-import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
@@ -27,7 +24,7 @@ public class SimpleProjectWithMavenPluginBasenameFunctionalTest {
     private static final Path PATH_IN_REPOSITORY = Paths.get("org/acme/base-name/1.0.1-redhat-00001/");
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -36,7 +33,7 @@ public class SimpleProjectWithMavenPluginBasenameFunctionalTest {
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
 
     @Test
-    public void ensureProperPomGeneratedForLegacyPlugin() throws IOException, URISyntaxException, XmlPullParserException {
+    public void ensureProperPomGeneratedForLegacyPlugin() throws IOException, URISyntaxException {
         // this makes gradle use the set property as maven local directory
         // we do this in order to avoid polluting the maven local and also be absolutely sure
         // that no prior invocations affect the execution
@@ -50,14 +47,11 @@ public class SimpleProjectWithMavenPluginBasenameFunctionalTest {
         TestUtils.copyDirectory("simple-project-with-maven-plugin-and-basename", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
 
-        final ManipulationModel alignment = ManipulationIO.readManipulationModel(simpleProjectRoot);
-
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
                 //.withDebug(true)
                 .withArguments("uploadArchives", "--stacktrace", "--info")
                 .withPluginClasspath()
-                .forwardOutput()
                 .forwardOutput()
                 .build();
         assertThat(buildResult.task(":install").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);

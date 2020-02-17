@@ -23,6 +23,7 @@ import org.gradle.tooling.ProjectConnection;
 import org.gradle.tooling.internal.consumer.DefaultGradleConnector;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.GroovyUtils;
+import org.jboss.gm.common.utils.ManifestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,11 +40,11 @@ import ch.qos.logback.classic.Level;
         versionProvider = ManifestVersionProvider.class)
 public class Main implements Callable<Void> {
 
-    private GradleConnector connector = GradleConnector.newConnector();
+    private final GradleConnector connector = GradleConnector.newConnector();
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @SuppressWarnings("FieldCanBeLocal")
+    @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
     @Option(names = "--no-colour",
             negatable = true,
             description = "Enable (or disable with '--no-colour') colour output on logging.")
@@ -58,7 +59,7 @@ public class Main implements Callable<Void> {
     @Option(names = { "-t", "--target" }, required = true, description = "Target Gradle directory.")
     private File target;
 
-    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+    @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection", "FieldMayBeFinal"})
     @Option(names = "-D", description = "Pass supplemental arguments (e.g. groovy script commands)")
     private Map<String, String> jvmPropertyParams = new LinkedHashMap<>();
 
@@ -70,7 +71,7 @@ public class Main implements Callable<Void> {
 
     // Partial workaround for https://github.com/gradle/gradle/issues/3117
     // It may still be necessary on Gradle < 5.3 to do ' LC_ALL=en_US LANG=en_US java -jar '
-    private Map<String, String> envVars = Stream.of(
+    private final Map<String, String> envVars = Stream.of(
             Pair.of("LC_ALL", "en_US"),
             Pair.of("LANG", "en_US"),
             Pair.of("PROMPT", "$"),
@@ -100,6 +101,7 @@ public class Main implements Callable<Void> {
 
         cl.setExecutionStrategy(new CommandLine.RunAll());
         cl.setExecutionExceptionHandler(handler);
+        cl.setOverwrittenOptionsAllowed(true);
 
         int result = cl.execute(args);
         if (handler.getException() != null) {
@@ -140,7 +142,8 @@ public class Main implements Callable<Void> {
                 jvmArgs.add("-DloggingColours=false");
             }
 
-            logger.info("Executing Gradle project {} with JVM args '{}' and arguments '{}'", target, jvmArgs, gradleArgs);
+            logger.info("Executing CLI {} on Gradle project {} with JVM args '{}' and arguments '{}'",
+                    ManifestUtils.getManifestInformation(), target, jvmArgs, gradleArgs);
 
             build.setEnvironmentVariables(envVars);
             build.setJvmArguments(jvmArgs);

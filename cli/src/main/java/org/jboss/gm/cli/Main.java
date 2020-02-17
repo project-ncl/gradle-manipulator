@@ -101,6 +101,7 @@ public class Main implements Callable<Void> {
 
         cl.setExecutionStrategy(new CommandLine.RunAll());
         cl.setExecutionExceptionHandler(handler);
+        cl.setOverwrittenOptionsAllowed(true);
 
         int result = cl.execute(args);
         if (handler.getException() != null) {

@@ -44,7 +44,7 @@ public class Main implements Callable<Void> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @SuppressWarnings("FieldCanBeLocal")
+    @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
     @Option(names = "--no-colour",
             negatable = true,
             description = "Enable (or disable with '--no-colour') colour output on logging.")
@@ -59,7 +59,7 @@ public class Main implements Callable<Void> {
     @Option(names = { "-t", "--target" }, required = true, description = "Target Gradle directory.")
     private File target;
 
-    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+    @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection", "FieldMayBeFinal"})
     @Option(names = "-D", description = "Pass supplemental arguments (e.g. groovy script commands)")
     private Map<String, String> jvmPropertyParams = new LinkedHashMap<>();
 

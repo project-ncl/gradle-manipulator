@@ -18,7 +18,6 @@ plugins {
     id("com.gradle.plugin-publish") version "0.10.1"
     id("io.freefair.lombok") version "4.1.6" apply false
     id("net.linguica.maven-settings") version "0.5"
-    id("net.nemerosa.versioning") version "2.8.2"
     id("net.researchgate.release") version "2.8.1"
     id("org.ajoberstar.grgit") version "3.1.0"
 }
@@ -26,6 +25,7 @@ plugins {
 apply(plugin = "net.researchgate.release")
 
 tasks.afterReleaseBuild { dependsOn(":analyzer:publish", ":manipulation:publish", ":cli:publish", ":analyzer:publishPlugins", ":manipulation:publishPlugins") }
+
 tasks.beforeReleaseBuild {
     doLast {
         if ("true" == System.getProperty("release","") && project == project.rootProject) {
@@ -82,7 +82,6 @@ allprojects {
 }
 
 subprojects {
-
     val isReleaseBuild = ("true" == System.getProperty("release",""))
 
     extra["gradleVersion"] = "5.6.2"
@@ -102,7 +101,6 @@ subprojects {
     extra["systemRulesVersion"] = "1.19.0"
 
     apply(plugin = "com.diffplug.gradle.spotless")
-    apply(plugin = "net.nemerosa.versioning")
     apply(plugin = "com.adarshr.test-logger")
     apply(plugin = "io.freefair.lombok")
 
@@ -159,6 +157,17 @@ subprojects {
                 exclude(dependency("org.commonjava.maven.atlas:.*:.*"))
                 exclude(dependency("org.aeonbits.owner:.*:.*"))
                 exclude(dependency("org.slf4j:.*:.*"))
+            }
+            doFirst {
+                manifest {
+                    attributes["Built-By"] = System.getProperty("user.name")
+                    attributes["Build-Timestamp"] = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(Date())
+                    attributes["Scm-Revision"] = Grgit.open().use { g -> g.head().id }
+                    attributes["Created-By"] = "Gradle ${gradle.gradleVersion}"
+                    attributes["Build-Jdk"] = System.getProperty("java.version") + " ; " + System.getProperty("java.vendor") + " ; " + System.getProperty("java.vm.version")
+                    attributes["Build-OS"] = System.getProperty("os.name") + " ; " + System.getProperty("os.arch") + " ; " + System.getProperty("os.version")
+                    attributes["Implementation-Version"] = "${project.version}"
+                }
             }
         }
 
@@ -286,20 +295,6 @@ subprojects {
             }
             "compile" {
                 exclude(group = "ch.qos.logback", module = "logback-core")
-            }
-        }
-    }
-
-    tasks {
-        "jar"(Jar::class) {
-            this.manifest {
-                attributes["Built-By"]=System.getProperty("user.name")
-                attributes["Build-Timestamp"]=SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(Date())
-                attributes["Scm-Revision"]=versioning.info.commit
-                attributes["Created-By"]="Gradle ${gradle.gradleVersion}"
-                attributes["Build-Jdk"]=System.getProperty("java.version") + " ; " + System.getProperty("java.vendor") + " ; " + System.getProperty("java.vm.version")
-                attributes["Build-OS"]=System.getProperty("os.name") + " ; " + System.getProperty("os.arch") + " ; " + System.getProperty("os.version")
-                attributes["Implementation-Version"]="${project.version}"
             }
         }
     }

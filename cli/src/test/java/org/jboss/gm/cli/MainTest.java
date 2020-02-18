@@ -80,7 +80,7 @@ public class MainTest {
         Main m = new Main();
         String[] args = new String[] { "-t", projectRoot.getParentFile().getAbsolutePath(), "tasks",
                 "-DgroovyScripts=" + groovy.toString(),
-                "-DdependencyOverride.org.jboss.slf4j:*@*=", };
+                "-DdependencyOverride.org.jboss.slf4j:*@*=" };
         m.run(args);
 
         assertTrue(systemOutRule.getLog().contains("Running Groovy script on"));
@@ -147,5 +147,26 @@ public class MainTest {
         m.run(args);
 
         assertTrue(systemOutRule.getLog().contains("Process 'command 'git'' finished with exit value"));
+    }
+
+    @Test
+    public void testInvokeGroovyWithDuplicateOption() throws Exception {
+
+        final File projectRoot = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
+
+        final URL groovy = Thread.currentThread().getContextClassLoader().getResource("sample.groovy");
+
+        Main m = new Main();
+        String[] args = new String[] { "--no-colour", "-t", projectRoot.getParentFile().getAbsolutePath(), "tasks",
+                "-DgroovyScripts=" + groovy.toString(),
+                "-DdependencyOverride.org.jboss.slf4j:*@*=", "--no-colour" };
+        m.run(args);
+
+        assertTrue(systemOutRule.getLog().contains("Running Groovy script on"));
+        assertTrue(systemOutRule.getLog().contains("Tasks runnable from root project"));
+        assertTrue(systemOutRule.getLog().contains("dependencyOverride.org.jboss.slf4j:*@*="));
+        assertTrue(systemOutRule.getLog().contains("with JVM args '[-DdependencyOverride.org.jboss.slf4j:*@*="));
+        assertFalse(systemOutRule.getLog().contains(", DdependencyOverride.org.jboss.slf4j:*@*="));
+        assertTrue(systemOutRule.getLog().contains("groovyScripts="));
     }
 }

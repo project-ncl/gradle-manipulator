@@ -144,7 +144,7 @@ public class ManipulationPlugin implements Plugin<Project> {
                         .afterEvaluate(new UploadTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
                 evaluatedProject.afterEvaluate(new LegacyMavenPublishingRepositoryAction());
             } else if (MAVEN_PUBLISH_PLUGIN.equals(deployPlugin)) {
-                logger.info("Configuring {}} plugin for project {}", deployPlugin, evaluatedProject.getName());
+                logger.info("Configuring {} plugin for project {}", deployPlugin, evaluatedProject.getName());
 
                 evaluatedProject.afterEvaluate(new MavenPublishingRepositoryAction());
                 evaluatedProject

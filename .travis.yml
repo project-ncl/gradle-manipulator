@@ -29,6 +29,12 @@ jobs:
     if: branch = master AND type = push
     script: "cp .travis.settings.xml $HOME/.m2/settings.xml && travis-wait-enhanced --timeout=60m --interval=4m -- ./gradlew clean build publish -DSONATYPE_PASSWORD=$(echo $SONATYPE_PASSWORD) -DSONATYPE_USERNAME=$(echo $SONATYPE_USERNAME)"
 
-  - name: pr
+  - name: pr-gradle-default
     if: type = pull_request
     script: "travis-wait-enhanced --timeout=60m --interval=4m -- ./gradlew --stacktrace clean build"
+
+  - name: pr-gradle-4.10
+    if: type = pull_request
+    script:
+      sed -i 's/gradle-.*-all.zip/gradle-4.10.3-all.zip/'  gradle/wrapper/gradle-wrapper.properties ;
+      travis-wait-enhanced --timeout=60m --interval=4m -- ./gradlew --stacktrace clean build

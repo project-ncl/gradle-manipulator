@@ -1,0 +1,27 @@
+/*
+    Test project that doesn't have "compileJava" task. Build with manipulation plugin should still complete.
+ */
+
+plugins {
+    // including this plugin directly instead of by an init script, which allows to use the freshly build version
+    id 'org.jboss.gm.manipulation'
+    id 'maven-publish'
+}
+
+repositories {
+    mavenCentral()
+}
+
+task packageDocs(type: Zip) {
+    archiveFileName = "docs.zip"
+    destinationDirectory = file("build")
+    from "docs"
+}
+
+publishing {
+    publications {
+        sourcePublication(MavenPublication) {
+            artifact source: packageDocs, extension: 'zip'
+        }
+    }
+}

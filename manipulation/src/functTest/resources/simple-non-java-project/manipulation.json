@@ -1,0 +1,7 @@
+{
+  "group": "org.acme",
+  "name": "root",
+  "version": "1.0.1-redhat-00001",
+  "alignedDependencies": {
+  }
+}

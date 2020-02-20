@@ -38,7 +38,11 @@ public class MavenPomTransformerAction implements Action<Project> {
         // GenerateMavenPom tasks need to be postponed until after compileJava task, because that's where artifact
         // resolution is normally triggered and ResolvedDependenciesRepository is filled. If GenerateMavenPom runs
         // before compileJava, we will see empty ResolvedDependenciesRepository here.
-        project.getTasks().withType(GenerateMavenPom.class).all(task -> task.dependsOn("compileJava"));
+        project.getTasks().withType(GenerateMavenPom.class).all(task -> {
+            if (project.getTasks().findByName("compileJava") != null) {
+                task.dependsOn("compileJava");
+            }
+        });
 
         project.getExtensions().getByType(PublishingExtension.class).getPublications()
                 .withType(MavenPublication.class)

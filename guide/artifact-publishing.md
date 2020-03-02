@@ -11,6 +11,8 @@ The `manipulation` plugin tries to detect a publishing plugin used by a project.
 
 * the legacy `maven` plugin,
 * the `maven-publish` plugin.
+* the `gradle-nexus` plugin (https://github.com/bmuschko/gradle-nexus-plugin)
+  * this is a wrapper around the legacy `maven` plugin.
 
 If one of the above plugins is detected, it is configured to support publication of project artifacts in PNC
 environment.
@@ -18,7 +20,7 @@ environment.
 Following properties need to be given either as system properties or as environment variables:
 
 * `AProxDeployUrl` - deployment repository URL,
-* `accessToken` - authorization access token (optional) 
+* `accessToken` - authorization access token (optional)
 
 In PNC above would be already defined as environment variables.
 
@@ -26,12 +28,12 @@ In PNC above would be already defined as environment variables.
 
 If the project uses the legacy `maven` plugin, use the `uploadArchives` task to publish artifacts.
 
-Following changes are made automatically: 
+Following changes are made automatically:
 
-* custom `Action` is added to all maven repositories of all `Upload` tasks, which overrides versions in generated 
+* custom `Action` is added to all maven repositories of all `Upload` tasks, which overrides versions in generated
   POM files,
 * if `uploadArchives` task doesn't exist, it is created,
-* `uploadArchives` task is made to depend on `install` task, so that the former is able to consume `pom.xml` generated 
+* `uploadArchives` task is made to depend on `install` task, so that the former is able to consume `pom.xml` generated
   by the latter,
 * publishing repository is added.
 

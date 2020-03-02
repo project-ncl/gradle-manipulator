@@ -47,7 +47,7 @@ CLI to optionally run Groovy scripts and then invoke Gradle.
 Apart from the Groovy scripting, the CLI can enable debug logging, specify the Gradle distribution to use, the target directory to operate on and finally all remaining parameters will be passed directly to the Gradle build e.g,
 
 ```
-java -jar cli/build/libs/cli-1.4.jar --target=<gradle-project> -d
+java -jar cli.jar --target=<gradle-project> -d
     --stacktrace
     --init-script=analyzer/build/resources/main/analyzer-init.gradle
     -DrepoRemovalBackup=repositories-backup.xml
@@ -58,6 +58,8 @@ java -jar cli/build/libs/cli-1.4.jar --target=<gradle-project> -d
     -DgroovyScripts=file:///tmp/fixup.groovy
     generateAlignmentMetadata
 ```
+
+To obtain the CLI it may be downloaded from Maven Central [here](https://repo1.maven.org/maven2/org/jboss/gm/cli).
 
 #### Applying the Plugin(s)
 

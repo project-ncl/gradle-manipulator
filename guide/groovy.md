@@ -76,13 +76,12 @@ The API can then be invoked by e.g.
 
     gmeScript.getProject()
 
-
 A typical groovy script that alters a JSON file on disk might be:
 
-
-    import org.jboss.gm.common.groovy.BaseScript
+    import org.commonjava.maven.ext.core.groovy.GMEBaseScript
     import org.commonjava.maven.ext.core.groovy.InvocationPoint
     import org.commonjava.maven.ext.core.groovy.InvocationStage
+    import org.jboss.gm.common.groovy.BaseScript
     import org.apache.commons.lang.StringUtils
     import org.jboss.gm.common.model.ManipulationModel
     import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef

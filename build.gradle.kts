@@ -31,7 +31,7 @@ tasks.beforeReleaseBuild {
         if ("true" == System.getProperty("release","") && project == project.rootProject) {
             val tmp = File(System.getProperty("java.io.tmpdir"))
             val source = File(project.rootDir, "README.md")
-            val searchString = "https://repo1.maven.org/maven2/org/jboss/gm/analyzer/analyzer"
+            val searchString = "https://repo1.maven.org/maven2/org/jboss/gm/analyzer"
 
             if (!source.exists() || Files.readAllLines(source.toPath()).filter { s -> s.contains(searchString) }.isEmpty()) {
                 throw GradleException ("Unable to find '$searchString' in README.md")
@@ -43,7 +43,7 @@ tasks.beforeReleaseBuild {
                 filter { line: String ->
                     if (line.contains(searchString)) {
                         line.replaceFirst("($searchString)(.*)".toRegex(),
-                                "$1-${project.version}/analyzer-${project.version}-init.gradle".replace("-SNAPSHOT", ""))
+                                "$1/${project.version}/analyzer-${project.version}-init.gradle".replace("-SNAPSHOT", ""))
                     } else line
                 }
             }

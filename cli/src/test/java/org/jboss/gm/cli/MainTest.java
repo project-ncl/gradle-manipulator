@@ -89,6 +89,25 @@ public class MainTest {
         assertTrue(systemOutRule.getLog().contains("with JVM args '[-DdependencyOverride.org.jboss.slf4j:*@*="));
         assertFalse(systemOutRule.getLog().contains(", DdependencyOverride.org.jboss.slf4j:*@*="));
         assertTrue(systemOutRule.getLog().contains("groovyScripts="));
+        assertTrue(systemOutRule.getLog().contains("Verification tasks"));
+    }
+
+    @Test
+    public void testDisableGME() throws Exception {
+
+        final File projectRoot = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
+
+        final URL groovy = Thread.currentThread().getContextClassLoader().getResource("sample.groovy");
+
+        Main m = new Main();
+        String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "tasks",
+                "-DgroovyScripts=" + groovy.toString(),
+                "-DdependencyOverride.org.jboss.slf4j:*@*=",
+                "-Dmanipulation.disable=true" };
+        m.run(args);
+
+        assertTrue(systemOutRule.getLog().contains("Running Groovy script on"));
+        assertFalse(systemOutRule.getLog().contains("Verification tasks"));
     }
 
     @Test

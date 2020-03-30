@@ -188,7 +188,13 @@ public class Main implements Callable<Void> {
         }
 
         connector.forProjectDirectory(target);
-        executeGradle();
+
+        if ("true".equals(jvmPropertyParams.get("manipulation.disable"))) {
+            logger.info("Gradle Manipulator disabled");
+        } else {
+            logger.debug("Executing Gradle");
+            executeGradle();
+        }
 
         return null;
     }

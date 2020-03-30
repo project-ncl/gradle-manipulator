@@ -61,6 +61,12 @@ java -jar cli.jar --target=<gradle-project> -d
 
 To obtain the CLI it may be downloaded from Maven Central [here](https://repo1.maven.org/maven2/org/jboss/gm/cli).
 
+##### Disabling the alignment
+
+You can disable GME _through the CLI_ using the `manipulation.disable` property:
+
+	$ gradle -Dmanipulation.disable=true...
+
 #### Applying the Plugin(s)
 
 There are multiple ways that the plugins can be applied.

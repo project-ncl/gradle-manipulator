@@ -2,7 +2,6 @@
  * This file is injected at the start by the Gradle Manipulation Tool during the analysis phase
  */
 
-
 buildscript {
     // While the global PNC init script also defines this, for some reason
     // Gradle doesn't seem to apply it to included scrpts.
@@ -38,7 +37,7 @@ buildscript {
 
 allprojects {
     if (!project.hasProperty("gmeAnalyse")) {
-        logger.info("Applying plugin org.jboss.gm.manipulation.ManipulationPlugin")
+        logger.info("Applying plugin org.jboss.gm.manipulation.ManipulationPlugin to project in {}", project.getProjectDir())
         apply plugin: org.jboss.gm.manipulation.ManipulationPlugin
     }
 

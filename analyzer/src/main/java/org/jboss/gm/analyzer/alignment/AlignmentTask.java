@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,19 +36,20 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.artifacts.LenientConfiguration;
-import org.gradle.api.artifacts.ModuleVersionSelector;
 import org.gradle.api.artifacts.ProjectDependency;
-import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
 import org.gradle.api.logging.Logger;
+import org.gradle.api.publish.PublishingExtension;
+import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.tasks.TaskAction;
 import org.jboss.gm.analyzer.alignment.AlignmentService.Response;
 import org.jboss.gm.analyzer.alignment.io.LockFileIO;
 import org.jboss.gm.analyzer.alignment.io.RepositoryExporter;
 import org.jboss.gm.analyzer.alignment.io.SettingsFileIO;
+import org.jboss.gm.analyzer.alignment.util.Comparator;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.io.ManipulationIO;
@@ -91,21 +93,57 @@ public class AlignmentTask extends DefaultTask {
     @TaskAction
     public void perform() {
         final Project project = getProject();
-        final String projectName = project.getName();
         final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
         final ManipulationCache cache = ManipulationCache.getCache(project);
-        final String groupId = ProjectUtils.getRealGroupId(project);
+        final Path root = project.getRootDir().toPath();
+        final ManipulationModel alignmentModel = cache.getModel();
+
+        String groupId = ProjectUtils.getRealGroupId(project);
+        String projectName = project.getName();
 
         if (!configOutput.get().getAndSet(true)) {
             // Only output the config once to avoid noisy logging.
             logger.info("Configuration now has properties {}", configuration.dumpCurrentConfig());
         }
-        logger.info("Starting model task for project {} with GAV {}:{}:{}", project.getDisplayName(), groupId,
+        logger.info("Starting model task for project {} with GAV {}:{}:{}", project.getProjectDir().getName(), groupId,
                 projectName, project.getVersion());
+
+        // If processing the root project _and_ we have a Maven publication configured then verify artifactId / groupId.
+        Project rootProject = project.getRootProject();
+        if (project.equals(rootProject)) {
+            logger.debug("Processing root project in directory {}", root);
+            PublishingExtension extension = rootProject.getExtensions().findByType(PublishingExtension.class);
+            Map<String, MavenPublication> publications = (extension == null ? Collections.emptyMap()
+                    : extension
+                            .getPublications()
+                            .withType(MavenPublication.class)
+                            .getAsMap());
+            if (publications.size() > 1) {
+                logger.error("Multiple publications for a single project. Found {}", publications);
+            }
+            for (MavenPublication p : publications.values()) {
+                if (!rootProject.getGroup().equals(p.getGroupId())) {
+                    logger.warn("Mismatched groupId between project {} and publication {} ; resetting to publication.",
+                            rootProject.getGroup(),
+                            p.getGroupId());
+                    groupId = p.getGroupId();
+                    rootProject.setGroup(p.getGroupId());
+                    alignmentModel.setGroup(p.getGroupId());
+                }
+                if (!rootProject.getName().equals(p.getArtifactId())) {
+                    logger.warn("Mismatched artifactId between project {} and publication {} ; resetting to publication.",
+                            rootProject.getName(),
+                            p.getArtifactId());
+                    projectName = p.getArtifactId();
+                    ProjectUtils.updateNameField(rootProject, p.getArtifactId());
+                    alignmentModel.setName(p.getArtifactId());
+                }
+            }
+        }
 
         try {
             final Set<ProjectVersionRef> lockFileDeps = LockFileIO
-                    .allProjectVersionRefsFromLockfiles(getLocksRootPath(project));
+                    .allProjectVersionRefsFromLockfiles(LockFileIO.getLocksRootPath(project));
             final String currentProjectVersion = project.getVersion().toString();
             final HashMap<RelaxedProjectVersionRef, ProjectVersionRef> dependencies = processAnyExistingManipulationFile(
                     project,
@@ -113,7 +151,6 @@ public class AlignmentTask extends DefaultTask {
 
             cache.addDependencies(project, dependencies);
 
-            Path root = project.getRootDir().toPath();
             project.getRepositories().forEach(r -> cache.addRepository(r,
                     org.jboss.gm.common.utils.FileUtils.relativize(root, project.getProjectDir().toPath())));
             project.getBuildscript().getRepositories().forEach(r -> cache.addRepository(r,
@@ -132,7 +169,7 @@ public class AlignmentTask extends DefaultTask {
             }
 
             // when the set is empty, we know that this was the last alignment task to execute.
-            if (cache.removeProject(projectName)) {
+            if (cache.removeProject(project)) {
                 logger.info("Completed scanning {} projects; now processing for REST...", cache.getDependencies().size());
                 Set<ProjectVersionRef> allDeps = cache.getDependencies().values().stream()
                         .flatMap(m -> m.values().stream()).collect(Collectors.toSet());
@@ -147,7 +184,6 @@ public class AlignmentTask extends DefaultTask {
                                                 : p.getVersionString()))
                                 .collect(Collectors.toList()), allDeps));
 
-                final ManipulationModel alignmentModel = cache.getModel();
                 final HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = cache
                         .getDependencies();
                 final String newVersion = alignmentResponse.getNewProjectVersion();
@@ -218,16 +254,11 @@ public class AlignmentTask extends DefaultTask {
             }
 
             // this needs to happen for each project, not just the last one
-            LockFileIO.renameAllLockFiles(getLocksRootPath(project));
+            LockFileIO.renameAllLockFiles(LockFileIO.getLocksRootPath(project));
 
         } catch (ManipulationException | IOException e) {
             throw new ManipulationUncheckedException(e);
         }
-    }
-
-    // TODO: we might need to make this configurable
-    private Path getLocksRootPath(Project project) {
-        return project.getProjectDir().toPath().resolve("gradle/dependency-locks");
     }
 
     private void writeGmeMarkerFile() throws IOException, ManipulationException {
@@ -378,7 +409,7 @@ public class AlignmentTask extends DefaultTask {
                 }
                 lenient.getFirstLevelModuleDependencies().forEach(dep -> {
                     // skip dependencies on project modules
-                    if (compareTo(dep, allProjectDependencies)) {
+                    if (Comparator.contains(allProjectDependencies, dep)) {
                         project.getLogger().debug("Skipping internal project dependency {} of configuration {}",
                                 dep.toString(), configuration.getName());
                         return;
@@ -437,31 +468,8 @@ public class AlignmentTask extends DefaultTask {
             Set<ProjectDependency> allProjectModules) {
         return lenient.getUnresolvedModuleDependencies()
                 .stream()
-                .filter(d -> !compareTo(d, allProjectModules))
+                .filter(d -> !Comparator.contains(allProjectModules, d))
                 .collect(Collectors.toSet());
-    }
-
-    private boolean compareTo(UnresolvedDependency unresolvedDependency, Set<ProjectDependency> projectDependencies) {
-        ModuleVersionSelector moduleVersionSelector = unresolvedDependency.getSelector();
-        for (ProjectDependency projectDependency : projectDependencies) {
-            if (StringUtils.equals(moduleVersionSelector.getGroup(), projectDependency.getGroup()) &&
-                    StringUtils.equals(moduleVersionSelector.getName(), projectDependency.getName()) &&
-                    StringUtils.equals(moduleVersionSelector.getVersion(), projectDependency.getVersion())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean compareTo(ResolvedDependency dependency, Set<ProjectDependency> projectDependencies) {
-        for (ProjectDependency projectDependency : projectDependencies) {
-            if (StringUtils.equals(dependency.getModuleGroup(), projectDependency.getGroup()) &&
-                    StringUtils.equals(dependency.getModuleName(), projectDependency.getName()) &&
-                    StringUtils.equals(dependency.getModuleVersion(), projectDependency.getVersion())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void updateModuleDynamicDependencies(ManipulationModel correspondingModule,

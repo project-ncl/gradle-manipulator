@@ -48,12 +48,11 @@ public class AlignmentPlugin implements Plugin<Project> {
     }
 
     private ManipulationModel getManipulationModel(Project project) {
-        final String name = project.getName();
         final ManipulationCache cache = ManipulationCache.getCache(project);
-        final ManipulationModel alignmentModel = new ManipulationModel(name, ProjectUtils.getRealGroupId(project));
+        final ManipulationModel alignmentModel = new ManipulationModel(project.getName(), ProjectUtils.getRealGroupId(project));
 
-        logger.debug("Adding project {} to cache", name);
-        cache.addProject(name);
+        logger.debug("Adding project {} to cache", project.getProjectDir());
+        cache.addProject(project);
         project.getChildProjects().forEach((n, p) -> alignmentModel.addChild(getManipulationModel(p)));
 
         return alignmentModel;

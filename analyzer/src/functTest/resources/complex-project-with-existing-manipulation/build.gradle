@@ -37,11 +37,6 @@ allprojects {
     }
 
     sourceCompatibility = 1.8
-
-    // dependencyLocking {
-    //     lockAllConfigurations()
-    // }
-
 }
 
 
@@ -68,7 +63,7 @@ task javadocJar(type: Jar) {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId = 'complex-project'
+            artifactId = 'complex-existing'
 
             versionMapping {
                 usage('java-api') {
@@ -78,7 +73,6 @@ publishing {
                     fromResolutionResult()
                 }
             }
-
 
             from components.java
             artifact sourcesJar

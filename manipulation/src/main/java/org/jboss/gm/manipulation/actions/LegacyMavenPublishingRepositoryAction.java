@@ -1,7 +1,6 @@
 package org.jboss.gm.manipulation.actions;
 
 import org.aeonbits.owner.ConfigCache;
-import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
@@ -11,6 +10,7 @@ import org.gradle.api.tasks.Upload;
 import org.gradle.authentication.http.HttpHeaderAuthentication;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
+import org.jboss.gm.common.utils.ProjectUtils;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.jboss.gm.manipulation.ManipulationPlugin.LEGACY_MAVEN_PLUGIN;
@@ -124,7 +124,7 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
             if (abn != null) {
                 logger.warn("Located archivesBaseName override ; forcing project name to {} from {} for correct deployment",
                         abn, originalName);
-                updateNameField(project, abn);
+                ProjectUtils.updateNameField(project, abn);
             }
         });
         uploadArchives.doLast(action -> {
@@ -132,7 +132,7 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
             // Now revert the action performed above.
             if (abn != null) {
                 logger.warn("Resetting project name after archivesBaseName override to {} from {}", originalName, abn);
-                updateNameField(project, abn);
+                ProjectUtils.updateNameField(project, abn);
             }
         });
 
@@ -150,11 +150,4 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
         uploadArchives.setConfiguration(publishArchives);
     }
 
-    private void updateNameField(Project project, Object replacement) {
-        try {
-            FieldUtils.writeField(project, "name", replacement, true);
-        } catch (IllegalAccessException e) {
-            throw new ManipulationUncheckedException("Unable to update name field to " + replacement, e);
-        }
-    }
 }

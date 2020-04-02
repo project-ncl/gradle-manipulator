@@ -13,8 +13,6 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
-import org.gradle.api.logging.Logger;
-import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.ProjectUtils;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
@@ -28,30 +26,30 @@ public class ManipulationCache {
 
     /** Root project */
     @Getter
-    private Project rootProject;
+    private final Project rootProject;
 
     /**
      * Will be built up to contain all the projects that need alignment. The same reference is passed to each task
      * and is used to make sure that the result of alignment is only written once (by the last alignment task to be performed)
      */
-    private HashSet<String> projectCounter = new HashSet<>();
+    private final HashSet<String> projectCounter = new HashSet<>();
 
     /** Root model **/
     @Getter
     private ManipulationModel model;
 
     @Getter
-    private List<ProjectVersionRef> projectVersionRefs = new ArrayList<>();
+    private final List<ProjectVersionRef> projectVersionRefs = new ArrayList<>();
 
     /**
      * This is the project dependencies - it represents a mapping of project module to a map of the original Dependency
      * (which might be dynamic) to the fully resolved GAV.
      */
     @Getter
-    private HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> dependencies = new HashMap<>();
+    private final HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> dependencies = new HashMap<>();
 
     @Getter
-    private Map<ArtifactRepository, Path> repositories = new HashMap<>();
+    private final Map<ArtifactRepository, Path> repositories = new HashMap<>();
 
     /**
      * Retrieves the cache given any project. It will access the root project, check if the
@@ -99,20 +97,20 @@ public class ManipulationCache {
     /**
      * Used to track the number of projects/subprojects.
      *
-     * @param name the project name
+     * @param project the project
      */
-    public void addProject(String name) {
-        projectCounter.add(name);
+    public void addProject(Project project) {
+        projectCounter.add(project.getPath());
     }
 
     /**
-     * Tracking projects - remove the named project when it is evaluated.
+     * Tracking projects - remove the project when it is evaluated.
      *
-     * @param name the name of the project
+     * @param project the project
      * @return true if all projects are now handled.
      */
-    public boolean removeProject(String name) {
-        projectCounter.remove(name);
+    public boolean removeProject(Project project) {
+        projectCounter.remove(project.getPath());
         return projectCounter.isEmpty();
     }
 
@@ -134,8 +132,6 @@ public class ManipulationCache {
         }
         this.projectVersionRefs.add(gav);
     }
-
-    private final Logger logger = GMLogger.getLogger(getClass());
 
     @Override
     public String toString() {

@@ -113,6 +113,9 @@ public final class TestUtils {
         if (expectFailure) {
             throw new ManipulationUncheckedException(buildResult.getOutput());
         } else {
+            if (!projectRoot.exists()) {
+                throw new ManipulationUncheckedException("No manipulation file found");
+            }
             return new TestManipulationModel(ManipulationIO.readManipulationModel(projectRoot));
         }
     }

@@ -19,6 +19,7 @@ import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.gradle.api.Project;
 
 public final class LockFileIO {
 
@@ -75,5 +76,9 @@ public final class LockFileIO {
         }
 
         return Arrays.asList(lockfiles);
+    }
+
+    public static Path getLocksRootPath(Project project) {
+        return project.getProjectDir().toPath().resolve("gradle/dependency-locks");
     }
 }

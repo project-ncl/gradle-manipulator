@@ -69,7 +69,7 @@ task javadocJar(type: Jar) {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId = 'dynamic-locks'
+            artifactId = 'dynamic-project-with-locks'
 
             versionMapping {
                 usage('java-api') {
@@ -79,8 +79,6 @@ publishing {
                     fromResolutionResult()
                 }
             }
-
-
             from components.java
             artifact sourcesJar
             artifact javadocJar

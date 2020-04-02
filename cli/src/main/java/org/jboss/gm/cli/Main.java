@@ -22,6 +22,7 @@ import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.gradle.tooling.internal.consumer.DefaultGradleConnector;
 import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.utils.GroovyUtils;
 import org.jboss.gm.common.utils.ManifestUtils;
 import org.slf4j.Logger;

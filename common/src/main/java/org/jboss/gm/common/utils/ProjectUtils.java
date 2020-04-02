@@ -2,6 +2,8 @@ package org.jboss.gm.common.utils;
 
 import lombok.experimental.UtilityClass;
 
+import org.apache.commons.lang.reflect.FieldUtils;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
 
 @UtilityClass
@@ -16,7 +18,9 @@ public class ProjectUtils {
      *         } else if (this == rootProject) {
      *             return "";
      *         }
-     *         group = rootProject.getName() + (getParent() == rootProject ? "" : "." + getParent().getPath().substring(1).replace(':', '.'));
+     *         group = rootProject.getName() +
+     *              (getParent() == rootProject ? "" : "."
+     *                  + getParent().getPath().substring(1).replace(':', '.'));
      *         return group;
      * </pre>
      *
@@ -43,4 +47,17 @@ public class ProjectUtils {
         return group;
     }
 
+    /**
+     * The Project name field is private and therefore can't be dynamically updated.
+     * 
+     * @param project the current project
+     * @param replacement the new name to use
+     */
+    public static void updateNameField(Project project, Object replacement) {
+        try {
+            FieldUtils.writeField(project, "name", replacement, true);
+        } catch (IllegalAccessException e) {
+            throw new ManipulationUncheckedException("Unable to update name field to " + replacement, e);
+        }
+    }
 }

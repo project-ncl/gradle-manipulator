@@ -7,12 +7,17 @@ import java.util.stream.Stream;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
 
 public class DependencyExclusionCustomizerTest {
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Test
     public void ensureExclusionOfDependenciesWorks() {

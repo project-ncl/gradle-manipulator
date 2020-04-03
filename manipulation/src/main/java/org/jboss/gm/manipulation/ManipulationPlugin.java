@@ -136,6 +136,10 @@ public class ManipulationPlugin implements Plugin<Project> {
                 } else if (evaluatedProject.getPluginManager().hasPlugin(LEGACY_MAVEN_PLUGIN)) {
                     deployPlugin = LEGACY_MAVEN_PLUGIN;
                 }
+                if (evaluatedProject.getPluginManager().hasPlugin(MAVEN_PUBLISH_PLUGIN) &&
+                        evaluatedProject.getPluginManager().hasPlugin(LEGACY_MAVEN_PLUGIN)) {
+                    logger.warn("Both deprecated maven plugin and current maven-publish plugin declared in project");
+                }
             }
 
             if (LEGACY_MAVEN_PLUGIN.equals(deployPlugin) || LEGACY_MAVEN_PLUGIN_NEXUS.equals(deployPlugin)) {

@@ -1,0 +1,31 @@
+plugins {
+    // including this plugin directly instead of by an init script, which allows to use the freshly build version
+    id 'org.jboss.gm.manipulation'
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
+//apply(from: "project.gradle");
+version = "1.2"
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'com.graphql-java'
+            artifactId = 'java-dataloader'
+            version = '1.2'
+
+            from components.java
+        }
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+}
+
+version = "1.2"

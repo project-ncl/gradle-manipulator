@@ -49,6 +49,12 @@ public class MavenPomTransformerAction implements Action<Project> {
                 .configureEach(publication -> {
                     logger.debug("Applying POM transformer to publication " + publication.getName());
 
+                    if (!project.getVersion().equals(publication.getVersion())) {
+                        logger.warn(
+                                "Mismatch between project version ({}) and publication version ({}). Resetting to project version.",
+                                project.getVersion(), publication.getVersion());
+                        publication.setVersion(project.getVersion().toString());
+                    }
                     if (publication.getPom() != null) {
                         publication.getPom()
                                 .withXml(new LegacyMavenPomTransformerAction(alignmentConfiguration,

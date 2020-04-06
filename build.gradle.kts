@@ -15,7 +15,7 @@ plugins {
     id("com.adarshr.test-logger") version "2.0.0"
     id("com.diffplug.gradle.spotless") version "3.25.0"
     id("com.github.johnrengelman.shadow") version "5.2.0"
-    id("com.gradle.plugin-publish") version "0.10.1"
+    id("com.gradle.plugin-publish") version "0.11.0"
     id("io.freefair.lombok") version "4.1.6" apply false
     id("net.linguica.maven-settings") version "0.5"
     id("net.researchgate.release") version "2.8.1"
@@ -26,7 +26,8 @@ apply(plugin = "net.researchgate.release")
 
 tasks.afterReleaseBuild { dependsOn(":analyzer:publish", ":manipulation:publish", ":cli:publish", ":analyzer:publishPlugins", ":manipulation:publishPlugins") }
 
-tasks.beforeReleaseBuild {
+// This was tasks.beforeReleaseBuild to hook into the release plugin system but we are manually handling the task ordering
+tasks.register("fixupReadme") {
     doLast {
         if ("true" == System.getProperty("release","") && project == project.rootProject) {
             val tmp = File(System.getProperty("java.io.tmpdir"))
@@ -50,15 +51,32 @@ tasks.beforeReleaseBuild {
             Files.move(File(tmp, "README.md").toPath(), source.toPath(), StandardCopyOption.REPLACE_EXISTING)
 
             val grgit = Grgit.open()
-            grgit.add {
-                patterns = Collections.singleton("README.md")
+            // Only commit README if there are any changes.
+            if (!grgit.status().isClean()) {
+                logger.info ("Committing README update")
+                grgit.commit(mapOf("message" to "Committing README Version Changes", "paths" to setOf("README.md")))
+                grgit.push()
             }
-            grgit.commit {
-                message = "Committing README Version Changes"
-            }
-            grgit.push()
         }
     }
+}
+
+// In https://github.com/researchgate/gradle-release/blob/master/src/main/groovy/net/researchgate/release/ReleasePlugin.groovy#L116
+// the list of task interdependencies is specified. However as per https://github.com/researchgate/gradle-release/issues/298
+// we want to ensure the tag is done before the build so the manifest (etc) points to the correct SHA. As the beforeReleaseBuild
+// then runs at the wrong point with this change we manually inject a task (fixupReadme) below.
+tasks.preTagCommit {
+    logger.info("Altering preTagCommit to run after checkSnapshotDependencies instead of runBuildTasks")
+    setMustRunAfter(listOf(project.tasks.checkSnapshotDependencies) )
+    dependsOn("fixupReadme")
+}
+tasks.runBuildTasks{
+    logger.info("Altering runBuildTasks to run after createReleaseTag instead of checkSnapshotDependencies")
+    setMustRunAfter(listOf(project.tasks.createReleaseTag) )
+}
+tasks.checkoutMergeFromReleaseBranch {
+    logger.info("Altering checkoutMergeFromReleaseBranch to run after runBuildTasks instead of createReleaseTag")
+    setMustRunAfter(listOf(project.tasks.runBuildTasks))
 }
 
 allprojects {

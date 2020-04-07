@@ -84,3 +84,11 @@ publishing {
         }
     }
 }
+
+
+jar {
+    manifest {
+         attributes("Implementation-Title": project.name,
+                    "Implementation-Version": version)
+    }
+}

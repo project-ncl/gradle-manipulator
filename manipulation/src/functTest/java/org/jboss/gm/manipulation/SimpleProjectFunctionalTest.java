@@ -1,8 +1,13 @@
 package org.jboss.gm.manipulation;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.jar.JarInputStream;
+import java.util.jar.Manifest;
 
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
@@ -115,6 +120,17 @@ public class SimpleProjectFunctionalTest {
                 .withPluginClasspath()
                 //.withDebug(true)
                 .build();
+
+        final String ARTIFACT_VERSION = "1.0.1-redhat-00001";
+        final Path PATH_IN_REPOSITORY = Paths.get("org/acme/root/" + ARTIFACT_VERSION);
+        final File repoPathToJar = publishDirectory.toPath().resolve(PATH_IN_REPOSITORY)
+                .resolve("root-" + ARTIFACT_VERSION + ".jar")
+                .toFile();
+
+        try (JarInputStream jarStream = new JarInputStream(new FileInputStream(repoPathToJar))) {
+            final Manifest manifest = jarStream.getManifest();
+            assertThat(manifest.getMainAttributes().getValue("Implementation-Version")).contains(ARTIFACT_VERSION);
+        }
 
         assertThat(buildResult.task(":" + "publishMainPublicationToJboss-snapshots-repositoryRepository").getOutcome())
                 .isEqualTo(TaskOutcome.SKIPPED);

@@ -3,6 +3,7 @@ package org.jboss.gm.manipulation;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.internal.Pair;

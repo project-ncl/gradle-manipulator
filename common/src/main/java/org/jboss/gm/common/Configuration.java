@@ -12,6 +12,8 @@ import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.Converter;
 import org.aeonbits.owner.Reloadable;
 import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
+import org.commonjava.maven.ext.core.state.RESTState;
+import org.commonjava.maven.ext.io.rest.Translator;
 
 import static org.aeonbits.owner.Config.LoadType.MERGE;
 
@@ -74,15 +76,29 @@ public interface Configuration extends Accessible, Reloadable {
     @DefaultValue("false")
     boolean versionSuffixSnapshot();
 
-    @Key("restRepositoryGroup")
+    @Key(RESTState.REST_REPO_GROUP)
     String restRepositoryGroup();
 
-    @Key("restMaxSize")
+    @Key(RESTState.REST_MAX_SIZE)
     @DefaultValue("-1")
     int restMaxSize();
 
-    @Key("log-context")
-    String logContext();
+    @Key(RESTState.REST_CONNECTION_TIMEOUT_SEC)
+    @DefaultValue("" + Translator.DEFAULT_CONNECTION_TIMEOUT_SEC)
+    int restConnectionTimeout();
+
+    @Key(RESTState.REST_SOCKET_TIMEOUT_SEC)
+    @DefaultValue("" + Translator.DEFAULT_SOCKET_TIMEOUT_SEC)
+    int restSocketTimeout();
+
+    @Key(RESTState.REST_RETRY_DURATION_SEC)
+    @DefaultValue("" + Translator.RETRY_DURATION_SEC)
+    int restRetryDuration();
+
+    @Key(RESTState.REST_HEADERS)
+    @ConverterClass(RestHeaderParser.class)
+    @DefaultValue("")
+    Map<String, String> restHeaders();
 
     @Key("ignoreUnresolvableDependencies")
     @DefaultValue("false")
@@ -134,6 +150,23 @@ public interface Configuration extends Accessible, Reloadable {
                 input = input.toUpperCase();
             }
             return DependencyPrecedence.valueOf(input);
+        }
+    }
+
+    class RestHeaderParser implements Converter<Map<String, String>> {
+        /**
+         * Converts the given input into an Object of type T.
+         * If the method returns null, null will be returned by the Config object.
+         * The converter is instantiated for every call, so it shouldn't have any internal state.
+         *
+         * @param method the method invoked on the <tt>{@link Config} object</tt>
+         * @param input the property value specified as input text to be converted to the T return type
+         * @return the object of type T converted from the input string.
+         * @since 1.0.4
+         */
+        @Override
+        public Map<String, String> convert(Method method, String input) {
+            return RESTState.restHeaderParser(input);
         }
     }
 

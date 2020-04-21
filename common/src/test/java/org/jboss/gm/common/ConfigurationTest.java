@@ -1,6 +1,9 @@
 package org.jboss.gm.common;
 
+import java.util.Map;
+
 import org.aeonbits.owner.ConfigFactory;
+import org.commonjava.maven.ext.io.rest.Translator;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
@@ -45,5 +48,20 @@ public class ConfigurationTest {
         Configuration c = ConfigFactory.create(Configuration.class);
 
         assertEquals(deploy, c.deployUrl());
+
+        assertEquals(c.restRetryDuration(), Translator.RETRY_DURATION_SEC);
+    }
+
+    @Test
+    public void verifyHeaders() {
+
+        String deploy = "log-user-id:102,log-request-context:061294ff-088,log-process-context:,log-expires:,log-tmp:";
+        environmentVariables.set("restHeaders", deploy);
+
+        Configuration c = ConfigFactory.create(Configuration.class);
+
+        Map<String, String> r = c.restHeaders();
+
+        assertEquals(5, r.size());
     }
 }

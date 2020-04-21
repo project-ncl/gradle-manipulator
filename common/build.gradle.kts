@@ -20,6 +20,11 @@ dependencies {
 
     compile("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
     compile("org.commonjava.maven.ext:pom-manipulation-core:${project.extra.get("pmeVersion")}")
+    compile("org.commonjava.maven.ext:pom-manipulation-io:${project.extra.get("pmeVersion")}")
+
+    // This is to prevent compilation errors in conjunction with Lombok due to use of PME code.
+    compileOnly("org.apache.maven:maven-compat:3.5.0")
+    permitUnusedDeclared("org.apache.maven:maven-compat:3.5.0")
 
     testCompile("junit:junit:${project.extra.get("junitVersion")}")
     testCompile("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")

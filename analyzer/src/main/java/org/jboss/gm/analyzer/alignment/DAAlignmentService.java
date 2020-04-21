@@ -9,14 +9,13 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
+import org.commonjava.maven.ext.io.rest.RestException;
 import org.commonjava.maven.ext.io.rest.Translator;
 import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence.NONE;
-import static org.commonjava.maven.ext.io.rest.Translator.RestProtocol.CURRENT;
 
 /**
  * An implementation of {@link org.jboss.gm.analyzer.alignment.AlignmentService} that uses the Dependency Analyzer service
@@ -42,17 +41,20 @@ public class DAAlignmentService implements AlignmentService {
                     String.format("'%s' must be configured in order for dependency scanning to work", Configuration.DA));
         }
 
-        restEndpoint = new GradleDefaultTranslator(
+        restEndpoint = new DefaultTranslator(
                 endpointUrl,
                 configuration.restMaxSize(),
-                DefaultTranslator.CHUNK_SPLIT_COUNT,
+                Translator.CHUNK_SPLIT_COUNT,
                 configuration.restRepositoryGroup(),
                 configuration.versionIncrementalSuffix(),
-                configuration.logContext());
+                configuration.restHeaders(),
+                configuration.restConnectionTimeout(),
+                configuration.restSocketTimeout(),
+                configuration.restRetryDuration());
     }
 
     @Override
-    public Response align(AlignmentService.Request request) {
+    public Response align(AlignmentService.Request request) throws RestException {
         final List<ProjectVersionRef> translateRequest = new ArrayList<>(request.getDependencies().size() + 1);
 
         if (dependencySource == NONE) {
@@ -76,31 +78,5 @@ public class DAAlignmentService implements AlignmentService {
             result.setNewProjectVersion(translationMap.get(request.getProject().get(0)));
         }
         return result;
-    }
-
-    static class GradleDefaultTranslator extends DefaultTranslator {
-        private final String logContext;
-
-        GradleDefaultTranslator(String endpointUrl, int restMaxSize, int restMinSize,
-                String repositoryGroup, String incrementalSerialSuffix, String logContext) {
-            super(endpointUrl, CURRENT, restMaxSize, restMinSize, repositoryGroup, incrementalSerialSuffix);
-            this.logContext = logContext;
-        }
-
-        @Override
-        protected String getHeaderContext() {
-            String headerContext;
-
-            if (isNotEmpty(logContext)) {
-                headerContext = logContext;
-            } else {
-                // If we have no MDC PME has been used as the entry point. Dummy one up for DA.
-                byte[] randomBytes = new byte[20];
-                RANDOM.nextBytes(randomBytes);
-                headerContext = "gme-" + CODEC.encodeAsString(randomBytes);
-            }
-
-            return headerContext;
-        }
     }
 }

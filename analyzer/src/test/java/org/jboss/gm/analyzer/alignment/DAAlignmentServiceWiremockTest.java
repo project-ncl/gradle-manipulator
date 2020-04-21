@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.io.rest.RestException;
 import org.jboss.gm.common.Configuration;
 import org.junit.Before;
 import org.junit.Rule;
@@ -47,7 +48,7 @@ public class DAAlignmentServiceWiremockTest {
     }
 
     @Test
-    public void alignmentWorksAsExpected() {
+    public void alignmentWorksAsExpected() throws RestException {
 
         System.setProperty(Configuration.DA, String.format("http://localhost:%d/da/rest/v-1", PORT));
         final Configuration configuration = ConfigFactory.create(Configuration.class);

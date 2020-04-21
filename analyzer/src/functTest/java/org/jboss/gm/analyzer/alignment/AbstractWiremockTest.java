@@ -27,6 +27,10 @@ public abstract class AbstractWiremockTest {
         StdErrLog el = new StdErrLog();
         el.setLevel(10);
         Log.setLog(el);
+
+        // Had strange behaviour where a single test would pass but multiple would fail.
+        // Various suggestions in https://github.com/tomakehurst/wiremock/issues/132
+        System.setProperty("http.keepAlive", "false");
     }
 
     @Rule

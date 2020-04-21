@@ -1,11 +1,16 @@
 package org.jboss.gm.common.groovy;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Properties;
 
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.core.groovy.GradleBaseScript;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
+import org.commonjava.maven.ext.io.FileIO;
+import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;
 import org.gradle.api.Project;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.slf4j.Logger;
@@ -29,6 +34,8 @@ public abstract class BaseScript extends GradleBaseScript {
     private Properties properties;
 
     private InvocationStage stage;
+
+    private FileIO fileIO;
 
     /**
      * Return the current Project
@@ -87,6 +94,11 @@ public abstract class BaseScript extends GradleBaseScript {
         return stage;
     }
 
+    @Override
+    public FileIO getFileIO() {
+        return fileIO;
+    }
+
     /**
      * Internal use only - the org.jboss.gm.analyzer.alignment.AlignmentTask uses this to
      * initialise the values
@@ -105,7 +117,21 @@ public abstract class BaseScript extends GradleBaseScript {
         this.basedir = rootDir;
         this.properties = properties;
 
+        File repoCache;
+        try {
+            if (stage == InvocationStage.FIRST || stage == InvocationStage.BOTH) {
+                repoCache = Files.createTempDirectory("repo-cache-").toFile();
+            } else {
+                repoCache = new File(rootProject.getBuildDir(), "repo-cache-");
+                //noinspection ResultOfMethodCallIgnored
+                repoCache.mkdirs();
+            }
+            fileIO = new FileIO(new GalleyInfrastructure(null, null).init(repoCache));
+
+        } catch (IOException | ManipulationException e) {
+            throw new ManipulationUncheckedException("Unable to create FileIO temporary directory", e);
+        }
+
         logger.info("Injecting values for stage {}. Project is {} with basedir {}", stage, rootProject, rootDir);
     }
-
 }

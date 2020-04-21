@@ -35,7 +35,6 @@ dependencies {
 
     compile("commons-lang:commons-lang:${project.extra.get("commonsVersion")}")
     compile("commons-io:commons-io:${project.extra.get("commonsVersion")}")
-    compile("commons-codec:commons-codec:1.11")
     compile("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
 
     compile("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
@@ -47,7 +46,7 @@ dependencies {
     testCompile("org.jboss.byteman:byteman-bmunit:${project.extra.get("bytemanVersion")}")
     testCompile (files ("${System.getProperty("java.home")}/../lib/tools.jar") )
     testCompile("org.mockito:mockito-core:2.27.0")
-    testCompile("com.github.tomakehurst:wiremock-jre8:2.23.2")
+    testCompile("com.github.tomakehurst:wiremock-jre8:2.26.3")
 
     // Groovy is built into Gradle
     permitUsedUndeclared("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")

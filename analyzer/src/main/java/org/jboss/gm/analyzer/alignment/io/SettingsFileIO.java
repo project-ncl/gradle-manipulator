@@ -84,8 +84,8 @@ public final class SettingsFileIO {
             }
             // Scanned the entire file and failed to find a match.
             throw new ManipulationUncheckedException(
-                    ".git/config file doesn't define SCM URL, failed to determine the root project name. File contents: "
-                            + lines);
+                    ".git/config file doesn't define SCM URL, failed to determine the root project name. File contents: {}",
+                    lines);
         } catch (IOException e) {
             throw new IOException("Unable to read .git/config file found, failed to determine the root project name", e);
         }

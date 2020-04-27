@@ -138,7 +138,7 @@ public class ManipulationModel {
 
             module = children.get(name);
             if (module == null) {
-                throw new ManipulationUncheckedException("ManipulationModel '" + name + "' does not exist");
+                throw new ManipulationUncheckedException("ManipulationModel '{}' does not exist", name);
             }
         } else {
             // we provided a project path, so recursively find the corresponding child by removing the initial ":"

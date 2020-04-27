@@ -26,7 +26,7 @@ public class DynamicVersionParser {
                 return true;
             }
             default: {
-                throw new ManipulationUncheckedException("Unknown version type for " + s);
+                throw new ManipulationUncheckedException("Unknown version type for {}", s);
             }
         }
     }

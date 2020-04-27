@@ -86,7 +86,7 @@ public class GroovyUtils {
                     ((BaseScript) script).setValues(stage, target, configuration.getProperties(), rootProject,
                             alignmentModel);
                 } else {
-                    throw new ManipulationException("Cannot cast " + script + " to a BaseScript to set values.");
+                    throw new ManipulationException("Cannot cast {} to a BaseScript to set values.", script);
                 }
                 try {
                     logger.info("Executing {} on {} at invocation point {}", script, rootProject, stage);

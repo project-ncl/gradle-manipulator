@@ -61,7 +61,7 @@ public class GMLogger implements Logger {
             // And therefore we need to ensure we have at least 3 frames to examine.
             if (result.length < 4) {
                 throw new ManipulationUncheckedException(
-                        "Internal logging failure ; not enough stacktrace elements: " + Arrays.toString(result));
+                        "Internal logging failure ; not enough stacktrace elements {}", Arrays.toString(result));
             }
             if (configuration.addLoggingColours()) {
                 sb.append(ANSI_DARK_GRAY);

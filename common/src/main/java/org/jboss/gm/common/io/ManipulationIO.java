@@ -28,7 +28,7 @@ public final class ManipulationIO {
                     ManipulationModel.class);
 
         } catch (IOException e) {
-            throw new ManipulationUncheckedException("Unable to deserialize " + MANIPULATION_FILE_NAME, e);
+            throw new ManipulationUncheckedException("Unable to deserialize {}", MANIPULATION_FILE_NAME, e);
         }
     }
 

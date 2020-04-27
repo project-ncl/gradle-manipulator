@@ -49,7 +49,7 @@ public final class LockFileIO {
                     .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
         } catch (IOException e) {
-            throw new ManipulationUncheckedException("Unable to parse lockfile " + lockfile, e);
+            throw new ManipulationUncheckedException("Unable to parse lockfile {}", lockfile, e);
         }
     }
 
@@ -59,7 +59,7 @@ public final class LockFileIO {
             try {
                 Files.move(path, path.resolveSibling(path.getFileName() + ".unused"), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
-                throw new ManipulationUncheckedException("Unable to rename lockfile " + f, e);
+                throw new ManipulationUncheckedException("Unable to rename lockfile {}", f, e);
             }
         });
     }

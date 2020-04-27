@@ -403,8 +403,8 @@ public class AlignmentTask extends DefaultTask {
                         for (UnresolvedDependency ud : unresolvedDependencies) {
                             logger.error("Unresolved had problem in {} with ", ud.getSelector(), ud.getProblem());
                         }
-                        throw new ManipulationUncheckedException("For configuration " + configuration.getName()
-                                + ", unable to resolve all project dependencies: " + unresolvedDependencies);
+                        throw new ManipulationUncheckedException("For configuration {}, unable to resolve all project dependencies: {}",
+                                configuration.getName(), unresolvedDependencies);
                     }
                 }
                 lenient.getFirstLevelModuleDependencies().forEach(dep -> {

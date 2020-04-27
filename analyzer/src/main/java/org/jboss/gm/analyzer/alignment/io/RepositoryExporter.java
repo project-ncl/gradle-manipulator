@@ -58,8 +58,7 @@ public final class RepositoryExporter {
         try {
             settingsWriter.write(repositoryExporter.mavenSettings, settingsFile);
         } catch (ManipulationException e) {
-            throw new ManipulationUncheckedException("Could not write repository settings file into "
-                    + settingsFile.getAbsolutePath());
+            throw new ManipulationUncheckedException("Could not write repository settings file into {}", settingsFile.getAbsolutePath());
         }
     }
 

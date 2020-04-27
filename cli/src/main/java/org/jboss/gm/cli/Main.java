@@ -115,7 +115,7 @@ public class Main implements Callable<Void> {
 
         if (installation != null) {
             if (!installation.exists()) {
-                throw new ManipulationException("Unable to locate Gradle installation at " + installation);
+                throw new ManipulationException("Unable to locate Gradle installation at {}", installation);
             }
             connector.useInstallation(installation);
         } else {
@@ -174,7 +174,7 @@ public class Main implements Callable<Void> {
         }
 
         if (target == null || !target.exists()) {
-            throw new ManipulationException("Unable to locate target directory: " + target);
+            throw new ManipulationException("Unable to locate target directory {}", target);
         }
 
         if (!jvmPropertyParams.isEmpty()) {

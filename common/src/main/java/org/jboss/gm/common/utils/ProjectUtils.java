@@ -57,7 +57,7 @@ public class ProjectUtils {
         try {
             FieldUtils.writeField(project, "name", replacement, true);
         } catch (IllegalAccessException e) {
-            throw new ManipulationUncheckedException("Unable to update name field to " + replacement, e);
+            throw new ManipulationUncheckedException("Unable to update name field to {}", replacement, e);
         }
     }
 }

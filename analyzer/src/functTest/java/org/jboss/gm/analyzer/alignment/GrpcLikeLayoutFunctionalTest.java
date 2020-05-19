@@ -9,12 +9,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -35,6 +37,7 @@ import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.Assert.fail;
 
 public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
@@ -83,7 +86,8 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
             assertThat(am.getName()).isEqualTo("root");
             assertThat(am.getVersion()).isEqualTo("1.1.2.redhat-00004");
 
-            assertThat(am.getChildren().keySet()).hasSize(3).containsExactly("subproject1", "subproject2", "subproject3");
+            assertThat(am.getChildren().keySet()).hasSize(3).containsExactly("subproject1", "subproject2",
+                    "subproject3");
 
             assertThat(am.findCorrespondingChild("subproject1")).satisfies(subproject1 -> {
                 assertThat(subproject1.getVersion()).isEqualTo("1.1.2.redhat-00004");
@@ -100,9 +104,10 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
                 assertThat(alignedDependencies).isEmpty();
             });
 
-            assertThat(am.findCorrespondingChild("subproject3")).satisfies(subproject11 -> {
-                assertThat(subproject11.getVersion()).isEqualTo("1.1.2.redhat-00004");
-                final Collection<ProjectVersionRef> alignedDependencies = subproject11.getAlignedDependencies().values();
+            assertThat(am.findCorrespondingChild("subproject3")).satisfies(subproject3 -> {
+                assertThat(subproject3.getName()).isEqualTo("special-subproject-number3");
+                assertThat(subproject3.getVersion()).isEqualTo("1.1.2.redhat-00004");
+                final Collection<ProjectVersionRef> alignedDependencies = subproject3.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
                         .containsOnly(
@@ -148,5 +153,35 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
         assertThatExceptionOfType(ManipulationUncheckedException.class)
                 .isThrownBy(() -> TestUtils.align(projectRoot, true))
                 .withMessageContaining("Unable to find suitable project version");
+    }
+
+    @Test
+    public void ensureAlignmentFileWithArchiveBaseNameOverride() throws IOException, URISyntaxException, ManipulationException {
+
+        final File projectRoot = tempDir.newFolder("grpc-like-layout");
+        final Map<String, String> props = Collections.singletonMap("dependencySource", "NONE");
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), props);
+
+        assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
+        assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+
+        assertThat(alignmentModel).isNotNull().satisfies(am -> {
+            assertThat(am.getGroup()).isEqualTo("org.acme");
+            assertThat(am.getName()).isEqualTo("root");
+
+            assertThat(am.getChildren().keySet()).hasSize(3).containsExactly("subproject1", "subproject2",
+                    "subproject3");
+            assertThat(am.findCorrespondingChild("subproject3")).satisfies(subproject3 -> {
+                assertThat(subproject3.getName().equals("special-subproject-number3"));
+                try {
+                    assertEquals(FieldUtils.getDeclaredField(ManipulationModel.class, "projectPathName", true).get(subproject3),
+                            "subproject3");
+                } catch (IllegalAccessException e) {
+                    fail("Couldn't get field to check.");
+                }
+                assertThat(subproject3.getChildren().keySet()).hasSize(1).containsExactly("subsubproject1");
+            });
+        });
     }
 }

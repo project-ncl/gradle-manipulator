@@ -55,6 +55,11 @@ configure(subprojects) { project ->
     repositories {
         mavenCentral()
     }
+
+    if ( project.getPath().endsWith ("subproject3") )
+    {
+        archivesBaseName = "special-subproject-number3"
+    }
 }
 
 configure(subprojects) { subproject ->

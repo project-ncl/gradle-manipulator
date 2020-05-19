@@ -37,7 +37,8 @@ public class DAAlignmentService implements AlignmentService {
         dependencySource = configuration.dependencyConfiguration();
 
         if (endpointUrl == null && (dependencySource != NONE)) {
-            throw new ManipulationUncheckedException("'{}' must be configured in order for dependency scanning to work", Configuration.DA);
+            throw new ManipulationUncheckedException("'{}' must be configured in order for dependency scanning to work",
+                    Configuration.DA);
         }
 
         restEndpoint = new DefaultTranslator(

@@ -14,11 +14,11 @@ public class ManipulationModelTest {
 
     @Test
     public void findCorrespondingChildWithName() {
-        ManipulationModel model = new ManipulationModel("root", "bar");
-        final ManipulationModel child = new ManipulationModel("child1", "bar");
+        ManipulationModel model = new ManipulationModel("root", "root", "bar");
+        final ManipulationModel child = new ManipulationModel("child1", "child1", "bar");
         model.addChild(child);
-        model.addChild(new ManipulationModel("child2", "bar"));
-        final ManipulationModel child11 = new ManipulationModel("child11", "bar");
+        model.addChild(new ManipulationModel("child2", "child2", "bar"));
+        final ManipulationModel child11 = new ManipulationModel("child11", "child11-custom-artifactId", "bar");
         child.addChild(child11);
 
         assertThat(model.findCorrespondingChild(model.getName())).isEqualTo(model);
@@ -37,13 +37,13 @@ public class ManipulationModelTest {
 
     @Test
     public void findCorrespondingChildWithPath() {
-        ManipulationModel model = new ManipulationModel("root", "bar");
-        final ManipulationModel child = new ManipulationModel("child1", "bar");
+        ManipulationModel model = new ManipulationModel("root", "root", "bar");
+        final ManipulationModel child = new ManipulationModel("child1", "child1", "bar");
         model.addChild(child);
-        model.addChild(new ManipulationModel("child2", "bar"));
-        final ManipulationModel child11 = new ManipulationModel("child11", "bar");
+        model.addChild(new ManipulationModel("child2", "child2", "bar"));
+        final ManipulationModel child11 = new ManipulationModel("child11", "child11", "bar");
         child.addChild(child11);
-        final ManipulationModel child111 = new ManipulationModel("child111", "bar");
+        final ManipulationModel child111 = new ManipulationModel("child111", "child111", "bar");
         child11.addChild(child111);
 
         assertThat(model.findCorrespondingChild(":")).isEqualTo(model);
@@ -60,15 +60,15 @@ public class ManipulationModelTest {
 
     @Test
     public void getAllAlignedDependencies() {
-        final ManipulationModel root = new ManipulationModel("root", "bar");
+        final ManipulationModel root = new ManipulationModel("root", "root", "bar");
         root.getAlignedDependencies().put("org.jboss.resteasy:resteasy-jaxrs:3.6.3.Final",
                 new SimpleProjectVersionRef("org.jboss.resteasy", "resteasy-jaxrs", "3.6.3.Final-redhat-000001"));
-        final ManipulationModel child = new ManipulationModel("child1", "bar");
+        final ManipulationModel child = new ManipulationModel("child1", "child1", "bar");
         child.getAlignedDependencies().put("org.hibernate:hibernate-core:5.3.7.Final",
                 new SimpleProjectVersionRef("org.hibernate", "hibernate-core", "5.3.7.Final-redhat-000001"));
         root.addChild(child);
-        root.addChild(new ManipulationModel("child2", "bar"));
-        final ManipulationModel child11 = new ManipulationModel("child11", "bar");
+        root.addChild(new ManipulationModel("child2", "child2", "bar"));
+        final ManipulationModel child11 = new ManipulationModel("child11", "child11", "bar");
         child.addChild(child11);
         child11.getAlignedDependencies().put("io.undertow:undertow-core:2.0.15.Final",
                 new SimpleProjectVersionRef("io.undertow", "undertow-core", "2.0.15.Final-redhat-000001"));

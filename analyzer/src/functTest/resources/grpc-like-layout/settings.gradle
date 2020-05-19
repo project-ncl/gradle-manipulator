@@ -1,6 +1,7 @@
 include "subproject1"
 include "subproject2"
 include "subproject3"
+include 'subproject3:subsubproject1'
 rootProject.name = "root"
 rootProject.children.each {project ->
 	project.buildFileName = "${project.name}.gradle"

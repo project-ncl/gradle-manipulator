@@ -105,7 +105,9 @@ public class AlignmentTask extends DefaultTask {
             // Only output the config once to avoid noisy logging.
             logger.info("Configuration now has properties {}", configuration.dumpCurrentConfig());
         }
-        logger.info("Starting model task for project {} with GAV {}:{}:{}", project.getProjectDir().getName(), groupId,
+        logger.info("Starting alignment task for project in directory '{}' with GAV {}:{}:{}",
+                project.getProjectDir().getName(),
+                groupId,
                 projectName, project.getVersion());
 
         // If processing the root project _and_ we have a Maven publication configured then verify artifactId / groupId.
@@ -403,7 +405,8 @@ public class AlignmentTask extends DefaultTask {
                         for (UnresolvedDependency ud : unresolvedDependencies) {
                             logger.error("Unresolved had problem in {} with ", ud.getSelector(), ud.getProblem());
                         }
-                        throw new ManipulationUncheckedException("For configuration {}, unable to resolve all project dependencies: {}",
+                        throw new ManipulationUncheckedException(
+                                "For configuration {}, unable to resolve all project dependencies: {}",
                                 configuration.getName(), unresolvedDependencies);
                     }
                 }

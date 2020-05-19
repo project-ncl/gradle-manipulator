@@ -129,6 +129,10 @@ public class Main implements Callable<Void> {
             if (trace) {
                 dgc.setVerboseLogging(true);
             }
+            else if (debug) {
+                // If debug has been enabled in the CLI propagate that through as info (we have customised logging).
+                gradleArgs.add("--info");
+            }
         }
 
         try (ProjectConnection connection = connector.connect()) {

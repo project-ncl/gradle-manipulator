@@ -1,6 +1,7 @@
 package org.jboss.gm.cli;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -177,12 +178,17 @@ public class Main implements Callable<Void> {
             root.setLevel(Level.DEBUG);
         }
 
-        if (target == null || !target.exists()) {
+        if (!target.isAbsolute()) {
+            target = new File(Paths.get("").toAbsolutePath().toFile(), target.toString());
+            logger.debug("Relative path detected ; resetting to {}", target);
+        }
+        if (!target.exists()) {
             throw new ManipulationException("Unable to locate target directory {}", target);
+        } else if (!target.isDirectory()) {
+            throw new ManipulationException("Pass project root as directory not file : {}", target);
         }
 
         if (!jvmPropertyParams.isEmpty()) {
-
             // By passing the command line into the configuration object have a standard place to retrieve
             // the configuration which makes the underlying code simpler.
             System.getProperties().putAll(jvmPropertyParams);

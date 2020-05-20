@@ -188,4 +188,30 @@ public class MainTest {
         assertFalse(systemOutRule.getLog().contains(", DdependencyOverride.org.jboss.slf4j:*@*="));
         assertTrue(systemOutRule.getLog().contains("groovyScripts="));
     }
+
+    @Test
+    public void testGradleInvalidTarget1() throws IOException {
+        Main m = new Main();
+        String[] args = new String[] { "-t", tempDir.newFile().toString() };
+        try {
+            m.run(args);
+            fail("No exception thrown");
+        } catch (Exception e) {
+            e.printStackTrace();
+            assertTrue(e.getMessage().contains("Pass project root as directory not file"));
+        }
+    }
+
+    @Test
+    public void testGradleInvalidTarget2() throws IOException {
+        Main m = new Main();
+        String[] args = new String[] { "-t", UUID.randomUUID().toString() };
+        try {
+            m.run(args);
+            fail("No exception thrown");
+        } catch (Exception e) {
+            e.printStackTrace();
+            assertTrue(e.getMessage().contains("Unable to locate target directory"));
+        }
+    }
 }

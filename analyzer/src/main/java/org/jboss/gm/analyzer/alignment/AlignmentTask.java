@@ -460,7 +460,7 @@ public class AlignmentTask extends DefaultTask {
 
                 });
             } else {
-                logger.debug("Unable to resolve configuration {} for project {}", configuration.getName(), project);
+                logger.trace("Unable to resolve configuration {} for project {}", configuration.getName(), project);
             }
         });
 

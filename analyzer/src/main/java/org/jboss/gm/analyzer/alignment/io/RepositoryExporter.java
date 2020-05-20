@@ -36,10 +36,15 @@ public final class RepositoryExporter {
     // only export remote URLs
     private static final Collection<String> SUPPORTED_SCHEMES = Arrays.asList("http", "https");
 
-    private Settings mavenSettings = new Settings();
-    private Profile mavenProfile = new Profile();
-    private Set<String> exportedUrls = new HashSet<>();
+    private final Settings mavenSettings = new Settings();
+    private final Profile mavenProfile = new Profile();
+    private final Set<String> exportedUrls = new HashSet<>();
     private int repositoryCounter = 0;
+
+    private enum REPO_TYPE {
+        Maven,
+        Ivy
+    }
 
     private RepositoryExporter() {
         mavenSettings.getProfiles().add(mavenProfile);
@@ -50,7 +55,7 @@ public final class RepositoryExporter {
     public static void export(Map<ArtifactRepository, Path> repositories, File settingsFile) {
         RepositoryExporter repositoryExporter = new RepositoryExporter();
 
-        addRepository(repositoryExporter, "Gradle Plugin Repository", "https://plugins.gradle.org/m2/");
+        addRepository(REPO_TYPE.Maven, repositoryExporter, "Gradle Plugin Repository", "https://plugins.gradle.org/m2/");
         processRepositories(repositoryExporter, repositories);
 
         SettingsIO settingsWriter = new SettingsIO(new DefaultSettingsBuilder());
@@ -74,8 +79,7 @@ public final class RepositoryExporter {
                 URI url = artifactRepository.getUrl();
 
                 if (isSupportedScheme(url)) {
-                    logger.debug("Adding maven repository: {}", url);
-                    addRepository(repositoryExporter, artifactRepository.getName(), url.toString());
+                    addRepository(REPO_TYPE.Maven, repositoryExporter, artifactRepository.getName(), url.toString());
                 } else {
                     logger.debug("Skipping maven repository '{}' with unsupported scheme {} from {}", repository.getName(), url,
                             repositories.get(repository));
@@ -85,8 +89,7 @@ public final class RepositoryExporter {
                 URI url = artifactRepository.getUrl();
 
                 if (isSupportedScheme(url)) {
-                    logger.debug("Adding ivy repository: {}", url);
-                    addRepository(repositoryExporter, artifactRepository.getName(), url.toString());
+                    addRepository(REPO_TYPE.Ivy, repositoryExporter, artifactRepository.getName(), url.toString());
                 } else {
                     logger.debug("Skipping ivy repository '{}' with unsupported scheme {} from {}", repository.getName(), url,
                             repositories.get(repository));
@@ -98,12 +101,13 @@ public final class RepositoryExporter {
         }
     }
 
-    private static void addRepository(RepositoryExporter repositoryExporter, String name, String url) {
+    private static void addRepository(REPO_TYPE type, RepositoryExporter repositoryExporter, String name, String url) {
         if (repositoryExporter.exportedUrls.contains(url)) {
             // skip URLs we've already seen
             return;
         }
-        repositoryExporter.exportedUrls.add(url);
+
+        logger.debug("Adding {} repository: {}", type, url);
 
         String repoId = name + "-" + repositoryExporter.repositoryCounter++; // counter ensures that the id is unique
         Repository mavenRepository = new Repository();
@@ -112,6 +116,8 @@ public final class RepositoryExporter {
         mavenRepository.setUrl(url);
         mavenRepository.setSnapshots(new RepositoryPolicy());
         mavenRepository.setReleases(new RepositoryPolicy());
+
+        repositoryExporter.exportedUrls.add(url);
         repositoryExporter.mavenProfile.addRepository(mavenRepository);
     }
 

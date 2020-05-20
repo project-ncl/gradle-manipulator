@@ -257,7 +257,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void trace(String msg) {
-        delegate.trace(injectLoggerFormatting(msg));
+        delegate.debug(injectLoggerFormatting(msg));
     }
 
     /**
@@ -275,7 +275,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void trace(String format, Object arg) {
-        delegate.trace(injectLoggerFormatting(format), arg);
+        delegate.debug(injectLoggerFormatting(format), arg);
     }
 
     /**
@@ -294,7 +294,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void trace(String format, Object arg1, Object arg2) {
-        delegate.trace(injectLoggerFormatting(format), arg1, arg2);
+        delegate.debug(injectLoggerFormatting(format), arg1, arg2);
     }
 
     /**
@@ -315,7 +315,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void trace(String format, Object... arguments) {
-        delegate.trace(injectLoggerFormatting(format), arguments);
+        delegate.debug(injectLoggerFormatting(format), arguments);
     }
 
     /**
@@ -328,7 +328,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void trace(String msg, Throwable t) {
-        delegate.trace(injectLoggerFormatting(msg), t);
+        delegate.debug(injectLoggerFormatting(msg), t);
     }
 
     /**
@@ -355,7 +355,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void trace(Marker marker, String msg) {
-        delegate.trace(marker, msg);
+        delegate.debug(marker, msg);
     }
 
     /**
@@ -369,7 +369,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void trace(Marker marker, String format, Object arg) {
-        delegate.trace(marker, injectLoggerFormatting(format), arg);
+        delegate.debug(marker, injectLoggerFormatting(format), arg);
     }
 
     /**
@@ -385,7 +385,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void trace(Marker marker, String format, Object arg1, Object arg2) {
-        delegate.trace(marker, injectLoggerFormatting(format), arg1, arg2);
+        delegate.debug(marker, injectLoggerFormatting(format), arg1, arg2);
     }
 
     /**
@@ -400,7 +400,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void trace(Marker marker, String format, Object... argArray) {
-        delegate.trace(marker, injectLoggerFormatting(format), argArray);
+        delegate.debug(marker, injectLoggerFormatting(format), argArray);
     }
 
     /**
@@ -414,7 +414,7 @@ public class GMLogger implements Logger {
      */
     @Override
     public void trace(Marker marker, String msg, Throwable t) {
-        delegate.trace(marker, injectLoggerFormatting(msg), t);
+        delegate.debug(marker, injectLoggerFormatting(msg), t);
     }
 
     /**

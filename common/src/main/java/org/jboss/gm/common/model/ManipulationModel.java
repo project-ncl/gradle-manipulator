@@ -2,11 +2,16 @@ package org.jboss.gm.common.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.tasks.bundling.AbstractArchiveTask;
+import org.jboss.gm.common.logging.GMLogger;
+import org.jboss.gm.common.utils.ProjectUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -19,6 +24,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class ManipulationModel {
 
+    @SuppressWarnings("FieldCanBeLocal")
+    private final Logger logger = GMLogger.getLogger(getClass());
+
     @JsonProperty
     protected String group;
 
@@ -27,6 +35,12 @@ public class ManipulationModel {
      */
     @JsonProperty
     protected String name;
+
+    /**
+     * This should be effectively the same as the folder name.
+     */
+    @JsonProperty
+    protected String projectPathName;
 
     /**
      * Version of the project.
@@ -43,7 +57,7 @@ public class ManipulationModel {
     protected Map<String, ProjectVersionRef> alignedDependencies = new HashMap<>();
 
     /**
-     * Representation of this project children projects if any, keyed by name.
+     * Representation of this project children projects if any, keyed by name(artifactId).
      */
     @JsonProperty
     protected Map<String, ManipulationModel> children = new HashMap<>(7);
@@ -54,8 +68,45 @@ public class ManipulationModel {
     public ManipulationModel() {
     }
 
-    public ManipulationModel(String name, String group) {
+    public ManipulationModel(Project project) {
+        this.name = project.getName();
+        this.projectPathName = project.getName();
+        this.group = ProjectUtils.getRealGroupId(project);
+
+        /* If a project has been configured like
+         * <code>
+         *  project(':streams') {
+         *    archivesBaseName = "my-streams"
+         * </code>
+         * then that applies to any Task that has an archive base type.
+         */
+        Optional<AbstractArchiveTask> optionalAbstractArchiveTask = project.getTasks().withType(AbstractArchiveTask.class)
+                .stream().findFirst();
+        if (optionalAbstractArchiveTask.isPresent() &&
+        // We should be using getArchiveBaseName but its only available in 5.1 and later.
+        // optionalAbstractArchiveTask.get().getArchiveBaseName().isPresent() &&
+        //!optionalAbstractArchiveTask.get().getArchiveBaseName().get().equals(project.getName())) {
+                !project.getName().equals(optionalAbstractArchiveTask.get().getBaseName())) {
+            logger.warn("Updating project name ({}) as it differs to archiveBaseName ({})",
+                    project.getName(), optionalAbstractArchiveTask.get().getBaseName());
+            if (!project.getName().equals(project.getProjectDir().getName())) {
+                logger.warn("Different project name ({}) to project directory ({}) ; defaulting to project name.",
+                        project.getName(),
+                        project.getProjectDir().getName());
+            }
+            // Force overwrite the project name to ensure consistency.
+            ProjectUtils.updateNameField(project, optionalAbstractArchiveTask.get().getBaseName());
+            this.name = project.getName();
+        }
+
+        logger.debug("Created manipulation model for project name({}), group({}) with path is {}",
+                name, group, projectPathName);
+    }
+
+    // Test use only ; avoids having to create a Project to test this class.
+    ManipulationModel(String projectPathName, String name, String group) {
         this.name = name;
+        this.projectPathName = projectPathName;
         this.group = group;
     }
 
@@ -117,44 +168,44 @@ public class ManipulationModel {
     }
 
     public void addChild(ManipulationModel child) {
-        children.put(child.getName(), child);
+        children.put(child.projectPathName, child);
     }
 
     public ManipulationModel findCorrespondingChild(Project name) {
         return findCorrespondingChild(name.getPath());
     }
 
-    protected ManipulationModel findCorrespondingChild(String name) {
-        if (StringUtils.isBlank(name)) {
+    protected ManipulationModel findCorrespondingChild(String path) {
+        if (StringUtils.isBlank(path)) {
             throw new ManipulationUncheckedException("Supplied child name cannot be empty");
         }
         final ManipulationModel module;
 
-        if (!name.contains(":")) {
+        if (!path.contains(":")) {
             // we provided a simple name so assume we're looking for a direct child
-            if (getName().equals(name) || name.isEmpty()) {
+            if (getName().equals(path) || path.isEmpty()) {
                 return this;
             }
 
-            module = children.get(name);
+            module = children.get(path);
             if (module == null) {
-                throw new ManipulationUncheckedException("ManipulationModel '{}' does not exist", name);
+                throw new ManipulationUncheckedException("ManipulationModel '{}' does not exist", path);
             }
         } else {
             // we provided a project path, so recursively find the corresponding child by removing the initial ":"
-            if (name.equals(":")) {
+            if (path.equals(":")) {
                 return this;
             }
 
-            final int index = name.indexOf(':', 1);
+            final int index = path.indexOf(':', 1);
             if (index < 0) {
                 // we don't have other path separators so remove the leading : and get with name
-                return findCorrespondingChild(name.substring(1));
+                return findCorrespondingChild(path.substring(1));
             } else {
                 // extract the child name which is the first component of the path and call recursively on it using remaining
                 // path
-                String childName = name.substring(1, index);
-                return findCorrespondingChild(childName).findCorrespondingChild(name.substring(index));
+                String childName = path.substring(1, index);
+                return findCorrespondingChild(childName).findCorrespondingChild(path.substring(index));
             }
         }
 

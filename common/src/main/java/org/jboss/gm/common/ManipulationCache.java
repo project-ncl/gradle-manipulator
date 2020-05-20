@@ -139,7 +139,6 @@ public class ManipulationCache {
     }
 
     public void addRepository(ArtifactRepository repository, Path projectDir) {
-
         repositories.put(repository, projectDir);
     }
 }

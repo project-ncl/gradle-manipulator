@@ -139,11 +139,11 @@ public final class TestUtils {
         /**
          * Calls the super method but with less access protection for test purposes
          *
-         * @param name string name
+         * @param path string name
          * @return the child model
          */
-        public ManipulationModel findCorrespondingChild(String name) {
-            return super.findCorrespondingChild(name);
+        public ManipulationModel findCorrespondingChild(String path) {
+            return super.findCorrespondingChild(path);
         }
     }
 }

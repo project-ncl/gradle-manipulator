@@ -42,13 +42,6 @@ public class ManifestUpdateAction implements Action<Project> {
             if (manifest.getAttributes().containsKey("Specification-Version")) {
                 manifest.getAttributes().put("Specification-Version", alignmentConfiguration.getVersion());
             }
-            if (manifest instanceof DefaultManifest) {
-                // TODO: what are common entries here?
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                ((DefaultManifest) manifest).writeTo(byteArrayOutputStream);
-                logger.warn("NYI : Found DefaultManifest with current entries: {}",
-                        byteArrayOutputStream.toString());
-            }
         });
     }
 }

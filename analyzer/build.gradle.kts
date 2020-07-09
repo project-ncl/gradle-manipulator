@@ -47,6 +47,7 @@ dependencies {
     testCompile (files ("${System.getProperty("java.home")}/../lib/tools.jar") )
     testCompile("org.mockito:mockito-core:2.27.0")
     testCompile("com.github.tomakehurst:wiremock-jre8:2.26.3")
+    testCompile(gradleKotlinDsl())
 
     // Groovy is built into Gradle
     permitUsedUndeclared("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")

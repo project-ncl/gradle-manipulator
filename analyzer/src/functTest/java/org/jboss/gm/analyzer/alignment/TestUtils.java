@@ -122,7 +122,11 @@ public final class TestUtils {
 
     public static String getLine(File projectRoot) throws IOException, ManipulationException {
 
-        List<String> lines = FileUtils.readLines(new File(projectRoot, Project.DEFAULT_BUILD_FILE), Charset.defaultCharset());
+        File buildFile = new File(projectRoot, Project.DEFAULT_BUILD_FILE);
+        if (!buildFile.exists()) {
+            buildFile = new File(projectRoot, "build.gradle.kts");
+        }
+        List<String> lines = FileUtils.readLines(buildFile, Charset.defaultCharset());
 
         return org.jboss.gm.common.utils.FileUtils.getFirstLine(lines);
     }

@@ -73,11 +73,13 @@ import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
 public class AlignmentTask extends DefaultTask {
 
     public static final String INJECT_GME_START = "buildscript { apply from: \"gme.gradle\" }";
+    public static final String INJECT_GME_START_KOTLIN = "buildscript { project.apply { from(\"gme.gradle\") } }";
+    public static final String INJECT_GME_END = "apply from: \"gme-pluginconfigs.gradle\"";
+    public static final String INJECT_GME_END_KOTLIN = "project.apply { from(\"gme-pluginconfigs.gradle\") }";
     public static final String GME = "gme.gradle";
     public static final String GRADLE = "gradle";
     public static final String GME_REPOS = "gme-repos.gradle";
     public static final String APPLY_GME_REPOS = "buildscript { apply from: new File(buildscript.getSourceFile().getParentFile(),\"gme-repos.gradle\"), to: buildscript }";
-    public static final String INJECT_GME_END = "apply from: \"gme-pluginconfigs.gradle\"";
     public static final String GME_PLUGINCONFIGS = "gme-pluginconfigs.gradle";
     public static final String NAME = "generateAlignmentMetadata";
 
@@ -249,9 +251,12 @@ public class AlignmentTask extends DefaultTask {
                 // Ordering is important here ; we mustn't inject the gme-repos file before iterating over all *.gradle
                 // files.
                 updateAllExtraGradleFilesWithGmeRepos();
-                writeGmeMarkerFile();
+
+                logger.info("For project script is {}  and build file {} ", project.getBuildscript(), project.getBuildFile());
+                logger.info("For project {} ", project.getBuildscript().getSourceFile());
+                writeGmeMarkerFile(project.getRootProject().getBuildFile());
+                writeGmeConfigMarkerFile(project.getRootProject().getBuildFile());
                 writeGmeReposMarkerFile();
-                writeGmeConfigMarkerFile();
                 writeRepositorySettingsFile(cache.getRepositories());
             }
 
@@ -263,10 +268,9 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private void writeGmeMarkerFile() throws IOException, ManipulationException {
+    private void writeGmeMarkerFile(File rootGradle) throws IOException, ManipulationException {
         File rootDir = getProject().getRootDir();
         File gmeGradle = new File(rootDir, GME);
-        File rootGradle = new File(rootDir, Project.DEFAULT_BUILD_FILE);
 
         if (!gmeGradle.exists()) {
             Files.copy(getClass().getResourceAsStream('/' + GME), gmeGradle.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -277,18 +281,50 @@ public class AlignmentTask extends DefaultTask {
             List<String> lines = FileUtils.readLines(rootGradle, Charset.defaultCharset());
             List<String> result = new ArrayList<>();
 
+            String injectedLine = rootGradle.getName().endsWith(".kts") ? INJECT_GME_START_KOTLIN : INJECT_GME_START;
             String first = org.jboss.gm.common.utils.FileUtils.getFirstLine(lines);
+            logger.debug("Read first line '{}' from {}", first, rootGradle);
 
             // Check if the first non-blank line is the gme phrase, otherwise inject it.
-            if (!INJECT_GME_START.equals(first.trim())) {
+            if (!injectedLine.equals(first.trim())) {
                 result.add(System.lineSeparator());
-                result.add(INJECT_GME_START);
+                result.add(injectedLine);
                 result.add(System.lineSeparator());
                 result.addAll(lines);
 
                 FileUtils.writeLines(rootGradle, result);
             }
 
+        } else {
+            logger.warn("Unable to find build.gradle in {} to modify.", rootDir);
+        }
+    }
+
+    private void writeGmeConfigMarkerFile(File rootGradle) throws IOException {
+        File rootDir = getProject().getRootDir();
+        File gmeGradle = new File(rootDir, GME_PLUGINCONFIGS);
+
+        if (!gmeGradle.exists()) {
+            Files.copy(getClass().getResourceAsStream('/' + GME_PLUGINCONFIGS), gmeGradle.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        if (rootGradle.exists()) {
+
+            String injectedLine = rootGradle.getName().endsWith(".kts") ? INJECT_GME_END_KOTLIN : INJECT_GME_END;
+            String line = org.jboss.gm.common.utils.FileUtils.getLastLine(rootGradle);
+            logger.debug("Read last line '{}' from {}", line, rootGradle);
+
+            if (!line.trim().equals(injectedLine)) {
+                // Haven't appended it before.
+                try (BufferedWriter writer = new BufferedWriter(new FileWriter(rootGradle, true))) {
+                    // Ensure the marker is on a line by itself.
+                    writer.newLine();
+                    writer.write(injectedLine);
+                    writer.newLine();
+                    writer.flush();
+                }
+            }
         } else {
             logger.warn("Unable to find build.gradle in {} to modify.", rootDir);
         }
@@ -323,36 +359,6 @@ public class AlignmentTask extends DefaultTask {
                 result.addAll(lines);
                 FileUtils.writeLines(extraGradleScript, result);
             }
-        }
-    }
-
-    private void writeGmeConfigMarkerFile() throws IOException {
-        File rootDir = getProject().getRootDir();
-        File gmeGradle = new File(rootDir, GME_PLUGINCONFIGS);
-        File rootGradle = new File(rootDir, Project.DEFAULT_BUILD_FILE);
-
-        if (!gmeGradle.exists()) {
-            Files.copy(getClass().getResourceAsStream('/' + GME_PLUGINCONFIGS), gmeGradle.toPath(),
-                    StandardCopyOption.REPLACE_EXISTING);
-        }
-
-        if (rootGradle.exists()) {
-
-            String line = org.jboss.gm.common.utils.FileUtils.getLastLine(rootGradle);
-            logger.debug("Read last line '{}' from build.gradle", line);
-
-            if (!line.trim().equals(INJECT_GME_END)) {
-                // Haven't appended it before.
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter(rootGradle, true))) {
-                    // Ensure the marker is on a line by itself.
-                    writer.newLine();
-                    writer.write(INJECT_GME_END);
-                    writer.newLine();
-                    writer.flush();
-                }
-            }
-        } else {
-            logger.warn("Unable to find build.gradle in {} to modify.", rootDir);
         }
     }
 

@@ -392,8 +392,18 @@ public class AlignmentTask extends DefaultTask {
                     }
                 }
 
-                LenientConfiguration lenient = configuration.copyRecursive().getResolvedConfiguration()
-                        .getLenientConfiguration();
+                // If we have dependency constraints we can get a ClassCastException when attempting to copy the configurations.
+                // Normally we need to copy the configuration to ensure we resolve all dependencies (See
+                // analyzer/src/functTest/java/org/jboss/gm/analyzer/alignment/DynamicWithLocksProjectFunctionalTest.java for
+                // an example).
+                LenientConfiguration lenient;
+                if (configuration.getAllDependencyConstraints().size() == 0) {
+                    lenient = configuration.copyRecursive().getResolvedConfiguration().getLenientConfiguration();
+                } else {
+                    logger.debug("Constraints found ({}), not copying configuration",
+                            configuration.getAllDependencyConstraints());
+                    lenient = configuration.getResolvedConfiguration().getLenientConfiguration();
+                }
 
                 // We don't care about modules of the project being unresolvable at this stage. Had we not excluded them,
                 // we would get false negatives
@@ -402,11 +412,13 @@ public class AlignmentTask extends DefaultTask {
 
                 if (unresolvedDependencies.size() > 0) {
                     if (internalConfig.ignoreUnresolvableDependencies()) {
-                        logger.warn("For configuration {}; ignoring all unresolvable dependencies: {}", configuration.getName(),
+                        logger.warn("For configuration {}; ignoring all unresolvable dependencies: {}",
+                                configuration.getName(),
                                 unresolvedDependencies);
                     } else {
 
-                        logger.error("For configuration {}; unable to resolve all dependencies: {}", configuration.getName(),
+                        logger.error("For configuration {}; unable to resolve all dependencies: {}",
+                                configuration.getName(),
                                 lenient.getUnresolvedModuleDependencies());
                         for (UnresolvedDependency ud : unresolvedDependencies) {
                             logger.error("Unresolved had problem in {} with ", ud.getSelector(), ud.getProblem());
@@ -437,7 +449,8 @@ public class AlignmentTask extends DefaultTask {
                             version = lockFileDep.getVersionString();
                         }
                     }
-                    ProjectVersionRef pvr = ProjectVersionFactory.withGAV(dep.getModuleGroup(), dep.getModuleName(), version);
+                    ProjectVersionRef pvr = ProjectVersionFactory.withGAV(dep.getModuleGroup(), dep.getModuleName(),
+                            version);
 
                     List<Dependency> originalDeps = allDependencies.stream()
                             .filter(d -> StringUtils.equals(d.getGroup(), dep.getModuleGroup()) &&
@@ -465,6 +478,7 @@ public class AlignmentTask extends DefaultTask {
                     }
 
                 });
+
             } else {
                 logger.trace("Unable to resolve configuration {} for project {}", configuration.getName(), project);
             }

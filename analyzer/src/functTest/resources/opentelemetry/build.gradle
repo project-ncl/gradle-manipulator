@@ -1,0 +1,454 @@
+
+
+
+plugins {
+    id "com.github.sherter.google-java-format" apply false
+    id "com.jfrog.artifactory" apply false
+    id "com.jfrog.bintray" version "1.8.4" apply false // Need *specific* version.
+    id "net.ltgt.errorprone" apply false
+    id "ru.vyarus.animalsniffer" apply false
+    id "io.morethan.jmhreport" apply false
+    id 'org.jboss.gm.analyzer'
+}
+
+ext {
+    opentelemetryProjects = subprojects - project(":opentelemetry-bom")
+}
+
+configure(subprojects) { project ->
+    apply plugin: 'org.jboss.gm.analyzer'
+}
+
+subprojects {
+    group = "io.opentelemetry"
+    version = "0.6.0" // CURRENT_OPEN_TELEMETRY_VERSION
+}
+
+configure(opentelemetryProjects) {
+    apply plugin: 'checkstyle'
+    apply plugin: 'eclipse'
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'idea'
+    apply plugin: 'signing'
+    apply plugin: 'jacoco'
+
+    apply plugin: 'com.github.sherter.google-java-format'
+    apply plugin: 'net.ltgt.errorprone'
+
+    repositories {
+        mavenCentral()
+        jcenter()
+        mavenLocal()
+    }
+
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+
+    tasks.withType(JavaCompile) {
+        it.options.compilerArgs += [
+                "-Xlint:all",
+                // We suppress the "try" warning because it disallows managing an auto-closeable with
+                // try-with-resources without referencing the auto-closeable within the try block.
+                "-Xlint:-try",
+                // We suppress the "processing" warning as suggested in
+                // https://groups.google.com/forum/#!topic/bazel-discuss/_R3A9TJSoPM
+                "-Xlint:-processing",
+                // We suppress the "options" warning because it prevents compilation on modern JDKs
+                "-Xlint:-options",
+        ]
+        it.options.errorprone.disableWarningsInGeneratedCode = true
+        it.options.errorprone.allDisabledChecksAsWarnings = true
+
+        // Doesn't currently use Var annotations.
+        it.options.errorprone.disable("Var") // "-Xep:Var:OFF"
+
+        // ImmutableRefactoring suggests using com.google.errorprone.annotations.Immutable,
+        // but currently uses javax.annotation.concurrent.Immutable
+        it.options.errorprone.disable("ImmutableRefactoring") // "-Xep:ImmutableRefactoring:OFF"
+
+        // NullPointerException is experimental and incomplete
+        // (https://github.com/google/error-prone/issues/1253).
+        it.options.errorprone.disable("NullableDereference") // "-Xep:NullableDereference:OFF"
+
+        // We prefer ExpectedException to assertThrows
+        it.options.errorprone.disable("ExpectedExceptionRefactoring")
+        // "-Xep:ExpectedExceptionRefactoring:OFF"
+
+        // AutoValueImmutableFields suggests returning Guava types from API methods
+        it.options.errorprone.disable("AutoValueImmutableFields")
+        // "-Xep:AutoValueImmutableFields:OFF"
+
+        // UnnecessaryAnonymousClass requires Java 8 but we target Java 7
+        it.options.errorprone.disable("UnnecessaryAnonymousClass")
+        // "-Xep:UnnecessaryAnonymousClass:OFF"
+
+        it.options.encoding = "UTF-8"
+
+        // Ignore warnings for protobuf and jmh generated files.
+        it.options.errorprone.excludedPaths = ".*generated.*"
+        // "-XepExcludedPaths:.*/build/generated/source/proto/.*"
+
+        it.options.compilerArgs += ["-Werror"]
+    }
+
+    compileTestJava {
+        // serialVersionUID is basically guaranteed to be useless in tests
+        options.compilerArgs += ["-Xlint:-serial"]
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+
+        // Disable Java7 checks in test sources
+        options.errorprone.disable("Java7ApiChecker")
+        // Disable AndroidJdkLibs checks in test sources
+        options.errorprone.disable("AndroidJdkLibsChecker")
+    }
+
+    jar.manifest {
+        attributes('Implementation-Title': name,
+                'Implementation-Version': version,
+                'Built-By': System.getProperty('user.name'),
+                'Built-JDK': System.getProperty('java.version'),
+                'Source-Compatibility': sourceCompatibility,
+                'Target-Compatibility': targetCompatibility)
+    }
+
+    ext {
+        autoValueVersion = '1.6.6'
+        errorProneVersion = '2.3.4'
+        errorProneJavacVersion = '9+181-r4173-1'
+        findBugsJsr305Version = '3.0.2'
+        grpcVersion = '1.28.0'
+        guavaVersion = '28.2-android'
+        jmhVersion = '1.19'
+        opentracingVersion = '0.33.0'
+        prometheusVersion = '0.8.1'
+        protobufVersion = '3.11.4'
+        protocVersion = '3.11.4'
+        zipkinReporterVersion = '2.12.2'
+        zipkinVersion = '2.18.3'
+
+        boms = [
+                grpc           : "io.grpc:grpc-bom:${grpcVersion}",
+                guava          : "com.google.guava:guava-bom:${guavaVersion}",
+                protobuf       : "com.google.protobuf:protobuf-bom:${protobufVersion}",
+                zipkin_reporter: "io.zipkin.reporter2:zipkin-reporter-bom:${zipkinReporterVersion}"
+        ]
+
+        libraries = [
+                auto_value              : "com.google.auto.value:auto-value:${autoValueVersion}",
+                auto_value_annotation   : "com.google.auto.value:auto-value-annotations:${autoValueVersion}",
+                disruptor               : "com.lmax:disruptor:3.4.2",
+                errorprone_annotation   : "com.google.errorprone:error_prone_annotations:${errorProneVersion}",
+                errorprone_core         : "com.google.errorprone:error_prone_core:${errorProneVersion}",
+                errorprone_javac        : "com.google.errorprone:javac:${errorProneJavacVersion}",
+                grpc_api                : "io.grpc:grpc-api",
+                grpc_context            : "io.grpc:grpc-context",
+                grpc_protobuf           : "io.grpc:grpc-protobuf",
+                grpc_stub               : "io.grpc:grpc-stub",
+                guava                   : "com.google.guava:guava",
+                javax_annotations       : "javax.annotation:javax.annotation-api:1.3.2",
+                jmh_core                : "org.openjdk.jmh:jmh-core:${jmhVersion}",
+                jmh_bytecode            : "org.openjdk.jmh:jmh-generator-bytecode:${jmhVersion}",
+                jsr305                  : "com.google.code.findbugs:jsr305:${findBugsJsr305Version}",
+                prometheus_client       : "io.prometheus:simpleclient:${prometheusVersion}",
+                prometheus_client_common: "io.prometheus:simpleclient_common:${prometheusVersion}",
+                protobuf                : "com.google.protobuf:protobuf-java",
+                protobuf_util           : "com.google.protobuf:protobuf-java-util",
+                zipkin_reporter         : "io.zipkin.reporter2:zipkin-reporter",
+                zipkin_urlconnection    : "io.zipkin.reporter2:zipkin-sender-urlconnection",
+
+                // Compatibility layer
+                opentracing             : "io.opentracing:opentracing-api:${opentracingVersion}",
+
+                // Test dependencies.
+                guava_testlib           : "com.google.guava:guava-testlib",
+                junit                   : 'junit:junit:4.12',
+                mockito                 : 'org.mockito:mockito-core:3.3.3',
+                truth                   : 'com.google.truth:truth:1.0.1',
+                system_rules            : 'com.github.stefanbirkner:system-rules:1.19.0', // env and system properties
+                slf4jsimple             : 'org.slf4j:slf4j-simple:1.7.25', // Compatibility layer
+                awaitility              : 'org.awaitility:awaitility:3.0.0', // Compatibility layer
+                testcontainers          : 'org.testcontainers:testcontainers:1.13.0',
+                rest_assured            : 'io.rest-assured:rest-assured:4.2.0',
+                jaeger_client           : 'io.jaegertracing:jaeger-client:1.2.0', // Jaeger Client
+                zipkin_junit            : "io.zipkin.zipkin2:zipkin-junit:${zipkinVersion}",  // Zipkin JUnit rule
+                archunit                : 'com.tngtech.archunit:archunit-junit4:0.13.1' //Architectural constraints
+        ]
+    }
+
+    checkstyle {
+        configFile = file("$rootDir/buildscripts/checkstyle.xml")
+        toolVersion = "8.12"
+        ignoreFailures = false
+        configProperties["rootDir"] = rootDir
+    }
+
+    jacoco { toolVersion = "0.8.5" }
+
+    googleJavaFormat {
+        toolVersion = '1.7'
+    }
+
+    configurations {
+        compile {
+            // Detect Maven Enforcer's dependencyConvergence failures. We only
+            // care for artifacts used as libraries by others.
+            // TODO: Enable failOnVersionConflict()
+            resolutionStrategy.preferProjectModules()
+        }
+    }
+
+    dependencies {
+        configurations.all {
+            if (it.name.endsWith('Classpath')) {
+                add(it.name, enforcedPlatform(boms.grpc))
+                add(it.name, enforcedPlatform(boms.guava))
+                add(it.name, enforcedPlatform(boms.protobuf))
+                add(it.name, enforcedPlatform(boms.zipkin_reporter))
+            }
+        }
+
+        compileOnly libraries.auto_value_annotation,
+                libraries.errorprone_annotation,
+                libraries.jsr305
+
+        testImplementation libraries.junit,
+                libraries.mockito,
+                libraries.truth,
+                libraries.guava_testlib
+
+        // The ErrorProne plugin defaults to the latest, which would break our
+        // build if error prone releases a new version with a new check
+        errorprone libraries.errorprone_core
+        if (!JavaVersion.current().isJava9Compatible()) {
+            errorproneJavac libraries.errorprone_javac
+        }
+
+        if (JavaVersion.current().isJava9Compatible()) {
+            // Workaround for @javax.annotation.Generated
+            // see: https://github.com/grpc/grpc-java/issues/3633
+            compile("javax.annotation:javax.annotation-api:1.3.2")
+        }
+
+        test {
+            systemProperties project.properties.subMap(["enable.docker.tests"])
+        }
+    }
+
+    javadoc.options {
+        source = "8"
+        encoding = "UTF-8"
+        links 'https://docs.oracle.com/javase/8/docs/api/'
+    }
+
+    afterEvaluate {  // Allow subproject to add more source sets.
+        tasks.googleJavaFormat {
+            source = sourceSets*.allJava
+            include '**/*.java'
+        }
+
+        tasks.verifyGoogleJavaFormat {
+            source = sourceSets*.allJava
+            include '**/*.java'
+        }
+
+        jar {
+            inputs.property("moduleName", moduleName)
+
+            manifest {
+                attributes('Automatic-Module-Name': moduleName)
+            }
+        }
+    }
+
+    signing {
+        required false
+        sign configurations.archives
+    }
+
+    task javadocJar(type: Jar) {
+        classifier = 'javadoc'
+        from javadoc
+    }
+
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives javadocJar, sourcesJar
+    }
+
+    // At a test failure, log the stack trace to the console so that we don't
+    // have to open the HTML in a browser.
+    test {
+        testLogging {
+            exceptionFormat = 'full'
+            showExceptions = true
+            showCauses = true
+            showStackTraces = true
+        }
+        maxHeapSize = '1500m'
+    }
+
+    plugins.withId("ru.vyarus.animalsniffer") {
+        animalsnifferTest {
+            enabled = false
+        }
+        // If JMH enabled ignore animalsniffer.
+        plugins.withId("me.champeau.gradle.jmh") {
+            animalsnifferJmh {
+                enabled = false
+            }
+        }
+    }
+
+    plugins.withId("me.champeau.gradle.jmh") {
+        // Always include the jmhreport plugin and run it after jmh task.
+        pluginManager.apply "io.morethan.jmhreport"
+        dependencies {
+            jmh libraries.jmh_core,
+                    libraries.jmh_bytecode
+        }
+
+        // invoke jmh on a single benchmark class like so:
+        //   ./gradlew -PjmhIncludeSingleClass=StatsTraceContextBenchmark clean :grpc-core:jmh
+        jmh {
+            failOnError = true
+            resultFormat = 'JSON'
+            // Otherwise an error will happen:
+            // Could not expand ZIP 'byte-buddy-agent-1.9.7.jar'.
+            includeTests = false
+            profilers = ["gc"]
+            if (project.hasProperty('jmhIncludeSingleClass')) {
+                include = [
+                        project.property('jmhIncludeSingleClass')
+                ]
+            }
+        }
+
+        jmhReport {
+            jmhResultPath = project.file("${project.buildDir}/reports/jmh/results.json")
+            jmhReportOutput = project.file("${project.buildDir}/reports/jmh")
+        }
+
+        // Always run jmhReport after jmh task.
+        tasks.jmh.finalizedBy tasks.jmhReport
+    }
+
+    plugins.withId("maven-publish") {
+        // Always include the artifactory/bintray plugins to do the deployment.
+        pluginManager.apply "com.jfrog.artifactory"
+        pluginManager.apply "com.jfrog.bintray"
+
+        publishing {
+            publications {
+                mavenPublication(MavenPublication) {
+                    version version
+                    groupId group
+
+                    from components.java
+                    artifact sourcesJar
+                    artifact javadocJar
+
+                    versionMapping {
+                        allVariants {
+                            fromResolutionResult()
+                        }
+                    }
+
+                    pom {
+                        name = 'OpenTelemetry Java'
+                        packaging = 'jar'
+                        url = 'https://github.com/open-telemetry/opentelemetry-java'
+
+                        licenses {
+                            license {
+                                name = 'The Apache License, Version 2.0'
+                                url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            }
+                        }
+
+                        developers {
+                            developer {
+                                id = 'opentelemetry'
+                                name = 'OpenTelemetry Gitter'
+                                url = 'https://gitter.im/open-telemetry/community'
+                            }
+                        }
+
+                        scm {
+                            connection = 'scm:git:git@github.com:open-telemetry/opentelemetry-java.git'
+                            developerConnection = 'scm:git:git@github.com:open-telemetry/opentelemetry-java.git'
+                            url = 'git@github.com:open-telemetry/opentelemetry-java.git'
+                        }
+
+                        afterEvaluate {
+                            // description is not available until evaluated.
+                            description = project.description
+                        }
+                    }
+                }
+            }
+        }
+
+        // Snapshot publishing.
+        artifactory {
+            contextUrl = 'https://oss.jfrog.org'
+            publish {
+                repository {
+                    repoKey = 'oss-snapshot-local'
+                    username = System.getenv("BINTRAY_USER")
+                    password = System.getenv("BINTRAY_KEY")
+                }
+                defaults {
+                    publications('mavenPublication')
+                    publishArtifacts = true
+                    publishPom = true
+                }
+            }
+            resolve {
+                repoKey = 'libs-release'
+            }
+        }
+
+        // Release artifacts publishing.
+        bintray {
+            user = System.getenv("BINTRAY_USER")
+            key = System.getenv("BINTRAY_KEY")
+            publications = ['mavenPublication']
+
+            publish = true
+
+            pkg {
+                repo = 'maven'
+                name = 'opentelemetry-java'
+                licenses = ['Apache-2.0']
+                vcsUrl = 'https://github.com/open-telemetry/opentelemetry-java.git'
+                userOrg = 'open-telemetry'
+
+                githubRepo = 'open-telemetry/opentelemetry-java'
+
+                version {
+                    name = project.version
+
+                    gpg {
+                        sign = true
+                    }
+
+                    mavenCentralSync {
+                        user = System.getenv("SONATYPE_USER")
+                        password = System.getenv("SONATYPE_KEY")
+                    }
+                }
+            }
+        }
+    }
+}
+
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+    gradleVersion = '6.0.1'
+}

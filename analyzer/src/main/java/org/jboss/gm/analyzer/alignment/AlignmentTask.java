@@ -40,6 +40,7 @@ import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
+import org.gradle.api.internal.artifacts.dependencies.DefaultProjectDependencyConstraint;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.publish.PublishingExtension;
@@ -393,14 +394,21 @@ public class AlignmentTask extends DefaultTask {
                 }
 
                 // If we have dependency constraints we can get a ClassCastException when attempting to copy the configurations.
-                // Normally we need to copy the configuration to ensure we resolve all dependencies (See
+                // This is due to an unchecked cast in
+                // org.gradle.api.internal.artifacts.configurations.DefaultConfiguration::createCopy { ...
+                // copiedDependencyConstraints.add(((DefaultDependencyConstraint) dependencyConstraint).copy());
+                // ... }
+                // When our constraint is a DefaultProjectDependencyConstraint this is a problem. Therefore, as we normally
+                // need to copy the configurations to ensure we resolve all dependencies (See
                 // analyzer/src/functTest/java/org/jboss/gm/analyzer/alignment/DynamicWithLocksProjectFunctionalTest.java for
-                // an example).
+                // an example) first verify if DefaultProjectDependencyConstraint occurs in the list of constraints.
                 LenientConfiguration lenient;
-                if (configuration.getAllDependencyConstraints().size() == 0) {
+                if (configuration
+                        .getAllDependencyConstraints().stream()
+                        .noneMatch(d -> d instanceof DefaultProjectDependencyConstraint)) {
                     lenient = configuration.copyRecursive().getResolvedConfiguration().getLenientConfiguration();
                 } else {
-                    logger.debug("Constraints found ({}), not copying configuration",
+                    logger.warn("DefaultProjectDependencyConstraint found ({}), not copying configuration",
                             configuration.getAllDependencyConstraints());
                     lenient = configuration.getResolvedConfiguration().getLenientConfiguration();
                 }

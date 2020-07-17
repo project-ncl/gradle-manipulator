@@ -182,11 +182,8 @@ public class AlignmentTask extends DefaultTask {
                         .getAlignmentService(configuration, cache.getDependencies().keySet());
 
                 final Response alignmentResponse = alignmentService.align(
-                        new AlignmentService.Request(cache.getProjectVersionRefs().stream()
-                                .map(p -> new SimpleProjectVersionRef(p.asProjectRef(),
-                                        !configuration.versionSuffixSnapshot() ? Version.removeSnapshot(p.getVersionString())
-                                                : p.getVersionString()))
-                                .collect(Collectors.toList()), allDeps));
+                        new AlignmentService.Request(cache.getProjectVersionRefs(configuration.versionSuffixSnapshot()),
+                                allDeps));
 
                 final HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = cache
                         .getDependencies();
@@ -195,6 +192,7 @@ public class AlignmentTask extends DefaultTask {
                 // While we've completed processing (sub)projects the current one is not going to be the root; so
                 // explicitly retrieve it and set its version.
                 if (configuration.versionModificationEnabled()) {
+
                     project.getRootProject().setVersion(newVersion);
                     logger.info("Updating project {} version to {}", project.getRootProject(), newVersion);
                     alignmentModel.setVersion(newVersion);

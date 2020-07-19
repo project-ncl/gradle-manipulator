@@ -39,6 +39,8 @@ dependencies {
 
     compile("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
 
+    testImplementation(testFixtures(project(":common")))
+    testCompile(project(":common"))
     testCompile(gradleTestKit())
     testCompile("junit:junit:${project.extra.get("junitVersion")}")
     testCompile("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")

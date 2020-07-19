@@ -1,6 +1,10 @@
 
 group = "org.jboss.gm"
 
+plugins {
+    `java-test-fixtures`
+}
+
 dependencies {
     compileOnly(localGroovy())
     compileOnly(gradleApi())
@@ -26,6 +30,8 @@ dependencies {
     compileOnly("org.apache.maven:maven-compat:3.5.0")
     permitUnusedDeclared("org.apache.maven:maven-compat:3.5.0")
 
+    testFixturesImplementation(gradleApi())
+    testFixturesImplementation("junit:junit:${project.extra.get("junitVersion")}")
     testCompile("junit:junit:${project.extra.get("junitVersion")}")
     testCompile("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
     testCompile("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")

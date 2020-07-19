@@ -53,6 +53,8 @@ public class GMLogger implements Logger {
 
         if (configuration.addLoggingClassnameLinenumber()) {
 
+            // Using a SecurityManager would be faster but we want the line number. And the StackWalker API
+            // is JDK9 and above.
             StackTraceElement[] result = Thread.currentThread().getStackTrace();
             // 0 is this getStackTrace call.
             // 1 is this method
@@ -65,6 +67,11 @@ public class GMLogger implements Logger {
             }
             if (configuration.addLoggingColours()) {
                 sb.append(ANSI_DARK_GRAY);
+            }
+            if (configuration.addLoggingLevel()) {
+                sb.append('[');
+                sb.append(result[2].getMethodName().toUpperCase());
+                sb.append(']');
             }
             sb.append('[');
             sb.append(result[3].getFileName());

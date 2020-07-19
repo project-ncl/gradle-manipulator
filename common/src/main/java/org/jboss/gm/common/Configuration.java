@@ -112,6 +112,10 @@ public interface Configuration extends Accessible, Reloadable {
     @DefaultValue("true")
     boolean addLoggingColours();
 
+    @Key("loggingLevel")
+    @DefaultValue("false")
+    boolean addLoggingLevel();
+
     @Key("groovyScripts")
     String[] groovyScripts();
 

@@ -12,7 +12,7 @@ plugins {
     signing
     `maven-publish`
     id("ca.cutterslade.analyze") version "1.3.3"
-    id("com.adarshr.test-logger") version "2.0.0"
+    id("com.adarshr.test-logger") version "2.1.0"
     id("com.diffplug.gradle.spotless") version "3.25.0"
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("com.gradle.plugin-publish") version "0.11.0"

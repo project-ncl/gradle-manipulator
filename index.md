@@ -91,8 +91,11 @@ If the tool is not able to resolve certain dependencies then it may fail during 
 
 #### Logging
 
-The tool uses its own logging system (that backs onto the Gradle logging system). This can add classname and line numbers to messages if `loggingClassnameLineNumber` is set to true (default: true). It will also use colours if `loggingColours` is true (default: true).
+The tool uses its own logging system (that backs onto the Gradle logging system).
 
+* If `loggingClassnameLineNumber` is set to true this will add classname and line numbers to messages (default: true).
+* If `loggingColours` is set to true it will also use colours (default: true).
+* If `loggingLevel` is set to true it will output the logging category e.g. INFO. (default: false).
 
 ### Feature Guide
 

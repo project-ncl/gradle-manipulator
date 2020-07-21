@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.aeonbits.owner.ConfigFactory;
@@ -173,5 +174,61 @@ public class UpdateProjectVersionCustomizerTest {
         assertThat(customizedReq).isNotNull()
                 .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001"));
         assertFalse(configuration.versionSuffixSnapshot());
+    }
+
+    @Test
+    public void validateVersionWithSnapshotIncrementalKept() throws IOException, ManipulationException {
+
+        System.setProperty("versionSuffixSnapshot", "true");
+
+        Map<ProjectVersionRef, String> translation = new HashMap<>();
+        ProjectVersionRef rg = SimpleProjectVersionRef.parse("org:test:1.1-SNAPSHOT");
+        translation.put(rg, "1.1.0.redhat-00001");
+
+        final Response originalResp = new Response(translation);
+        final File simpleProjectRoot = tempDir.newFolder("simple-project");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+        Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
+        p.setVersion("1.1-SNAPSHOT");
+        p.setGroup("org");
+        final Set<Project> projects = new HashSet<>();
+        projects.add(p);
+
+        ManipulationCache cache = ManipulationCache.getCache(p);
+        cache.addGAV(p, rg);
+
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
+        final Response customizedReq = sut.customize(originalResp);
+
+        assertThat(customizedReq).isNotNull()
+                .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002-SNAPSHOT"));
+    }
+
+    @Test
+    public void validateVersionWithSnapshotIncrement() throws IOException, ManipulationException {
+
+        Map<ProjectVersionRef, String> translation = new HashMap<>();
+        ProjectVersionRef rg = SimpleProjectVersionRef.parse("org:test:1.1");
+        translation.put(rg, "1.1.0.redhat-00001");
+
+        final Response originalResp = new Response(translation);
+        final File simpleProjectRoot = tempDir.newFolder("simple-project");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+        Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
+        p.setVersion("1.1-SNAPSHOT");
+        p.setGroup("org");
+        final Set<Project> projects = new HashSet<>();
+        projects.add(p);
+
+        ManipulationCache cache = ManipulationCache.getCache(p);
+        cache.addGAV(p, new SimpleProjectVersionRef(p.getGroup().toString(), p.getName(), p.getVersion().toString()));
+
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
+        final Response customizedReq = sut.customize(originalResp);
+
+        assertThat(customizedReq).isNotNull()
+                .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002"));
     }
 }

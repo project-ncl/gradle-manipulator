@@ -6,11 +6,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import lombok.Getter;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.commonjava.maven.ext.core.impl.Version;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.jboss.gm.common.model.ManipulationModel;
@@ -38,7 +41,6 @@ public class ManipulationCache {
     @Getter
     private ManipulationModel model;
 
-    @Getter
     private final List<ProjectVersionRef> projectVersionRefs = new ArrayList<>();
 
     /**
@@ -141,4 +143,13 @@ public class ManipulationCache {
     public void addRepository(ArtifactRepository repository, Path projectDir) {
         repositories.put(repository, projectDir);
     }
+
+    public List<ProjectVersionRef> getProjectVersionRefs(boolean versionSuffixSnapshot) {
+        return projectVersionRefs.stream()
+                .map(e -> !versionSuffixSnapshot
+                        ? new SimpleProjectVersionRef(e.asProjectRef(), Version.removeSnapshot(e.getVersionString()))
+                        : e)
+                .collect(Collectors.toList());
+    }
+
 }

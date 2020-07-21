@@ -20,6 +20,7 @@ import org.gradle.api.internal.GradleInternal;
 import org.gradle.api.internal.TaskInternal;
 import org.gradle.api.internal.project.ProjectInternal;
 import org.gradle.api.internal.project.taskfactory.TaskIdentity;
+import org.gradle.api.logging.LogLevel;
 import org.gradle.api.model.ObjectFactory;
 import org.gradle.internal.Cast;
 import org.gradle.internal.service.ServiceRegistry;
@@ -29,6 +30,7 @@ import org.jboss.byteman.contrib.bmunit.BMUnitConfig;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.jboss.gm.analyzer.alignment.io.SettingsFileIO;
 import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -53,13 +55,16 @@ import static org.mockito.Mockito.when;
 public class AlignmentTaskEmptyVersionTest {
 
     @Rule
-    public TemporaryFolder tempDir = new TemporaryFolder();
+    public final TemporaryFolder tempDir = new TemporaryFolder();
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+
+    @Rule
+    public final LoggingRule loggingRule = new LoggingRule(LogLevel.INFO);
 
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
-
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     /**
      * We can't just create a new AlignmentTask as the base AbstractTask has checks to
@@ -119,7 +124,6 @@ public class AlignmentTaskEmptyVersionTest {
 
     @Test
     public void testParseScm() throws Exception {
-
         Map<String, String> formats = new HashMap<>();
 
         formats.put("  url = git@github.com:rnc/pom-manipulation-ext.git", "pom-manipulation-ext");
@@ -142,5 +146,6 @@ public class AlignmentTaskEmptyVersionTest {
 
             assertEquals(result, formats.get(line));
         }
+        assertTrue(systemOutRule.getLog().contains("Examining git config content"));
     }
 }

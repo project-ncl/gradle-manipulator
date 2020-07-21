@@ -40,6 +40,7 @@ import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
+import org.gradle.api.internal.artifacts.dependencies.DefaultProjectDependencyConstraint;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.publish.PublishingExtension;
@@ -392,8 +393,25 @@ public class AlignmentTask extends DefaultTask {
                     }
                 }
 
-                LenientConfiguration lenient = configuration.copyRecursive().getResolvedConfiguration()
-                        .getLenientConfiguration();
+                // If we have dependency constraints we can get a ClassCastException when attempting to copy the configurations.
+                // This is due to an unchecked cast in
+                // org.gradle.api.internal.artifacts.configurations.DefaultConfiguration::createCopy { ...
+                // copiedDependencyConstraints.add(((DefaultDependencyConstraint) dependencyConstraint).copy());
+                // ... }
+                // When our constraint is a DefaultProjectDependencyConstraint this is a problem. Therefore, as we normally
+                // need to copy the configurations to ensure we resolve all dependencies (See
+                // analyzer/src/functTest/java/org/jboss/gm/analyzer/alignment/DynamicWithLocksProjectFunctionalTest.java for
+                // an example) first verify if DefaultProjectDependencyConstraint occurs in the list of constraints.
+                LenientConfiguration lenient;
+                if (configuration
+                        .getAllDependencyConstraints().stream()
+                        .noneMatch(d -> d instanceof DefaultProjectDependencyConstraint)) {
+                    lenient = configuration.copyRecursive().getResolvedConfiguration().getLenientConfiguration();
+                } else {
+                    logger.warn("DefaultProjectDependencyConstraint found ({}), not copying configuration",
+                            configuration.getAllDependencyConstraints());
+                    lenient = configuration.getResolvedConfiguration().getLenientConfiguration();
+                }
 
                 // We don't care about modules of the project being unresolvable at this stage. Had we not excluded them,
                 // we would get false negatives
@@ -402,11 +420,13 @@ public class AlignmentTask extends DefaultTask {
 
                 if (unresolvedDependencies.size() > 0) {
                     if (internalConfig.ignoreUnresolvableDependencies()) {
-                        logger.warn("For configuration {}; ignoring all unresolvable dependencies: {}", configuration.getName(),
+                        logger.warn("For configuration {}; ignoring all unresolvable dependencies: {}",
+                                configuration.getName(),
                                 unresolvedDependencies);
                     } else {
 
-                        logger.error("For configuration {}; unable to resolve all dependencies: {}", configuration.getName(),
+                        logger.error("For configuration {}; unable to resolve all dependencies: {}",
+                                configuration.getName(),
                                 lenient.getUnresolvedModuleDependencies());
                         for (UnresolvedDependency ud : unresolvedDependencies) {
                             logger.error("Unresolved had problem in {} with ", ud.getSelector(), ud.getProblem());
@@ -437,7 +457,8 @@ public class AlignmentTask extends DefaultTask {
                             version = lockFileDep.getVersionString();
                         }
                     }
-                    ProjectVersionRef pvr = ProjectVersionFactory.withGAV(dep.getModuleGroup(), dep.getModuleName(), version);
+                    ProjectVersionRef pvr = ProjectVersionFactory.withGAV(dep.getModuleGroup(), dep.getModuleName(),
+                            version);
 
                     List<Dependency> originalDeps = allDependencies.stream()
                             .filter(d -> StringUtils.equals(d.getGroup(), dep.getModuleGroup()) &&
@@ -465,6 +486,7 @@ public class AlignmentTask extends DefaultTask {
                     }
 
                 });
+
             } else {
                 logger.trace("Unable to resolve configuration {} for project {}", configuration.getName(), project);
             }

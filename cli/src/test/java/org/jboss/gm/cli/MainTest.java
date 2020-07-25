@@ -9,8 +9,10 @@ import java.util.Properties;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
+import org.gradle.api.logging.LogLevel;
 import org.jboss.gm.analyzer.alignment.AlignmentPlugin;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemErrRule;
@@ -22,6 +24,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class MainTest {
+
+    @Rule
+    public final LoggingRule loggingRule = new LoggingRule(LogLevel.DEBUG);
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();

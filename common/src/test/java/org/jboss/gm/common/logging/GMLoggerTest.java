@@ -34,7 +34,7 @@ public class GMLoggerTest {
         logger.info("Test logging");
         logger.debug("Test logging");
 
-        System.err.println ("### systemOutRule log contains: " + systemOutRule.getLog());
+        System.err.println("### systemOutRule log contains: " + systemOutRule.getLog());
         assertTrue(systemOutRule.getLog().contains("Test logging"));
         assertTrue(systemOutRule.getLog().contains("[LIFECYCLE] [org.jboss.gm.common.logging.GMLoggerTest]"));
         assertTrue(systemOutRule.getLog().contains("[INFO] [org.jboss.gm.common.logging.GMLoggerTest]"));

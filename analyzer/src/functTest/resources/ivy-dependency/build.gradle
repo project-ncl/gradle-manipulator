@@ -18,7 +18,3 @@ repositories {
         artifactPattern "https://artifacts.elastic.co/downloads/elasticsearch/[module]-[revision].[ext]"
     }
 }
-
-dependencies {
-    compile name: "org.eclipse.swt.gtk.linux.x86_64_3.105.3.v20170228-0512"
-}

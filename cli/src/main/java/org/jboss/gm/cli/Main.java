@@ -23,7 +23,6 @@ import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.gradle.tooling.internal.consumer.DefaultGradleConnector;
 import org.jboss.gm.common.Configuration;
-import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.utils.GroovyUtils;
 import org.jboss.gm.common.utils.ManifestUtils;
 import org.slf4j.Logger;
@@ -171,11 +170,10 @@ public class Main implements Callable<Void> {
     @Override
     public Void call() throws ManipulationException {
         final Logger rootLogger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-        final ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) rootLogger;
         final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
 
-        if (debug) {
-            root.setLevel(Level.DEBUG);
+        if (debug && rootLogger instanceof ch.qos.logback.classic.Logger) {
+            ((ch.qos.logback.classic.Logger) rootLogger).setLevel(Level.DEBUG);
         }
 
         if (!target.isAbsolute()) {

@@ -19,16 +19,28 @@ before_install: |
   wget -qO- "https://github.com/crazy-max/travis-wait-enhanced/releases/download/v1.0.0/travis-wait-enhanced_1.0.0_linux_x86_64.tar.gz" | tar -zxvf - travis-wait-enhanced
   mv travis-wait-enhanced $HOME/bin
   fi
+  wget https://services.gradle.org/distributions/gradle-6.5.1-bin.zip
+  unzip -qq gradle-6.5.1-bin.zip
 
 
 install: /bin/true
 
 jobs:
   include:
-  - name: deploy
+  - stage: deploy
     if: branch = master AND type = push
     script: "cp .travis.settings.xml $HOME/.m2/settings.xml && travis-wait-enhanced --timeout=60m --interval=4m -- ./gradlew clean build publish -DSONATYPE_PASSWORD=$(echo $SONATYPE_PASSWORD) -DSONATYPE_USERNAME=$(echo $SONATYPE_USERNAME)"
 
-  - name: pr
+  - stage: test
+    name: "Gradle 5"
     if: type = pull_request
     script: "travis-wait-enhanced --timeout=60m --interval=4m -- ./gradlew --stacktrace clean build"
+
+  - stage: test
+    name: "Gradle 6"
+    if: type = pull_request
+    script:
+      - export GRADLE_HOME=$PWD/gradle-6.5.1
+      - export PATH=$GRADLE_HOME/bin:$PATH
+      - gradle -v
+      - travis-wait-enhanced --timeout=60m --interval=4m -- gradle --stacktrace clean build

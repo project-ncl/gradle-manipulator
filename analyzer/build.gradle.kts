@@ -65,13 +65,13 @@ dependencies {
 
 // separate source set and task for functional tests
 
-sourceSets {
-    create("functionalTest") {
-        java.srcDir("src/functTest/java")
-        resources.srcDir("src/functTest/resources")
-        compileClasspath += sourceSets["main"].output + configurations.testRuntime
-        runtimeClasspath += output + compileClasspath
-    }
+sourceSets.create("functionalTest") {
+    java.srcDir("src/functTest/java")
+    resources.srcDir("src/functTest/resources")
+    // Force the addition of the plugin-under-test-metadata.properties else there are problems under Gradle >= 6.
+    runtimeClasspath += layout.files(project.buildDir.toString() + "/pluginUnderTestMetadata")
+    compileClasspath += sourceSets["main"].output + configurations.testRuntime
+    runtimeClasspath += output + compileClasspath
 }
 
 val functionalTest = task<Test>("functionalTest") {

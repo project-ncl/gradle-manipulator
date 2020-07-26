@@ -55,6 +55,17 @@ The tooling overrides the logging to support integration into ProjectNCL. Theref
 ```
 The Gradle logger interface extends `org.slf4j.Logger`. It is recommended to use `info` and `debug` categories as appropriate.
 
+During tests it may be useful to retrieve logging output. The following rule will capture output for examination:
+``
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+``
+Due to how the Gradle logging system initialises outside of the TestKit the unit tests may not output logging as the Gradle logging defaults to LIFECYCLE level by default. Therefore a new Logging rule has been provided which can configure the logging level on a per test basis.
+```
+    @Rule
+    public final LoggingRule loggingRule = new LoggingRule(LogLevel.INFO);
+```
+
 #### Exceptions
 
 * Internal code may use checked exceptions such as `ManipulationException`.

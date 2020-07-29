@@ -50,10 +50,10 @@ jobs:
       - export PATH=$GRADLE_HOME/bin:$PATH
       - travis-wait-enhanced --timeout=60m --interval=4m -- gradle --no-daemon --stacktrace clean build
 
-  - stage: test
-    name: "Gradle 6.5.1"
-    if: type = pull_request
-    script:
-      - export GRADLE_HOME=$HOME/bin/gradle-6.5.1
-      - export PATH=$GRADLE_HOME/bin:$PATH
-      - travis-wait-enhanced --timeout=60m --interval=4m -- gradle --no-daemon --stacktrace clean build
+  # - stage: test
+  #   name: "Gradle 6.5.1"
+  #   if: type = pull_request
+  #   script:
+  #     - export GRADLE_HOME=$HOME/bin/gradle-6.5.1
+  #     - export PATH=$GRADLE_HOME/bin:$PATH
+  #     - travis-wait-enhanced --timeout=60m --interval=4m -- gradle --no-daemon --stacktrace clean build

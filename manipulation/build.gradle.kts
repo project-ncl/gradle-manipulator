@@ -38,6 +38,8 @@ dependencies {
     // GradleAPI in test compile to get access to org.gradle.internal.Pair
     testCompile(gradleApi())
 
+    testCompile(gradleTestKit())
+
     permitTestUnusedDeclared("junit:junit:${project.extra.get("junitVersion")}")
     permitTestUnusedDeclared("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
     permitTestUnusedDeclared("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
@@ -56,6 +58,8 @@ dependencies {
 sourceSets.create("functionalTest") {
     java.srcDir("src/functTest/java")
     resources.srcDir("src/functTest/resources")
+    // Force the addition of the plugin-under-test-metadata.properties else there are problems under Gradle >= 6.
+    runtimeClasspath += layout.files(project.buildDir.toString() + "/pluginUnderTestMetadata")
     compileClasspath += sourceSets["main"].output + configurations.testRuntime
     runtimeClasspath += output + compileClasspath
 }

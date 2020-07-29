@@ -18,6 +18,7 @@ dependencies {
     compile("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
 
     testCompile("commons-io:commons-io:${project.extra.get("commonsVersion")}")
+    testImplementation(testFixtures(project(":common")))
     testCompile(project(":analyzer"))
     testCompile("junit:junit:${project.extra.get("junitVersion")}")
     testCompile("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")

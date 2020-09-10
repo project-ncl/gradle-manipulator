@@ -4,9 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
@@ -51,10 +54,12 @@ public class VersionConflictProjectFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void ensureAlignmentFileCreated() throws IOException, URISyntaxException, ManipulationException {
+    public void validateResolutionStrategy() throws IOException, URISyntaxException, ManipulationException {
         final File projectRoot = tempDir.newFolder("version-conflict");
 
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
+        final Map<String, String> map = new HashMap<>();
+        map.put("overrideTransitive", "false");
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), map);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
@@ -77,5 +82,52 @@ public class VersionConflictProjectFunctionalTest extends AbstractWiremockTest {
         });
 
         assertTrue(systemOutRule.getLog().contains("Detected use of conflict resolution strategy strict"));
+    }
+
+    @Test
+    public void validateTransitiveDisabledAndShadow() throws IOException, URISyntaxException {
+        final File projectRoot = tempDir.newFolder("version-conflict");
+
+        final Map<String, String> map = new HashMap<>();
+        try {
+            TestUtils.align(projectRoot, projectRoot.getName(), true, map);
+        } catch (ManipulationUncheckedException e) {
+            assertTrue(e.getMessage().contains(
+                    "Shadow plugin (for shading) configured but overrideTransitive has not been explicitly enabled or disabled"));
+        }
+
+    }
+
+    @Test
+    public void validateTransitiveEnabledAndShadow() throws IOException, URISyntaxException, ManipulationException {
+        final File projectRoot = tempDir.newFolder("version-conflict");
+
+        final Map<String, String> map = new HashMap<>();
+        map.put("overrideTransitive", "true");
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), map);
+
+        assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
+        assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+
+        assertThat(alignmentModel).isNotNull().satisfies(am -> {
+            assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
+            assertThat(am.getName()).isEqualTo("root");
+            assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
+                assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00002");
+                assertThat(root.getName()).isEqualTo("root");
+
+                final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
+                assertThat(alignedDependencies)
+                        .extracting("artifactId", "versionString")
+                        .containsOnly(
+                                tuple("antlr", "2.7.7.redhat-00001"),
+                                tuple("undertow-core", "2.0.15.Final-redhat-00001"),
+                                tuple("hibernate-core", "5.3.7.Final-redhat-00001"));
+            });
+        });
+
+        assertTrue(systemOutRule.getLog().contains("Detected use of conflict resolution strategy strict"));
+        assertTrue(systemOutRule.getLog().contains("Passing 19 GAVs following into the REST client api"));
     }
 }

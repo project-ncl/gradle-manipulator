@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -83,7 +85,9 @@ public class GMEFunctionalTest extends AbstractWiremockTest {
         Files.write(rootBuildFile.toPath(), lines.map(l -> l.replaceAll("(val isReleaseBuild)",
                 "apply(plugin = \"org.jboss.gm.analyzer\") \n $1")).collect(Collectors.toList()));
 
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, false);
+        final Map<String, String> map = new HashMap<>();
+        map.put("overrideTransitive", "false");
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, false, map);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertThat(alignmentModel).isNotNull().satisfies(am -> {

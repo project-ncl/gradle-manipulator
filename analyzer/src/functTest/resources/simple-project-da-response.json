@@ -78,5 +78,14 @@
     "version": "1.0.1",
     "groupId": "org.acme.gradle",
     "artifactId": "root"
+  },
+  {
+    "bestMatchVersion": "2.7.7.redhat-00001",
+    "availableVersions": [],
+    "blacklisted": false,
+    "whitelisted": [],
+    "version": "2.7.7",
+    "groupId": "antlr",
+    "artifactId": "antlr"
   }
 ]

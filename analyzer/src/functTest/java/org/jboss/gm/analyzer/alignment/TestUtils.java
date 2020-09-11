@@ -54,7 +54,7 @@ public final class TestUtils {
         return align(projectRoot, expectFailure, new HashMap<>());
     }
 
-    private static TestManipulationModel align(File projectRoot, String projectDirName, boolean expectFailure,
+    static TestManipulationModel align(File projectRoot, String projectDirName, boolean expectFailure,
             Map<String, String> systemProps)
             throws IOException, URISyntaxException {
 

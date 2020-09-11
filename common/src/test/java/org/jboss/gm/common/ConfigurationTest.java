@@ -11,6 +11,7 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.rules.TestRule;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class ConfigurationTest {
 
@@ -63,5 +64,11 @@ public class ConfigurationTest {
         Map<String, String> r = c.restHeaders();
 
         assertEquals(5, r.size());
+    }
+
+    @Test
+    public void verifyDefaultState() {
+        Configuration c = ConfigFactory.create(Configuration.class);
+        assertNull(c.overrideTransitive());
     }
 }

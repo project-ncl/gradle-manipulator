@@ -2,6 +2,9 @@ plugins {
     // including this plugin directly instead of by an init script, which allows to use the freshly build version
     id 'org.jboss.gm.analyzer'
     id 'java'
+    id "maven-publish"
+
+    id "com.github.johnrengelman.shadow"
 }
 
 sourceCompatibility = 1.8

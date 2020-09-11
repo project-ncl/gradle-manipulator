@@ -30,13 +30,13 @@ import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
-import org.commonjava.maven.ext.core.impl.Version;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.artifacts.LenientConfiguration;
 import org.gradle.api.artifacts.ProjectDependency;
+import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
@@ -386,7 +386,6 @@ public class AlignmentTask extends DefaultTask {
                         // at continuing. As Gradle creates 'decorated' we can't use reflection to change the value back to the
                         // default. Therefore use preferProjectModules as its not eager-fail.
                         logger.warn("Detected use of conflict resolution strategy strict ; resetting to preferProjectModules.");
-
                         defaultResolutionStrategy.preferProjectModules();
                     }
                 }
@@ -434,7 +433,19 @@ public class AlignmentTask extends DefaultTask {
                                 configuration.getName(), unresolvedDependencies);
                     }
                 }
-                lenient.getFirstLevelModuleDependencies().forEach(dep -> {
+                Set<ResolvedDependency> target;
+                if (internalConfig.overrideTransitive() == null || !internalConfig.overrideTransitive()) {
+                    if (internalConfig.overrideTransitive() == null &&
+                            project.getPluginManager().hasPlugin("com.github.johnrengelman.shadow")) {
+                        // Check for shadow jar configuration.
+                        throw new ManipulationUncheckedException(
+                                "Shadow plugin (for shading) configured but overrideTransitive has not been explicitly enabled or disabled.");
+                    }
+                    target = lenient.getFirstLevelModuleDependencies();
+                } else {
+                    target = lenient.getAllModuleDependencies();
+                }
+                target.forEach(dep -> {
                     // skip dependencies on project modules
                     if (Comparator.contains(allProjectDependencies, dep)) {
                         project.getLogger().debug("Skipping internal project dependency {} of configuration {}",

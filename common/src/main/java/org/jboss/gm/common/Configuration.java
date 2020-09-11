@@ -120,6 +120,20 @@ public interface Configuration extends Accessible, Reloadable {
     String[] groovyScripts();
 
     /**
+     * Whether to explicitly override all transitive dependencies as well. Defaults to false.
+     * <p>
+     * </p>
+     * This method is purposely <b>not</b> annotated with a <code>DefaultValue</code> so that
+     * we can determine between the user explicitly configuring this to be true or false and
+     * implicitly assuming it is false. If a shadow plugin configuration (i.e. shading) is detected
+     * then the user has to explicitly either enable/disable this.
+     *
+     * @return whether this is enabled or not.
+     */
+    @Key("overrideTransitive")
+    Boolean overrideTransitive();
+
+    /**
      * This value is used to represent the dependency configuration. While PME supports
      * BOM and REST configs ; currently within Gradle only REST is supported. If this
      * value is set to "" (or "NONE")

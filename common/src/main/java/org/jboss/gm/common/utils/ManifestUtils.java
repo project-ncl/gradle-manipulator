@@ -32,7 +32,7 @@ public class ManifestUtils {
                     result = manifest.getMainAttributes()
                             .getValue("Implementation-Version");
                     result += " ( SHA: " + manifest.getMainAttributes()
-                            .getValue("Scm-Revision") + " ) ";
+                            .getValue("Scm-Revision") + " )";
                     break;
                 }
             }

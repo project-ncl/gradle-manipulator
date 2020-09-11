@@ -63,6 +63,10 @@ The lookup REST endpoint should follow:
 </tr>
 </table>
 
+### Disabling Dependency Manipulation
+
+If the parameter `-DdependencySource=NONE` is set then this will disable communication with the REST source which effectively disables manipulation. Note that the version will still be changed - although, if there is no preceeding `manipulation.json` it will always get a `-00001` suffix.
+
 ### Exclusions and Overrides
 
 
@@ -134,6 +138,6 @@ This will prevent any alignment within the `org.foo:moduleB`.
 
 This will prevent any alignment within `org.foo` and all sub-modules within that.
 
-#### Disabling Dependency Manipulation
+### Direct/Transitive Dependencies
 
-If the parameter `-DdependencySource=NONE` is set then this will disable communication with the REST source which effectively disables manipulation. Note that the version will still be changed - although, if there is no preceeding `manipulation.json` it will always get a `-00001` suffix.
+By default GME will _only_ align direct dependencies and not transitive as well. There are scenarios - such as using the [Shadow Plugin](https://github.com/johnrengelman/shadow) when creating a shaded jar that is may be desirable to align transitive as well. In that case set `overrideTransitive=true`. Note that by default it is **implicitly** set to false, but if the Shadow Plugin is detected and the user has **not** explicitly configured `overrideTransitive` then an exception will be thrown.

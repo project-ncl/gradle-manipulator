@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -19,9 +21,12 @@ import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.gradle.internal.Pair;
 import org.gradle.tooling.BuildException;
 import org.gradle.tooling.BuildLauncher;
+import org.gradle.tooling.GradleConnectionException;
 import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.gradle.tooling.internal.consumer.DefaultGradleConnector;
+import org.gradle.tooling.model.build.BuildEnvironment;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.GroovyUtils;
 import org.jboss.gm.common.utils.ManifestUtils;
@@ -40,6 +45,9 @@ import ch.qos.logback.classic.Level;
         mixinStandardHelpOptions = true, // add --help and --version options
         versionProvider = ManifestVersionProvider.class)
 public class Main implements Callable<Void> {
+    private static final GradleVersion MIN_GRADLE_VERSION = GradleVersion.version("4.10");
+
+    private static final GradleVersion MAX_GRADLE_VERSION = GradleVersion.version("6.5");
 
     private final GradleConnector connector = GradleConnector.newConnector();
 
@@ -111,8 +119,50 @@ public class Main implements Callable<Void> {
         return result;
     }
 
-    private void executeGradle() throws ManipulationException {
+    private void verifyBuildEnvironment(ProjectConnection connection) throws ManipulationException {
+        try {
+            BuildEnvironment env = connection.getModel(BuildEnvironment.class);
+            String versionString = env.getGradle().getGradleVersion();
+            GradleVersion version = GradleVersion.version(versionString);
 
+            logger.info("Gradle version: {}", versionString);
+            logger.info("Java home: {}", env.getJava().getJavaHome());
+            logger.info("JVM arguments: {}", env.getJava().getJvmArguments());
+
+            if (version.compareTo(MIN_GRADLE_VERSION) < 0) {
+                throw new ManipulationException("{} is too old and is unsupported. You need at least {}.", version,
+                        MIN_GRADLE_VERSION);
+            } else if (version.compareTo(MAX_GRADLE_VERSION) >= 0) {
+                logger.warn("{} has not been tested. Only versions less than {} are supported.", version,
+                        MAX_GRADLE_VERSION);
+            }
+        } catch (GradleConnectionException e) {
+            Throwable firstCause = e.getCause();
+
+            if (firstCause != null) {
+                Throwable secondCause = firstCause.getCause();
+
+                if (secondCause != null && secondCause.getClass() == IllegalArgumentException.class) {
+                    String causeMessage = secondCause.getMessage();
+
+                    if (causeMessage != null) {
+                        Pattern pattern = Pattern.compile("^Could not determine java version from '(?<version>.*)'.$");
+                        Matcher matcher = pattern.matcher(causeMessage);
+
+                        if (matcher.matches()) {
+                            String version = matcher.group("version");
+                            logger.debug("Caught exception processing Gradle API", e);
+                            throw new ManipulationException("Java {} is incompatible with Gradle version used to build", version);
+                        }
+                    }
+                }
+            }
+
+            throw e;
+        }
+    }
+
+    private void executeGradle() throws ManipulationException {
         if (installation != null) {
             if (!installation.exists()) {
                 throw new ManipulationException("Unable to locate Gradle installation at {}", installation);
@@ -136,6 +186,8 @@ public class Main implements Callable<Void> {
         }
 
         try (ProjectConnection connection = connector.connect()) {
+            verifyBuildEnvironment(connection);
+
             BuildLauncher build = connection.newBuild();
             Set<String> jvmArgs = jvmPropertyParams.entrySet().stream()
                     .map(entry -> "-D" + entry.getKey() + '=' + entry.getValue())
@@ -191,7 +243,10 @@ public class Main implements Callable<Void> {
             // the configuration which makes the underlying code simpler.
             System.getProperties().putAll(jvmPropertyParams);
             configuration.reload();
-            logger.debug("Configuration reloaded with {}", configuration.dumpCurrentConfig());
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Configuration reloaded with {}", configuration.dumpCurrentConfig());
+            }
 
             GroovyUtils.runCustomGroovyScript(logger, InvocationStage.FIRST, target, configuration, null, null);
         }

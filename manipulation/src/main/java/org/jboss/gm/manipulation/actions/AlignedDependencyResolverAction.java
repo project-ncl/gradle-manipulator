@@ -60,7 +60,8 @@ public class AlignedDependencyResolverAction implements Action<DependencyResolve
 
             resolveDetails.because(key + " is aligned to " + aligned.toString()).useVersion(aligned.getVersionString());
         } else {
-            logger.debug("Unable to find a mapping for {} in alignedDependencies {}", key, alignedDependencies);
+            logger.debug("Unable to find a mapping for {} in module {} with alignedDependencies {}", key, module.getName(),
+                    alignedDependencies);
         }
     }
 }

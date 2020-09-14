@@ -175,41 +175,49 @@ public class ManipulationModel {
         return findCorrespondingChild(name.getPath());
     }
 
+    // Only test access.
     protected ManipulationModel findCorrespondingChild(String path) {
         if (StringUtils.isBlank(path)) {
             throw new ManipulationUncheckedException("Supplied child name cannot be empty");
         }
-        final ManipulationModel module;
 
         if (!path.contains(":")) {
             // we provided a simple name so assume we're looking for a direct child
+            if (children.containsKey(path) && getName().equals(path)) {
+                logger.error("Child module ({}) has matching name to current module ({}) and unable to differentiate",
+                        children.keySet(), getName());
+            }
+
             if (getName().equals(path) || path.isEmpty()) {
                 return this;
             }
 
-            module = children.get(path);
-            if (module == null) {
-                throw new ManipulationUncheckedException("ManipulationModel '{}' does not exist", path);
-            }
+            return getChild(path);
         } else {
             // we provided a project path, so recursively find the corresponding child by removing the initial ":"
             if (path.equals(":")) {
                 return this;
             }
-
             final int index = path.indexOf(':', 1);
             if (index < 0) {
                 // we don't have other path separators so remove the leading : and get with name
-                return findCorrespondingChild(path.substring(1));
+                return getChild(path.substring(1));
             } else {
                 // extract the child name which is the first component of the path and call recursively on it using remaining
                 // path
                 String childName = path.substring(1, index);
-                return findCorrespondingChild(childName).findCorrespondingChild(path.substring(index));
+                return getChild(childName).findCorrespondingChild(path.substring(index));
             }
         }
+    }
 
-        return module;
+    private ManipulationModel getChild(String path) {
+        ManipulationModel result = children.get(path);
+        logger.debug("Looking for {} in model (with children {}) and found {}", path, children.keySet(), result);
+        if (result == null) {
+            throw new ManipulationUncheckedException("ManipulationModel '{}' does not exist", path);
+        }
+        return result;
     }
 
     @Override

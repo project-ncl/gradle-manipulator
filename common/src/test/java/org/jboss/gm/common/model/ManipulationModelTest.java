@@ -2,15 +2,28 @@ package org.jboss.gm.common.model;
 
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.gradle.api.logging.LogLevel;
+import org.jboss.gm.common.rules.LoggingRule;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.SystemErrRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
  */
 public class ManipulationModelTest {
+
+    @Rule
+    public final LoggingRule loggingRule = new LoggingRule(LogLevel.DEBUG);
+
+    @Rule
+    public final SystemErrRule systemErrRule = new SystemErrRule().enableLog().muteForSuccessfulTests();
 
     @Test
     public void findCorrespondingChildWithName() {
@@ -54,8 +67,9 @@ public class ManipulationModelTest {
                 .isThrownBy(() -> model.findCorrespondingChild(":child11"))
                 .withMessage("ManipulationModel 'child11' does not exist");
 
-        assertThat(child.findCorrespondingChild(":child1:child11")).isEqualTo(child11);
-        assertThat(child.findCorrespondingChild(":child1:child11:child111")).isEqualTo(child111);
+        assertThat(child.findCorrespondingChild(":child11")).isEqualTo(child11);
+        assertThat(model.findCorrespondingChild(":child2").name).isEqualTo("child2");
+        assertThat(model.findCorrespondingChild(":child1:child11:child111")).isEqualTo(child111);
     }
 
     @Test
@@ -83,5 +97,28 @@ public class ManipulationModelTest {
                         new SimpleProjectVersionRef("org.jboss.resteasy", "resteasy-jaxrs", "3.6.3.Final-redhat-000001"),
                         new SimpleProjectVersionRef("io.undertow", "undertow-core", "2.0.15.Final-redhat-000001"),
                         new SimpleProjectVersionRef("io.undertow", "undertow-core", "2.27.0-redhat-000001")));
+    }
+
+    @Test
+    public void findCorrespondingChildWithDuplicateName() {
+        ManipulationModel model = new ManipulationModel("root-foo", "foo", "org.hibernate");
+        final ManipulationModel child = new ManipulationModel("foo", "foo", "org.hibernate");
+        model.addChild(child);
+        model.addChild(new ManipulationModel("child2", "child2", "childgroup2"));
+        final ManipulationModel child11 = new ManipulationModel("child11", "child11-custom-artifactId", "bar");
+        child.addChild(child11);
+
+        assertNotEquals(System.identityHashCode(model.findCorrespondingChild(":foo")), System.identityHashCode(model));
+        assertEquals(System.identityHashCode(model.findCorrespondingChild(":foo")), System.identityHashCode(child));
+        assertThat(model.findCorrespondingChild(":foo:child11")).isEqualTo(child11);
+        assertThatExceptionOfType(ManipulationUncheckedException.class)
+                .isThrownBy(() -> child.findCorrespondingChild(":foo:child11"))
+                .withMessage("ManipulationModel 'foo' does not exist");
+
+        // So we should never hit this - normally findCorrespondingChild should be called through the Project API which means children
+        // have correctly colon separated paths.
+        assertEquals(System.identityHashCode(model.findCorrespondingChild("foo")), System.identityHashCode(model));
+        assertTrue(systemErrRule.getLog().contains(
+                "Child module ([child2, foo]) has matching name to current module (foo) and unable to differentiate"));
     }
 }

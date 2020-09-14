@@ -152,7 +152,8 @@ public class Main implements Callable<Void> {
                         if (matcher.matches()) {
                             String version = matcher.group("version");
                             logger.debug("Caught exception processing Gradle API", e);
-                            throw new ManipulationException("Java {} is incompatible with Gradle version used to build", version);
+                            throw new ManipulationException("Java {} is incompatible with Gradle version used to build",
+                                    version);
                         }
                     }
                 }

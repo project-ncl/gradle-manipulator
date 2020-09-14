@@ -444,6 +444,7 @@ public class AlignmentTask extends DefaultTask {
                     target = lenient.getFirstLevelModuleDependencies();
                 } else {
                     target = lenient.getAllModuleDependencies();
+                    logger.debug("Returning all (including transitive) module dependencies for examination...");
                 }
                 target.forEach(dep -> {
                     // skip dependencies on project modules

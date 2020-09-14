@@ -11,6 +11,7 @@ plugins {
     java
     signing
     `maven-publish`
+    idea
     id("ca.cutterslade.analyze") version "1.3.3"
     id("com.adarshr.test-logger") version "2.1.0"
     id("com.diffplug.gradle.spotless") version "3.25.0"
@@ -97,6 +98,7 @@ allprojects {
         }
     }
     apply(plugin = "ca.cutterslade.analyze" )
+    apply(plugin = "idea")
 }
 
 subprojects {

@@ -73,6 +73,14 @@ sourceSets.create("functionalTest") {
     compileClasspath += sourceSets["main"].output + configurations.testRuntime
     runtimeClasspath += output + compileClasspath
 }
+idea.module {
+    val testSources = testSourceDirs
+    testSources.addAll(project.sourceSets.getByName("functionalTest").java.srcDirs)
+    val testResources = testResourceDirs
+    testResources.addAll(project.sourceSets.getByName("functionalTest").resources.srcDirs)
+    testSourceDirs = testSources
+    testResourceDirs = testResources
+}
 
 val functionalTest = task<Test>("functionalTest") {
     description = "Runs functional tests"

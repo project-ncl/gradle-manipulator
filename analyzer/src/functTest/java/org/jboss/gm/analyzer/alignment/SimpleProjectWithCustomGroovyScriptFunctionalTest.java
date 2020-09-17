@@ -97,6 +97,7 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
                     assertFalse(s.contains("x-pack"));
                     assertTrue(s.contains("another-pack"));
                 });
+        assertTrue(systemOutRule.getLog().contains("Retrieved"));
     }
 
 }

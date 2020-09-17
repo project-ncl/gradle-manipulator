@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Properties;
 
+import lombok.Getter;
+
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.core.groovy.GradleBaseScript;
@@ -23,6 +25,7 @@ import org.slf4j.LoggerFactory;
 public abstract class BaseScript extends GradleBaseScript {
 
     // Explicitly using LoggerFactory not GMLogger to avoid NoClassDefFound issues with cli jar.
+    @Getter
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private ManipulationModel model;

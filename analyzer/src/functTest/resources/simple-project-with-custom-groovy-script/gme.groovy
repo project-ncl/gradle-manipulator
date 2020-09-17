@@ -36,4 +36,4 @@ information = new File(gmeScript.getProject().getRootDir(), "settings.gradle")
 newContent = information.text.replaceAll("addSubProjects.*x-pack'[)][)]", "")
 information.text = newContent
 
-println "New content is " + newContent
+gmeScript.getLogger().info("Retrieved content with {}", newContent)

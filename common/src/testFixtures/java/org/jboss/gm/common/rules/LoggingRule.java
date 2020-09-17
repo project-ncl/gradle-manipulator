@@ -29,7 +29,7 @@ public class LoggingRule implements TestRule {
                 ILoggerFactory factory = LoggerFactory.getILoggerFactory();
 
                 if (factory instanceof OutputEventListenerBackedLoggerContext) {
-                    OutputEventListenerBackedLoggerContext context = (OutputEventListenerBackedLoggerContext)factory;
+                    OutputEventListenerBackedLoggerContext context = (OutputEventListenerBackedLoggerContext) factory;
                     try {
                         context.setLevel(level);
                         if (context.getOutputEventListener() instanceof OutputEventRenderer) {

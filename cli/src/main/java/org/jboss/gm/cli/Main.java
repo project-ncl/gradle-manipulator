@@ -199,6 +199,7 @@ public class Main implements Callable<Void> {
             } else {
                 jvmArgs.add("-DloggingColours=false");
             }
+            jvmArgs.add("-D" + Configuration.CLI_WORKING_DIR + '=' + System.getProperty("user.dir"));
 
             logger.info("Executing CLI {} on Gradle project {} with JVM args '{}' and arguments '{}'",
                     ManifestUtils.getManifestInformation(), target, jvmArgs, gradleArgs);

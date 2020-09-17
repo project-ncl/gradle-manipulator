@@ -257,6 +257,8 @@ public class AlignmentTask extends DefaultTask {
                 writeGmeConfigMarkerFile(project.getRootProject().getBuildFile());
                 writeGmeReposMarkerFile();
                 writeRepositorySettingsFile(cache.getRepositories());
+            } else {
+                logger.debug("Still have {} projects to scan", cache.getProjectCounterRemaining());
             }
 
             // this needs to happen for each project, not just the last one

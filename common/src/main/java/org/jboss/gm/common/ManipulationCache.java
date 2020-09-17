@@ -152,4 +152,7 @@ public class ManipulationCache {
                 .collect(Collectors.toList());
     }
 
+    public String getProjectCounterRemaining() {
+        return projectCounter.toString();
+    }
 }

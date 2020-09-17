@@ -2,16 +2,19 @@ package org.jboss.gm.common.utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import lombok.experimental.UtilityClass;
 
-import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.core.groovy.InvocationPoint;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
+import org.commonjava.maven.ext.io.FileIO;
+import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;
 import org.gradle.api.Project;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.groovy.BaseScript;
@@ -41,16 +44,23 @@ public class GroovyUtils {
 
         final List<File> groovyFiles = new ArrayList<>();
         final String[] scripts = configuration.groovyScripts();
+        final File tmpDir;
 
         if (scripts != null) {
-            int i = 0;
+            try {
+                tmpDir = Files.createTempDirectory("gme-" + UUID.randomUUID().toString()).toFile();
+                tmpDir.deleteOnExit();
+            } catch (IOException e) {
+                throw new ManipulationUncheckedException("Unable to create temporary directory", e);
+            }
+
+            GalleyInfrastructure galleyInfra = new GalleyInfrastructure(null, null).init(null, null, tmpDir);
+            FileIO fileIO = new FileIO(galleyInfra);
+
             for (String script : scripts) {
                 logger.info("Attempting to read URL {} ", script);
                 try {
-                    File remote = File.createTempFile("gme-" + i, ".groovy");
-                    remote.deleteOnExit();
-                    FileUtils.copyURLToFile(new URL(script), remote);
-                    groovyFiles.add(remote);
+                    groovyFiles.add(fileIO.resolveURL(script));
                 } catch (IOException e) {
                     logger.error("Ignoring script {} as unable to locate it.", script);
                     logger.debug("Problem with script URL is", e);

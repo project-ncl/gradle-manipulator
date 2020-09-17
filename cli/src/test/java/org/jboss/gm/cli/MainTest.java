@@ -69,7 +69,8 @@ public class MainTest {
         Main m = new Main();
         String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "help", "--info",
                 "-Dfoobar=nothing",
-                "-Dfoobar=barfoo", "-DdependencyOverride.org.jboss.slf4j:*@*=", "-DgroovyScripts=file:///tmp/fake-file" };
+                "-Dfoobar=barfoo", "-DdependencyOverride.org.jboss.slf4j:*@*=",
+                "-DgroovyScripts=https://www.foo.com/tmp/fake-file" };
         m.run(args);
 
         assertTrue(systemOutRule.getLog().contains("Welcome to Gradle"));

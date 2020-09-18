@@ -157,11 +157,13 @@ See [this](https://docs.gradle.org/current/userguide/signing_plugin.html) for mo
 
 The plugins can be released using the following command (from the master branch of the repository):
 
+    # Optional command: ./gradlew clean
+
 	./gradlew release -Drelease=true
 
 The command will both publish the plugin to the Gradle Plugin Portal and to Maven Central.
 
-Note: It is **very** important to execute this exact command when releasing. Adding other tasks can cause the release to fail, or even worse leave the release in an inconsistent state.
+Note: It is **very** important to execute this exact command when releasing. Adding other tasks (e.g. `clean`) can cause the release to fail, or even worse leave the release in an inconsistent state. If clean is needed run it separately before the main command.
 
 Note: It may be necessary to add the following to your `$HOME/.gradle/gradle.properties` to prevent timeouts:
 

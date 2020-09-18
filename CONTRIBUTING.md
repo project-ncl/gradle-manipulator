@@ -159,11 +159,16 @@ The plugins can be released using the following command (from the master branch 
 
     # Optional command: ./gradlew clean
 
-	./gradlew release -Drelease=true
+	./gradlew --info release -Drelease=true
 
 The command will both publish the plugin to the Gradle Plugin Portal and to Maven Central.
 
-Note: It is **very** important to execute this exact command when releasing. Adding other tasks (e.g. `clean`) can cause the release to fail, or even worse leave the release in an inconsistent state. If clean is needed run it separately before the main command.
+Note: It is **very** important to execute this exact command when releasing. Adding other tasks (e.g. `clean`) can cause the release to fail, or even worse leave the release in an inconsistent state. If `clean` is needed run it separately before the main command. If a release needs to be rolled back the following must be checked and cleaned up:
+
+* Gradle Plugins Portal (https://plugins.gradle.org/)
+* Sonatype Staging (https://oss.sonatype.org/#stagingRepositories)
+* Local and remote tags
+* Local and remote GIT commits for release
 
 Note: It may be necessary to add the following to your `$HOME/.gradle/gradle.properties` to prevent timeouts:
 

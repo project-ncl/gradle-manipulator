@@ -44,7 +44,7 @@ public class SettingsFileIOTest {
         File root = new File(TestUtils.class.getClassLoader().getResource("").getPath())
                 .getParentFile().getParentFile().getParentFile().getParentFile();
         // Weird hack to work around debugging in IntelliJ versus running in Gradle project build.
-        if ( root.getName().equals( "analyzer" )) {
+        if (root.getName().equals("analyzer")) {
             root = root.getParentFile();
         }
 

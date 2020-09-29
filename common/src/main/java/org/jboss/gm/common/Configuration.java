@@ -26,8 +26,6 @@ import static org.aeonbits.owner.Config.LoadType.MERGE;
 @LoadPolicy(MERGE)
 public interface Configuration extends Accessible, Reloadable {
 
-    String CLI_WORKING_DIR = "cliWorkingDir";
-
     /**
      * Cache is indexed to object instance : Properties - while in production
      * usage there should only be one instance, using this allows for easier testing.

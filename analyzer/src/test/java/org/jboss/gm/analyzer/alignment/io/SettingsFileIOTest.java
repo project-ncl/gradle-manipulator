@@ -3,10 +3,10 @@ package org.jboss.gm.analyzer.alignment.io;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.internal.impldep.com.google.api.client.googleapis.testing.TestUtils;
-import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -39,20 +39,22 @@ public class SettingsFileIOTest {
 
     @Test
     public void testSCMNameWithSCMHigher() throws IOException {
+        File testPath = new File(TestUtils.class.getClassLoader().getResource("").getPath()).getParentFile().getParentFile()
+                .getParentFile();
+        File testSettings = new File(testPath, "tmp" + File.separator + "tests");
+        testSettings.mkdirs();
+        File settingsGradle = new File(testSettings, "settings.gradle");
+        settingsGradle.createNewFile();
+        SettingsFileIO.writeProjectNameIfNeeded(testSettings);
+        // Clean up so we can rerun and still succeed.
+        FileUtils.deleteQuietly(testSettings);
+    }
+
+    @Test(expected = ManipulationUncheckedException.class)
+    public void testFindGitDir() throws IOException {
         File tmpFolder = folder.newFolder();
         File subdir = new File(tmpFolder, "subfolder");
-        File root = new File(TestUtils.class.getClassLoader().getResource("").getPath())
-                .getParentFile().getParentFile().getParentFile().getParentFile();
-        // Weird hack to work around debugging in IntelliJ versus running in Gradle project build.
-        if (root.getName().equals("analyzer")) {
-            root = root.getParentFile();
-        }
 
-        System.setProperty(Configuration.CLI_WORKING_DIR, root.getCanonicalPath());
-
-        subdir.mkdirs();
-        File settingsGradle = new File(subdir, "settings.gradle");
-        settingsGradle.createNewFile();
-        SettingsFileIO.writeProjectNameIfNeeded(subdir);
+        SettingsFileIO.findGitDir(subdir);
     }
 }

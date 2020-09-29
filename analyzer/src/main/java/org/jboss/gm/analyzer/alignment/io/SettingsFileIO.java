@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.logging.Logger;
-import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
@@ -21,6 +20,7 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 public final class SettingsFileIO {
     private static final Pattern SETTINGS_ROOT_PROJECT = Pattern.compile(".*rootProject.name\\s*=\\s*['\"](.*)['\"]");
     private static final Pattern SCM_URL_LINE_EXPR = Pattern.compile("\\s*url\\s*=(?:.*/)([a-zA-Z0-9\\-._]+)");
+    private static final String GIT_CONFIG = ".git" + File.separator + "config";
 
     private static final Logger logger = GMLogger.getLogger(SettingsFileIO.class);
 
@@ -68,19 +68,7 @@ public final class SettingsFileIO {
     }
 
     private static String extractProjectNameFromScmUrl(File rootDir) throws IOException {
-        final String originalWorkingDir = System.getProperty(Configuration.CLI_WORKING_DIR, "");
-        File gitConfig = new File(new File(rootDir, ".git"), "config");
-        if (!gitConfig.isFile()) {
-            File newTarget = new File(originalWorkingDir, ".git");
-            logger.debug("Couldn't find config in {} ; now checking {} ", gitConfig, newTarget);
-            // Fall back and check if originalWorkingDir helps
-            gitConfig = new File(newTarget, "config");
-            if (!gitConfig.isFile()) {
-                logger.debug("Couldn't find config in {}", gitConfig);
-                throw new ManipulationUncheckedException(
-                        "No .git/config file found, failed to determine the root project name");
-            }
-        }
+        File gitConfig = findGitDir(rootDir);
         try {
             List<String> lines = FileUtils.readLines(gitConfig, Charset.defaultCharset());
 
@@ -99,5 +87,21 @@ public final class SettingsFileIO {
         } catch (IOException e) {
             throw new IOException("Unable to read .git/config file found, failed to determine the root project name", e);
         }
+    }
+
+    // Package private for testing
+    static File findGitDir(File current) {
+        File prospective = new File(current, GIT_CONFIG);
+        File parent = current.getParentFile();
+
+        logger.info("Searching for Git config in {}", prospective);
+        if (prospective.isFile()) {
+            return prospective;
+        }
+        if (parent == null) {
+            throw new ManipulationUncheckedException(
+                    "No .git/config file found, failed to determine the root project name");
+        }
+        return findGitDir(parent);
     }
 }

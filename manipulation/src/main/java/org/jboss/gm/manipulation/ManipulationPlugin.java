@@ -147,12 +147,23 @@ public class ManipulationPlugin implements Plugin<Project> {
                 evaluatedProject
                         .afterEvaluate(new UploadTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
                 evaluatedProject.afterEvaluate(new LegacyMavenPublishingRepositoryAction());
+
+                if (project.getGradle().getStartParameter().getTaskNames().stream()
+                        .noneMatch(p -> p.contains("uploadArchives"))) {
+                    logger.error(
+                            "Unable to find uploadArchives parameter for Legacy Maven Plugin.");
+                }
             } else if (MAVEN_PUBLISH_PLUGIN.equals(deployPlugin)) {
                 logger.info("Configuring {} plugin for project {}", deployPlugin, evaluatedProject.getName());
 
                 evaluatedProject.afterEvaluate(new MavenPublishingRepositoryAction());
                 evaluatedProject
                         .afterEvaluate(new MavenPomTransformerAction(correspondingModule, resolvedDependenciesRepository));
+
+                if (project.getGradle().getStartParameter().getTaskNames().stream().noneMatch(p -> p.contains("publish"))) {
+                    logger.error(
+                            "Unable to find publish parameter for Maven Publish Plugin.");
+                }
             } else {
                 logger.warn("No publishing plugin was configured!");
             }

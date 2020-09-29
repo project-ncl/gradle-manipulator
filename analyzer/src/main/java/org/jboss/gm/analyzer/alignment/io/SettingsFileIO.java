@@ -71,9 +71,10 @@ public final class SettingsFileIO {
         final String originalWorkingDir = System.getProperty(Configuration.CLI_WORKING_DIR, "");
         File gitConfig = new File(new File(rootDir, ".git"), "config");
         if (!gitConfig.isFile()) {
-            logger.debug("Couldn't find config in {}", gitConfig);
+            File newTarget = new File(originalWorkingDir, ".git");
+            logger.debug("Couldn't find config in {} ; now checking {} ", gitConfig, newTarget);
             // Fall back and check if originalWorkingDir helps
-            gitConfig = new File(new File(originalWorkingDir, ".git"), "config");
+            gitConfig = new File(newTarget, "config");
             if (!gitConfig.isFile()) {
                 logger.debug("Couldn't find config in {}", gitConfig);
                 throw new ManipulationUncheckedException(

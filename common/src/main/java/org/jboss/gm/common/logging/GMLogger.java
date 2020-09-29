@@ -51,26 +51,28 @@ public class GMLogger implements Logger {
 
         StringBuilder sb = new StringBuilder();
 
+        // Using a SecurityManager would be faster but we want the line number. And the StackWalker API
+        // is JDK9 and above.
+        StackTraceElement[] result = Thread.currentThread().getStackTrace();
+        // 0 is this getStackTrace call.
+        // 1 is this method
+        // 2 is the logging method
+        // 3 is the target we want.
+        // And therefore we need to ensure we have at least 3 frames to examine.
+        if (result.length < 4) {
+            throw new ManipulationUncheckedException(
+                    "Internal logging failure ; not enough stacktrace elements {}", Arrays.toString(result));
+        }
+        String loggingLevel = result[2].getMethodName().toUpperCase();
+
         if (configuration.addLoggingClassnameLinenumber()) {
 
-            // Using a SecurityManager would be faster but we want the line number. And the StackWalker API
-            // is JDK9 and above.
-            StackTraceElement[] result = Thread.currentThread().getStackTrace();
-            // 0 is this getStackTrace call.
-            // 1 is this method
-            // 2 is the logging method
-            // 3 is the target we want.
-            // And therefore we need to ensure we have at least 3 frames to examine.
-            if (result.length < 4) {
-                throw new ManipulationUncheckedException(
-                        "Internal logging failure ; not enough stacktrace elements {}", Arrays.toString(result));
-            }
             if (configuration.addLoggingColours()) {
                 sb.append(ANSI_DARK_GRAY);
             }
             if (configuration.addLoggingLevel()) {
                 sb.append('[');
-                sb.append(result[2].getMethodName().toUpperCase());
+                sb.append(loggingLevel);
                 sb.append(']');
             }
             sb.append('[');
@@ -82,7 +84,21 @@ public class GMLogger implements Logger {
                 sb.append(ANSI_RESET);
             }
         }
+        // Currently only colouring warning or error messages for ease of spotting.
+        if (configuration.addLoggingColours()) {
+            switch (loggingLevel) {
+                case "WARN":
+                    sb.append(ANSI_PURPLE);
+                    break;
+                case "ERROR":
+                    sb.append(ANSI_RED);
+                    break;
+            }
+        }
         sb.append(msg);
+        if (configuration.addLoggingColours() && (loggingLevel.equals("WARN") || loggingLevel.equals("ERROR"))) {
+            sb.append(ANSI_RESET);
+        }
 
         return sb.toString();
     }

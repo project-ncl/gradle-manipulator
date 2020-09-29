@@ -20,6 +20,7 @@ import org.junit.rules.TestRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class JavaDataLoaderFunctionalTest {
 
@@ -50,6 +51,7 @@ public class JavaDataLoaderFunctionalTest {
         assertThat(buildResult.task(":" + "generatePomFileForMavenPublication").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
         final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(projectRoot, alignment,
                 "build/publications/maven/pom-default.xml");
+        assertTrue(systemOutRule.getLog().contains("Unable to find publish parameter for Maven Publish Plugin."));
         assertEquals("1.2.0.redhat-00001", modelAndModule.right.getVersion());
     }
 }

@@ -21,7 +21,7 @@ The plugins can be tested on real projects like so:
 
 An init script is required. If a development version is being used it is processed during the build into
 `analyzer/build/resources/main/analyzer-init.gradle`.  If a released version is being used it is deployed as `analyzer-<version>-init.gradle`
-and may be found in Maven Central i.e. https://repo1.maven.org/maven2/org/jboss/gm/analyzer/2.1/analyzer-2.1-init.gradle
+and may be found in Maven Central i.e. https://repo1.maven.org/maven2/org/jboss/gm/analyzer/2.2/analyzer-2.2-init.gradle
 
 Now by executing the following command:
 

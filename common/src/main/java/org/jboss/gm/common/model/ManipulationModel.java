@@ -29,7 +29,7 @@ public class ManipulationModel {
 
     /**
      * Specially handled so that it is both lazy instantiated and not accessed directly in general functions.
-     * This allows it to be overridden in utility projects.
+     * This allows it to be overridden in utility projects. Use {@link #getLogger()}
      */
     @JsonIgnore
     protected Logger logger;
@@ -70,7 +70,6 @@ public class ManipulationModel {
     protected Map<String, ManipulationModel> children = new HashMap<>(7);
 
     public ManipulationModel(Project project) {
-        this.logger = GMLogger.getLogger(getClass());
         this.name = project.getName();
         this.projectPathName = project.getName();
         this.group = ProjectUtils.getRealGroupId(project);
@@ -89,10 +88,10 @@ public class ManipulationModel {
         // optionalAbstractArchiveTask.get().getArchiveBaseName().isPresent() &&
         //!optionalAbstractArchiveTask.get().getArchiveBaseName().get().equals(project.getName())) {
                 !project.getName().equals(optionalAbstractArchiveTask.get().getBaseName())) {
-            logger.warn("Updating project name ({}) as it differs to archiveBaseName ({})",
+            getLogger().warn("Updating project name ({}) as it differs to archiveBaseName ({})",
                     project.getName(), optionalAbstractArchiveTask.get().getBaseName());
             if (!project.getName().equals(project.getProjectDir().getName())) {
-                logger.warn("Different project name ({}) to project directory ({}) ; defaulting to project name.",
+                getLogger().warn("Different project name ({}) to project directory ({}) ; defaulting to project name.",
                         project.getName(),
                         project.getProjectDir().getName());
             }
@@ -101,7 +100,7 @@ public class ManipulationModel {
             this.name = project.getName();
         }
 
-        logger.debug("Created manipulation model for project name({}), group({}) with path is {}",
+        getLogger().debug("Created manipulation model for project name({}), group({}) with path is {}",
                 name, group, projectPathName);
     }
 
@@ -110,7 +109,6 @@ public class ManipulationModel {
         this.name = name;
         this.projectPathName = projectPathName;
         this.group = group;
-        this.logger = GMLogger.getLogger(getClass());
     }
 
     public String getName() {

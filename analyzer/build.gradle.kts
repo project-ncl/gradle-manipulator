@@ -99,10 +99,18 @@ val testJar by tasks.registering(Jar::class) {
     from(sourceSets.test.get().output)
 }
 
+// Publish test source jar so it can be reused by manipulator-groovy-examples.
+val testSourcesJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("test-sources")
+    from(sourceSets.test.get().allSource)
+    from(sourceSets.getByName("functionalTest").java.srcDirs)
+}
+
 configure<PublishingExtension> {
     publications {
         getByName<MavenPublication>("shadow") {
             artifact(testJar.get())
+            artifact(testSourcesJar.get())
         }
     }
 }

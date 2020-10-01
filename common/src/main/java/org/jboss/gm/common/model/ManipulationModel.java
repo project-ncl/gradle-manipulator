@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import lombok.NoArgsConstructor;
+
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -22,10 +24,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
  */
+@NoArgsConstructor // Required for Jackson
 public class ManipulationModel {
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private final Logger logger = GMLogger.getLogger(getClass());
+    /**
+     * Specially handled so that it is both lazy instantiated and not accessed directly in general functions.
+     * This allows it to be overridden in utility projects.
+     */
+    @JsonIgnore
+    protected Logger logger;
 
     @JsonProperty
     protected String group;
@@ -62,13 +69,8 @@ public class ManipulationModel {
     @JsonProperty
     protected Map<String, ManipulationModel> children = new HashMap<>(7);
 
-    /**
-     * Required for Jackson
-     */
-    public ManipulationModel() {
-    }
-
     public ManipulationModel(Project project) {
+        this.logger = GMLogger.getLogger(getClass());
         this.name = project.getName();
         this.projectPathName = project.getName();
         this.group = ProjectUtils.getRealGroupId(project);
@@ -108,6 +110,7 @@ public class ManipulationModel {
         this.name = name;
         this.projectPathName = projectPathName;
         this.group = group;
+        this.logger = GMLogger.getLogger(getClass());
     }
 
     public String getName() {
@@ -184,7 +187,7 @@ public class ManipulationModel {
         if (!path.contains(":")) {
             // we provided a simple name so assume we're looking for a direct child
             if (children.containsKey(path) && getName().equals(path)) {
-                logger.error("Child module ({}) has matching name to current module ({}) and unable to differentiate",
+                getLogger().error("Child module ({}) has matching name to current module ({}) and unable to differentiate",
                         children.keySet(), getName());
             }
 
@@ -213,7 +216,7 @@ public class ManipulationModel {
 
     private ManipulationModel getChild(String path) {
         ManipulationModel result = children.get(path);
-        logger.debug("Looking for {} in model (with children {}) and found {}", path, children.keySet(), result);
+        getLogger().debug("Looking for {} in model (with children {}) and found {}", path, children.keySet(), result);
         if (result == null) {
             throw new ManipulationUncheckedException("ManipulationModel '{}' does not exist", path);
         }
@@ -243,5 +246,12 @@ public class ManipulationModel {
         result = 31 * result + name.hashCode();
         result = 31 * result + version.hashCode();
         return result;
+    }
+
+    private Logger getLogger() {
+        if (logger == null) {
+            logger = GMLogger.getLogger(getClass());
+        }
+        return logger;
     }
 }

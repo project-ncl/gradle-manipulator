@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import lombok.NoArgsConstructor;
+
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -20,6 +22,7 @@ import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.jboss.gm.common.io.ManipulationIO;
+import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 
 import static junit.framework.TestCase.assertTrue;
@@ -131,13 +134,16 @@ public final class TestUtils {
         return org.jboss.gm.common.utils.FileUtils.getFirstLine(lines);
     }
 
+    @NoArgsConstructor
     public static class TestManipulationModel extends ManipulationModel {
+
         public TestManipulationModel(ManipulationModel m) {
             group = m.getGroup();
             name = m.getName();
             version = m.getVersion();
             alignedDependencies = m.getAlignedDependencies();
             children = m.getChildren();
+            logger = GMLogger.getLogger(getClass());
         }
 
         /**

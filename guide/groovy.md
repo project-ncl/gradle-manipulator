@@ -117,3 +117,16 @@ A typical groovy script that alters a JSON file on disk might be:
 ### Developing Groovy Scripts
 
 To make it easier to develop scripts for both GME (this project) and [PME](https://github.com/release-engineering/pom-manipulation-ext) an example project has been setup. The [manipulator-groovy-examples](https://github.com/project-ncl/manipulator-groovy-examples) provides a framework to develop and test such scripts.
+
+**Note**: To debug Groovy scripts, while it is possible to use a debugger on the CLI for those scripts with invocation point `FIRST`, for those scripts with `LAST` it is not possible to run the CLI _and_ debug on the Groovy script. Instead run Gradle directly and invoke the plugin like
+
+    gradle
+    --no-daemon
+    --info
+    --stacktrace
+    --init-script=<....analyzer-init.gradle>
+    ...
+    -DgroovyScripts=file://...../script.groovy
+    -Dorg.gradle.debug=true
+
+The are two crucial aspects - you need to activate Groovy debugging via `org.gradle.debug=true` and the source must be added to your IDE so it can see it.

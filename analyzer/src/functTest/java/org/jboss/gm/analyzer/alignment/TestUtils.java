@@ -132,6 +132,7 @@ public final class TestUtils {
     }
 
     public static class TestManipulationModel extends ManipulationModel {
+
         public TestManipulationModel(ManipulationModel m) {
             group = m.getGroup();
             name = m.getName();

@@ -46,6 +46,13 @@ public class DependencyOverrideCustomizer implements ResponseCustomizer {
         return response;
     }
 
+    /**
+     * This is created by the {@link AlignmentServiceFactory} when creating the request/response customizers.
+     * 
+     * @param configuration the Configuration object
+     * @param projects the collection of projects
+     * @return An initiated ResponseCustomizer
+     */
     public static ResponseCustomizer fromConfigurationForModule(Configuration configuration,
             Set<Project> projects) {
 
@@ -55,7 +62,6 @@ public class DependencyOverrideCustomizer implements ResponseCustomizer {
                 "dependencyOverride.");
 
         if (!prefixed.isEmpty()) {
-            //the idea is to create one DependencyOverrideCustomizer per configuration property
             for (String key : prefixed.keySet()) {
                 final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
 
@@ -64,12 +70,11 @@ public class DependencyOverrideCustomizer implements ResponseCustomizer {
                     if (isNotEmpty(project.getVersion().toString()) &&
                             isNotEmpty(group) &&
                             isNotEmpty(project.getName())) {
-
                         final ProjectVersionRef projectRef = new SimpleProjectVersionRef(group,
                                 project.getName(), project.getVersion().toString());
                         if (keyParseResult.matchesModule(projectRef)) {
                             final String overrideVersion = prefixed.get(key);
-                            logger.debug("Overriding dependency {} from in module {} with version {}",
+                            logger.debug("Overriding dependency {} in module {} with version {}",
                                     keyParseResult.getDependency(), projectRef, overrideVersion);
                             overrideMap.put(keyParseResult.getDependency(), overrideVersion);
                         }
@@ -82,6 +87,7 @@ public class DependencyOverrideCustomizer implements ResponseCustomizer {
             logger.debug("Returning overrideMap of {} ", overrideMap);
             result = new DependencyOverrideCustomizer(overrideMap);
         }
+        // If null is returned this is filtered out in AlignmentServiceFactory::geResponseCustomizer with the filter
         return result;
     }
 }

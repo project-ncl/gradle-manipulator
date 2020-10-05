@@ -32,7 +32,7 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  */
 public class DependencyExclusionCustomizer implements AlignmentService.RequestCustomizer {
 
-    private static final Logger log = GMLogger.getLogger(DependencyExclusionCustomizer.class);
+    private static final Logger logger = GMLogger.getLogger(DependencyExclusionCustomizer.class);
 
     private final Predicate<ProjectRef> predicate;
 
@@ -68,7 +68,7 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
                                 project.getName(),
                                 project.getVersion().toString());
                         if (keyParseResult.matchesModule(projectRef)) {
-                            log.debug("Excluding dependency {} from alignment of module {}", keyParseResult.getDependency(),
+                            logger.debug("Excluding dependency {} from alignment of module {}", keyParseResult.getDependency(),
                                     projectRef);
                             // if the key matches this module, add a predicate that rejects the artifact that was configured in the property
                             predicates.add(new DependencyExclusionPredicate(keyParseResult.getDependency()));
@@ -81,6 +81,7 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
         if (!predicates.isEmpty()) {
             result = new DependencyExclusionCustomizer(predicates.stream().reduce(x -> true, Predicate::and));
         }
+        // If null is returned this is filtered out in AlignmentServiceFactory::getRequestCustomizer with the filter
         return result;
     }
 

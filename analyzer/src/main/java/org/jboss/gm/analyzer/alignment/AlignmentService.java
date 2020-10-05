@@ -58,6 +58,7 @@ public interface AlignmentService {
 
         String getAlignedVersionOfGav(ProjectVersionRef gav) {
             final Optional<ProjectRef> projectRef = matchingProjectRef(gav);
+
             if (projectRef.isPresent()) {
                 return overrideMap.get(projectRef.get());
             }

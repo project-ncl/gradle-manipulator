@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.gradle.api.logging.Logger;
+import org.jboss.gm.common.logging.GMLogger;
 
 /**
  * An implementation of {@link org.jboss.gm.analyzer.alignment.AlignmentService} that
@@ -19,6 +21,8 @@ import org.commonjava.maven.ext.common.ManipulationException;
  * @see org.jboss.gm.analyzer.alignment.AlignmentServiceFactory
  */
 public class WithCustomizersDelegatingAlignmentService implements AlignmentService {
+
+    private final Logger logger = GMLogger.getLogger(getClass());
 
     private final DAAlignmentService delegate;
     private final List<AlignmentService.RequestCustomizer> requestCustomizers;
@@ -41,12 +45,15 @@ public class WithCustomizersDelegatingAlignmentService implements AlignmentServi
     @Override
     public Response align(Request request) throws ManipulationException {
 
+        logger.debug("Invoking request customizers...");
         for (RequestCustomizer requestCustomizer : requestCustomizers) {
             request = requestCustomizer.customize(request);
         }
 
+        logger.debug("Invoking DA...");
         Response response = delegate.align(request);
 
+        logger.debug("Invoking response customizers...");
         for (ResponseCustomizer responseCustomizer : responseCustomizers) {
             response = responseCustomizer.customize(response);
         }

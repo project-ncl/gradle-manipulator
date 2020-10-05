@@ -3,8 +3,11 @@ package org.jboss.gm.common.model;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -35,24 +38,31 @@ public class ManipulationModel {
     protected Logger logger;
 
     @JsonProperty
+    @Getter
+    @Setter
     protected String group;
 
     /**
      * Name of the project as defined by the build system.
      */
     @JsonProperty
+    @Getter
+    @Setter
     protected String name;
 
     /**
      * This should be effectively the same as the folder name.
      */
     @JsonProperty
+    @Getter
     protected String projectPathName;
 
     /**
      * Version of the project.
      */
     @JsonProperty
+    @Getter
+    @Setter
     protected String version;
 
     /**
@@ -61,7 +71,7 @@ public class ManipulationModel {
      * {@code 3.6.3.SP1-redhat-00001} version
      */
     @JsonProperty
-    protected Map<String, ProjectVersionRef> alignedDependencies = new HashMap<>();
+    protected Map<String, ProjectVersionRef> alignedDependencies = new TreeMap<>();
 
     /**
      * Representation of this project children projects if any, keyed by name(artifactId).
@@ -111,14 +121,6 @@ public class ManipulationModel {
         this.group = group;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     @Override
     public String toString() {
         return getGroup() + ':' + getName() + ':' + getVersion();
@@ -146,22 +148,6 @@ public class ManipulationModel {
         for (ManipulationModel child : manipulationModel.getChildren().values()) {
             addDependenciesRec(child, result);
         }
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String newProjectVersion) {
-        this.version = newProjectVersion;
-    }
-
-    public String getGroup() {
-        return group;
-    }
-
-    public void setGroup(String group) {
-        this.group = group;
     }
 
     public Map<String, ManipulationModel> getChildren() {

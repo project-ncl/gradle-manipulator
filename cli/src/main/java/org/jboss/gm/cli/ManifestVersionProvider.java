@@ -23,7 +23,7 @@ public class ManifestVersionProvider
         implements CommandLine.IVersionProvider {
     /**
      * Returns version information for a command.
-     * 
+     *
      * @return version information (each string in the array is displayed on a separate line)
      */
     @Override

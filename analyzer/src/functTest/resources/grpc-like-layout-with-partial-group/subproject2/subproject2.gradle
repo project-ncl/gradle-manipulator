@@ -1,6 +1,6 @@
 description = "subproject 2"
 
 dependencies {
-	compile group: 'com.google.inject', name: 'guice', version: '4.2.2'
-	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
+    compile group: 'com.google.inject', name: 'guice', version: '4.2.2'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
 }

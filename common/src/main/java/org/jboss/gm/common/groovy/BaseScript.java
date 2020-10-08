@@ -42,7 +42,7 @@ public abstract class BaseScript extends GradleBaseScript {
 
     /**
      * Return the current Project
-     * 
+     *
      * @return a {@link Project} instance.
      */
     @Override
@@ -56,7 +56,7 @@ public abstract class BaseScript extends GradleBaseScript {
 
     /**
      * Get the current ManipulationModel instance for remote artifact resolving.
-     * 
+     *
      * @return a {@link ManipulationModel} reference.
      */
     @Override
@@ -70,7 +70,7 @@ public abstract class BaseScript extends GradleBaseScript {
 
     /**
      * Get the working directory (the execution root).
-     * 
+     *
      * @return a {@link java.io.File} reference.
      */
     @Override
@@ -80,7 +80,7 @@ public abstract class BaseScript extends GradleBaseScript {
 
     /**
      * Get the user properties
-     * 
+     *
      * @return a {@link java.util.Properties} reference.
      */
     public Properties getUserProperties() {
@@ -89,7 +89,7 @@ public abstract class BaseScript extends GradleBaseScript {
 
     /**
      * Get the current stage
-     * 
+     *
      * @return a {@link InvocationStage} reference.
      */
     @Override
@@ -105,7 +105,7 @@ public abstract class BaseScript extends GradleBaseScript {
     /**
      * Internal use only - the org.jboss.gm.analyzer.alignment.AlignmentTask uses this to
      * initialise the values
-     * 
+     *
      * @param stage the current invocation stage
      * @param rootDir the root directory of the project.
      * @param properties the current configuration properties

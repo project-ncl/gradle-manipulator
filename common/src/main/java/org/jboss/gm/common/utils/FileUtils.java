@@ -54,7 +54,7 @@ public class FileUtils {
     /**
      * Returns either the relative path of target to root, or the root name. Used to establish
      * whether something is derived from the root project or a submodule.
-     * 
+     *
      * @param root The root project path.
      * @param target The potential (sub?)project path.
      * @return The resultant path.

@@ -1,5 +1,5 @@
 description = "subproject 1"
 
 dependencies {
-	compile group: 'org.jboss.resteasy', name: 'resteasy-jaxrs', version: '3.6.3.SP1'
+    compile group: 'org.jboss.resteasy', name: 'resteasy-jaxrs', version: '3.6.3.SP1'
 }

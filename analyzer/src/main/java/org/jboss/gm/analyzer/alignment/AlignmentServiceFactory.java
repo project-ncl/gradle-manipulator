@@ -30,7 +30,7 @@ final class AlignmentServiceFactory {
      * Creates the request customizers.
      * Currently only a single one exists so in theory we could eliminate the List here. Keeping it for consistency
      * with the response side and potential future expansion.
-     * 
+     *
      * @param configuration the current Configuration.
      * @param projects the current Projects
      * @return the list of Request Customizers.

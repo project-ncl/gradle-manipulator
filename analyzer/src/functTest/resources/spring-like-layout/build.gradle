@@ -92,7 +92,7 @@ configure(subprojects) { subproject ->
 configure(rootProject) {
     description = "Root project"
 
-    dependencies { 
+    dependencies {
         testCompile(project(":subproject1"))
         testCompile(project(":subproject2"))
     }

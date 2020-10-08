@@ -533,7 +533,7 @@ public class AlignmentTask extends DefaultTask {
 
     /**
      * This does the actual substitution replacing the dependencies with aligned version if it exists
-     * 
+     *
      * @param correspondingModule the module we are working on
      * @param allModuleDependencies the collection of dependencies
      * @param alignmentResponse the response which (possibly) contains overrides and DA information

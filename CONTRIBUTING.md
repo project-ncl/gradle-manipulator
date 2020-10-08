@@ -159,7 +159,7 @@ The plugins can be released using the following command (from the master branch 
 
     # Optional command: ./gradlew clean
 
-	./gradlew --info release -Drelease=true
+    ./gradlew --info release -Drelease=true
 
 The command will both publish the plugin to the Gradle Plugin Portal and to Maven Central.
 
@@ -181,7 +181,7 @@ Note: It may be necessary to add the following to your `$HOME/.gradle/gradle.pro
 
 Both plugins can be published to maven local to make it easier to consume them in projects. The command to do so is:
 
-	./gradlew publishToMavenLocal
+    ./gradlew publishToMavenLocal
 
 To change the version that will be deployed just add `-Pversion=whatever`.
 

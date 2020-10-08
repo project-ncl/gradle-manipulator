@@ -15,7 +15,7 @@ public class Comparator {
 
     /**
      * Determines whether the set contains the GAV from the UnresolvedDependency
-     * 
+     *
      * @param projectDependencies - the set of dependencies of examine.
      * @param unresolvedDependency - the UnresolvedDependency to verify
      * @return true if it does match.
@@ -34,7 +34,7 @@ public class Comparator {
 
     /**
      * Determines whether the set contains the GAV from the ResolvedDependency
-     * 
+     *
      * @param projectDependencies - the set of dependencies of examine.
      * @param dependency - the ResolvedDependency to verify
      * @return true if it does match.

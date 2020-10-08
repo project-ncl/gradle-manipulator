@@ -49,7 +49,7 @@ public class ProjectUtils {
 
     /**
      * The Project name field is private and therefore can't be dynamically updated.
-     * 
+     *
      * @param project the current project
      * @param replacement the new name to use
      */

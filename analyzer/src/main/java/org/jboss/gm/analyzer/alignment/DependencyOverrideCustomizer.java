@@ -48,7 +48,7 @@ public class DependencyOverrideCustomizer implements ResponseCustomizer {
 
     /**
      * This is created by the {@link AlignmentServiceFactory} when creating the request/response customizers.
-     * 
+     *
      * @param configuration the Configuration object
      * @param projects the collection of projects
      * @return An initiated ResponseCustomizer

@@ -17,6 +17,7 @@ import org.jboss.gm.common.groovy.BaseScript
 
 println("Running Groovy script on " + gmeScript.getProject())
 println("\tgroovy found new version is " + gmeScript.getModel().getVersion())
+println("Project original version is " + gmeScript.getProject().getVersion())
 
 gmeScript.getModel().setName("newRoot")
 

@@ -91,6 +91,8 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
                 .hasOnlyOneElementSatisfying(l -> assertThat(l).contains("2.0.15.Final-redhat-00001"));
         assertTrue(lines.stream().anyMatch(s -> s.contains("CustomVersion( '1.0.1.redhat-00002', project )")));
         assertTrue(systemOutRule.getLog().contains("Attempting to read URL"));
+        assertTrue(systemOutRule.getLog().contains("found new version is 1.0.1.redhat-00002"));
+        assertTrue(systemOutRule.getLog().contains("original version is 1.0.1" + System.lineSeparator()));
 
         assertThat(FileUtils.readFileToString(new File(projectRoot, "settings.gradle"), Charset.defaultCharset()))
                 .satisfies(s -> {

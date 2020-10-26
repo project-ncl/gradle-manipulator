@@ -195,8 +195,8 @@ public class AlignmentTask extends DefaultTask {
                 // While we've completed processing (sub)projects the current one is not going to be the root; so
                 // explicitly retrieve it and set its version.
                 if (configuration.versionModificationEnabled()) {
-                    project.getRootProject().setVersion(newVersion);
-                    logger.info("Updating project {} version to {}", project.getRootProject(), newVersion);
+                    logger.info("Updating model version for {} from {} to {}", project.getRootProject(),
+                            project.getRootProject().getVersion(), newVersion);
                     alignmentModel.setVersion(newVersion);
                 }
 
@@ -224,7 +224,7 @@ public class AlignmentTask extends DefaultTask {
 
                 // groupId
                 if (isEmpty(alignmentModel.getGroup())) {
-                    List<String> candidates = ManipulationCache.getCache(project.getRootProject()).getModel().getChildren()
+                    List<String> candidates = cache.getModel().getChildren()
                             .values()
                             .stream().map(ManipulationModel::getGroup)
                             .filter(StringUtils::isNotBlank)

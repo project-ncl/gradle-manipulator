@@ -21,6 +21,8 @@ import org.jboss.gm.common.utils.ProjectUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+
 /**
  * Contains the information extracted from a gradle project and its sub-project required to perform model and version
  * change
@@ -97,6 +99,7 @@ public class ManipulationModel {
         // We should be using getArchiveBaseName but its only available in 5.1 and later.
         // optionalAbstractArchiveTask.get().getArchiveBaseName().isPresent() &&
         //!optionalAbstractArchiveTask.get().getArchiveBaseName().get().equals(project.getName())) {
+                !isEmpty(optionalAbstractArchiveTask.get().getBaseName()) &&
                 !project.getName().equals(optionalAbstractArchiveTask.get().getBaseName())) {
             getLogger().warn("Updating project name ({}) as it differs to archiveBaseName ({})",
                     project.getName(), optionalAbstractArchiveTask.get().getBaseName());

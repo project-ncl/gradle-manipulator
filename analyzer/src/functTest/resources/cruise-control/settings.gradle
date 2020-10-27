@@ -1,0 +1,2 @@
+//otherwise it defaults to the folder name
+rootProject.name = 'cruise-control'

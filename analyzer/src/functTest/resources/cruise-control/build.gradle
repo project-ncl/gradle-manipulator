@@ -1,0 +1,192 @@
+/*
+ * Copyright 2017 LinkedIn Corp. Licensed under the BSD 2-Clause License (the "License"). See License in the project root for license information.
+ */
+
+plugins {
+  id "jacoco" // Java Code Coverage plugin
+  id "com.github.ben-manes.versions" version "0.28.0"
+  id "com.github.spotbugs" version "4.2.4" apply false
+  id 'com.github.jk1.dependency-license-report' version '1.13'
+  // including this plugin directly instead of by an init script, which allows to use the freshly build version
+  id 'org.jboss.gm.analyzer'
+}
+
+group = 'com.linkedin.cruisecontrol'
+
+project.ext {
+  pomConfig = {
+    url "https://github.com/linkedin/cruise-control"
+    licenses {
+      license {
+        name "BSD 2-CLAUSE LICENSE"
+        url "https://opensource.org/licenses/BSD-2-Clause"
+      }
+    }
+    developers {
+      developer {
+        name "Adem Efe Gencer"
+        email "efegencer@gmail.com"
+      }
+      developer {
+        name "Jiangjie (Becket) Qin"
+        email "becket.qin@gmail.com"
+      }
+      developer {
+        name "Sir Joel Koshy"
+        email "jjkoshy@yahoo.com"
+      }
+    }
+    scm {
+      url "https://github.com/linkedin/cruise-control"
+    }
+  }
+  buildVersionFileName = "cruise-control-version.properties"
+  commitId = project.hasProperty('commitId') ? commitId : null
+}
+
+
+allprojects {
+
+  repositories {
+    mavenCentral()
+    jcenter()
+  }
+
+  apply plugin: 'com.github.ben-manes.versions'
+
+  dependencyUpdates {
+    revision="release"
+    resolutionStrategy {
+      componentSelection { rules ->
+        rules.all { ComponentSelection selection ->
+          boolean rejected = ['snap', 'alpha', 'beta', 'rc', 'cr', 'm'].any { qualifier ->
+            selection.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-]*/
+          }
+          if (rejected) {
+            selection.reject('Release candidate')
+          }
+        }
+      }
+    }
+  }
+
+  configurations.all {
+
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+      if (details.requested.group == 'com.fasterxml.jackson.core' && details.requested.name == 'jackson-databind') {
+        details.useVersion '2.11.3'
+        details.because 'fixes critical XML external entity (XXE) attack vulnerability in versions <2.11.0'
+      }
+    }
+
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+      if (details.requested.group == 'org.yaml' && details.requested.name == 'snakeyaml') {
+        details.useVersion '1.27'
+        details.because 'fixes critical DDoS attack vulnerability in versions <1.26'
+      }
+    }
+
+    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+      if (details.requested.group == 'commons-codec' && details.requested.name == 'commons-codec') {
+        details.useVersion '1.13'
+        details.because 'fixes critical Insecure Input Validation vulnerability in versions <1.13'
+      }
+    }
+
+  }
+
+}
+
+subprojects {
+  group = rootProject.group
+  version = rootProject.version
+
+  apply plugin: 'java'
+  apply plugin: 'checkstyle'
+  apply plugin: "com.github.spotbugs"
+  apply plugin: 'jacoco'
+
+  task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+  }
+
+  task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+  }
+
+  //code quality and inspections
+  checkstyle {
+    project.ext.checkstyleVersion = '8.20'
+    ignoreFailures = false
+    configDir = file("$rootDir/checkstyle")
+  }
+
+  spotbugs {
+    toolVersion = '4.0.3'
+    excludeFilter = file("$rootDir/gradle/findbugs-exclude.xml")
+    ignoreFailures = false
+    jvmArgs = [ '-Xms512m' ]
+    maxHeapSize = '768m'
+    showProgress = true
+  }
+  spotbugsMain {
+    reports {
+      xml.enabled = (project.hasProperty('xmlFindBugsReport'))
+      html.enabled = (!project.hasProperty('xmlFindBugsReport'))
+    }
+  }
+  spotbugsTest {
+    reports {
+      xml.enabled = (project.hasProperty('xmlFindBugsReport'))
+      html.enabled = (!project.hasProperty('xmlFindBugsReport'))
+    }
+  }
+  // aggregated task for checkstyle and spotbugs static analyzers
+  task('analyze') {
+    dependsOn('checkstyleMain', 'checkstyleTest', 'spotbugsMain', 'spotbugsTest')
+    doLast {}
+  }
+
+  test.dependsOn('checkstyleMain', 'checkstyleTest', 'spotbugsMain', 'spotbugsTest')
+
+  jar {
+    from "$rootDir/LICENSE"
+    from "$rootDir/NOTICE"
+  }
+
+  test {
+    useJUnit {}
+    testLogging {
+      events "passed", "failed", "skipped"
+      exceptionFormat = 'full'
+    }
+    if (!project.hasProperty("maxParallelForks")) {
+      maxParallelForks = Runtime.runtime.availableProcessors()
+    }
+  }
+}
+
+
+task buildApiWiki(type: Exec) {
+  workingDir '.'
+  commandLine './build_api_wiki.sh'
+}
+
+task assembleLicenses(type: Zip) {
+  dependsOn ':generateLicenseReport'
+  archiveName 'cruise-control-licenses.zip'
+  destinationDir file("$buildDir/licenses")
+  from "$buildDir/reports/dependency-license/"
+}
+
+apply plugin: 'maven-publish'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'cruise-control-licenses'
+            artifact source: assembleLicenses, extension: 'zip'
+        }
+    }
+}

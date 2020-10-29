@@ -24,7 +24,6 @@ public class OverrideDependenciesAction implements Action<Project> {
 
     @Override
     public void execute(Project project) {
-
         project.getConfigurations().all(configuration -> {
             if (configuration.getState() != Configuration.State.UNRESOLVED) {
                 // TODO: Can we use reflection to force the state back to unresolved?

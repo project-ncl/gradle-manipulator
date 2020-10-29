@@ -16,6 +16,7 @@ import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.ManifestUtils;
+import org.jboss.gm.common.utils.ProjectUtils;
 import org.jboss.gm.manipulation.actions.LegacyMavenPublishingRepositoryAction;
 import org.jboss.gm.manipulation.actions.ManifestUpdateAction;
 import org.jboss.gm.manipulation.actions.MavenPomTransformerAction;
@@ -78,13 +79,21 @@ public class ManipulationPlugin implements Plugin<Project> {
 
         final ResolvedDependenciesRepository resolvedDependenciesRepository = new ResolvedDependenciesRepository();
 
-        project.afterEvaluate(p -> {
+        project.afterEvaluate(ignore -> {
+            final Object abn = project.findProperty("archivesBaseName");
+            final String originalName = project.getName();
+
             // This double version set is required - sometimes other plugins seem to override the version we set initially.
             // We need to set it at the start as other plugins also require it there. Hence this belt and braces approach.
             if (!alignmentModel.getVersion().equals(project.getVersion())) {
                 logger.warn("Another plugin has reset the version to {}. Resetting to {}",
                         project.getVersion(), alignmentModel.getVersion());
                 project.setVersion(alignmentModel.getVersion());
+            }
+            if (abn != null && !originalName.equals(abn)) {
+                logger.warn("Located archivesBaseName override ; forcing project name to '{}' from '{}' for correct usage",
+                        abn, originalName);
+                ProjectUtils.updateNameField(project, abn);
             }
         });
 
@@ -95,9 +104,6 @@ public class ManipulationPlugin implements Plugin<Project> {
         configurePublishingTask(configuration, project, correspondingModule, resolvedDependenciesRepository);
     }
 
-    /**
-     * TODO: add functional tests for publishing
-     */
     private void configurePublishingTask(Configuration config, Project project, ManipulationModel correspondingModule,
             ResolvedDependenciesRepository resolvedDependenciesRepository) {
         project.afterEvaluate(evaluatedProject -> {

@@ -121,7 +121,7 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
             // which is removed above. Equally we can't find any way of ensuring the new publish configuration correctly
             // checks the archivesBaseName value - overriding 'configurablePublishArtifact.setName' is insufficient.
             // We add it as an action to minimise any side affects.
-            if (abn != null) {
+            if (abn != null && !project.getName().equals(abn)) {
                 logger.warn("Located archivesBaseName override ; forcing project name to {} from {} for correct deployment",
                         abn, originalName);
                 ProjectUtils.updateNameField(project, abn);
@@ -130,7 +130,7 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
         uploadArchives.doLast(action -> {
             // TODO: Find a better method
             // Now revert the action performed above.
-            if (abn != null) {
+            if (abn != null && !project.getName().equals(abn)) {
                 logger.warn("Resetting project name after archivesBaseName override to {} from {}", originalName, abn);
                 ProjectUtils.updateNameField(project, abn);
             }

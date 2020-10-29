@@ -1,0 +1,204 @@
+{
+  "group" : "org.apache.kafka",
+  "name" : "kafka",
+  "projectPathName" : "tmppa_tjjpugit",
+  "version" : "2.6.0.redhat-00001",
+  "children" : {
+    "core" : {
+      "group" : "org.apache.kafka",
+      "name" : "kafka_2.12",
+      "projectPathName" : "core",
+      "version" : "2.6.0.redhat-00001"
+    },
+    "clients" : {
+      "group" : "org.apache.kafka",
+      "name" : "kafka-clients",
+      "projectPathName" : "clients",
+      "version" : "2.6.0.redhat-00001"
+    },
+    "examples" : {
+      "group" : "org.apache.kafka",
+      "name" : "kafka-examples",
+      "projectPathName" : "examples",
+      "version" : "2.6.0.redhat-00001"
+    },
+    "jmh-benchmarks" : {
+      "group" : "org.apache.kafka",
+      "name" : "jmh-benchmarks",
+      "projectPathName" : "jmh-benchmarks",
+      "version" : "2.6.0.redhat-00001"
+    },
+    "log4j-appender" : {
+      "group" : "org.apache.kafka",
+      "name" : "kafka-log4j-appender",
+      "projectPathName" : "log4j-appender",
+      "version" : "2.6.0.redhat-00001"
+    },
+    "streams" : {
+      "group" : "org.apache.kafka",
+      "name" : "kafka-streams",
+      "projectPathName" : "streams",
+      "version" : "2.6.0.redhat-00001",
+      "children" : {
+        "upgrade-system-tests-20" : {
+          "group" : "org.apache.kafka",
+          "name" : "kafka-streams-upgrade-system-tests-20",
+          "projectPathName" : "upgrade-system-tests-20",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "test-utils" : {
+          "group" : "org.apache.kafka",
+          "name" : "kafka-streams-test-utils",
+          "projectPathName" : "test-utils",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "upgrade-system-tests-0102" : {
+          "group" : "org.apache.kafka",
+          "name" : "kafka-streams-upgrade-system-tests-0102",
+          "projectPathName" : "upgrade-system-tests-0102",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "upgrade-system-tests-25" : {
+          "group" : "org.apache.kafka",
+          "name" : "kafka-streams-upgrade-system-tests-25",
+          "projectPathName" : "upgrade-system-tests-25",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "upgrade-system-tests-0110" : {
+          "group" : "org.apache.kafka",
+          "name" : "kafka-streams-upgrade-system-tests-0110",
+          "projectPathName" : "upgrade-system-tests-0110",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "upgrade-system-tests-23" : {
+          "group" : "org.apache.kafka",
+          "name" : "kafka-streams-upgrade-system-tests-23",
+          "projectPathName" : "upgrade-system-tests-23",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "upgrade-system-tests-24" : {
+          "group" : "org.apache.kafka",
+          "name" : "kafka-streams-upgrade-system-tests-24",
+          "projectPathName" : "upgrade-system-tests-24",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "upgrade-system-tests-0101" : {
+          "group" : "org.apache.kafka",
+          "name" : "kafka-streams-upgrade-system-tests-0101",
+          "projectPathName" : "upgrade-system-tests-0101",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "upgrade-system-tests-10" : {
+          "group" : "org.apache.kafka",
+          "name" : "kafka-streams-upgrade-system-tests-10",
+          "projectPathName" : "upgrade-system-tests-10",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "upgrade-system-tests-21" : {
+          "group" : "org.apache.kafka",
+          "name" : "kafka-streams-upgrade-system-tests-21",
+          "projectPathName" : "upgrade-system-tests-21",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "upgrade-system-tests-0100" : {
+          "group" : "org.apache.kafka",
+          "name" : "kafka-streams-upgrade-system-tests-0100",
+          "projectPathName" : "upgrade-system-tests-0100",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "upgrade-system-tests-11" : {
+          "group" : "org.apache.kafka",
+          "name" : "kafka-streams-upgrade-system-tests-11",
+          "projectPathName" : "upgrade-system-tests-11",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "upgrade-system-tests-22" : {
+          "group" : "org.apache.kafka",
+          "name" : "kafka-streams-upgrade-system-tests-22",
+          "projectPathName" : "upgrade-system-tests-22",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "examples" : {
+          "group" : "org.apache.kafka",
+          "name" : "kafka-streams-examples",
+          "projectPathName" : "examples",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "streams-scala" : {
+          "group" : "org.apache.kafka",
+          "name" : "kafka-streams-scala_2.12",
+          "projectPathName" : "streams-scala",
+          "version" : "2.6.0.redhat-00001"
+        }
+      }
+    },
+    "generator" : {
+      "group" : "org.apache.kafka",
+      "name" : "generator",
+      "projectPathName" : "generator",
+      "version" : "2.6.0.redhat-00001"
+    },
+    "tools" : {
+      "group" : "org.apache.kafka",
+      "name" : "kafka-tools",
+      "projectPathName" : "tools",
+      "version" : "2.6.0.redhat-00001"
+    },
+    "connect" : {
+      "group" : "org.apache.kafka",
+      "name" : "connect",
+      "projectPathName" : "connect",
+      "version" : "2.6.0.redhat-00001",
+      "children" : {
+        "basic-auth-extension" : {
+          "group" : "org.apache.kafka",
+          "name" : "connect-basic-auth-extension",
+          "projectPathName" : "basic-auth-extension",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "mirror" : {
+          "group" : "org.apache.kafka",
+          "name" : "connect-mirror",
+          "projectPathName" : "mirror",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "file" : {
+          "group" : "org.apache.kafka",
+          "name" : "connect-file",
+          "projectPathName" : "file",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "transforms" : {
+          "group" : "org.apache.kafka",
+          "name" : "connect-transforms",
+          "projectPathName" : "transforms",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "json" : {
+          "group" : "org.apache.kafka",
+          "name" : "connect-json",
+          "projectPathName" : "json",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "mirror-client" : {
+          "group" : "org.apache.kafka",
+          "name" : "connect-mirror-client",
+          "projectPathName" : "mirror-client",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "runtime" : {
+          "group" : "org.apache.kafka",
+          "name" : "connect-runtime",
+          "projectPathName" : "runtime",
+          "version" : "2.6.0.redhat-00001"
+        },
+        "api" : {
+          "group" : "org.apache.kafka",
+          "name" : "connect-api",
+          "projectPathName" : "api",
+          "version" : "2.6.0.redhat-00001"
+        }
+      }
+    }
+  }
+}

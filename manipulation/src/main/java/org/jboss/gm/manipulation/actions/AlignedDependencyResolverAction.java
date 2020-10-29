@@ -49,15 +49,12 @@ public class AlignedDependencyResolverAction implements Action<DependencyResolve
         }
 
         final ProjectVersionRef requestedGAV = withGAV(requested.getGroup(), requested.getName(), version);
-
         final Map<String, ProjectVersionRef> alignedDependencies = module.getAlignedDependencies();
         final String key = requestedGAV.toString();
         final ProjectVersionRef aligned = alignedDependencies.get(key);
 
         if (aligned != null) {
-
             logger.info("Overriding dependency {} with new version {}", key, aligned);
-
             resolveDetails.because(key + " is aligned to " + aligned.toString()).useVersion(aligned.getVersionString());
         } else {
             logger.debug("Unable to find a mapping for {} in module {} with alignedDependencies {}", key, module.getName(),

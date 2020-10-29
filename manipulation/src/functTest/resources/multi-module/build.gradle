@@ -13,7 +13,6 @@ allprojects {
     repositories {
         mavenCentral()
 
-        // TODO: this will need to be removed when the plugin takes care of things
         publishing {
             publications {
                 main(MavenPublication) {

@@ -20,7 +20,7 @@ plugins {
     id("io.freefair.lombok") version "4.1.6" apply false
     id("net.linguica.maven-settings") version "0.5"
     id("net.researchgate.release") version "2.8.1"
-    id("org.ajoberstar.grgit") version "3.1.0"
+    id("org.ajoberstar.grgit") version "4.1.0"
 }
 
 apply(plugin = "net.researchgate.release")
@@ -110,20 +110,20 @@ allprojects {
 subprojects {
     val isReleaseBuild = ("true" == System.getProperty("release",""))
 
-    extra["gradleVersion"] = "5.6.2"
+    extra["gradleVersion"] = "5.6.4"
     extra["atlasVersion"] = "0.17.2"
     extra["assertjVersion"] = "3.12.2"
-    extra["bytemanVersion"] = "4.0.7"
+    extra["bytemanVersion"] = "4.0.13"
     extra["commonsVersion"] = "2.6"
     extra["commonsBeanVersion"] = "1.9.4"
-    extra["jacksonVersion"] = "2.10.0.pr1"
-    extra["junitVersion"] = "4.12"
-    extra["groovyVersion"] = "2.5.8"
+    extra["jacksonVersion"] = "2.11.2"
+    extra["junitVersion"] = "4.13.1"
+    extra["groovyVersion"] = "3.0.5"
     extra["logbackVersion"] = "1.2.3"
     extra["mavenVersion"] = "3.5.0"
-    extra["ownerVersion"] = "1.0.10"
-    extra["pmeVersion"] = "4.0"
-    extra["slf4jVersion"] = "1.7.25"
+    extra["ownerVersion"] = "1.0.12"
+    extra["pmeVersion"] = "4.1"
+    extra["slf4jVersion"] = "1.7.30"
     extra["systemRulesVersion"] = "1.19.0"
 
     apply(plugin = "com.diffplug.gradle.spotless")
@@ -175,20 +175,21 @@ subprojects {
             classifier = ""
             // no need to add analyzer.init.gradle in the jar since it will never be used from inside the plugin itself
             exclude("analyzer-init.gradle")
-            // Minimise the resulting uber-jars to ensure we don't have massive jars
-            minimize() {
-                // Sometimes minimisation takes away too much ... ensure we keep these.
-                exclude(dependency("com.fasterxml.jackson.core:.*:.*"))
-                exclude(dependency("org.commonjava.maven.ext:.*:.*"))
-                exclude(dependency("org.commonjava.maven.atlas:.*:.*"))
-                exclude(dependency("org.aeonbits.owner:.*:.*"))
-                exclude(dependency("org.slf4j:.*:.*"))
-            }
+           // Minimise the resulting uber-jars to ensure we don't have massive jars
+           minimize() {
+               // Sometimes minimisation takes away too much ... ensure we keep these.
+               exclude(dependency("com.fasterxml.jackson.core:.*:.*"))
+               exclude(dependency("org.commonjava.maven.ext:.*:.*"))
+               exclude(dependency("org.commonjava.maven.atlas:.*:.*"))
+               exclude(dependency("org.aeonbits.owner:.*:.*"))
+               exclude(dependency("org.slf4j:.*:.*"))
+               exclude(dependency("org.apache.maven:.*:.*"))
+           }
             doFirst {
                 manifest {
                     attributes["Built-By"] = System.getProperty("user.name")
                     attributes["Build-Timestamp"] = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(Date())
-                    attributes["Scm-Revision"] = Grgit.open().use { g -> g.head().id }
+                    attributes["Scm-Revision"] = Grgit.open(mapOf("currentDir" to project.rootDir)).use { g -> g.head().id }
                     attributes["Created-By"] = "Gradle ${gradle.gradleVersion}"
                     attributes["Build-Jdk"] = System.getProperty("java.version") + " ; " + System.getProperty("java.vendor") + " ; " + System.getProperty("java.vm.version")
                     attributes["Build-OS"] = System.getProperty("os.name") + " ; " + System.getProperty("os.arch") + " ; " + System.getProperty("os.version")

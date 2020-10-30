@@ -31,6 +31,10 @@ dependencies {
     compile("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
     compile("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")
 
+    runtime("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
+    runtime("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
+    runtime("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
+
     testCompile("junit:junit:${project.extra.get("junitVersion")}")
     testCompile("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
     testCompile("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")

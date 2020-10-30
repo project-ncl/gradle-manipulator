@@ -26,6 +26,10 @@ dependencies {
     compile("org.commonjava.maven.ext:pom-manipulation-core:${project.extra.get("pmeVersion")}")
     compile("org.commonjava.maven.ext:pom-manipulation-io:${project.extra.get("pmeVersion")}")
 
+    runtime("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
+    runtime("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
+    runtime("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
+
     // This is to prevent compilation errors in conjunction with Lombok due to use of PME code.
     compileOnly("org.apache.maven:maven-compat:3.5.0")
     permitUnusedDeclared("org.apache.maven:maven-compat:3.5.0")

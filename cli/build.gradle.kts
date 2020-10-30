@@ -17,6 +17,10 @@ dependencies {
     compile("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
     compile("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
 
+    runtime("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
+    runtime("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
+    runtime("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
+
     testCompile("commons-io:commons-io:${project.extra.get("commonsVersion")}")
     testImplementation(testFixtures(project(":common")))
     testCompile(project(":analyzer"))

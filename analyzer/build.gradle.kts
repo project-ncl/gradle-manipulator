@@ -30,6 +30,9 @@ dependencies {
     compile("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
     compile("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")
 
+    runtime("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
+    runtime("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
+    runtime("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
     compile("org.apache.maven:maven-settings-builder:${project.extra.get("mavenVersion")}")
     compile("org.apache.maven:maven-settings:${project.extra.get("mavenVersion")}")
 
@@ -63,6 +66,10 @@ dependencies {
     permitUsedUndeclared("org.aeonbits.owner:owner:${project.extra.get("ownerVersion")}")
 }
 
+tasks.test {
+    systemProperties["jdk.attach.allowAttachSelf"] = "true"
+}
+
 // separate source set and task for functional tests
 
 sourceSets.create("functionalTest") {
@@ -90,6 +97,7 @@ val functionalTest = task<Test>("functionalTest") {
     mustRunAfter(tasks["test"])
     //this will be used in the Wiremock tests - the port needs to match what Wiremock is setup to use
     environment("DA_ENDPOINT_URL", "http://localhost:8089/da/rest/v-1")
+    systemProperties["jdk.attach.allowAttachSelf"] = "true"
 }
 
 val testJar by tasks.registering(Jar::class) {

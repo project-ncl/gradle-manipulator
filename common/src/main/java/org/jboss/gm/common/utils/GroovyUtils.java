@@ -93,7 +93,7 @@ public class GroovyUtils {
             if (targetStage == stage || InvocationStage.BOTH == stage) {
                 // Inject the values via a new BaseScript so user's can have completion.
                 if (script instanceof BaseScript) {
-                    ((BaseScript) script).setValues(stage, target, configuration.getProperties(), rootProject,
+                    ((BaseScript) script).setValues(logger, stage, target, configuration.getProperties(), rootProject,
                             alignmentModel);
                 } else {
                     throw new ManipulationException("Cannot cast {} to a BaseScript to set values.", script);

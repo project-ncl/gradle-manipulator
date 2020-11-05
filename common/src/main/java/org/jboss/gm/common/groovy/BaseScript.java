@@ -26,7 +26,7 @@ public abstract class BaseScript extends GradleBaseScript {
 
     // Explicitly using LoggerFactory not GMLogger to avoid NoClassDefFound issues with cli jar.
     @Getter
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected Logger logger;
 
     private ManipulationModel model;
 
@@ -112,8 +112,9 @@ public abstract class BaseScript extends GradleBaseScript {
      * @param rootProject Current project
      * @param model the current aligned model.
      */
-    public void setValues(InvocationStage stage, File rootDir, Properties properties, Project rootProject,
+    public void setValues(Logger logger, InvocationStage stage, File rootDir, Properties properties, Project rootProject,
             ManipulationModel model) {
+        this.logger = logger;
         this.stage = stage;
         this.rootProject = rootProject;
         this.model = model;

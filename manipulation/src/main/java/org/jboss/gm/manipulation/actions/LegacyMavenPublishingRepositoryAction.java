@@ -135,6 +135,8 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
                 ProjectUtils.updateNameField(project, abn);
             }
         });
+        // Don't publish the Ivy files.
+        uploadArchives.setUploadDescriptor(false);
 
         // add an artifact referencing the POM
         project.getArtifacts().add("publishArchives",

@@ -95,5 +95,6 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
         Path pathToArtifacts = repoDirectory.toPath().resolve(PATH_IN_REPOSITORY);
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile().exists()).isTrue();
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar").toFile().exists()).isTrue();
+        assertThat(pathToArtifacts.resolve("ivy-1.0.1-redhat-00001.xml").toFile().exists()).isFalse();
     }
 }

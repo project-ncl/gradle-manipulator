@@ -59,6 +59,11 @@ java -jar cli.jar --target=<gradle-project> -d
     generateAlignmentMetadata
 ```
 
+It is possible to run the Gradle process using a different JDK by passing in the following parameter:
+
+    -Dorg.gradle.java.home=<JDK-Location>
+
+
 To obtain the CLI it may be downloaded from Maven Central [here](https://repo1.maven.org/maven2/org/jboss/gm/cli).
 
 ##### Disabling the alignment

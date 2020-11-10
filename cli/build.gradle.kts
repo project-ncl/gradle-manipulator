@@ -26,6 +26,10 @@ dependencies {
     testCompile(project(":analyzer"))
     testCompile("junit:junit:${project.extra.get("junitVersion")}")
     testCompile("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
+    testCompile("org.codehaus.plexus:plexus-archiver:4.2.3")
+    testImplementation("com.konghq:unirest-java:3.10.00")
+    testImplementation("commons-lang:commons-lang:${project.extra.get("commonsVersion")}")
+    testImplementation("org.eclipse.sisu:org.eclipse.sisu.plexus:0.3.3")
 
     // Lombok comes via plugin
     permitUsedUndeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")

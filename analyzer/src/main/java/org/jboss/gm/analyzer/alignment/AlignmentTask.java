@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -198,6 +199,17 @@ public class AlignmentTask extends DefaultTask {
                     logger.info("Updating model version for {} from {} to {}", project.getRootProject(),
                             project.getRootProject().getVersion(), newVersion);
                     alignmentModel.setVersion(newVersion);
+                }
+                // Even if version modification is disabled, set the original version for consistency in the JSON file.
+                Optional<Project> originalVersion = project.getRootProject().getAllprojects()
+                        .stream()
+                        .filter(p -> !DEFAULT_VERSION.equals(
+                                p.getVersion().toString()))
+                        .findAny();
+                if (originalVersion.isPresent()) {
+                    alignmentModel.setOriginalVersion(originalVersion.get().getVersion().toString());
+                } else {
+                    throw new ManipulationUncheckedException("Unable to locate a suitable original version");
                 }
 
                 // Iterate through all modules and set their version

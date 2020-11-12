@@ -58,7 +58,7 @@ public class AlignmentTaskEmptyVersionTest {
     public final TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public final LoggingRule loggingRule = new LoggingRule(LogLevel.INFO);

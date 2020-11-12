@@ -67,6 +67,11 @@ public class ManipulationModel {
     @Setter
     protected String version;
 
+    @JsonProperty
+    @Getter
+    @Setter
+    private String originalVersion;
+
     /**
      * Computed aligned dependencies for this project, indexed by the previous GAV of the dependency, e.g.
      * {@code org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1} could be the key for a dependency aligned with

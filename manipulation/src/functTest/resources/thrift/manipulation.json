@@ -1,0 +1,7 @@
+{
+  "group" : "org.apache.thrift",
+  "name" : "libthrift",
+  "projectPathName" : "libthrift",
+  "version" : "0.13.0.temporary-redhat-00001",
+  "originalVersion" : "0.13.0-SNAPSHOT"
+}

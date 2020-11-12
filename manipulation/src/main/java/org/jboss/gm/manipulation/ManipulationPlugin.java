@@ -69,13 +69,14 @@ public class ManipulationPlugin implements Plugin<Project> {
         }
 
         // get the previously performed alignment
-        final ManipulationModel alignmentModel = ManipulationIO.readManipulationModel(project.getRootDir());
-        final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project);
+        final ManipulationModel correspondingModule = ManipulationIO.readManipulationModel(project.getRootDir())
+                .findCorrespondingChild(project);
 
         // we need to change the project version early so various tasks that ready early and create other vars based on it
         // (like the zip tasks) can use the correct version
-        logger.info("Updating project version {} to {} ", project.getVersion(), alignmentModel.getVersion());
-        project.setVersion(alignmentModel.getVersion());
+        logger.info("Updating project ({}) version {} to {} ", project.getProjectDir(), project.getVersion(),
+                correspondingModule.getVersion());
+        project.setVersion(correspondingModule.getVersion());
 
         final ResolvedDependenciesRepository resolvedDependenciesRepository = new ResolvedDependenciesRepository();
 
@@ -85,10 +86,10 @@ public class ManipulationPlugin implements Plugin<Project> {
 
             // This double version set is required - sometimes other plugins seem to override the version we set initially.
             // We need to set it at the start as other plugins also require it there. Hence this belt and braces approach.
-            if (!alignmentModel.getVersion().equals(project.getVersion())) {
-                logger.warn("Another plugin has reset the version to {}. Resetting to {}",
-                        project.getVersion(), alignmentModel.getVersion());
-                project.setVersion(alignmentModel.getVersion());
+            if (!correspondingModule.getVersion().equals(project.getVersion())) {
+                logger.warn("After evaluation, another plugin has reset the version to {}. Resetting to {}",
+                        project.getVersion(), correspondingModule.getVersion());
+                project.setVersion(correspondingModule.getVersion());
             }
             if (abn != null && !originalName.equals(abn)) {
                 logger.warn("Located archivesBaseName override ; forcing project name to '{}' from '{}' for correct usage",

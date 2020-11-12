@@ -1,0 +1,130 @@
+
+plugins{
+    // including this plugin directly instead of by an init script, which allows to use the freshly build version
+    id 'org.jboss.gm.manipulation'
+}
+allprojects {
+    apply plugin: 'org.jboss.gm.manipulation'
+}
+
+subprojects {
+    apply plugin: "java"
+    apply plugin: "osgi"
+
+    group = "org.reactivestreams"
+    version = "1.0.3"
+
+    sourceCompatibility = 1.6
+    targetCompatibility = 1.6
+
+    tasks.withType(JavaCompile) {
+        configure(options) {
+            compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+            encoding = "UTF-8"
+        }
+    }
+
+    tasks.withType(Javadoc) {
+        configure(options) {
+            encoding "UTF-8"
+            docEncoding "UTF-8"
+            charSet "UTF-8"
+            linkSource true
+            noTimestamp true
+        }
+    }
+
+    tasks.withType(Test) {
+      testLogging {
+        exceptionFormat "full"
+        events "failed", "started", "standard_out", "standard_error"
+      }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+
+    jar {
+        manifest {
+            instructionReplace "Bundle-Vendor", "Reactive Streams SIG"
+            instructionReplace "Bundle-Description", "Reactive Streams API"
+            instructionReplace "Bundle-DocURL", "http://reactive-streams.org"
+            instructionReplace "Bundle-Version", "1.0.3"
+        }
+    }
+
+    if (name in ["reactive-streams"
+                 // ,
+                 // "reactive-streams-tck",
+                 // "reactive-streams-tck-flow",
+                 // "reactive-streams-examples"
+    ]) {
+        apply plugin: "maven"
+        apply plugin: "maven-publish"
+
+        task sourcesJar(type: Jar) {
+            classifier "sources"
+            from sourceSets.main.allSource
+        }
+
+        task javadocJar(type: Jar) {
+            classifier "javadoc"
+            from javadoc
+        }
+
+        publishing {
+          publications {
+            mavenJava(MavenPublication) {
+              from components.java
+              artifact (sourcesJar)
+              artifact (javadocJar)
+            }
+          }
+          repositories {
+            mavenLocal()
+          }
+        }
+
+        artifacts {
+            archives sourcesJar, javadocJar
+        }
+
+        tasks.withType(Upload) {
+            repositories.withType(MavenResolver) {
+                it.pom.whenConfigured { pom ->
+                    pom.project {
+                        url "http://www.reactive-streams.org/"
+                        name "reactive-streams"
+                        description "A Protocol for Asynchronous Non-Blocking Data Sequence"
+                        inceptionYear "2014"
+
+                        scm {
+                            url "git@github.com:reactive-streams/reactive-streams.git"
+                            connection "scm:git:git@github.com:reactive-streams/reactive-streams.git"
+                        }
+
+                        licenses {
+                            license {
+                                name "CC0"
+                                url "http://creativecommons.org/publicdomain/zero/1.0/"
+                                distribution "repo"
+                            }
+                        }
+
+                        developers {
+                            developer {
+                                id "reactive-streams-sig"
+                                name "Reactive Streams SIG"
+                                url "http://www.reactive-streams.org/"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        uploadArchives.enabled = false
+    }
+}

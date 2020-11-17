@@ -132,8 +132,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(repositories).extracting("url")
                 // should not contain duplicate entries
                 .containsOnly(
-                        "https://repo.maven.apache.org/maven2/",
-                        "https://plugins.gradle.org/m2/");
+                        "https://repo.maven.apache.org/maven2/");
 
         // make sure the project name was not changed
         List<String> settingsLines = org.apache.commons.io.FileUtils.readLines(new File(projectRoot, "settings.gradle"),

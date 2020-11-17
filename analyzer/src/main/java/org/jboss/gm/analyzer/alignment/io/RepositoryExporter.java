@@ -54,8 +54,6 @@ public final class RepositoryExporter {
 
     public static void export(Map<ArtifactRepository, Path> repositories, File settingsFile) {
         RepositoryExporter repositoryExporter = new RepositoryExporter();
-
-        addRepository(REPO_TYPE.Maven, repositoryExporter, "Gradle Plugin Repository", "https://plugins.gradle.org/m2/");
         processRepositories(repositoryExporter, repositories);
 
         SettingsIO settingsWriter = new SettingsIO(new DefaultSettingsBuilder());

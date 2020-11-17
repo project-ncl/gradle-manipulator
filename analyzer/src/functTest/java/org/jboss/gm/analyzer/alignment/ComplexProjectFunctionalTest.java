@@ -112,7 +112,6 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
                 "https://repo.maven.apache.org/maven2/",
                 "https://oss.sonatype.org/content/repositories/snapshots/",
                 "https://localhost:8089/ivy-repo",
-                "https://plugins.gradle.org/m2/",
                 "https://dl.google.com/dl/android/maven2/",
                 "https://jcenter.bintray.com/");
     }

@@ -44,7 +44,9 @@ CLI to optionally run Groovy scripts and then invoke Gradle.
   -V, --version           Print version information and exit.
 ```
 
-Apart from the Groovy scripting, the CLI can enable debug logging, specify the Gradle distribution to use, the target directory to operate on and finally all remaining parameters will be passed directly to the Gradle build e.g,
+Apart from the Groovy scripting, the CLI can modify colour output, enable debug logging, pass extra `-D` parameters, specify the Gradle distribution to use and specify the target directory to operate on.
+
+Note that the CLI will capture [unmatched arguments](https://picocli.info/#unmatched-annotation) and pass them directly to the Gradle build. For example, below `--stacktrace`, `--init-script` and the task exclusion of `-x task-to-exclude` are all passed to Gradle.
 
 ```
 java -jar cli.jar --target=<gradle-project> -d
@@ -57,6 +59,7 @@ java -jar cli.jar --target=<gradle-project> -d
     -DrestRepositoryGroup=DA-temporary-builds
     -DgroovyScripts=file:///tmp/fixup.groovy
     generateAlignmentMetadata
+    -x task-to-exclude
 ```
 
 It is possible to run the Gradle process using a different JDK by passing in the following parameter:

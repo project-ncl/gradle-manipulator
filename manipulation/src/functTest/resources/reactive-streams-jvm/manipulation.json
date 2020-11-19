@@ -1,0 +1,15 @@
+{
+  "group" : "org.reactivestreams",
+  "name" : "reactive-streams",
+  "projectPathName" : "reactive-streams",
+  "version" : "1.0.3.temporary-redhat-00001",
+  "originalVersion" : "1.0.3",
+  "children" : {
+    "reactive-streams" : {
+      "group" : "org.reactivestreams",
+      "name" : "reactive-streams",
+      "projectPathName" : "reactive-streams",
+      "version" : "1.0.3.temporary-redhat-00001"
+    }
+  }
+}

@@ -139,6 +139,7 @@ public final class TestUtils {
             version = m.getVersion();
             alignedDependencies = m.getAlignedDependencies();
             children = m.getChildren();
+            setOriginalVersion( m.getOriginalVersion() );
         }
 
         /**

@@ -7,6 +7,7 @@ dependencies {
 
     // Minimum Gradle API to provide the Project. Not using gradleApi as that pulls in too much.
     compile("org.gradle:gradle-core-api:${project.extra.get("gradleVersion")}")
+    compile("org.gradle:gradle-base-services:${project.extra.get("gradleVersion")}")
 
     compile(project(":common"))
     compile("org.gradle:gradle-tooling-api:${project.extra.get("gradleVersion")}")

@@ -29,6 +29,7 @@ import org.gradle.tooling.model.build.BuildEnvironment;
 import org.gradle.util.GradleVersion;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.GroovyUtils;
+import org.jboss.gm.common.utils.JavaUtils;
 import org.jboss.gm.common.utils.ManifestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,14 +120,14 @@ public class Main implements Callable<Void> {
         return result;
     }
 
-    private void verifyBuildEnvironment(ProjectConnection connection) throws ManipulationException {
+    private File verifyBuildEnvironment(ProjectConnection connection) throws ManipulationException {
         try {
             BuildEnvironment env = connection.getModel(BuildEnvironment.class);
             String versionString = env.getGradle().getGradleVersion();
             GradleVersion version = GradleVersion.version(versionString);
 
             logger.info("Gradle version: {}", versionString);
-            logger.info("Java home: {}", env.getJava().getJavaHome());
+            logger.info("Java home: {}", JavaUtils.getJavaHome());
             logger.info("JVM arguments: {}", env.getJava().getJvmArguments());
 
             if (version.compareTo(MIN_GRADLE_VERSION) < 0) {
@@ -136,6 +137,8 @@ public class Main implements Callable<Void> {
                 logger.warn("{} has not been tested. Only versions less than {} are supported.", version,
                         MAX_GRADLE_VERSION);
             }
+
+            return env.getJava().getJavaHome();
         } catch (GradleConnectionException e) {
             Throwable firstCause = e.getCause();
 
@@ -187,7 +190,14 @@ public class Main implements Callable<Void> {
         }
 
         try (ProjectConnection connection = connector.connect()) {
-            verifyBuildEnvironment(connection);
+            File javaHome = verifyBuildEnvironment(connection);
+
+            if (!JavaUtils.compareJavaHome(javaHome)) {
+                // Gradle handles detecting the location in GRADLE_JAVA_HOME. If it doesn't match
+                // what it has detected that is an internal error but should never happen.
+                logger.info("Java home overridden to: {}", javaHome.getAbsolutePath());
+            }
+            envVars.put("JAVA_HOME", javaHome.getAbsolutePath());
 
             BuildLauncher build = connection.newBuild();
             Set<String> jvmArgs = jvmPropertyParams.entrySet().stream()

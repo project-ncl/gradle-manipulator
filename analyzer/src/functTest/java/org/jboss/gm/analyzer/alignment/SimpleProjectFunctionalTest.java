@@ -79,7 +79,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                 org.jboss.gm.common.utils.FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
-            assertThat(am.getOriginalVersion()).isEqualTo( "1.0.1" );
+            assertThat(am.getOriginalVersion()).isEqualTo("1.0.1");
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
             assertThat(am.getName()).isEqualTo("root");
             assertThat(am.findCorrespondingChild("root")).satisfies(root -> {

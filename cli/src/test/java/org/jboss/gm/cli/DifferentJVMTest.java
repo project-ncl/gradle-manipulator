@@ -81,6 +81,55 @@ public class DifferentJVMTest {
     }
 
     @Test
+    public void runWithDefaultJDK() throws Exception {
+        Assume.assumeTrue(SystemUtils.IS_OS_LINUX);
+
+        final File target = tempDir.newFolder();
+        final File source = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
+        final File root = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath())
+                .getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();
+        final File projectRoot = new File(target, source.getName());
+        FileUtils.copyFile(source, projectRoot);
+
+        // This hack-fest is because the development version is not in Maven Central so it won't be resolvable
+        // This adds the compiled libraries as flat dir repositories.
+        final File initFile = tempDir.newFile();
+        String init = FileUtils.readFileToString(new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
+                Charset.defaultCharset());
+        init = init.replaceFirst("(mavenCentral[(][)])", "$1" +
+                "\n        flatDir {\n        dirs '" +
+                new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent() +
+                "'\n        }\n" +
+                "\n        flatDir {\n        dirs '" +
+                new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent() +
+                "'\n        }\n");
+        System.out.println("Writing to " + initFile + ":" + init);
+        FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
+
+        Properties actualVersion = new Properties();
+        actualVersion.load(new FileReader(new File(root, "gradle.properties")));
+
+        Main m = new Main();
+        String[] args = new String[] { "-t", projectRoot.getParentFile().getAbsolutePath(), "generateAlignmentMetadata",
+                "--init-script=" + initFile.getCanonicalPath(),
+                "-DdependencySource=NONE",
+                "-DignoreUnresolvableDependencies=true",
+                "-DdependencyOverride.junit:junit@*=4.10",
+                "--info"
+        };
+        m.run(args);
+
+        File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), "gme.gradle");
+        assertTrue(systemOutRule.getLog().contains("Task :generateAlignmentMetadata"));
+        assertTrue(systemOutRule.getLog().matches("(?s).*Environment:.*JAVA_HOME:.*"));
+
+        System.out.println("Verifying it has injected gme.gradle with version " + actualVersion.getProperty("version"));
+        assertTrue(gmeGradle.exists());
+        assertTrue(FileUtils.readFileToString(gmeGradle, Charset.defaultCharset())
+                .contains("org.jboss.gm:manipulation:" + actualVersion.getProperty("version")));
+    }
+
+    @Test
     public void runWithJDK8() throws Exception {
         Assume.assumeTrue(SystemUtils.IS_OS_LINUX);
 
@@ -120,10 +169,12 @@ public class DifferentJVMTest {
         };
         m.run(args);
 
-        assertTrue(systemOutRule.getLog().contains("Java home: " + jdk8));
-        File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), "gme.gradle");
+        assertTrue(systemOutRule.getLog().contains("Java home: "));
+        assertTrue(systemOutRule.getLog().contains("Java home overridden to: " + jdk8.getAbsolutePath()));
         assertTrue(systemOutRule.getLog().contains("Task :generateAlignmentMetadata"));
+        assertTrue(systemOutRule.getLog().matches("(?s).*Environment.*JAVA_HOME.*jdk8.*"));
 
+        File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), "gme.gradle");
         System.out.println("Verifying it has injected gme.gradle with version " + actualVersion.getProperty("version"));
         assertTrue(gmeGradle.exists());
         assertTrue(FileUtils.readFileToString(gmeGradle, Charset.defaultCharset())
@@ -172,7 +223,7 @@ public class DifferentJVMTest {
 
         assertTrue(systemErrRule.getLog().contains(
                 "Build exception but unable to transfer message due to mix of JDK versions. Examine log for problems"));
-        assertTrue(systemOutRule.getLog().contains("Java home: " + jdk8));
+        assertTrue(systemOutRule.getLog().contains("Java home overridden to: " + jdk8));
         File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), "gme.gradle");
         assertTrue(systemErrRule.getLog().contains("Task 'FOOgenerateAlignmentMetadataBAR' not found in root project"));
         assertFalse(gmeGradle.exists());

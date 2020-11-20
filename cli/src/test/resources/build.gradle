@@ -35,6 +35,12 @@ task api(type: Javadoc) {
         project.sourceSets.main.allJava
     }
 }
+
+System.out.println("Environment: " + System.getenv())
+if ( System.getenv("JAVA_HOME") == null ) {
+    throw new RuntimeException()
+}
+
 task getGitVersion {
     def outputAsString = ""
     new ByteArrayOutputStream().withStream { os ->

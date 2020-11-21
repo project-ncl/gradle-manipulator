@@ -57,7 +57,7 @@ tasks.register("fixupReadme") {
             }
             Files.move(File(tmp, "README.md").toPath(), source.toPath(), StandardCopyOption.REPLACE_EXISTING)
 
-            val grgit = Grgit.open()
+            val grgit = Grgit.open(mapOf("currentDir" to project.rootDir))
             // Only commit README if there are any changes.
             if (!grgit.status().isClean()) {
                 logger.info ("Committing README update")

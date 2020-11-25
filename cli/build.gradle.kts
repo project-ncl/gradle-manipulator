@@ -18,6 +18,9 @@ dependencies {
     implementation("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
     implementation("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
 
+    // Owner: Need Java8 dependency which pulls in owner itself.
+    implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
+
     runtimeOnly("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
     runtimeOnly("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
     runtimeOnly("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
@@ -28,25 +31,6 @@ dependencies {
     testImplementation("junit:junit:${project.extra.get("junitVersion")}")
     testImplementation("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
     testImplementation("org.codehaus.plexus:plexus-archiver:4.2.3")
-//    // Lombok comes via plugin
-//    permitUnusedDeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
-//    permitTestUnusedDeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
-//
-//    // Tooling API needs SLF4J
-//    permitUnusedDeclared("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
-//
-    // Owner: Need Java8 dependency which pulls in owner itself.
-    implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
-//    permitUnusedDeclared("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
-//    permitUsedUndeclared("org.aeonbits.owner:owner:${project.extra.get("ownerVersion")}")
-//
-//    permitUnusedDeclared("ch.qos.logback:logback-core:${project.extra.get("logbackVersion")}")
-//
-//    // The CLI needs to be able to run groovy.
-//    permitUnusedDeclared("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
-//
-//    // The CLI needs to be able to run groovy.
-//    permitUnusedDeclared("org.gradle:gradle-core-api:${project.extra.get("gradleVersion")}")
 }
 
 tasks {

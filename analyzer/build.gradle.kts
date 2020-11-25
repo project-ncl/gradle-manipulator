@@ -56,17 +56,6 @@ dependencies {
     testImplementation("org.mockito:mockito-core:2.27.0")
     testImplementation("com.github.tomakehurst:wiremock-jre8:2.26.3")
     testImplementation(gradleKotlinDsl())
-
-    // Groovy is built into Gradle
-//    permitUsedUndeclared("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
-//
-//    // Lombok comes via plugin
-//    permitUnusedDeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
-//    permitTestUnusedDeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
-//
-//    // Owner: Need Java8 dependency which pulls in owner itself.
-//    permitUnusedDeclared("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
-//    permitUsedUndeclared("org.aeonbits.owner:owner:${project.extra.get("ownerVersion")}")
 }
 
 tasks.test {

@@ -31,6 +31,9 @@ dependencies {
     implementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
     implementation("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")
 
+    // Owner: Need Java8 dependency which pulls in owner itself.
+    implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
+
     runtimeOnly("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
     runtimeOnly("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
     runtimeOnly("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
@@ -46,19 +49,6 @@ dependencies {
     // GradleAPI in test compile to get access to org.gradle.internal.Pair
     testImplementation(gradleApi())
     testImplementation(gradleTestKit())
-
-//    permitTestUnusedDeclared("junit:junit:${project.extra.get("junitVersion")}")
-//    permitTestUnusedDeclared("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
-//    permitTestUnusedDeclared("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
-//
-//    // Lombok comes via plugin
-//    permitUnusedDeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
-//    permitTestUnusedDeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
-//
-    // Owner: Need Java8 dependency which pulls in owner itself.
-    implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
-//    permitUnusedDeclared("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
-//    permitUsedUndeclared("org.aeonbits.owner:owner:${project.extra.get("ownerVersion")}")
 }
 
 // separate source set and task for functional tests

@@ -48,8 +48,6 @@ import ch.qos.logback.classic.Level;
 public class Main implements Callable<Void> {
     private static final GradleVersion MIN_GRADLE_VERSION = GradleVersion.version("4.10");
 
-    private static final GradleVersion MAX_GRADLE_VERSION = GradleVersion.version("6.5");
-
     private final GradleConnector connector = GradleConnector.newConnector();
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -133,9 +131,6 @@ public class Main implements Callable<Void> {
             if (version.compareTo(MIN_GRADLE_VERSION) < 0) {
                 throw new ManipulationException("{} is too old and is unsupported. You need at least {}.", version,
                         MIN_GRADLE_VERSION);
-            } else if (version.compareTo(MAX_GRADLE_VERSION) >= 0) {
-                logger.warn("{} has not been tested. Only versions less than {} are supported.", version,
-                        MAX_GRADLE_VERSION);
             }
 
             return env.getJava().getJavaHome();

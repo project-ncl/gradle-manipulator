@@ -27,6 +27,10 @@ before_install: |
     wget https://services.gradle.org/distributions/gradle-6.5.1-bin.zip
     unzip -qq -d $HOME/bin gradle-6.5.1-bin.zip
   fi
+  if ! [ -d $HOME/bin/gradle-6.7.1 ]; then
+    wget https://services.gradle.org/distributions/gradle-6.7.1-bin.zip
+    unzip -qq -d $HOME/bin gradle-6.7.1-bin.zip
+  fi
 
 
 install: /bin/true
@@ -50,10 +54,18 @@ jobs:
       - export PATH=$GRADLE_HOME/bin:$PATH
       - travis-wait-enhanced --timeout=60m --interval=4m -- gradle --no-daemon --stacktrace clean build
 
-  # - stage: test
-  #   name: "Gradle 6.5.1"
-  #   if: type = pull_request
-  #   script:
-  #     - export GRADLE_HOME=$HOME/bin/gradle-6.5.1
-  #     - export PATH=$GRADLE_HOME/bin:$PATH
-  #     - travis-wait-enhanced --timeout=60m --interval=4m -- gradle --no-daemon --stacktrace clean build
+  - stage: test
+    name: "Gradle 6.5.1"
+    if: type = pull_request
+    script:
+      - export GRADLE_HOME=$HOME/bin/gradle-6.5.1
+      - export PATH=$GRADLE_HOME/bin:$PATH
+      - travis-wait-enhanced --timeout=60m --interval=4m -- gradle --no-daemon --stacktrace clean build
+
+  - stage: test
+    name: "Gradle 6.7.1"
+    if: type = pull_request
+    script:
+      - export GRADLE_HOME=$HOME/bin/gradle-6.7.1
+      - export PATH=$GRADLE_HOME/bin:$PATH
+      - travis-wait-enhanced --timeout=60m --interval=4m -- gradle --no-daemon --stacktrace clean build

@@ -121,6 +121,7 @@ modify `README.md` to ensure it points to the correct version.
 
 #### Prerequisites
 
+* Run the release using Gradle 5.6.4 (currently later 6.x produce much larger jars)
 * Sign up for a Gradle account (see details [here](https://guides.gradle.org/publishing-plugins-to-gradle-plugin-portal/#create_an_account_on_the_gradle_plugin_portal))
 * Make sure you can push changes to Maven Central
 * Create or update the required `$HOME/.gradle/gradle.properties` locally with data from the API key (which can be found in your gradle account)

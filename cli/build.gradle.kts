@@ -2,54 +2,51 @@ group = "org.jboss.gm"
 
 dependencies {
 
-    compile("ch.qos.logback:logback-classic:${project.extra.get("logbackVersion")}")
-    compile("ch.qos.logback:logback-core:${project.extra.get("logbackVersion")}")
+    implementation("ch.qos.logback:logback-classic:${project.extra.get("logbackVersion")}")
+    implementation("ch.qos.logback:logback-core:${project.extra.get("logbackVersion")}")
 
     // Minimum Gradle API to provide the Project. Not using gradleApi as that pulls in too much.
-    compile("org.gradle:gradle-core-api:${project.extra.get("gradleVersion")}")
-    compile("org.gradle:gradle-base-services:${project.extra.get("gradleVersion")}")
+    implementation("org.gradle:gradle-core-api:${project.extra.get("gradleVersion")}")
+    implementation("org.gradle:gradle-base-services:${project.extra.get("gradleVersion")}")
 
-    compile(project(":common"))
-    compile("org.gradle:gradle-tooling-api:${project.extra.get("gradleVersion")}")
-    compile("info.picocli:picocli:4.0.4")
+    implementation(project(":common"))
+    implementation("org.gradle:gradle-tooling-api:${project.extra.get("gradleVersion")}")
+    implementation("info.picocli:picocli:4.0.4")
 
-    compile("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
-    compile("org.commonjava.maven.ext:pom-manipulation-core:${project.extra.get("pmeVersion")}")
-    compile("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
-    compile("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
+    implementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
+    implementation("org.commonjava.maven.ext:pom-manipulation-core:${project.extra.get("pmeVersion")}")
+    implementation("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
+    implementation("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
 
-    runtime("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
-    runtime("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
-    runtime("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
+    runtimeOnly("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
+    runtimeOnly("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
+    runtimeOnly("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
 
-    testCompile("commons-io:commons-io:${project.extra.get("commonsVersion")}")
+    testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsVersion")}")
     testImplementation(testFixtures(project(":common")))
-    testCompile(project(":analyzer"))
-    testCompile("junit:junit:${project.extra.get("junitVersion")}")
-    testCompile("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
-    testCompile("org.codehaus.plexus:plexus-archiver:4.2.3")
-    testImplementation("com.konghq:unirest-java:3.10.00")
-    testImplementation("commons-lang:commons-lang:${project.extra.get("commonsVersion")}")
-    testImplementation("org.eclipse.sisu:org.eclipse.sisu.plexus:0.3.3")
-
-    // Lombok comes via plugin
-    permitUsedUndeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
-    permitTestUnusedDeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
-
-    // Tooling API needs SLF4J
-    permitUnusedDeclared("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
-
+    testImplementation(project(":analyzer"))
+    testImplementation("junit:junit:${project.extra.get("junitVersion")}")
+    testImplementation("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
+    testImplementation("org.codehaus.plexus:plexus-archiver:4.2.3")
+//    // Lombok comes via plugin
+//    permitUnusedDeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
+//    permitTestUnusedDeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
+//
+//    // Tooling API needs SLF4J
+//    permitUnusedDeclared("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
+//
     // Owner: Need Java8 dependency which pulls in owner itself.
-    permitUnusedDeclared("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
-    permitUsedUndeclared("org.aeonbits.owner:owner:${project.extra.get("ownerVersion")}")
-
-    permitUnusedDeclared("ch.qos.logback:logback-core:${project.extra.get("logbackVersion")}")
-
-    // The CLI needs to be able to run groovy.
-    permitUnusedDeclared("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
-
-    // The CLI needs to be able to run groovy.
-    permitUnusedDeclared("org.gradle:gradle-core-api:${project.extra.get("gradleVersion")}")
+    implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
+//    permitUnusedDeclared("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
+//    permitUsedUndeclared("org.aeonbits.owner:owner:${project.extra.get("ownerVersion")}")
+//
+//    permitUnusedDeclared("ch.qos.logback:logback-core:${project.extra.get("logbackVersion")}")
+//
+//    // The CLI needs to be able to run groovy.
+//    permitUnusedDeclared("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
+//
+//    // The CLI needs to be able to run groovy.
+//    permitUnusedDeclared("org.gradle:gradle-core-api:${project.extra.get("gradleVersion")}")
 }
 
 tasks {

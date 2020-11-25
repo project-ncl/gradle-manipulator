@@ -2,6 +2,7 @@ import com.adarshr.gradle.testlogger.theme.ThemeType
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.freefair.gradle.plugins.lombok.LombokExtension
 import org.ajoberstar.grgit.Grgit
+import org.gradle.util.GradleVersion
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.text.SimpleDateFormat
@@ -12,11 +13,11 @@ plugins {
     signing
     `maven-publish`
     idea
-    id("ca.cutterslade.analyze") version "1.3.3"
-    id("com.adarshr.test-logger") version "2.1.0"
+//    id("ca.cutterslade.analyze") version "1.4.2"
+    id("com.adarshr.test-logger") version "2.1.1"
     id("com.diffplug.gradle.spotless") version "3.25.0"
     id("com.github.johnrengelman.shadow") version "5.2.0"
-    id("com.gradle.plugin-publish") version "0.11.0"
+    id("com.gradle.plugin-publish") version "0.12.0"
     id("io.freefair.lombok") version "4.1.6" apply false
     id("net.linguica.maven-settings") version "0.5"
     id("net.researchgate.release") version "2.8.1"
@@ -103,22 +104,25 @@ allprojects {
             url = uri("http://maven.repository.redhat.com/techpreview/all")
         }
     }
-    apply(plugin = "ca.cutterslade.analyze" )
     apply(plugin = "idea")
+//    apply(plugin = "ca.cutterslade.analyze" )
+}
+
+val isReleaseBuild = ("true" == System.getProperty("release",""))
+if (isReleaseBuild && GradleVersion.current().version != "5.6.4") {
+   throw GradleException("Gradle 5.6.4 is required to release this project")
 }
 
 subprojects {
-    val isReleaseBuild = ("true" == System.getProperty("release",""))
-
-    extra["gradleVersion"] = "5.6.4"
-    extra["atlasVersion"] = "0.17.2"
     extra["assertjVersion"] = "3.12.2"
+    extra["atlasVersion"] = "0.17.2"
     extra["bytemanVersion"] = "4.0.13"
-    extra["commonsVersion"] = "2.6"
     extra["commonsBeanVersion"] = "1.9.4"
+    extra["commonsVersion"] = "2.6"
+    extra["gradleVersion"] = "5.6.4"
+    extra["groovyVersion"] = "3.0.5"
     extra["jacksonVersion"] = "2.11.2"
     extra["junitVersion"] = "4.13.1"
-    extra["groovyVersion"] = "3.0.5"
     extra["logbackVersion"] = "1.2.3"
     extra["mavenVersion"] = "3.5.0"
     extra["ownerVersion"] = "1.0.12"
@@ -175,8 +179,8 @@ subprojects {
             classifier = ""
             // no need to add analyzer.init.gradle in the jar since it will never be used from inside the plugin itself
             exclude("analyzer-init.gradle")
-           // Minimise the resulting uber-jars to ensure we don't have massive jars
-           minimize() {
+            // Minimise the resulting uber-jars to ensure we don't have massive jars
+            minimize() {
                // Sometimes minimisation takes away too much ... ensure we keep these.
                exclude(dependency("com.fasterxml.jackson.core:.*:.*"))
                exclude(dependency("org.commonjava.maven.ext:.*:.*"))

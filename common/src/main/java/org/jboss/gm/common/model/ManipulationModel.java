@@ -118,8 +118,7 @@ public class ManipulationModel {
             this.name = project.getName();
         }
 
-        getLogger().debug("Created manipulation model for project name({}), group({}) with path is {}",
-                name, group, projectPathName);
+        getLogger().debug("Created manipulation model for project ({}) with path {}", name, projectPathName);
     }
 
     // Test use only ; avoids having to create a Project to test this class.

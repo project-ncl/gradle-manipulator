@@ -240,6 +240,7 @@ public class AlignmentTask extends DefaultTask {
                             .values()
                             .stream().map(ManipulationModel::getGroup)
                             .filter(StringUtils::isNotBlank)
+                            .distinct()
                             .collect(Collectors.toList());
 
                     logger.debug("Found potential candidates of {} to establish a groupId.", candidates);

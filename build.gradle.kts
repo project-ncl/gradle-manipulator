@@ -13,7 +13,6 @@ plugins {
     signing
     `maven-publish`
     idea
-//    id("ca.cutterslade.analyze") version "1.4.2"
     id("com.adarshr.test-logger") version "2.1.1"
     id("com.diffplug.gradle.spotless") version "3.25.0"
     id("com.github.johnrengelman.shadow") version "5.2.0"
@@ -105,7 +104,6 @@ allprojects {
         }
     }
     apply(plugin = "idea")
-//    apply(plugin = "ca.cutterslade.analyze" )
 }
 
 val isReleaseBuild = ("true" == System.getProperty("release",""))

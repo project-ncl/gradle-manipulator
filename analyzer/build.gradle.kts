@@ -20,50 +20,42 @@ gradlePlugin {
 }
 
 dependencies {
-    compile(project(":common"))
+    implementation(project(":common"))
     // the shadow configuration is used in order to avoid adding gradle and groovy stuff to the shadowed jar
     shadow(localGroovy())
     shadow(gradleApi())
 
-    compile("org.commonjava.maven.ext:pom-manipulation-core:${project.extra.get("pmeVersion")}")
-    compile("org.commonjava.maven.ext:pom-manipulation-io:${project.extra.get("pmeVersion")}")
-    compile("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
-    compile("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")
+    implementation("org.commonjava.maven.ext:pom-manipulation-core:${project.extra.get("pmeVersion")}")
+    implementation("org.commonjava.maven.ext:pom-manipulation-io:${project.extra.get("pmeVersion")}")
+    implementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
+    implementation("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")
 
-    runtime("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
-    runtime("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
-    runtime("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
-    compile("org.apache.maven:maven-settings-builder:${project.extra.get("mavenVersion")}")
-    compile("org.apache.maven:maven-settings:${project.extra.get("mavenVersion")}")
+    runtimeOnly("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
+    runtimeOnly("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
+    runtimeOnly("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
 
-    compile("commons-lang:commons-lang:${project.extra.get("commonsVersion")}")
-    compile("commons-io:commons-io:${project.extra.get("commonsVersion")}")
-    compile("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
+    implementation("org.apache.maven:maven-settings-builder:${project.extra.get("mavenVersion")}")
+    implementation("org.apache.maven:maven-settings:${project.extra.get("mavenVersion")}")
 
-    compile("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
+    implementation("commons-lang:commons-lang:${project.extra.get("commonsVersion")}")
+    implementation("commons-io:commons-io:${project.extra.get("commonsVersion")}")
+    implementation("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
 
+    implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
+
+    testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsVersion")}")
+    testImplementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
     testImplementation(testFixtures(project(":common")))
-    testCompile(project(":common"))
-    testCompile(gradleTestKit())
-    testCompile("junit:junit:${project.extra.get("junitVersion")}")
-    testCompile("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
-    testCompile("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
-    testCompile("org.jboss.byteman:byteman-bmunit:${project.extra.get("bytemanVersion")}")
-    testCompile (files ("${System.getProperty("java.home")}/../lib/tools.jar") )
-    testCompile("org.mockito:mockito-core:2.27.0")
-    testCompile("com.github.tomakehurst:wiremock-jre8:2.26.3")
-    testCompile(gradleKotlinDsl())
-
-    // Groovy is built into Gradle
-    permitUsedUndeclared("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
-
-    // Lombok comes via plugin
-    permitUsedUndeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
-    permitTestUnusedDeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
-
-    // Owner: Need Java8 dependency which pulls in owner itself.
-    permitUnusedDeclared("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
-    permitUsedUndeclared("org.aeonbits.owner:owner:${project.extra.get("ownerVersion")}")
+    testImplementation(project(":common"))
+    testImplementation(gradleTestKit())
+    testImplementation("junit:junit:${project.extra.get("junitVersion")}")
+    testImplementation("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
+    testImplementation("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
+    testImplementation("org.jboss.byteman:byteman-bmunit:${project.extra.get("bytemanVersion")}")
+    testImplementation(files ("${System.getProperty("java.home")}/../lib/tools.jar") )
+    testImplementation("org.mockito:mockito-core:2.27.0")
+    testImplementation("com.github.tomakehurst:wiremock-jre8:2.26.3")
+    testImplementation(gradleKotlinDsl())
 }
 
 tasks.test {
@@ -72,14 +64,21 @@ tasks.test {
 
 // separate source set and task for functional tests
 
-sourceSets.create("functionalTest") {
+val functionalTestSourceSet = sourceSets.create("functionalTest") {
     java.srcDir("src/functTest/java")
     resources.srcDir("src/functTest/resources")
-    // Force the addition of the plugin-under-test-metadata.properties else there are problems under Gradle >= 6.
-    runtimeClasspath += layout.files(project.buildDir.toString() + "/pluginUnderTestMetadata")
     compileClasspath += sourceSets["main"].output + configurations.testRuntime
     runtimeClasspath += output + compileClasspath
 }
+configurations.getByName("functionalTestImplementation").apply {
+    extendsFrom(configurations.getByName("testImplementation"))
+}
+configurations.getByName("functionalTestRuntime").apply {
+    extendsFrom(configurations.getByName("testRuntime"))
+}
+// Previously had to force the addition of the plugin-under-test-metadata.properties but this seems to solve it.
+gradlePlugin.testSourceSets(functionalTestSourceSet)
+
 idea.module {
     val testSources = testSourceDirs
     testSources.addAll(project.sourceSets.getByName("functionalTest").java.srcDirs)

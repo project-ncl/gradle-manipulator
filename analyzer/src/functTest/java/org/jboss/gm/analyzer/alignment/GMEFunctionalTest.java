@@ -80,9 +80,10 @@ public class GMEFunctionalTest extends AbstractWiremockTest {
                 new File(projectRoot, ".git"));
         File rootBuildFile = new File(projectRoot, "build.gradle.kts");
         Stream<String> lines = Files.lines(rootBuildFile.toPath());
-        lines = lines.map(l -> l.replaceAll("(id[(]\"ca.cutterslade.analyze)",
+        lines = lines.map(l -> l.replaceAll("(id[(]\"com.adarshr.test-logger)",
                 "id(\"org.jboss.gm.analyzer\") \n $1")).collect(Collectors.toList()).stream();
-        Files.write(rootBuildFile.toPath(), lines.map(l -> l.replaceAll("(val isReleaseBuild)",
+
+        Files.write(rootBuildFile.toPath(), lines.map(l -> l.replaceAll("(apply[(]plugin = \"idea\")",
                 "apply(plugin = \"org.jboss.gm.analyzer\") \n $1")).collect(Collectors.toList()));
 
         final Map<String, String> map = new HashMap<>();

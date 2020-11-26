@@ -20,53 +20,54 @@ gradlePlugin {
 }
 
 dependencies {
-    compile(project(":common"))
+    implementation(project(":common"))
     // the shadow configuration is used in order to avoid adding gradle and groovy stuff to the shadowed jar
     shadow(localGroovy())
     shadow(gradleApi())
 
-    compile("commons-lang:commons-lang:${project.extra.get("commonsVersion")}")
-    compile ("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
+    implementation("commons-lang:commons-lang:${project.extra.get("commonsVersion")}")
+    implementation("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
 
-    compile("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
-    compile("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")
-
-    runtime("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
-    runtime("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
-    runtime("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
-
-    testCompile("junit:junit:${project.extra.get("junitVersion")}")
-    testCompile("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
-    testCompile("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
-
-    // GradleAPI in test compile to get access to org.gradle.internal.Pair
-    testCompile(gradleApi())
-
-    testCompile(gradleTestKit())
-
-    permitTestUnusedDeclared("junit:junit:${project.extra.get("junitVersion")}")
-    permitTestUnusedDeclared("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
-    permitTestUnusedDeclared("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
-
-    // Lombok comes via plugin
-    permitUsedUndeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
-    permitTestUnusedDeclared("org.projectlombok:lombok:${project.extra.get("lombokVersion")}")
+    implementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
+    implementation("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")
 
     // Owner: Need Java8 dependency which pulls in owner itself.
-    permitUnusedDeclared("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
-    permitUsedUndeclared("org.aeonbits.owner:owner:${project.extra.get("ownerVersion")}")
+    implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
+
+    runtimeOnly("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
+    runtimeOnly("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
+    runtimeOnly("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
+    testImplementation("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
+    testImplementation("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
+    testImplementation("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
+
+    testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsVersion")}")
+    testImplementation("junit:junit:${project.extra.get("junitVersion")}")
+    testImplementation("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
+    testImplementation("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
+
+    // GradleAPI in test compile to get access to org.gradle.internal.Pair
+    testImplementation(gradleApi())
+    testImplementation(gradleTestKit())
 }
 
 // separate source set and task for functional tests
 
-sourceSets.create("functionalTest") {
+val functionalTestSourceSet = sourceSets.create("functionalTest") {
     java.srcDir("src/functTest/java")
     resources.srcDir("src/functTest/resources")
-    // Force the addition of the plugin-under-test-metadata.properties else there are problems under Gradle >= 6.
-    runtimeClasspath += layout.files(project.buildDir.toString() + "/pluginUnderTestMetadata")
     compileClasspath += sourceSets["main"].output + configurations.testRuntime
     runtimeClasspath += output + compileClasspath
 }
+configurations.getByName("functionalTestImplementation").apply {
+    extendsFrom(configurations.getByName("testImplementation"))
+}
+configurations.getByName("functionalTestRuntime").apply {
+    extendsFrom(configurations.getByName("testRuntime"))
+}
+// Previously had to force the addition of the plugin-under-test-metadata.properties but this seems to solve it.
+gradlePlugin.testSourceSets(functionalTestSourceSet)
+
 idea.module {
     val testSources = testSourceDirs
     testSources.addAll(project.sourceSets.getByName("functionalTest").java.srcDirs)

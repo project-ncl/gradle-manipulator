@@ -38,4 +38,5 @@ Contributions are more than welcome! Before contributing to the project, please 
 
 ## Documentation
 
+
 Documentation for the project can be found [here](https://project-ncl.github.io/gradle-manipulator/)

@@ -1,6 +1,23 @@
 [![Build Status (Travis CI)](https://travis-ci.org/project-ncl/gradle-manipulator.svg?branch=master)](https://travis-ci.org/project-ncl/gradle-manipulator.svg?branch=master)
 
-# Source code for Gradle manipulation plugins
+# Table of Contents
+
+<!-- TocDown Begin -->
+* [Introduction](#introduction)
+* [Plugins](#plugins)
+  * [Analyzer](#analyzer)
+  * [Manipulation](#manipulation)
+  * [Testing on a real project](#testing-on-a-real-project)
+  * [Contributions](#contributions)
+  * [Documentation](#documentation)
+<!-- TocDown End -->
+
+
+# Introduction
+
+This is a Gradle tool to align versions and dependencies within the project according to some external references. It excels in a cleanroom environment where large numbers of pre-existing projects must be rebuilt. It is a sibling project to the [Maven POM Manipulator Extension](https://github.com/release-engineering/pom-manipulation-ext).
+
+# Plugins
 
 Both plugins work in conjunction and therefore the same version is required for each. The analyzer plugin will inject a reference
  to the manipulation plugin. It requires Gradle 5.6.x - 6.x to _build_ and can _run_ with Gradle 4.10.x - 6.x.
@@ -34,7 +51,7 @@ you should get the `manipulation.json` file in the root of the project. For deta
 
 ## Contributions
 
-Contributions are more than welcome! Before contributing to the project, please read [this](https://github.com/project-ncl/gradle-manipulator/blob/master/CONTRIBUTING.md).
+Contributions are more than welcome! Before contributing to the project, please read [this](https://github.com/project-ncl/gradle-manipulator/blob/master/CONTRIBUTING.md). To contribute sample Groovy scripts (for this project or the sibling PME project) please see the [Groovy Examples](https://github.com/project-ncl/manipulator-groovy-examples) project.
 
 ## Documentation
 

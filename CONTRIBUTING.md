@@ -4,19 +4,19 @@
 Contributions to the project are very welcome! Please submit pull requests with any changes (preferably with tests).
 
 <!-- TocDown Begin -->
-    * [Documentation](#documentation)
-    * [IDE Config and Code Style](#ide-config-and-code-style)
-      * [Eclipse Setup](#eclipse-setup)
-      * [IDEA Setup](#idea-setup)
-    * [Code Recommendations](#code-recommendations)
-      * [Logging](#logging)
-      * [Exceptions](#exceptions)
-      * [Gradle Test Runner](#gradle-test-runner)
-    * [Releasing](#releasing)
-      * [Prerequisites](#prerequisites)
-      * [Release command](#release-command)
-      * [Publishing artifacts locally](#publishing-artifacts-locally)
-      * [Releasing SNAPSHOT version](#releasing-snapshot-version)
+ * [Documentation](#documentation)
+ * [IDE Config and Code Style](#ide-config-and-code-style)
+   * [Eclipse Setup](#eclipse-setup)
+   * [IDEA Setup](#idea-setup)
+ * [Code Recommendations](#code-recommendations)
+   * [Logging](#logging)
+   * [Exceptions](#exceptions)
+   * [Gradle Test Runner](#gradle-test-runner)
+ * [Releasing](#releasing)
+   * [Prerequisites](#prerequisites)
+   * [Release command](#release-command)
+   * [Publishing artifacts locally](#publishing-artifacts-locally)
+   * [Releasing SNAPSHOT version](#releasing-snapshot-version)
 <!-- TocDown End -->
 
 

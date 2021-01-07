@@ -44,7 +44,7 @@ jobs:
   - stage: test
     name: "Gradle 5.6.4"
     if: type = pull_request
-    script: "travis-wait-enhanced --timeout=60m --interval=4m -- ./gradlew --no-daemon --stacktrace clean build"
+    script: "travis-wait-enhanced --timeout=60m --interval=4m -- ./gradlew --no-daemon --stacktrace clean build AggregateJacocoReport"
 
   - stage: test
     name: "Gradle 6.4.1"
@@ -52,7 +52,7 @@ jobs:
     script:
       - export GRADLE_HOME=$HOME/bin/gradle-6.4.1
       - export PATH=$GRADLE_HOME/bin:$PATH
-      - travis-wait-enhanced --timeout=60m --interval=4m -- gradle --no-daemon --stacktrace clean build
+      - travis-wait-enhanced --timeout=60m --interval=4m -- gradle --no-daemon --stacktrace clean build AggregateJacocoReport
 
   - stage: test
     name: "Gradle 6.5.1"
@@ -60,7 +60,7 @@ jobs:
     script:
       - export GRADLE_HOME=$HOME/bin/gradle-6.5.1
       - export PATH=$GRADLE_HOME/bin:$PATH
-      - travis-wait-enhanced --timeout=60m --interval=4m -- gradle --no-daemon --stacktrace clean build
+      - travis-wait-enhanced --timeout=60m --interval=4m -- gradle --no-daemon --stacktrace clean build AggregateJacocoReport
 
   - stage: test
     name: "Gradle 6.7.1"
@@ -68,4 +68,7 @@ jobs:
     script:
       - export GRADLE_HOME=$HOME/bin/gradle-6.7.1
       - export PATH=$GRADLE_HOME/bin:$PATH
-      - travis-wait-enhanced --timeout=60m --interval=4m -- gradle --no-daemon --stacktrace clean build
+      - travis-wait-enhanced --timeout=60m --interval=4m -- gradle --no-daemon --stacktrace clean build AggregateJacocoReport
+
+after_success:
+  - '[ "$TRAVIS_OS_NAME" = "linux" ] && bash <(curl -s https://codecov.io/bash) -f build/reports/jacoco/aggregate/jacocoTestReport.xml'

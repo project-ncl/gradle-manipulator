@@ -15,7 +15,7 @@ jobs:
       matrix:
         gradle: [ 5.6.4, 6.4.1, 6.5.1, 6.7.1 ]
     # https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions#jobsjob_idif
-    if: github.repository == 'release-engineering/pom-manipulation-ext' && github.event_name == 'pull_request'
+    if: github.repository == 'project-ncl/gradle-manipulator' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -29,7 +29,12 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11
-     - uses: eskatos/gradle-command-action@v1
+    - name: Remove default github maven configuration
+      # This step is a workaround to avoid a decryption issue of Beam's
+      # net.linguica.gradle.maven.settings plugin and github's provided maven
+      # settings.xml file
+      run: rm ~/.m2/settings.xml
+    - uses: eskatos/gradle-command-action@v1
       with:
         gradle-version: ${{ matrix.gradle }}
         arguments: --no-daemon --stacktrace clean build AggregateJacocoReport
@@ -41,7 +46,7 @@ jobs:
         files: ./build/reports/jacoco/aggregate/jacocoTestReport.xml
 
   snapshot:
-    if: github.repository == 'release-engineering/pom-manipulation-ext' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.repository == 'project-ncl/gradle-manipulator' && github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -55,6 +60,11 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11
+    - name: Remove default github maven configuration
+      # This step is a workaround to avoid a decryption issue of Beam's
+      # net.linguica.gradle.maven.settings plugin and github's provided maven
+      # settings.xml file
+      run: rm ~/.m2/settings.xml
     # https://github.com/marketplace/actions/maven-setings-action
     - name: Maven Settings
       uses: s4u/maven-settings-action@v2

@@ -21,6 +21,7 @@ plugins {
     id("net.linguica.maven-settings") version "0.5"
     id("net.researchgate.release") version "2.8.1"
     id("org.ajoberstar.grgit") version "4.1.0"
+    id("org.kordamp.gradle.jacoco") version "0.42.1"
 }
 
 apply(plugin = "net.researchgate.release")

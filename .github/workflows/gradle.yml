@@ -79,7 +79,7 @@ jobs:
             }]
     - uses: eskatos/gradle-command-action@v1
       with:
-        arguments: clean build publish AggregateJacocoReport -DSONATYPE_PASSWORD=$(echo $SONATYPE_PASSWORD) -DSONATYPE_USERNAME=$(echo $SONATYPE_USERNAME)
+        arguments: clean build publish AggregateJacocoReport
     - name: Codecov
       uses: codecov/codecov-action@v1
       with:

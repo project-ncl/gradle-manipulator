@@ -172,7 +172,7 @@ public class ManipulationPlugin implements Plugin<Project> {
                             "Unable to find publish parameter for Maven Publish Plugin.");
                 }
             } else {
-                logger.warn("No publishing plugin was configured!");
+                logger.warn("No publishing plugin was configured for '{}'!", evaluatedProject.getName());
             }
         });
     }

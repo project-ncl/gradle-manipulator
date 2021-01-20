@@ -79,4 +79,8 @@ jobs:
             }]
     - uses: eskatos/gradle-command-action@v1
       with:
-        arguments: clean build publish
+        arguments: clean build publish AggregateJacocoReport
+    - name: Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        files: ./build/reports/jacoco/aggregate/jacocoTestReport.xml

@@ -44,6 +44,7 @@ jobs:
       uses: codecov/codecov-action@v1
       with:
         files: ./build/reports/jacoco/aggregate/jacocoTestReport.xml
+        verbose: true
 
   snapshot:
     if: github.repository == 'project-ncl/gradle-manipulator' && github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -84,3 +85,4 @@ jobs:
       uses: codecov/codecov-action@v1
       with:
         files: ./build/reports/jacoco/aggregate/jacocoTestReport.xml
+        verbose: true

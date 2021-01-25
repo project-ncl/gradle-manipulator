@@ -4,6 +4,7 @@ import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.credentials.HttpHeaderCredentials;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.publish.PublishingExtension;
@@ -46,15 +47,23 @@ public class MavenPublishingRepositoryAction implements Action<Project> {
 
     @Override
     public void execute(Project project) {
-
         // disable existing publishing tasks but make sure we keep ours
-        project.afterEvaluate(p -> p.getTasks().stream()
-                .filter(t -> t.getName().startsWith("publish") && t.getName().endsWith("Repository")
-                        && !t.getName().contains(REPO_NAME))
-                .forEach(t -> {
-                    logger.info("Disabling publishing task " + t.getName());
-                    t.setEnabled(false);
-                }));
+        project.afterEvaluate(p -> {
+            p.getTasks().stream()
+                    .filter(t -> t.getName().startsWith("publish") && t.getName().endsWith("Repository")
+                            && !t.getName().contains(REPO_NAME))
+                    .forEach(t -> {
+                        logger.info("Disabling publishing task " + t.getName());
+                        t.setEnabled(false);
+                    });
+            RepositoryHandler repos = p.getExtensions().getByType(PublishingExtension.class).getRepositories();
+            repos.forEach(repository -> {
+                if (!REPO_NAME.equals(repository.getName())) {
+                    logger.info("Removing publishing repository {}", repository.getName());
+                }
+            });
+            repos.removeIf(artifactRepository -> !artifactRepository.getName().equals(REPO_NAME));
+        });
 
         if (project.getProjectDir().getName().equals("buildSrc")) {
             logger.warn("Not adding publishing extension to project {} as buildSrc is build-time only.", project);

@@ -1,0 +1,23 @@
+{
+  "group" : "org.elasticsearch",
+  "name" : "elasticsearch",
+  "projectPathName" : "elasticsearch",
+  "version" : "6.8.6.temporary-redhat-00001",
+  "originalVersion" : "6.8.6",
+  "children" : {
+    "modules" : {
+      "group" : "org.elasticsearch",
+      "name" : "modules",
+      "projectPathName" : "modules",
+      "version" : "6.8.6.temporary-redhat-00001",
+      "children" : {
+        "transport-netty4" : {
+          "group" : "org.elasticsearch.plugin",
+          "name" : "transport-netty4",
+          "projectPathName" : "transport-netty4",
+          "version" : "6.8.6.temporary-redhat-00001"
+        }
+      }
+    }
+  }
+}

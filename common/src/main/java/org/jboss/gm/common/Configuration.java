@@ -18,7 +18,8 @@ import org.commonjava.maven.ext.io.rest.Translator;
 import static org.aeonbits.owner.Config.LoadType.MERGE;
 
 /**
- * This class is used to hold all configuration values for the two plugins. The naming scheme of
+ * This class is used to hold all configuration values for the two plugins. The configuration is processed
+ * via <a href=http://owner.aeonbits.org>Owner</a>. The naming scheme of
  * the configuration variables has been chosen to match the
  * <a href=https://release-engineering.github.io/pom-manipulation-ext/#feature-guide>PME</a> naming.
  */
@@ -118,6 +119,10 @@ public interface Configuration extends Accessible, Reloadable {
 
     @Key("groovyScripts")
     String[] groovyScripts();
+
+    @Key("publishPluginHooks")
+    @DefaultValue("elasticsearch.esplugin")
+    String[] publishPluginHooks();
 
     /**
      * Whether to explicitly override all transitive dependencies as well. Defaults to false.

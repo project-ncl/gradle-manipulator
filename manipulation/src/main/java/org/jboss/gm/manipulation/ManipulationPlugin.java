@@ -1,6 +1,7 @@
 package org.jboss.gm.manipulation;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.aeonbits.owner.ConfigCache;
@@ -33,6 +34,7 @@ public class ManipulationPlugin implements Plugin<Project> {
     public static final String LEGACY_MAVEN_PLUGIN = "maven";
     // This plugin wraps the legacy maven plugin.
     private static final String LEGACY_MAVEN_PLUGIN_NEXUS = "com.bmuschko.nexus";
+    // Plugin "nebula.maven-base-publish" encompasses maven-publish
     private static final String MAVEN_PUBLISH_PLUGIN = "maven-publish";
 
     static {
@@ -102,14 +104,24 @@ public class ManipulationPlugin implements Plugin<Project> {
         project.afterEvaluate(new OverrideDependenciesAction(correspondingModule, resolvedDependenciesRepository));
         project.afterEvaluate(new ManifestUpdateAction(correspondingModule));
 
-        configurePublishingTask(configuration, project, correspondingModule, resolvedDependenciesRepository);
+        configurePublishingTask(configuration, project, correspondingModule, resolvedDependenciesRepository, "");
+
+        logger.debug("Publish plugin hooks are {}", Arrays.toString(configuration.publishPluginHooks()));
+        for (String hook : configuration.publishPluginHooks()) {
+            project.getPluginManager().withPlugin(hook, action -> {
+                configurePublishingTask(configuration, project, correspondingModule, resolvedDependenciesRepository,
+                        hook);
+            });
+        }
     }
 
     private void configurePublishingTask(Configuration config, Project project, ManipulationModel correspondingModule,
-            ResolvedDependenciesRepository resolvedDependenciesRepository) {
+            ResolvedDependenciesRepository resolvedDependenciesRepository, String pluginHook) {
         project.afterEvaluate(evaluatedProject -> {
+            if (!isEmpty(pluginHook)) {
+                logger.warn("Detected application of plugin hook {} and now running publishing task again", pluginHook);
+            }
             // we need to determine which plugin to configure for publication
-
             // first, let the choice be enforced via a system property
             String deployPlugin = config.deployPlugin();
             if (isNotEmpty(deployPlugin)) {

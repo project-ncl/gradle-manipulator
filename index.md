@@ -105,6 +105,10 @@ The tool uses its own logging system (that backs onto the Gradle logging system)
 * If `loggingColours` is set to true it will also use colours (default: true).
 * If `loggingLevel` is set to true it will output the logging category e.g. INFO. (default: false).
 
+#### Publish Plugin Hook
+
+Certain project builds don't apply the publish plugin directly (be it the legacy or current one); instead they implement their own 'build plugin' (e.g. within `buildSrc`) that itself then applies plugins. This can lead to the situation where this custom plugin is applied and actioned after the GME tooling plugin which therefore does not detect any publishing plugins. It is possible to list those custom plugins as 'hooks' that GME will detect, and attempt to customise the publishing again. It is a comma separated list with a single default entry of `elasticsearch.esplugin`.
+
 ### Feature Guide
 
 Below are links to more specific information about configuring sets of features in GME:
@@ -113,4 +117,4 @@ Below are links to more specific information about configuring sets of features 
 * [Dependency manipulation](guide/dep-manip.html)
 * [Artifact publishing](guide/artifact-publishing.html)
 * [Groovy](guide/groovy.html)
-* [Repositories Etc.](guide/misc.html)
+* [Repositories](guide/misc.html)

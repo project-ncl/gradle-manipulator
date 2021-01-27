@@ -60,4 +60,25 @@ public class ProjectUtils {
             throw new ManipulationUncheckedException("Unable to update name field to {}", replacement, e);
         }
     }
+
+    /**
+     * This returns the value of archivesBaseName while not returning its default value of project.name
+     *
+     * archiveTask.archiveBaseName defaults to the project.archivesBaseName which defaults to project.name.
+     *
+     * References:
+     * https://docs.gradle.org/current/userguide/maven_plugin.html
+     * https://docs.gradle.org/6.8.1/dsl/org.gradle.api.tasks.bundling.AbstractArchiveTask.html
+     *
+     * @param project the current project
+     * @return the value for the archivesBaseName or null if not set
+     */
+    public static String getArchivesBaseName(Project project) {
+        final Object abn = project.findProperty("archivesBaseName");
+
+        if (abn != null && !project.getName().equals(abn)) {
+            return abn.toString();
+        }
+        return null;
+    }
 }

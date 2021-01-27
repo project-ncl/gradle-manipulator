@@ -89,7 +89,7 @@ configure(javaProjects) { project ->
     publishing {
         publications {
             mavenJava(MavenPublication) {
-                artifactId = project.archivesBaseName
+//                artifactId = project.archivesBaseName
                 from project.components.java
                 artifact sourcesJar
                 artifact javadocJar
@@ -102,7 +102,7 @@ configure(javaProjects) { project ->
 
     afterEvaluate {
         jar configureJarManifestAttributes(project)
-        publishing.publications.mavenJava.artifactId = project.archivesBaseName
+//        publishing.publications.mavenJava.artifactId = project.archivesBaseName
         publishing.publications.mavenJava.pom configurePom(project)
     }
 }

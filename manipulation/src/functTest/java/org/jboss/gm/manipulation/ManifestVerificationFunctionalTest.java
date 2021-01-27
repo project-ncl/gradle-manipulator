@@ -27,6 +27,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class ManifestVerificationFunctionalTest {
+    private static final String ARTIFACT_NAME = "mongodb-driver-core-4.1.0.temporary-redhat-00001";
+    private static final Path PATH_IN_REPOSITORY = Paths.get("org/mongodb/mongodb-driver-core/4.1.0.temporary-redhat-00001");
+
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
@@ -186,13 +189,19 @@ public class ManifestVerificationFunctionalTest {
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(projectRoot)
                 //.withDebug(true)
-                .withArguments("publishToMavenLocal", "--info")
+                .withArguments("assemble", "publish", "--info")
                 .withPluginClasspath()
                 .forwardOutput()
                 .build();
 
-        assertThat(Objects.requireNonNull(buildResult.task(":bson:publishToMavenLocal")).getOutcome())
+        assertThat(Objects.requireNonNull(buildResult.task(":bson:publish")).getOutcome())
                 .isEqualTo(TaskOutcome.SUCCESS);
+
+        Path pathToArtifacts = publishDirectory.toPath().resolve(PATH_IN_REPOSITORY);
+        assertTrue(systemOutRule.getLog().contains(
+                "Updating publication artifactId (driver-core) as it is not consistent with archivesBaseName (mongodb-driver-core)"));
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile().exists()).isTrue();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar").toFile().exists()).isTrue();
 
         File manifestFile = new File(projectRoot, "bson/build/tmp/jar/MANIFEST.MF");
         assertTrue(manifestFile.exists());

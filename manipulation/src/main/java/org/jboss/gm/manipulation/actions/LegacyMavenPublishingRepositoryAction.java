@@ -113,25 +113,24 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
         // Clone the archive configuration to avoid ConcurrentModificationException.
         publishArchives.getArtifacts().addAll(archives.copy().getArtifacts());
 
-        final Object abn = project.findProperty("archivesBaseName");
-        final String originalName = project.getName();
+        final String abn = ProjectUtils.getArchivesBaseName(project);
         uploadArchives.doFirst(action -> {
             // TODO: Find a better method
             // This is a horrendous hack. We can't find any way of adding HttpHeaderCredentials to the MavenDeployer
             // which is removed above. Equally we can't find any way of ensuring the new publish configuration correctly
             // checks the archivesBaseName value - overriding 'configurablePublishArtifact.setName' is insufficient.
             // We add it as an action to minimise any side affects.
-            if (abn != null && !project.getName().equals(abn)) {
+            if (abn != null) {
                 logger.warn("Located archivesBaseName override ; forcing project name to {} from {} for correct deployment",
-                        abn, originalName);
+                        abn, project.getName());
                 ProjectUtils.updateNameField(project, abn);
             }
         });
         uploadArchives.doLast(action -> {
             // TODO: Find a better method
             // Now revert the action performed above.
-            if (abn != null && !project.getName().equals(abn)) {
-                logger.warn("Resetting project name after archivesBaseName override to {} from {}", originalName, abn);
+            if (abn != null) {
+                logger.warn("Resetting project name after archivesBaseName override to {} from {}", project.getName(), abn);
                 ProjectUtils.updateNameField(project, abn);
             }
         });
@@ -142,7 +141,7 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
         project.getArtifacts().add("publishArchives",
                 project.file(project.getBuildDir().toPath().resolve("poms/pom-default.xml")),
                 configurablePublishArtifact -> {
-                    configurablePublishArtifact.setName(abn == null ? originalName : abn.toString());
+                    configurablePublishArtifact.setName(abn == null ? project.getName() : abn);
                     configurablePublishArtifact.setExtension("pom");
                 });
 

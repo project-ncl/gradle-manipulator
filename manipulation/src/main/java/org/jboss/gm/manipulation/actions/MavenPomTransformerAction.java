@@ -1,27 +1,31 @@
 package org.jboss.gm.manipulation.actions;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.gradle.api.Action;
-import org.gradle.api.Project;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.publish.PublishingExtension;
-import org.gradle.api.publish.maven.MavenPublication;
-import org.gradle.api.publish.maven.tasks.GenerateMavenPom;
-import org.jboss.gm.common.logging.GMLogger;
+import org.gradle.api.XmlProvider;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.manipulation.ResolvedDependenciesRepository;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
 
 /**
- * Fixes pom.xml generation in "maven-publish" plugin.
- * <p>
- * Applies PomTransformer, that overrides dependencies versions according to given configuration, to all maven
- * publications.
+ * Overrides data in pom
  */
-public class MavenPomTransformerAction implements Action<Project> {
+public class MavenPomTransformerAction
+        implements Action<XmlProvider> {
+
+    private static final String VERSION = "version";
+    private static final String DEPENDENCIES = "dependencies";
+    private static final String DEPENDENCY = "dependency";
+    private static final String GROUPID = "groupId";
+    private static final String ARTIFACTID = "artifactId";
 
     private final ManipulationModel alignmentConfiguration;
     private final ResolvedDependenciesRepository resolvedDependenciesRepository;
-
-    private final Logger logger = GMLogger.getLogger(getClass());
 
     public MavenPomTransformerAction(ManipulationModel alignmentConfiguration,
             ResolvedDependenciesRepository resolvedDependenciesRepository) {
@@ -30,36 +34,74 @@ public class MavenPomTransformerAction implements Action<Project> {
     }
 
     @Override
-    public void execute(Project project) {
-        if (!project.getPluginManager().hasPlugin("maven-publish")) {
+    public void execute(XmlProvider xmlProvider) {
+        transformDependencies(xmlProvider);
+    }
+
+    private void transformDependencies(XmlProvider xmlProvider) {
+        // find <dependencies> child
+        Node dependenciesNode = null;
+        NodeList childNodes = xmlProvider.asElement().getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            Node child = childNodes.item(i);
+            if (child.getNodeType() == Node.ELEMENT_NODE
+                    && DEPENDENCIES.equals(child.getNodeName())) {
+                dependenciesNode = child;
+                break;
+            }
+        }
+
+        if (dependenciesNode == null) {
             return;
         }
 
-        // GenerateMavenPom tasks need to be postponed until after compileJava task, because that's where artifact
-        // resolution is normally triggered and ResolvedDependenciesRepository is filled. If GenerateMavenPom runs
-        // before compileJava, we will see empty ResolvedDependenciesRepository here.
-        project.getTasks().withType(GenerateMavenPom.class).all(task -> {
-            if (project.getTasks().findByName("compileJava") != null) {
-                task.dependsOn("compileJava");
+        // go through dependencies
+        NodeList dependencyNodes = ((Element) dependenciesNode).getElementsByTagName(DEPENDENCY);
+        for (int i = 0; i < dependencyNodes.getLength(); i++) {
+            Node dependencyNode = dependencyNodes.item(i);
+
+            // collect GAV
+            String group = null;
+            String name = null;
+            String version = null;
+            Node versionNode = null;
+            for (int j = 0; j < dependencyNode.getChildNodes().getLength(); j++) {
+                Node child = dependencyNode.getChildNodes().item(j);
+                if (child.getNodeType() == Node.ELEMENT_NODE) {
+                    switch (child.getNodeName()) {
+                        case GROUPID:
+                            group = child.getTextContent();
+                            break;
+                        case ARTIFACTID:
+                            name = child.getTextContent();
+                            break;
+                        case VERSION:
+                            version = child.getTextContent();
+                            versionNode = child;
+                            break;
+                    }
+                }
             }
-        });
+            if (group == null || name == null) {
+                continue;
+            }
+            if (version == null) {
+                version = resolvedDependenciesRepository.get(new SimpleProjectRef(group, name));
+                if (version == null) {
+                    continue;
+                }
+            }
 
-        project.getExtensions().getByType(PublishingExtension.class).getPublications()
-                .withType(MavenPublication.class)
-                .configureEach(publication -> {
-                    logger.debug("Applying POM transformer to publication " + publication.getName());
-
-                    if (!project.getVersion().equals(publication.getVersion())) {
-                        logger.warn(
-                                "Mismatch between project version ({}) and publication version ({}). Resetting to project version.",
-                                project.getVersion(), publication.getVersion());
-                        publication.setVersion(project.getVersion().toString());
-                    }
-                    if (publication.getPom() != null) {
-                        publication.getPom()
-                                .withXml(new LegacyMavenPomTransformerAction(alignmentConfiguration,
-                                        resolvedDependenciesRepository));
-                    }
-                });
+            // modify version
+            final ProjectVersionRef initial = withGAV(group, name, version);
+            final ProjectVersionRef aligned = alignmentConfiguration.getAlignedDependencies().get(initial.toString());
+            if (aligned != null) {
+                if (versionNode == null) {
+                    versionNode = dependencyNode.getOwnerDocument().createElement("version");
+                    dependencyNode.appendChild(versionNode);
+                }
+                versionNode.setTextContent(aligned.getVersionString());
+            }
+        }
     }
 }

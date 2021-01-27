@@ -34,7 +34,7 @@ public class UploadTaskTransformerAction implements Action<Project> {
         project.getTasks().withType(Upload.class).all(upload -> upload.getRepositories()
                 .withType(MavenResolver.class).all(resolver -> {
                     resolver.getPom().withXml(
-                            new LegacyMavenPomTransformerAction(alignmentConfiguration, resolvedDependenciesRepository));
+                            new MavenPomTransformerAction(alignmentConfiguration, resolvedDependenciesRepository));
                 }));
     }
 }

@@ -84,6 +84,7 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Response
             return super.calculate(groupId, artifactId, version, state);
         }
 
+        @Override
         protected Set<String> getVersionCandidates(VersioningState state, String groupId, String artifactId) {
 
             final Set<String> result = new HashSet<>();

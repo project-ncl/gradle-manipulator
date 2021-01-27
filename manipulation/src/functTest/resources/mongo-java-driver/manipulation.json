@@ -10,6 +10,12 @@
       "name" : "bson",
       "projectPathName" : "bson",
       "version" : "4.1.0.temporary-redhat-00001"
+    },
+    "driver-core" : {
+      "group" : "org.mongodb",
+      "name" : "driver-core",
+      "projectPathName" : "driver-core",
+      "version" : "4.1.0.temporary-redhat-00001"
     }
   }
 }

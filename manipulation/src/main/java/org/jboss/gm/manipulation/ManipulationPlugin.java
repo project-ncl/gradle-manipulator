@@ -1,7 +1,6 @@
 package org.jboss.gm.manipulation;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.aeonbits.owner.ConfigCache;
@@ -20,9 +19,9 @@ import org.jboss.gm.common.utils.ManifestUtils;
 import org.jboss.gm.common.utils.ProjectUtils;
 import org.jboss.gm.manipulation.actions.LegacyMavenPublishingRepositoryAction;
 import org.jboss.gm.manipulation.actions.ManifestUpdateAction;
-import org.jboss.gm.manipulation.actions.MavenPomTransformerAction;
 import org.jboss.gm.manipulation.actions.MavenPublishingRepositoryAction;
 import org.jboss.gm.manipulation.actions.OverrideDependenciesAction;
+import org.jboss.gm.manipulation.actions.PublishTaskTransformerAction;
 import org.jboss.gm.manipulation.actions.PublishingArtifactsAction;
 import org.jboss.gm.manipulation.actions.UploadTaskTransformerAction;
 
@@ -35,7 +34,7 @@ public class ManipulationPlugin implements Plugin<Project> {
     // This plugin wraps the legacy maven plugin.
     private static final String LEGACY_MAVEN_PLUGIN_NEXUS = "com.bmuschko.nexus";
     // Plugin "nebula.maven-base-publish" encompasses maven-publish
-    private static final String MAVEN_PUBLISH_PLUGIN = "maven-publish";
+    public static final String MAVEN_PUBLISH_PLUGIN = "maven-publish";
 
     static {
         System.out.println("Running Gradle Manipulation Plugin " + ManifestUtils.getManifestInformation());
@@ -83,20 +82,12 @@ public class ManipulationPlugin implements Plugin<Project> {
         final ResolvedDependenciesRepository resolvedDependenciesRepository = new ResolvedDependenciesRepository();
 
         project.afterEvaluate(ignore -> {
-            final Object abn = project.findProperty("archivesBaseName");
-            final String originalName = project.getName();
-
             // This double version set is required - sometimes other plugins seem to override the version we set initially.
             // We need to set it at the start as other plugins also require it there. Hence this belt and braces approach.
             if (!correspondingModule.getVersion().equals(project.getVersion())) {
                 logger.warn("After evaluation, another plugin has reset the version to {}. Resetting to {}",
                         project.getVersion(), correspondingModule.getVersion());
                 project.setVersion(correspondingModule.getVersion());
-            }
-            if (abn != null && !originalName.equals(abn)) {
-                logger.warn("Located archivesBaseName override ; forcing project name to '{}' from '{}' for correct usage",
-                        abn, originalName);
-                ProjectUtils.updateNameField(project, abn);
             }
         });
 
@@ -106,7 +97,6 @@ public class ManipulationPlugin implements Plugin<Project> {
 
         configurePublishingTask(configuration, project, correspondingModule, resolvedDependenciesRepository, "");
 
-        logger.debug("Publish plugin hooks are {}", Arrays.toString(configuration.publishPluginHooks()));
         for (String hook : configuration.publishPluginHooks()) {
             project.getPluginManager().withPlugin(hook, action -> {
                 configurePublishingTask(configuration, project, correspondingModule, resolvedDependenciesRepository,
@@ -163,6 +153,17 @@ public class ManipulationPlugin implements Plugin<Project> {
 
             if (LEGACY_MAVEN_PLUGIN.equals(deployPlugin) || LEGACY_MAVEN_PLUGIN_NEXUS.equals(deployPlugin)) {
                 logger.info("Configuring {} plugin for project {}", deployPlugin, evaluatedProject.getName());
+
+                evaluatedProject.afterEvaluate(action -> {
+                    final String archivesBaseName = ProjectUtils.getArchivesBaseName(project);
+                    if (archivesBaseName != null) {
+                        logger.warn(
+                                "Located archivesBaseName override ; forcing project name to '{}' from '{}' for correct usage",
+                                archivesBaseName, project.getName());
+                        ProjectUtils.updateNameField(project, archivesBaseName);
+                    }
+                });
+
                 evaluatedProject
                         .afterEvaluate(new UploadTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
                 evaluatedProject.afterEvaluate(new LegacyMavenPublishingRepositoryAction());
@@ -177,7 +178,7 @@ public class ManipulationPlugin implements Plugin<Project> {
 
                 evaluatedProject.afterEvaluate(new MavenPublishingRepositoryAction());
                 evaluatedProject
-                        .afterEvaluate(new MavenPomTransformerAction(correspondingModule, resolvedDependenciesRepository));
+                        .afterEvaluate(new PublishTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
 
                 if (project.getGradle().getStartParameter().getTaskNames().stream().noneMatch(p -> p.contains("publish"))) {
                     logger.error(

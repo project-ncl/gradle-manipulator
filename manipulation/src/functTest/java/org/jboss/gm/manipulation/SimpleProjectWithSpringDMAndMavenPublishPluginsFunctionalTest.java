@@ -45,7 +45,7 @@ public class SimpleProjectWithSpringDMAndMavenPublishPluginsFunctionalTest {
         final BuildResult buildResult = GradleRunner.create()
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("publishToMavenLocal")
-                .withDebug(true)
+                //.withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath()
                 .build();

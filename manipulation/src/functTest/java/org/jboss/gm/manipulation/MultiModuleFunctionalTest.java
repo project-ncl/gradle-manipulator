@@ -37,7 +37,7 @@ public class MultiModuleFunctionalTest {
         final BuildResult buildResult = GradleRunner.create()
                 .withProjectDir(multiModuleRoot)
                 .withArguments("generatePomFileForMainPublication")
-                .withDebug(true)
+                //.withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath()
                 .build();

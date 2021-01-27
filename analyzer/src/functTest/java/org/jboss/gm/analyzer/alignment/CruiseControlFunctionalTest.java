@@ -55,7 +55,6 @@ public class CruiseControlFunctionalTest extends AbstractWiremockTest {
 
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
-        System.out.println("### " + alignmentModel.toString());
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertTrue(new File(projectRoot, AlignmentTask.GRADLE + '/' + AlignmentTask.GME_REPOS).exists());
         assertTrue(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS).exists());

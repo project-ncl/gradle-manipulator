@@ -1,0 +1,15 @@
+{
+  "group" : "org.postgresql",
+  "name" : "pgjdbc",
+  "projectPathName" : "pgjdbc",
+  "version" : "42.2.18.redhat-00001",
+  "originalVersion" : "42.2.18",
+  "children" : {
+    "postgresql" : {
+      "group" : "org.postgresql",
+      "name" : "pgjdbc",
+      "projectPathName" : "pgjdbc",
+      "version" : "42.2.18.redhat-00001"
+    }
+  }
+}

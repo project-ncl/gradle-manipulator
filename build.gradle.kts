@@ -26,6 +26,10 @@ plugins {
 
 apply(plugin = "net.researchgate.release")
 
+if(!JavaVersion.current().isJava11Compatible){
+    throw GradleException("This build must be run with at least Java 11")
+}
+
 tasks {
     wrapper {
         distributionType = Wrapper.DistributionType.ALL

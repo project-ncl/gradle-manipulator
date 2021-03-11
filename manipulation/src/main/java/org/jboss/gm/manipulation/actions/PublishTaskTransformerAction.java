@@ -38,7 +38,6 @@ public class PublishTaskTransformerAction
         if (!project.getPluginManager().hasPlugin(MAVEN_PUBLISH_PLUGIN)) {
             return;
         }
-
         // GenerateMavenPom tasks need to be postponed until after compileJava task, because that's where artifact
         // resolution is normally triggered and ResolvedDependenciesRepository is filled. If GenerateMavenPom runs
         // before compileJava, we will see empty ResolvedDependenciesRepository here.
@@ -47,6 +46,22 @@ public class PublishTaskTransformerAction
                 task.dependsOn("compileJava");
             }
         });
+
+        // If someone has done "generatePomFileForPluginMavenPublication.enabled" while adding
+        // java-gradle-plugin rather than configuring the Gradle plugin with "automatedPublishing=false"
+        // this can cause issues during publishing. Elasticsearch is one such culprit (fixed on 7.x codebase).
+        project.getTasks().stream().filter(
+                t -> t.getName().startsWith("generatePomFileFor")
+                        && t.getName().endsWith("Publication"))
+                .forEach(t -> {
+                    String generateName = t.getName().replaceAll("generatePomFileFor([a-zA-Z]+)Publication", "$1");
+                    if (!t.getEnabled() && project.getTasks().stream().anyMatch(tt -> tt.getName().contains(generateName))) {
+                        logger.warn("A '{}' (full name: '{}') publication has been added but the POM file generation disabled. "
+                                + "This causes issues with Gradle and should be reviewed. Force enabling it to prevent future errors.",
+                                generateName, t.getName());
+                        t.setEnabled(true);
+                    }
+                });
 
         project.getExtensions().getByType(PublishingExtension.class).getPublications()
                 .withType(MavenPublication.class)

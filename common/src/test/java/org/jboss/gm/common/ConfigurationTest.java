@@ -13,6 +13,7 @@ import org.junit.rules.TestRule;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class ConfigurationTest {
 
@@ -38,10 +39,12 @@ public class ConfigurationTest {
     public void verifySystem2() {
         String deploy = "http://indy-stable-next.newcastle-devel.svc.cluster.local";
         System.setProperty("AProxDeployUrl", deploy);
+        System.setProperty("manipulation.disable", "true");
 
         Configuration c = ConfigFactory.create(Configuration.class);
 
         assertEquals(deploy, c.deployUrl());
+        assertTrue(c.disableGME());
     }
 
     @Test

@@ -5,6 +5,11 @@
   "version" : "6.8.6.temporary-redhat-00001",
   "originalVersion" : "6.8.6",
   "children" : {
+    "build-tools": {
+      "group": "org.elasticsearch.gradle",
+      "name": "build-tools",
+      "version": "6.7.1.temporary-redhat-00001"
+    },
     "modules" : {
       "group" : "org.elasticsearch",
       "name" : "modules",

@@ -1,5 +1,7 @@
 package org.jboss.gm.manipulation.actions;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Action;
@@ -47,26 +49,31 @@ public class MavenPublishingRepositoryAction implements Action<Project> {
 
     @Override
     public void execute(Project project) {
-        // disable existing publishing tasks but make sure we keep ours
-        project.afterEvaluate(p -> {
-            p.getTasks().stream()
-                    .filter(t -> t.getName().startsWith("publish") && t.getName().endsWith("Repository")
-                            && !t.getName().contains(REPO_NAME))
-                    .forEach(t -> {
-                        logger.info("Disabling publishing task " + t.getName());
-                        t.setEnabled(false);
-                    });
-            RepositoryHandler repos = p.getExtensions().getByType(PublishingExtension.class).getRepositories();
-            repos.forEach(repository -> {
-                if (!REPO_NAME.equals(repository.getName())) {
-                    logger.info("Removing publishing repository {}", repository.getName());
-                }
-            });
-            repos.removeIf(artifactRepository -> !artifactRepository.getName().equals(REPO_NAME));
-        });
+        AtomicBoolean publishBuildSrc = new AtomicBoolean(false);
 
-        if (project.getProjectDir().getName().equals("buildSrc")) {
-            logger.warn("Not adding publishing extension to project {} as buildSrc is build-time only.", project);
+        // disable existing publishing tasks but make sure we keep ours
+        project.getTasks().stream()
+                .filter(t -> t.getName().startsWith("publish")
+                        && t.getName().endsWith("Repository")
+                        && !t.getName().contains(REPO_NAME))
+                .forEach(t -> {
+                    logger.info("Disabling publishing task {}", t.getName());
+                    t.setEnabled(false);
+                    publishBuildSrc.set(true);
+                });
+        RepositoryHandler repos = project.getExtensions().getByType(PublishingExtension.class).getRepositories();
+        repos.forEach(repository -> {
+            if (!REPO_NAME.equals(repository.getName())) {
+                logger.info("Removing publishing repository {}", repository.getName());
+            }
+        });
+        repos.removeIf(artifactRepository -> !artifactRepository.getName().equals(REPO_NAME));
+
+        if (project.getProjectDir().getName().equals("buildSrc") && !publishBuildSrc.get()) {
+            // Only ignore buildSrc if it doesn't have an existing publishing mechanism.
+            logger.warn(
+                    "Not adding publishing extension to project {} as buildSrc is build-time only and not configured for publishing.",
+                    project);
             return;
         } else if (!project.getPluginManager().hasPlugin("maven-publish")) {
             // This should never happen due to prior checks in ManipulationPlugin

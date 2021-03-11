@@ -269,7 +269,7 @@ public class Main implements Callable<Void> {
 
         connector.forProjectDirectory(target);
 
-        if ("true".equals(jvmPropertyParams.get("manipulation.disable"))) {
+        if (configuration.disableGME()) {
             logger.info("Gradle Manipulator disabled");
         } else {
             logger.debug("Executing Gradle");

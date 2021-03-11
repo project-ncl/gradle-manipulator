@@ -67,6 +67,9 @@ public class ElasticSearchProjectFunctionalTest {
                 FileUtils.readFileToString(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile(),
                         Charset.defaultCharset())).contains("transport-netty4-client");
         assertTrue(systemOutRule.getLog().contains("Detected application of plugin hook"));
+        assertTrue(systemOutRule.getLog().contains("Removing publishing repository test"));
+        assertTrue(systemOutRule.getLog().contains("Disabling publishing task publishNebulaPublicationToTestRepository"));
+        assertTrue(systemOutRule.getLog().contains("publication has been added but the POM file generation disabled"));
     }
 
     @Test

@@ -15,6 +15,7 @@ import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
@@ -33,6 +34,9 @@ public class MainTest {
 
     @Rule
     public final SystemErrRule systemErrRule = new SystemErrRule().enableLog().muteForSuccessfulTests();
+
+    @Rule
+    public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -114,6 +118,7 @@ public class MainTest {
 
         assertTrue(systemOutRule.getLog().contains("Running Groovy script on"));
         assertFalse(systemOutRule.getLog().contains("Verification tasks"));
+        assertTrue(systemOutRule.getLog().contains("Gradle Manipulator disabled"));
     }
 
     @Test

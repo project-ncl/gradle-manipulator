@@ -249,13 +249,6 @@ class BuildPlugin implements Plugin<Project> {
             if (System.getProperty("idea.executable") != null || System.getProperty("eclipse.launcher") != null) {
                 // IntelliJ does not set JAVA_HOME, so we use the JDK that Gradle was run with
                 return Jvm.current().javaHome
-            } else {
-                throw new GradleException(
-                        " " + System.getProperties().toString() + " " +
-                        "JAVA_HOME must be set to build Elasticsearch. " +
-                                "Note that if the variable was just set you might have to run `./gradlew --stop` for " +
-                                "it to be picked up. See https://github.com/elastic/elasticsearch/issues/31399 details."
-                )
             }
         }
         return compilerJavaHome
@@ -745,22 +738,6 @@ class BuildPlugin implements Plugin<Project> {
                 // Force manifest entries that change by nature to a constant to be able to compare builds more effectively
                 if (System.properties.getProperty("build.compare_friendly", "false") == "true") {
                     jarTask.manifest.getAttributes().clear()
-                }
-            }
-            // add license/notice files
-            project.afterEvaluate {
-                if (project.licenseFile == null || project.noticeFile == null) {
-                    throw new GradleException("Must specify license and notice file for project ${project.path}")
-                }
-                jarTask.metaInf {
-                    from(project.licenseFile.parent) {
-                        include project.licenseFile.name
-                        rename { 'LICENSE.txt' }
-                    }
-                    from(project.noticeFile.parent) {
-                        include project.noticeFile.name
-                        rename { 'NOTICE.txt' }
-                    }
                 }
             }
         }

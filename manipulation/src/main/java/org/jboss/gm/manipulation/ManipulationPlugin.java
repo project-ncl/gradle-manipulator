@@ -52,13 +52,6 @@ public class ManipulationPlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
 
-        if (!new File(project.getRootDir(), ManipulationIO.MANIPULATION_FILE_NAME).exists()) {
-            logger.error("No {} found in {}; exiting plugin.", ManipulationIO.MANIPULATION_FILE_NAME, project.getRootDir());
-            return;
-        }
-        // We can't ignore projects like buildSrc (which are purely build-time) here as we still might need to process them to
-        // e.g. remove any publishing tasks.
-
         if (System.getProperty("gmeFunctionalTest") != null) {
             ConfigCache.getOrCreate(Configuration.class).reload();
         }
@@ -67,6 +60,15 @@ public class ManipulationPlugin implements Plugin<Project> {
         if (!configOutput.get().getAndSet(true)) {
             // Only output the config once to avoid noisy logging.
             logger.info("Configuration now has properties {}", configuration.dumpCurrentConfig());
+        }
+        if (configuration.disableGME()) {
+            logger.info("Gradle Manipulator disabled");
+            return;
+        }
+
+        if (!new File(project.getRootDir(), ManipulationIO.MANIPULATION_FILE_NAME).exists()) {
+            logger.error("No {} found in {}; exiting plugin.", ManipulationIO.MANIPULATION_FILE_NAME, project.getRootDir());
+            return;
         }
 
         // get the previously performed alignment

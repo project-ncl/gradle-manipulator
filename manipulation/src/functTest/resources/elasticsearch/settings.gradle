@@ -1,6 +1,11 @@
 String dirName = rootProject.projectDir.name
 rootProject.name = dirName
 
+List projects = [
+    'build-tools'
+]
+include projects.toArray(new String[0])
+
 /**
   * Iterates over sub directories, looking for build.gradle, and adds a project if found
   * for that dir with the given path prefix. Note that this requires each level
@@ -24,5 +29,6 @@ void addSubProjects(String path, File dir) {
   }
 
 addSubProjects('', new File(rootProject.projectDir, 'modules'))
+project(':build-tools').projectDir = new File(rootProject.projectDir, 'buildSrc')
 
 rootProject.name='elasticsearch'

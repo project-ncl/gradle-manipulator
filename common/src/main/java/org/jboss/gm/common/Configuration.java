@@ -15,6 +15,7 @@ import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
 import org.commonjava.maven.ext.core.state.RESTState;
 import org.commonjava.maven.ext.io.rest.Translator;
 
+import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.aeonbits.owner.Config.LoadType.MERGE;
 
 /**
@@ -54,6 +55,11 @@ public interface Configuration extends Accessible, Reloadable {
 
     @Key("AProxDeployUrl")
     String deployUrl();
+
+    @DisableFeature(VARIABLE_EXPANSION)
+    @Key("manipulation.disable")
+    @DefaultValue("false")
+    boolean disableGME();
 
     @Key("deployPlugin")
     String deployPlugin();

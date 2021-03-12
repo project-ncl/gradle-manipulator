@@ -115,6 +115,7 @@ public class DifferentJVMTest {
                 "-DdependencySource=NONE",
                 "-DignoreUnresolvableDependencies=true",
                 "-DdependencyOverride.junit:junit@*=4.10",
+                "-Dmanipulation.disable=false",
                 "--info"
         };
         m.run(args);

@@ -41,6 +41,7 @@ jobs:
         arguments: --no-daemon --stacktrace clean build AggregateJacocoReport
     # - name: Setup tmate session
     #   uses: mxschmitt/action-tmate@v3
+    #   if: ${{ failure() }}
     - name: Codecov
       uses: codecov/codecov-action@v1
       with:

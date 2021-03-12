@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.jar.JarInputStream;
@@ -25,6 +26,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class SimpleProjectFunctionalTest {
 
@@ -43,7 +45,7 @@ public class SimpleProjectFunctionalTest {
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         TestUtils.copyDirectory("simple-project", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
-        new File(simpleProjectRoot, ManipulationIO.MANIPULATION_FILE_NAME).delete();
+        Files.delete(Paths.get(simpleProjectRoot.toString(), ManipulationIO.MANIPULATION_FILE_NAME));
 
         TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
@@ -53,7 +55,25 @@ public class SimpleProjectFunctionalTest {
                 .withPluginClasspath()
                 .build();
 
-        assertThat(systemOutRule.getLog().contains("No manipulation.json found in"));
+        assertTrue(systemOutRule.getLog().contains("No manipulation.json found in"));
+    }
+
+    @Test
+    public void testDisableGME() throws IOException, URISyntaxException {
+
+        final File simpleProjectRoot = tempDir.newFolder("simple-project");
+        TestUtils.copyDirectory("simple-project", simpleProjectRoot);
+        assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
+
+        TestUtils.createGradleRunner()
+                .withProjectDir(simpleProjectRoot)
+                .withArguments("-Dmanipulation.disable=true", "generatePomFileForMainPublication")
+                //.withDebug(true)
+                .forwardOutput()
+                .withPluginClasspath()
+                .build();
+
+        assertTrue(systemOutRule.getLog().contains("Gradle Manipulator disabled"));
     }
 
     @Test
@@ -136,6 +156,7 @@ public class SimpleProjectFunctionalTest {
                 .isEqualTo(TaskOutcome.SKIPPED);
         assertThat(buildResult.task(":" + "publish").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
         assertThat(publishDirectory).exists();
+        assertTrue(systemOutRule.getLog().contains("as buildSrc is build-time only and not configured for publishing"));
     }
 
     @Test
@@ -167,7 +188,7 @@ public class SimpleProjectFunctionalTest {
         final File publishDirectory = tempDir.newFolder("publish");
         System.setProperty("AProxDeployUrl", "file://" + publishDirectory.toString());
 
-        final BuildResult buildResult = TestUtils.createGradleRunner()
+        TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("--info", "publish", "-DdeployPlugin=maven")
                 .forwardOutput()

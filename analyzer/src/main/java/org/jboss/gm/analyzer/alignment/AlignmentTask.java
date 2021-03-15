@@ -268,7 +268,7 @@ public class AlignmentTask extends DefaultTask {
 
                 logger.info("For project script is {}  and build file {} ", project.getBuildscript(), project.getBuildFile());
                 logger.info("For project {} ", project.getBuildscript().getSourceFile());
-                writeGmeMarkerFile(project.getRootProject().getBuildFile());
+                writeGmeMarkerFile(configuration, project.getRootProject().getBuildFile());
                 writeGmeConfigMarkerFile(project.getRootProject().getBuildFile());
                 writeGmeReposMarkerFile();
                 writeRepositorySettingsFile(cache.getRepositories());
@@ -284,12 +284,22 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private void writeGmeMarkerFile(File rootGradle) throws IOException, ManipulationException {
+    private void writeGmeMarkerFile(Configuration configuration, File rootGradle) throws IOException, ManipulationException {
         File rootDir = getProject().getRootDir();
         File gmeGradle = new File(rootDir, GME);
 
         if (!gmeGradle.exists()) {
             Files.copy(getClass().getResourceAsStream('/' + GME), gmeGradle.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        }
+        if (!isEmpty(configuration.manipulationVersion())) {
+            String gmeGradleString = FileUtils.readFileToString(gmeGradle, Charset.defaultCharset());
+            String currentVersion = gmeGradleString.replaceFirst(
+                    "(?s).*(classpath \"org.jboss.gm:manipulation:)([0-9]+\\.[0-9]+(-SNAPSHOT)??)\".*", "$2");
+            logger.info("Replacing version {} with {} for the ManipulationPlugin", currentVersion,
+                    configuration.manipulationVersion());
+            FileUtils.writeStringToFile(gmeGradle,
+                    gmeGradleString.replaceFirst(currentVersion, configuration.manipulationVersion()),
+                    Charset.defaultCharset());
         }
 
         if (rootGradle.exists()) {

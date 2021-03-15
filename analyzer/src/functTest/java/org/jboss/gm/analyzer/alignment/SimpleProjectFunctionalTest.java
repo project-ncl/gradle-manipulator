@@ -36,7 +36,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
@@ -71,9 +70,9 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                 projectRoot, projectRoot.getName(),
                 Collections.singletonMap("dependencyOverride.com.yammer.metrics:*@org.acme.gradle:root", ""));
 
-        assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
-        assertTrue(new File(projectRoot, AlignmentTask.GRADLE + '/' + AlignmentTask.GME_REPOS).exists());
-        assertTrue(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS).exists());
+        assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
+        assertThat(new File(projectRoot, AlignmentTask.GRADLE + '/' + AlignmentTask.GME_REPOS)).exists();
+        assertThat(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS)).exists();
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
         assertEquals(AlignmentTask.INJECT_GME_END,
                 org.jboss.gm.common.utils.FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
@@ -102,6 +101,37 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
+    public void ensureAlignmentProduceCustomManipulationPlugin() throws IOException, URISyntaxException, ManipulationException {
+        final File projectRoot = tempDir.newFolder("simple-project");
+
+        final TestManipulationModel alignmentModel = TestUtils.align(
+                projectRoot, projectRoot.getName(),
+                Collections.singletonMap("manipulationVersion", "0.1.2.3.4"));
+
+        assertThat(alignmentModel).isNotNull().satisfies(am -> {
+            assertThat(am.getOriginalVersion()).isEqualTo("1.0.1");
+            assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
+            assertThat(am.getName()).isEqualTo("root");
+        });
+        File gme = new File(projectRoot, AlignmentTask.GME);
+        assertThat(gme).exists();
+        assertThat(FileUtils.readFileToString(gme, Charset.defaultCharset()))
+                .contains("org.jboss.gm:manipulation:0.1.2.3.4");
+        assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
+        assertThat(new File(projectRoot, AlignmentTask.GRADLE + '/' + AlignmentTask.GME_REPOS)).exists();
+        assertThat(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS)).exists();
+        assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_END,
+                org.jboss.gm.common.utils.FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+
+        //verify that dummy.gradle now includes the gme-repos.gradle injection
+        final File extraGradleFile = projectRoot.toPath().resolve("gradle/dummy.gradle").toFile();
+        assertThat(extraGradleFile).exists();
+        assertThat(FileUtils.readLines(extraGradleFile, Charset.defaultCharset()))
+                .filteredOn(l -> l.trim().equals(AlignmentTask.APPLY_GME_REPOS)).hasSize(1);
+    }
+
+    @Test
     // @BMUnitConfig(verbose = true, bmunitVerbose = true)
     @BMRule(name = "override-inprocess-configuration",
             targetClass = "org.jboss.gm.common.Configuration",
@@ -116,7 +146,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
 
         List<String> lines = FileUtils.readLines(new File(projectRoot, Project.DEFAULT_BUILD_FILE), Charset.defaultCharset());
 
-        assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
+        assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
         assertEquals(AlignmentTask.INJECT_GME_START, org.jboss.gm.common.utils.FileUtils.getFirstLine(lines));
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
@@ -137,7 +167,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         alignmentModel = new TestManipulationModel(ManipulationIO.readManipulationModel(projectRoot));
         lines = FileUtils.readLines(new File(projectRoot, Project.DEFAULT_BUILD_FILE), Charset.defaultCharset());
 
-        assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
+        assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
             assertThat(am.getName()).isEqualTo("root");
@@ -165,9 +195,9 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         verify(postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
                 .withRequestBody(notMatching(".*SNAPSHOT.*")));
 
-        assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
-        assertTrue(new File(projectRoot, AlignmentTask.GRADLE + '/' + AlignmentTask.GME_REPOS).exists());
-        assertTrue(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS).exists());
+        assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
+        assertThat(new File(projectRoot, AlignmentTask.GRADLE + '/' + AlignmentTask.GME_REPOS)).exists();
+        assertThat(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS)).exists();
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
         assertEquals(AlignmentTask.INJECT_GME_END,
                 org.jboss.gm.common.utils.FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));

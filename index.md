@@ -17,6 +17,18 @@ The metadata file is named `manipulation.json` and is created by the `generateAl
 
 ### Usage
 
+#### Applying the Plugin(s)
+
+There are multiple ways that the plugins can be applied.
+
+* Utilise the below CLI (this is the **recommended** approach).
+* Add plugin configuration to project manually.
+* Apply script to project that handles all the details (this method is used by the `analyzer` plugin which configures the project to use the `manipulation` plugin automatically).
+* Use an init script (see example [here](https://github.com/project-ncl/gradle-manipulator#testing-on-a-real-project)).
+
+It should also be noted that the project itself contains a properly configured init script for the `analyzer` plugin (which gets released along with the plugin).
+Furthermore, when the `analyzer` plugin executes, it alters the main gradle script of the target project to include the manipulation plugin.
+
 #### CLI
 
 <table bgcolor="#ffff00">
@@ -69,33 +81,39 @@ It is possible to run the Gradle process using a different JDK by passing in the
 
 To obtain the CLI it may be downloaded from Maven Central [here](https://repo1.maven.org/maven2/org/jboss/gm/cli).
 
-##### Disabling the alignment
-
-You can disable GME _through the CLI_ using the `manipulation.disable` property:
-
-	$ gradle -Dmanipulation.disable=true...
-
-#### Applying the Plugin(s)
-
-There are multiple ways that the plugins can be applied.
-
-* Utilise the above CLI.
-* Add plugin configuration to project manually
-* Apply script to project that handles all the details (this method is used by the `analyzer` plugin which configures the project to use the `manipulation` plugin automatically)
-* Use an init script (see example [here](https://github.com/project-ncl/gradle-manipulator#testing-on-a-real-project))
-
-It should also be noted that the project itself contains a properly configured init script for the `analyzer` plugin (which gets released along with the plugin).
-Furthermore, when the `analyzer` plugin executes, it alters the main gradle script of the target project to include the manipulation plugin.
-
-##### Troubleshooting
+#### Troubleshooting
 
 * Gradle build daemon disappeared unexpectedly
    * This may happen in Gradle versions prior to 5.x if the shell environment contains non ASCII characters (e.g. the PROMPT symbol).
 
-### General Configuration
+### Alignment Configuration
+
+#### Customising the Manipulation Plugin Version
+
+<table bgcolor="red">
+<tr>
+<td>
+    Warning : This option may lead to Alignment and Manipulation plugins being 'out of sync'. Therefore caution should be used when applying this option and only use it if absolutely necessary.
+</td>
+</tr>
+</table>
+When running the alignment plugin (e.g. via the CLI), it is possible to configure the version of the Manipulation Plugin that is injected. By default the same version as the alignment plugin will be used (i.e. the current version). By setting `manipulationVersion` to a value (e.g. `2.6.`) this version is requested instead.
 
 #### Unresolved Dependencies
+
 If the tool is not able to resolve certain dependencies then it may fail during the alignment phase. Set `ignoreUnresolvableDependencies` to true to ignore those (default: false).
+
+#### Publish Plugin Hook
+
+Certain project builds don't apply the publish plugin directly (be it the legacy or current one); instead they implement their own 'build plugin' (e.g. within `buildSrc`) that itself then applies plugins. This can lead to the situation where this custom plugin is applied and actioned after the GME tooling plugin which therefore does not detect any publishing plugins. It is possible to list those custom plugins as 'hooks' that GME will detect, and attempt to customise the publishing again. It is a comma separated list with a single default entry of `elasticsearch.esplugin`.
+
+### General Configuration
+
+#### Disabling the Plugins
+
+You can disable GME using the `manipulation.disable` property:
+
+	$ gradle -Dmanipulation.disable=true...
 
 #### Logging
 
@@ -104,10 +122,6 @@ The tool uses its own logging system (that backs onto the Gradle logging system)
 * If `loggingClassnameLineNumber` is set to true this will add classname and line numbers to messages (default: true).
 * If `loggingColours` is set to true it will also use colours (default: true).
 * If `loggingLevel` is set to true it will output the logging category e.g. INFO. (default: false).
-
-#### Publish Plugin Hook
-
-Certain project builds don't apply the publish plugin directly (be it the legacy or current one); instead they implement their own 'build plugin' (e.g. within `buildSrc`) that itself then applies plugins. This can lead to the situation where this custom plugin is applied and actioned after the GME tooling plugin which therefore does not detect any publishing plugins. It is possible to list those custom plugins as 'hooks' that GME will detect, and attempt to customise the publishing again. It is a comma separated list with a single default entry of `elasticsearch.esplugin`.
 
 ### Feature Guide
 

@@ -30,7 +30,7 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
  */
 public class DependencyOverrideCustomizer implements ResponseCustomizer {
 
-    private static final Logger logger = GMLogger.getLogger(DependencyExclusionCustomizer.class);
+    private static final Logger logger = GMLogger.getLogger(DependencyOverrideCustomizer.class);
 
     private final Map<ProjectRef, String> overrideMap;
 
@@ -62,7 +62,9 @@ public class DependencyOverrideCustomizer implements ResponseCustomizer {
                 "dependencyOverride.");
 
         if (!prefixed.isEmpty()) {
-            for (String key : prefixed.keySet()) {
+            for (Map.Entry<String, String> entry : prefixed.entrySet()) {
+                final String key = entry.getKey();
+                final String value = entry.getValue();
                 final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
 
                 for (Project project : projects) {
@@ -73,7 +75,7 @@ public class DependencyOverrideCustomizer implements ResponseCustomizer {
                         final ProjectVersionRef projectRef = new SimpleProjectVersionRef(group,
                                 project.getName(), project.getVersion().toString());
                         if (keyParseResult.matchesModule(projectRef)) {
-                            final String overrideVersion = prefixed.get(key);
+                            final String overrideVersion = value;
                             logger.debug("Overriding dependency {} in module {} with version {}",
                                     keyParseResult.getDependency(), projectRef, overrideVersion);
                             overrideMap.put(keyParseResult.getDependency(), overrideVersion);

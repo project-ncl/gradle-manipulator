@@ -67,11 +67,12 @@ public final class RepositoryExporter {
     }
 
     private static void processRepositories(RepositoryExporter repositoryExporter, Map<ArtifactRepository, Path> repositories) {
-        for (ArtifactRepository repository : repositories.keySet()) {
+        for (Map.Entry<ArtifactRepository, Path> entry : repositories.entrySet()) {
+            ArtifactRepository repository = entry.getKey();
+            Path path = entry.getValue();
             if (repository instanceof DefaultMavenLocalArtifactRepository) {
                 DefaultMavenLocalArtifactRepository artifactRepository = (DefaultMavenLocalArtifactRepository) repository;
-                logger.debug("Skipping local maven repository '{}' from {}", artifactRepository.getUrl(),
-                        repositories.get(repository));
+                logger.debug("Skipping local maven repository '{}' from {}", artifactRepository.getUrl(), path);
             } else if (repository instanceof MavenArtifactRepository) {
                 MavenArtifactRepository artifactRepository = (MavenArtifactRepository) repository;
                 URI url = artifactRepository.getUrl();
@@ -80,7 +81,7 @@ public final class RepositoryExporter {
                     addRepository(REPO_TYPE.Maven, repositoryExporter, artifactRepository.getName(), url.toString());
                 } else {
                     logger.debug("Skipping maven repository '{}' with unsupported scheme {} from {}", repository.getName(), url,
-                            repositories.get(repository));
+                            path);
                 }
             } else if (repository instanceof IvyArtifactRepository) {
                 IvyArtifactRepository artifactRepository = (IvyArtifactRepository) repository;
@@ -90,11 +91,11 @@ public final class RepositoryExporter {
                     addRepository(REPO_TYPE.Ivy, repositoryExporter, artifactRepository.getName(), url.toString());
                 } else {
                     logger.debug("Skipping ivy repository '{}' with unsupported scheme {} from {}", repository.getName(), url,
-                            repositories.get(repository));
+                            path);
                 }
             } else {
                 logger.debug("Skipping repository of type {} from {}", repository.getClass().getSimpleName(),
-                        repositories.get(repository));
+                        path);
             }
         }
     }

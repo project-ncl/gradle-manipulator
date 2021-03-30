@@ -151,7 +151,7 @@ public class AlignmentTask extends DefaultTask {
             final Set<ProjectVersionRef> lockFileDeps = LockFileIO
                     .allProjectVersionRefsFromLockfiles(LockFileIO.getLocksRootPath(project));
             final String currentProjectVersion = project.getVersion().toString();
-            final HashMap<RelaxedProjectVersionRef, ProjectVersionRef> dependencies = processAnyExistingManipulationFile(
+            final Map<RelaxedProjectVersionRef, ProjectVersionRef> dependencies = processAnyExistingManipulationFile(
                     project,
                     getDependencies(project, configuration, lockFileDeps));
 
@@ -189,7 +189,7 @@ public class AlignmentTask extends DefaultTask {
                         new AlignmentService.Request(cache.getProjectVersionRefs(configuration.versionSuffixSnapshot()),
                                 allDeps));
 
-                final HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = cache
+                final Map<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = cache
                         .getDependencies();
                 final String newVersion = alignmentResponse.getNewProjectVersion();
 
@@ -378,10 +378,10 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private HashMap<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(Project project, Configuration internalConfig,
+    private Map<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(Project project, Configuration internalConfig,
             Set<ProjectVersionRef> lockFileDeps) {
 
-        final HashMap<RelaxedProjectVersionRef, ProjectVersionRef> depMap = new HashMap<>();
+        final Map<RelaxedProjectVersionRef, ProjectVersionRef> depMap = new HashMap<>();
         project.getConfigurations().all(configuration -> {
             if (configuration.isCanBeResolved()) {
 
@@ -533,7 +533,7 @@ public class AlignmentTask extends DefaultTask {
     }
 
     private void updateModuleDynamicDependencies(ManipulationModel correspondingModule,
-            HashMap<RelaxedProjectVersionRef, ProjectVersionRef> allModuleDependencies) {
+            Map<RelaxedProjectVersionRef, ProjectVersionRef> allModuleDependencies) {
 
         allModuleDependencies.forEach((d, p) -> {
             // we need to make sure that dynamic dependencies are stored with their original key
@@ -552,7 +552,7 @@ public class AlignmentTask extends DefaultTask {
      * @param alignmentResponse the response which (possibly) contains overrides and DA information
      */
     private void updateModuleDependencies(ManipulationModel correspondingModule,
-            HashMap<RelaxedProjectVersionRef, ProjectVersionRef> allModuleDependencies,
+            Map<RelaxedProjectVersionRef, ProjectVersionRef> allModuleDependencies,
             Response alignmentResponse) {
 
         allModuleDependencies.forEach((d, p) -> {
@@ -591,8 +591,8 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private HashMap<RelaxedProjectVersionRef, ProjectVersionRef> processAnyExistingManipulationFile(Project project,
-            HashMap<RelaxedProjectVersionRef, ProjectVersionRef> allDependencies) {
+    private Map<RelaxedProjectVersionRef, ProjectVersionRef> processAnyExistingManipulationFile(Project project,
+            Map<RelaxedProjectVersionRef, ProjectVersionRef> allDependencies) {
 
         File m = new File(project.getRootDir(), ManipulationIO.MANIPULATION_FILE_NAME);
 

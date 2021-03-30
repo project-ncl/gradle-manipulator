@@ -24,6 +24,8 @@ plugins {
     id("org.kordamp.gradle.jacoco") version "0.42.1"
 }
 
+
+
 apply(plugin = "net.researchgate.release")
 
 if(!JavaVersion.current().isJava11Compatible){

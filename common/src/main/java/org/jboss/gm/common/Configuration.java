@@ -162,6 +162,15 @@ public interface Configuration extends Accessible, Reloadable {
     @Key("repoRemovalBackup")
     String repositoriesFile();
 
+    /**
+     * Represents the version of the Manipulation Plugin to inject. By default this returns
+     * empty representing the current version. This can be set to a numeric version. The version
+     * must exist in Maven Central for it to be valid.
+     */
+    @Key("manipulationVersion")
+    @DefaultValue("")
+    String manipulationVersion();
+
     class DependencyConverter implements Converter<DependencyPrecedence> {
         /**
          * Converts the given input into an Object of type T.

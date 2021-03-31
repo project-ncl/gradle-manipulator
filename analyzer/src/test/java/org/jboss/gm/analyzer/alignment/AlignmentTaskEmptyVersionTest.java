@@ -108,7 +108,7 @@ public class AlignmentTaskEmptyVersionTest {
         Method m = at.getClass().getDeclaredMethod("getDependencies", Project.class, Configuration.class, Set.class);
         m.setAccessible(true);
         @SuppressWarnings("unchecked")
-        HashMap<Dependency, ProjectVersionRef> result = (HashMap<Dependency, ProjectVersionRef>) m.invoke(at,
+        Map<Dependency, ProjectVersionRef> result = (Map<Dependency, ProjectVersionRef>) m.invoke(at,
                 new Object[] { p, config, new HashSet<ProjectVersionRef>() });
         Collection<ProjectVersionRef> allDependencies = result.values();
 

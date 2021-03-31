@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
@@ -35,7 +36,7 @@ public class ManipulationCache {
      * Will be built up to contain all the projects that need alignment. The same reference is passed to each task
      * and is used to make sure that the result of alignment is only written once (by the last alignment task to be performed)
      */
-    private final HashSet<String> projectCounter = new HashSet<>();
+    private final Set<String> projectCounter = new HashSet<>();
 
     /** Root model **/
     @Getter
@@ -48,7 +49,7 @@ public class ManipulationCache {
      * (which might be dynamic) to the fully resolved GAV.
      */
     @Getter
-    private final HashMap<Project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef>> dependencies = new HashMap<>();
+    private final Map<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>> dependencies = new HashMap<>();
 
     @Getter
     private final Map<ArtifactRepository, Path> repositories = new HashMap<>();
@@ -116,7 +117,7 @@ public class ManipulationCache {
         return projectCounter.isEmpty();
     }
 
-    public void addDependencies(Project project, HashMap<RelaxedProjectVersionRef, ProjectVersionRef> deps) {
+    public void addDependencies(Project project, Map<RelaxedProjectVersionRef, ProjectVersionRef> deps) {
         dependencies.put(project, deps);
     }
 

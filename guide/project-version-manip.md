@@ -11,7 +11,7 @@ The tool uses the same code from PME and therefore supports a subset of the feat
 
 ### Disabling Version Manipulation
 
-If `versionModificationEnabled` is set to false (default: true) then no version change will happen.
+If `versionModification` is set to false (default: true) then no version change will happen.
 
 ### Automatic version increment
 

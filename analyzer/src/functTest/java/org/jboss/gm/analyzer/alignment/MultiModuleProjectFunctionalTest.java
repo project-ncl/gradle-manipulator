@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 
@@ -13,7 +15,12 @@ import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.io.xpp3.SettingsXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.json.GAV;
+import org.commonjava.maven.ext.common.json.ModulesItem;
+import org.commonjava.maven.ext.common.json.PME;
+import org.commonjava.maven.ext.common.util.JSONUtils;
 import org.gradle.api.Project;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
@@ -34,8 +41,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 
 public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
 
@@ -137,8 +146,280 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         // make sure the project name was not changed
         List<String> settingsLines = org.apache.commons.io.FileUtils.readLines(new File(projectRoot, "settings.gradle"),
                 Charset.defaultCharset());
-        assertThat(settingsLines).filteredOn(s -> s.trim().startsWith("rootProject.name"))
-                .hasOnlyOneElementSatisfying(s -> s.trim().endsWith("'root'"));
+        assertThat(settingsLines).map(String::trim).filteredOn(s -> s.startsWith("rootProject.name"))
+                .singleElement(as(STRING)).endsWith("'root'");
     }
 
+    @Test
+    public void verifyAlignmentReportJson() throws IOException, URISyntaxException {
+        final Path projectRoot = tempDir.newFolder("multi-module").toPath();
+        assertThat(projectRoot).isDirectory();
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot.toFile(),
+                projectRoot.getFileName().toString());
+        assertThat(alignmentModel).isNotNull();
+        final Path buildRoot = projectRoot.resolve("build");
+        assertThat(buildRoot).isDirectory();
+        final Path jsonFile = buildRoot.resolve(Configuration.REPORT_JSON_OUTPUT_FILE);
+        assertThat(jsonFile).isRegularFile().isReadable();
+        final Path textFile = buildRoot.resolve(Configuration.REPORT_JSON_OUTPUT_FILE
+                .replaceFirst("\\.json$", ".txt"));
+        assertThat(textFile).doesNotExist();
+        final PME jsonReport = JSONUtils.fileToJSON(jsonFile.toFile());
+        final String jsonString = org.apache.commons.io.FileUtils.readFileToString(jsonFile.toFile(),
+                StandardCharsets.UTF_8);
+        final String expectedJsonString = String.format(
+                "{%n" +
+                        "  \"executionRoot\" : {%n" +
+                        "    \"groupId\" : \"org.acme\",%n" +
+                        "    \"artifactId\" : \"root\",%n" +
+                        "    \"version\" : \"1.1.2.redhat-00005\",%n" +
+                        "    \"originalGAV\" : \"org.acme:root:1.1.2\"%n" +
+                        "  },%n" +
+                        "  \"modules\" : [ {%n" +
+                        "    \"gav\" : {%n" +
+                        "      \"groupId\" : \"org.acme\",%n" +
+                        "      \"artifactId\" : \"root\",%n" +
+                        "      \"version\" : \"1.1.2.redhat-00005\",%n" +
+                        "      \"originalGAV\" : \"org.acme:root:1.1.2\"%n" +
+                        "    }%n" +
+                        "  }, {%n" +
+                        "    \"gav\" : {%n" +
+                        "      \"groupId\" : \"org.acme\",%n" +
+                        "      \"artifactId\" : \"subproject1\",%n" +
+                        "      \"version\" : \"1.1.2.redhat-00005\",%n" +
+                        "      \"originalGAV\" : \"org.acme:subproject1:1.1.2\"%n" +
+                        "    },%n" +
+                        "    \"dependencies\" : {%n" +
+                        "      \"org.hibernate:hibernate-core:5.4.2.Final\" : {%n" +
+                        "        \"groupId\" : \"org.hibernate\",%n" +
+                        "        \"artifactId\" : \"hibernate-core\",%n" +
+                        "        \"version\" : \"5.4.2.Final-redhat-00001\"%n" +
+                        "      },%n" +
+                        "      \"org.springframework:spring-context:5.1.6.RELEASE\" : {%n" +
+                        "        \"groupId\" : \"org.springframework\",%n" +
+                        "        \"artifactId\" : \"spring-context\",%n" +
+                        "        \"version\" : \"5.1.6.RELEASE-redhat-00005\"%n" +
+                        "      }%n" +
+                        "    }%n" +
+                        "  }, {%n" +
+                        "    \"gav\" : {%n" +
+                        "      \"groupId\" : \"org.acme\",%n" +
+                        "      \"artifactId\" : \"subproject2\",%n" +
+                        "      \"version\" : \"1.1.2.redhat-00005\",%n" +
+                        "      \"originalGAV\" : \"org.acme:subproject2:1.1.2\"%n" +
+                        "    },%n" +
+                        "    \"dependencies\" : {%n" +
+                        "      \"org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1\" : {%n" +
+                        "        \"groupId\" : \"org.jboss.resteasy\",%n" +
+                        "        \"artifactId\" : \"resteasy-jaxrs\",%n" +
+                        "        \"version\" : \"3.6.3.SP1-redhat-00001\"%n" +
+                        "      }%n" +
+                        "    }%n" +
+                        "  }, {%n" +
+                        "    \"gav\" : {%n" +
+                        "      \"groupId\" : \"org.acme\",%n" +
+                        "      \"artifactId\" : \"subproject11\",%n" +
+                        "      \"version\" : \"1.1.2.redhat-00005\",%n" +
+                        "      \"originalGAV\" : \"org.acme:subproject11:1.1.2\"%n" +
+                        "    },%n" +
+                        "    \"dependencies\" : {%n" +
+                        "      \"org.springframework:spring-context:5.1.6.RELEASE\" : {%n" +
+                        "        \"groupId\" : \"org.springframework\",%n" +
+                        "        \"artifactId\" : \"spring-context\",%n" +
+                        "        \"version\" : \"5.1.6.RELEASE-redhat-00005\"%n" +
+                        "      }%n" +
+                        "    }%n" +
+                        "  } ]%n" +
+                        "}");
+        assertThat(jsonString).isEqualTo(expectedJsonString);
+        final GAV gav = new GAV();
+        gav.setPVR(SimpleProjectVersionRef.parse("org.acme:root:1.1.2.redhat-00005"));
+        assertThat(jsonReport.getGav().getGroupId()).isEqualTo(gav.getGroupId());
+        assertThat(jsonReport.getGav().getArtifactId()).isEqualTo(gav.getArtifactId());
+        assertThat(jsonReport.getGav().getVersion()).isEqualTo(gav.getVersion());
+        assertThat(jsonReport.getGav().getOriginalGAV()).isEqualTo("org.acme:root:1.1.2");
+        final List<ModulesItem> modules = jsonReport.getModules();
+        assertThat(modules).hasSize(4);
+        final ModulesItem module1 = modules.get(0);
+        final ModulesItem module2 = modules.get(1);
+        final ModulesItem module3 = modules.get(2);
+        final ModulesItem module4 = modules.get(3);
+        assertThat(module1.getGav()).isNotNull();
+        assertThat(module1.getGav().getGroupId()).isEqualTo("org.acme");
+        assertThat(module1.getGav().getArtifactId()).isEqualTo("root");
+        assertThat(module1.getGav().getVersion()).isEqualTo("1.1.2.redhat-00005");
+        assertThat(module1.getGav().getOriginalGAV()).isEqualTo("org.acme:root:1.1.2");
+        assertThat(module2.getGav()).isNotNull();
+        assertThat(module2.getGav().getGroupId()).isEqualTo("org.acme");
+        assertThat(module2.getGav().getArtifactId()).isEqualTo("subproject1");
+        assertThat(module2.getGav().getVersion()).isEqualTo("1.1.2.redhat-00005");
+        assertThat(module2.getGav().getOriginalGAV()).isEqualTo("org.acme:subproject1:1.1.2");
+        assertThat(module2.getDependencies()).hasSize(2)
+                .containsEntry("org.hibernate:hibernate-core:5.4.2.Final",
+                        SimpleProjectVersionRef.parse("org.hibernate:hibernate-core:5.4.2.Final-redhat-00001"))
+                .containsEntry("org.springframework:spring-context:5.1.6.RELEASE",
+                        SimpleProjectVersionRef.parse("org.springframework:spring-context:5.1.6.RELEASE-redhat-00005"));
+        assertThat(module3.getGav()).isNotNull();
+        assertThat(module3.getGav().getGroupId()).isEqualTo("org.acme");
+        assertThat(module3.getGav().getArtifactId()).isEqualTo("subproject2");
+        assertThat(module3.getGav().getVersion()).isEqualTo("1.1.2.redhat-00005");
+        assertThat(module3.getGav().getOriginalGAV()).isEqualTo("org.acme:subproject2:1.1.2");
+        assertThat(module3.getDependencies()).hasSize(1)
+                .containsEntry("org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1",
+                        SimpleProjectVersionRef.parse("org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1-redhat-00001"));
+        assertThat(module4.getGav()).isNotNull();
+        assertThat(module4.getGav().getGroupId()).isEqualTo("org.acme");
+        assertThat(module4.getGav().getArtifactId()).isEqualTo("subproject11");
+        assertThat(module4.getGav().getVersion()).isEqualTo("1.1.2.redhat-00005");
+        assertThat(module4.getGav().getOriginalGAV()).isEqualTo("org.acme:subproject11:1.1.2");
+        assertThat(module4.getDependencies()).hasSize(1)
+                .containsEntry("org.springframework:spring-context:5.1.6.RELEASE",
+                        SimpleProjectVersionRef.parse("org.springframework:spring-context:5.1.6.RELEASE-redhat-00005"));
+        final String expectedTextString = String.format(
+                "------------------- project org.acme:root%n" +
+                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
+                        "%n" +
+                        "------------------- project org.acme:root%n" +
+                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
+                        "%n" +
+                        "------------------- project org.acme:subproject1%n" +
+                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
+                        "%n" +
+                        "\tDependencies : org.springframework:spring-context:5.1.6.RELEASE --> org.springframework:spring-context:5.1.6.RELEASE-redhat-00005%n"
+                        +
+                        "\tDependencies : org.hibernate:hibernate-core:5.4.2.Final --> org.hibernate:hibernate-core:5.4.2.Final-redhat-00001%n"
+                        +
+                        "%n" +
+                        "------------------- project org.acme:subproject2%n" +
+                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
+                        "%n" +
+                        "\tDependencies : org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1 --> org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1-redhat-00001%n"
+                        +
+                        "%n" +
+                        "------------------- project org.acme:subproject11%n" +
+                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
+                        "%n" +
+                        "\tDependencies : org.springframework:spring-context:5.1.6.RELEASE --> org.springframework:spring-context:5.1.6.RELEASE-redhat-00005%n"
+                        +
+                        "%n");
+        assertThat(systemOutRule.getLog()).contains(expectedTextString);
+    }
+
+    @Test
+    public void verifyAlignmentReportText() throws IOException, URISyntaxException {
+        System.setProperty("reportJSONOutputFile", "");
+        final String reportJsonOutputFile = System.getProperty("reportJSONOutputFile");
+        assertThat(reportJsonOutputFile).isNotNull().isEmpty();
+        System.setProperty("reportTxtOutputFile", Configuration.REPORT_JSON_OUTPUT_FILE
+                .replaceFirst("\\.json$", ".txt"));
+        final String reportTxtOutputFile = System.getProperty("reportTxtOutputFile");
+        assertThat(reportTxtOutputFile).isEqualTo(Configuration.REPORT_JSON_OUTPUT_FILE
+                .replaceFirst("\\.json$", ".txt"));
+        final String reportNonAligned = System.getProperty("reportNonAligned");
+        assertThat(reportNonAligned).isNull();
+        final Path projectRoot = tempDir.newFolder("multi-module").toPath();
+        assertThat(projectRoot).isDirectory();
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot.toFile(),
+                projectRoot.getFileName().toString());
+        assertThat(alignmentModel).isNotNull();
+        final Path buildRoot = projectRoot.resolve("build");
+        assertThat(buildRoot).isDirectory();
+        final Path jsonFile = buildRoot.resolve(Configuration.REPORT_JSON_OUTPUT_FILE);
+        assertThat(jsonFile).doesNotExist();
+        final Path textFile = buildRoot.resolve(System.getProperty("reportTxtOutputFile"));
+        assertThat(textFile).isRegularFile().isReadable();
+        final String textString = org.apache.commons.io.FileUtils.readFileToString(textFile.toFile(), StandardCharsets.UTF_8);
+        final String expectedTextString = String.format(
+                "------------------- project org.acme:root%n" +
+                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
+                        "%n" +
+                        "------------------- project org.acme:root%n" +
+                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
+                        "%n" +
+                        "------------------- project org.acme:subproject1%n" +
+                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
+                        "%n" +
+                        "\tDependencies : org.springframework:spring-context:5.1.6.RELEASE --> org.springframework:spring-context:5.1.6.RELEASE-redhat-00005%n"
+                        +
+                        "\tDependencies : org.hibernate:hibernate-core:5.4.2.Final --> org.hibernate:hibernate-core:5.4.2.Final-redhat-00001%n"
+                        +
+                        "%n" +
+                        "------------------- project org.acme:subproject2%n" +
+                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
+                        "%n" +
+                        "\tDependencies : org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1 --> org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1-redhat-00001%n"
+                        +
+                        "%n" +
+                        "------------------- project org.acme:subproject11%n" +
+                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
+                        "%n" +
+                        "\tDependencies : org.springframework:spring-context:5.1.6.RELEASE --> org.springframework:spring-context:5.1.6.RELEASE-redhat-00005%n"
+                        +
+                        "%n");
+        assertThat(textString).isEqualTo(expectedTextString);
+        assertThat(systemOutRule.getLog()).contains(expectedTextString);
+    }
+
+    @Test
+    public void verifyAlignmentReportTextReportNonAligned() throws IOException, URISyntaxException {
+        System.setProperty("reportJSONOutputFile", "");
+        final String reportJsonOutputFile = System.getProperty("reportJSONOutputFile");
+        assertThat(reportJsonOutputFile).isNotNull().isEmpty();
+        System.setProperty("reportTxtOutputFile", Configuration.REPORT_JSON_OUTPUT_FILE
+                .replaceFirst("\\.json$", ".txt"));
+        final String reportTxtOutputFile = System.getProperty("reportTxtOutputFile");
+        assertThat(reportTxtOutputFile).isEqualTo(Configuration.REPORT_JSON_OUTPUT_FILE
+                .replaceFirst("\\.json$", ".txt"));
+        System.setProperty("reportNonAligned", Boolean.TRUE.toString());
+        final String reportNonAligned = System.getProperty("reportNonAligned");
+        assertThat(reportNonAligned).isNotEmpty().isEqualTo(Boolean.TRUE.toString());
+        final Path projectRoot = tempDir.newFolder("multi-module").toPath();
+        assertThat(projectRoot).isDirectory();
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot.toFile(),
+                projectRoot.getFileName().toString());
+        assertThat(alignmentModel).isNotNull();
+        final Path buildRoot = projectRoot.resolve("build");
+        assertThat(buildRoot).isDirectory();
+        final Path jsonFile = buildRoot.resolve(Configuration.REPORT_JSON_OUTPUT_FILE);
+        assertThat(jsonFile).doesNotExist();
+        final Path textFile = buildRoot.resolve(reportTxtOutputFile);
+        assertThat(textFile).isRegularFile().isReadable();
+        final String textString = org.apache.commons.io.FileUtils.readFileToString(textFile.toFile(), StandardCharsets.UTF_8);
+        final String expectedTextString = String.format(
+                "------------------- project org.acme:root%n" +
+                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
+                        "%n" +
+                        "------------------- project org.acme:root%n" +
+                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
+                        "%n" +
+                        "------------------- project org.acme:subproject1%n" +
+                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
+                        "%n" +
+                        "\tDependencies : org.springframework:spring-context:5.1.6.RELEASE --> org.springframework:spring-context:5.1.6.RELEASE-redhat-00005%n"
+                        +
+                        "\tDependencies : org.hibernate:hibernate-core:5.4.2.Final --> org.hibernate:hibernate-core:5.4.2.Final-redhat-00001%n"
+                        +
+                        "\tNon-Aligned Dependencies : junit:junit:4.12%n" +
+                        "%n" +
+                        "------------------- project org.acme:subproject2%n" +
+                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
+                        "%n" +
+                        "\tDependencies : org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1 --> org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1-redhat-00001%n"
+                        +
+                        "\tNon-Aligned Dependencies : junit:junit:4.12%n" +
+                        "\tNon-Aligned Dependencies : com.google.inject:guice:4.2.2%n" +
+                        "\tNon-Aligned Dependencies : org.apache.commons:commons-lang3:3.8.1%n" +
+                        "%n" +
+                        "------------------- project org.acme:subproject11%n" +
+                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
+                        "%n" +
+                        "\tDependencies : org.springframework:spring-context:5.1.6.RELEASE --> org.springframework:spring-context:5.1.6.RELEASE-redhat-00005%n"
+                        +
+                        "\tNon-Aligned Dependencies : junit:junit:4.12%n" +
+                        "\tNon-Aligned Dependencies : com.google.inject:guice:4.2.2%n" +
+                        "\tNon-Aligned Dependencies : org.apache.commons:commons-lang3:3.8.1%n" +
+                        "%n");
+        assertThat(textString).isEqualTo(expectedTextString);
+        assertThat(systemOutRule.getLog()).contains(expectedTextString);
+    }
 }

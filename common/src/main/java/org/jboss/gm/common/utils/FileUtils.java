@@ -11,9 +11,9 @@ import lombok.experimental.UtilityClass;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.slf4j.helpers.MessageFormatter;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.isEmpty;
 
 @UtilityClass
 public class FileUtils {
@@ -68,5 +68,17 @@ public class FileUtils {
             result = root.relativize(target);
         }
         return result;
+    }
+
+    /**
+     * Wraps appending to the string builder using SLF4J style substitutions.
+     *
+     * @param builder the string builder
+     * @param message the message (possibly with parameters)
+     * @param args optional parameters
+     */
+    public static void append(StringBuilder builder, String message, Object... args) {
+        builder.append(MessageFormatter.arrayFormat(message, args).getMessage());
+        builder.append(System.lineSeparator());
     }
 }

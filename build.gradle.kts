@@ -117,7 +117,7 @@ if (isReleaseBuild && GradleVersion.current().version != "5.6.4") {
 }
 
 subprojects {
-    extra["assertjVersion"] = "3.12.2"
+    extra["assertjVersion"] = "3.19.0"
     extra["atlasVersion"] = "0.17.2"
     extra["bytemanVersion"] = "4.0.13"
     extra["commonsBeanVersion"] = "1.9.4"

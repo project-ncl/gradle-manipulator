@@ -36,6 +36,8 @@ public interface Configuration extends Accessible, Reloadable {
 
     String DA = "restURL";
 
+    String REPORT_JSON_OUTPUT_FILE = "alignmentReport.json";
+
     /**
      * This method simply encapsulates the {@link Accessible#fill(Map)} in order to
      * cache the value to avoid repeated calls.
@@ -170,6 +172,18 @@ public interface Configuration extends Accessible, Reloadable {
     @Key("manipulationVersion")
     @DefaultValue("")
     String manipulationVersion();
+
+    @Key("reportTxtOutputFile")
+    @DefaultValue("")
+    String reportTxtOutputFile();
+
+    @Key("reportJSONOutputFile")
+    @DefaultValue(REPORT_JSON_OUTPUT_FILE)
+    String reportJsonOutputFile();
+
+    @Key("reportNonAligned")
+    @DefaultValue("false")
+    boolean reportNonAligned();
 
     class DependencyConverter implements Converter<DependencyPrecedence> {
         /**

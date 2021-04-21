@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,7 +50,7 @@ public class ManipulationCache {
      * (which might be dynamic) to the fully resolved GAV.
      */
     @Getter
-    private final Map<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>> dependencies = new HashMap<>();
+    private final Map<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>> dependencies = new LinkedHashMap<>();
 
     @Getter
     private final Map<ArtifactRepository, Path> repositories = new HashMap<>();

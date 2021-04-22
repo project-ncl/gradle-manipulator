@@ -51,11 +51,6 @@ public interface AlignmentService {
         private Map<ProjectRef, String> overrideMap;
         private String newProjectVersion;
 
-        // Only used by tests.
-        Response() {
-            this(new HashMap<>());
-        }
-
         String getAlignedVersionOfGav(ProjectVersionRef gav) {
             final Optional<ProjectRef> projectRef = matchingProjectRef(gav);
 

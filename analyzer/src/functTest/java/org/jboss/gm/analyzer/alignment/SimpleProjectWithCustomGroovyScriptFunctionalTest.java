@@ -93,7 +93,14 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
         assertTrue(systemOutRule.getLog().contains("Attempting to read URL"));
         assertTrue(systemOutRule.getLog().contains("found new version is 1.0.1.redhat-00002"));
         assertTrue(systemOutRule.getLog().contains("original version is 1.0.1" + System.lineSeparator()));
-
+        assertThat(FileUtils.readFileToString(new File(projectRoot, "build.gradle"), Charset.defaultCharset()))
+                .satisfies(s -> {
+                    assertTrue(s.contains("classpath \"org.hibernate:hibernate-core:5.3.7.Final-redhat-00001"));
+                    assertTrue(s.contains("publishing {\n" +
+                            "  publications {\n" +
+                            "    nebula {\n" +
+                            "      artifact(\"build/distributions/${project.name}-${version}.zip\")\n"));
+                });
         assertThat(FileUtils.readFileToString(new File(projectRoot, "settings.gradle"), Charset.defaultCharset()))
                 .satisfies(s -> {
                     assertFalse(s.contains("x-pack"));
@@ -101,5 +108,4 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
                 });
         assertTrue(systemOutRule.getLog().contains("Retrieved"));
     }
-
 }

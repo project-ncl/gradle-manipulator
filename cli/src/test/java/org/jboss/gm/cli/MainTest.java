@@ -21,6 +21,7 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 
 import static junit.framework.TestCase.fail;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -156,7 +157,8 @@ public class MainTest {
                 "-DignoreUnresolvableDependencies=true",
                 "-DdependencyOverride.junit:junit@*=4.10"
         };
-        m.run(args);
+        int result = m.run(args);
+        assertEquals(0, result);
 
         File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), "gme.gradle");
         assertTrue(systemOutRule.getLog().contains("Task :generateAlignmentMetadata"));
@@ -165,6 +167,49 @@ public class MainTest {
         assertTrue(gmeGradle.exists());
         assertTrue(FileUtils.readFileToString(gmeGradle, Charset.defaultCharset())
                 .contains("org.jboss.gm:manipulation:" + actualVersion.getProperty("version")));
+    }
+
+    @Test
+    public void testInvokeAlignmentFails() throws Exception {
+
+        final File target = tempDir.newFolder();
+        final File source = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
+        final File root = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath())
+                .getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();
+        final File projectRoot = new File(target, source.getName());
+        FileUtils.copyFile(source, projectRoot);
+
+        // This hack-fest is because the development version is not in Maven Central so it won't be resolvable
+        // This adds the compiled libraries as flat dir repositories.
+        final File initFile = tempDir.newFile();
+        String init = FileUtils.readFileToString(new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
+                Charset.defaultCharset());
+        init = init.replaceFirst("(mavenCentral[(][)])", "$1" +
+                "\n        flatDir {\n        dirs '" +
+                new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent() +
+                "'\n        }\n" +
+                "\n        flatDir {\n        dirs '" +
+                new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent() +
+                "'\n        }\n");
+        System.out.println("Writing to " + initFile + ":" + init);
+        FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
+
+        Properties actualVersion = new Properties();
+        actualVersion.load(new FileReader(new File(root, "gradle.properties")));
+
+        Main m = new Main();
+        String[] args = new String[] { "-t", projectRoot.getParentFile().getAbsolutePath(), "generateAlignmentMetadata",
+                "--init-script=" + initFile.getCanonicalPath(),
+                "-DignoreUnresolvableDependencies=true",
+                "-DdependencyOverride.junit:junit@*=4.10"
+        };
+        try {
+            m.run(args);
+            fail("No exception thrown");
+        } catch (Exception e) {
+            assertTrue(e.getCause().getMessage().contains("must be configured in order for dependency scanning to work"));
+        }
+        assertTrue(systemErrRule.getLog().contains("'restURL' must be configured in order for dependency scanning to work"));
     }
 
     @Test

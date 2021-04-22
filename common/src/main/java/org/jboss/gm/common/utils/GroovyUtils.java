@@ -48,7 +48,7 @@ public class GroovyUtils {
 
         if (scripts != null) {
             try {
-                tmpDir = Files.createTempDirectory("gme-" + UUID.randomUUID().toString()).toFile();
+                tmpDir = Files.createTempDirectory("gme-" + UUID.randomUUID()).toFile();
                 tmpDir.deleteOnExit();
             } catch (IOException e) {
                 throw new ManipulationUncheckedException("Unable to create temporary directory", e);
@@ -84,7 +84,7 @@ public class GroovyUtils {
 
             logger.info("For target stage {} attempting to invoke groovy script {} ", targetStage, scriptFile);
             if (invocationPoint != null) {
-                logger.debug("InvocationPoint is {}", invocationPoint.invocationPoint().toString());
+                logger.debug("InvocationPoint is {}", invocationPoint.invocationPoint());
                 stage = invocationPoint.invocationPoint();
             } else {
                 throw new ManipulationException("Mandatory annotation '@InvocationPoint(invocationPoint = ' not declared");
@@ -93,8 +93,8 @@ public class GroovyUtils {
             if (targetStage == stage || InvocationStage.BOTH == stage) {
                 // Inject the values via a new BaseScript so user's can have completion.
                 if (script instanceof BaseScript) {
-                    ((BaseScript) script).setValues(logger, stage, target, configuration.getProperties(), rootProject,
-                            alignmentModel);
+                    ((BaseScript) script).setValues(logger, stage, target, configuration.getProperties(),
+                            RESTUtils.getTranslator(configuration), rootProject, alignmentModel);
                 } else {
                     throw new ManipulationException("Cannot cast {} to a BaseScript to set values.", script);
                 }

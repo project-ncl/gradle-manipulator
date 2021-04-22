@@ -13,12 +13,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import lombok.Getter;
-
 import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
-import org.gradle.api.GradleException;
 import org.gradle.internal.Pair;
 import org.gradle.tooling.BuildException;
 import org.gradle.tooling.BuildLauncher;

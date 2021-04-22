@@ -12,10 +12,8 @@ public class RESTUtils {
 
     private static final ContextClassLoaderLocalWithConfiguration cache = new ContextClassLoaderLocalWithConfiguration();
 
-    public static synchronized Translator getTranslator(Configuration config) {
-
+    public static Translator getTranslator(Configuration config) {
         cache.configuration = config;
-
         return cache.get();
     }
 

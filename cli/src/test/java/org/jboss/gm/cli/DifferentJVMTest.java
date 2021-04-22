@@ -69,7 +69,6 @@ public class DifferentJVMTest {
             gradleJDKHome.mkdirs();
             File tarFile = new File(gradleJDKHome + File.separator + jdkTar);
             File compressedFile = new File(tarFile + ".gz");
-            Unirest.config().enableCookieManagement(false);
             Unirest.get(
                     "https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u272-b10/OpenJDK8U-jdk_x64_linux_hotspot_8u272b10.tar.gz")
                     .asFile(compressedFile.toString());
@@ -81,6 +80,17 @@ public class DifferentJVMTest {
             ua.extract();
 
             compressedFile.deleteOnExit();
+
+            /*
+             * Reset the configuration in case other tests use Unirest. Otherwise the MainTest which calls
+             * RESTUtils (and eventually Unirest) can fail. This can also be worked around with if the following
+             * is added
+             * tasks.test {
+             *  this.setForkEvery(1)
+             * }
+             * to the CLI build.gradle.kts.
+             */
+            Unirest.config().reset();
         }
     }
 

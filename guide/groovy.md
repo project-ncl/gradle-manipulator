@@ -79,6 +79,18 @@ The following API is made available:
 
 | [Logger](https://www.javadoc.io/doc/org.slf4j/slf4j-api/1.7.30/org/slf4j/Logger.html) getLogger() | Get the Logger. |
 
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : From version 2.7 the following extra API is available:
+</td>
+</tr>
+</table>
+</table>
+
+| [getRESTAPI](https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-io/latest/org/commonjava/maven/ext/io/rest/Translator.html) getRESTAPI() | Get the REST Version Translator. |
+
+
 When running as `FIRST` Gradle has not parsed and created the Project which means the `getModel`/`getProject` calls are not available. However it is possible to ammend the Gradle scripts directly on disk which will then be read as part of the following alignment process.
 
 The API can then be invoked by e.g.
@@ -113,6 +125,24 @@ A typical groovy script that alters a JSON file on disk might be:
     information.text = newContent
     newContent = information.text.replaceAll( "version \\+ \"\\.0\"", "version")
     information.text = newContent
+
+
+It is possible to use the `Translator` API to call onto the Dependency Anlalyser to make adjustments beyond what GME already provides e.g.
+
+    import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef
+    import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef
+    import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef
+    import org.commonjava.maven.ext.io.rest.Translator
+    ...
+    Translator translator = gmeScript.getRESTAPI();
+    ProjectVersionRef pvr = SimpleProjectVersionRef.parse("org.hibernate:hibernate-core:5.3.7.Final")
+    Map<ProjectVersionRef, String> result = translator.translateVersions(Collections.singletonList(pvr))
+    gmeScript.getLogger().warn("Alignment result is {}", result)
+    File target = gmeScript.getProject().getBuildFile()
+    newContent = target.text.replaceFirst("classpath \"org.hibernate:hibernate-core:5.3.7.Final",
+        "classpath \"org.hibernate:hibernate-core:" + result.get(pvr))
+    target.text = newContent
+
 
 ### Developing Groovy Scripts
 

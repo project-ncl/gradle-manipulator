@@ -12,6 +12,7 @@ dependencies {
     implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
     implementation("commons-lang:commons-lang:${project.extra.get("commonsVersion")}")
     implementation("commons-io:commons-io:${project.extra.get("commonsVersion")}")
+    implementation("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
 
     implementation("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")
 

@@ -13,10 +13,10 @@ import org.commonjava.maven.ext.core.groovy.GradleBaseScript;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.commonjava.maven.ext.io.FileIO;
 import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;
+import org.commonjava.maven.ext.io.rest.Translator;
 import org.gradle.api.Project;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Abstract class that should be used by developers wishing to implement groovy scripts
@@ -39,6 +39,8 @@ public abstract class BaseScript extends GradleBaseScript {
     private InvocationStage stage;
 
     private FileIO fileIO;
+
+    private Translator restAPI;
 
     /**
      * Return the current Project
@@ -102,6 +104,11 @@ public abstract class BaseScript extends GradleBaseScript {
         return fileIO;
     }
 
+    // TODO: @Override from PME
+    public Translator getRESTAPI() {
+        return restAPI;
+    }
+
     /**
      * Internal use only - the org.jboss.gm.analyzer.alignment.AlignmentTask uses this to
      * initialise the values
@@ -109,10 +116,12 @@ public abstract class BaseScript extends GradleBaseScript {
      * @param stage the current invocation stage
      * @param rootDir the root directory of the project.
      * @param properties the current configuration properties
+     * @param restAPI the REST API Translator interface
      * @param rootProject Current project
      * @param model the current aligned model.
      */
-    public void setValues(Logger logger, InvocationStage stage, File rootDir, Properties properties, Project rootProject,
+    public void setValues(Logger logger, InvocationStage stage, File rootDir, Properties properties, Translator restAPI,
+            Project rootProject,
             ManipulationModel model) {
         this.logger = logger;
         this.stage = stage;
@@ -120,6 +129,7 @@ public abstract class BaseScript extends GradleBaseScript {
         this.model = model;
         this.basedir = rootDir;
         this.properties = properties;
+        this.restAPI = restAPI;
 
         File repoCache;
         try {

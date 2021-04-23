@@ -4,12 +4,14 @@
  *
  */
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef
 import org.commonjava.maven.ext.core.groovy.GMEBaseScript
 import org.commonjava.maven.ext.core.groovy.InvocationPoint
 import org.commonjava.maven.ext.core.groovy.InvocationStage
+import org.commonjava.maven.ext.io.rest.Translator
 import org.jboss.gm.common.groovy.BaseScript
-
 
 // Use BaseScript annotation to set script for evaluating the DSL.
 @InvocationPoint(invocationPoint = InvocationStage.LAST)
@@ -36,5 +38,24 @@ println "New content is " + newContent
 information = new File(gmeScript.getProject().getRootDir(), "settings.gradle")
 newContent = information.text.replaceAll("addSubProjects.*x-pack'[)][)]", "")
 information.text = newContent
+
+
+Translator translator = gmeScript.getRESTAPI();
+ProjectVersionRef pvr = SimpleProjectVersionRef.parse("org.hibernate:hibernate-core:5.3.7.Final")
+Map<ProjectVersionRef, String> result = translator.translateVersions(Collections.singletonList(pvr))
+gmeScript.getLogger().warn("Alignment result is {}", result)
+File target = gmeScript.getProject().getBuildFile()
+newContent = target.text.replaceFirst("classpath \"org.hibernate:hibernate-core:5.3.7.Final",
+    "classpath \"org.hibernate:hibernate-core:" + result.get(pvr))
+newContent = newContent + """
+
+publishing {
+  publications {
+    nebula {
+      artifact("build/distributions/\${project.name}-\${version}.zip")
+      }
+   }
+}"""
+target.text = newContent
 
 gmeScript.getLogger().info("Retrieved content with {}", newContent)

@@ -1,3 +1,17 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+        classpath "org.hibernate:hibernate-core:5.3.7.Final"
+    }
+}
+
+
+
 plugins {
     // including this plugin directly instead of by an init script, which allows to use the freshly build version
     id 'org.jboss.gm.analyzer'

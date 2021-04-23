@@ -13,8 +13,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import lombok.Getter;
-
 import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
@@ -279,7 +277,6 @@ public class Main implements Callable<Void> {
         return null;
     }
 
-    @Getter
     private static class ExceptionHandler implements CommandLine.IExecutionExceptionHandler {
 
         private Exception exception;
@@ -297,6 +294,18 @@ public class Main implements Callable<Void> {
         public int handleExecutionException(Exception ex, CommandLine commandLine, CommandLine.ParseResult parseResult) {
             this.exception = ex;
             return 1;
+        }
+
+        public Exception getException() {
+            if (exception != null) {
+                if ("Caught exception running build".equals(exception.getMessage())) {
+                    exception = (Exception) exception.getCause();
+                }
+                if ("org.gradle.internal.exceptions.LocationAwareException".equals(exception.getClass().getName())) {
+                    exception = (Exception) exception.getCause();
+                }
+            }
+            return exception;
         }
     }
 }

@@ -41,7 +41,7 @@ public class UpdateProjectVersionCustomizerTest {
     @Test
     public void ensureProjectVersionIsUpdatedWhenOriginalResponseHasNoProjectVersion()
             throws IOException, ManipulationException {
-        final Response originalResp = new Response();
+        final Response originalResp = new Response(new HashMap<>());
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
@@ -61,7 +61,7 @@ public class UpdateProjectVersionCustomizerTest {
     @Test
     public void ensureProjectVersionIsUpdatedWhenOriginalResponseHasNoProjectVersion2()
             throws IOException, ManipulationException {
-        final Response originalResp = new Response();
+        final Response originalResp = new Response(new HashMap<>());
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
@@ -84,7 +84,7 @@ public class UpdateProjectVersionCustomizerTest {
 
         System.setProperty("versionIncrementalSuffixPadding", "3");
 
-        final Response originalResp = new Response();
+        final Response originalResp = new Response(new HashMap<>());
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
@@ -137,7 +137,7 @@ public class UpdateProjectVersionCustomizerTest {
 
         System.setProperty("versionSuffixSnapshot", "true");
 
-        final Response originalResp = new Response();
+        final Response originalResp = new Response(new HashMap<>());
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
@@ -158,7 +158,7 @@ public class UpdateProjectVersionCustomizerTest {
     @Test
     public void validateVersionWithNoSnapshot() throws IOException, ManipulationException {
 
-        final Response originalResp = new Response();
+        final Response originalResp = new Response(new HashMap<>());
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         System.setProperty("ignoreUnresolvableDependencies", "true");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();

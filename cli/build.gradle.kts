@@ -9,7 +9,7 @@ dependencies {
     implementation("org.gradle:gradle-core-api:${project.extra.get("gradleVersion")}")
     implementation("org.gradle:gradle-base-services:${project.extra.get("gradleVersion")}")
 
-    implementation(project(":common"))
+    api(project(":common"))
     implementation("org.gradle:gradle-tooling-api:${project.extra.get("gradleVersion")}")
     implementation("info.picocli:picocli:4.0.4")
 

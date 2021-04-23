@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -77,7 +78,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                 Collections.singletonMap("dependencyOverride.com.yammer.metrics:*@org.acme.gradle:root", ""));
 
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
-        assertThat(new File(projectRoot, AlignmentTask.GRADLE + '/' + AlignmentTask.GME_REPOS)).exists();
+        assertThat(new File(projectRoot, AlignmentTask.GRADLE + File.separator + AlignmentTask.GME_REPOS)).exists();
         assertThat(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS)).exists();
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
         assertEquals(AlignmentTask.INJECT_GME_END,
@@ -104,6 +105,27 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(extraGradleFile).exists();
         assertThat(FileUtils.readLines(extraGradleFile, Charset.defaultCharset()))
                 .filteredOn(l -> l.trim().equals(AlignmentTask.APPLY_GME_REPOS)).hasSize(1);
+    }
+
+    @Test
+    public void ensureAlignmentsFileOverwritten() throws IOException, URISyntaxException {
+        final Path projectRoot = tempDir.newFolder("simple-project").toPath();
+        final Path gme = projectRoot.resolve(AlignmentTask.GME);
+        Files.createFile(gme);
+        assertThat(gme).isEmptyFile();
+        final Path gradleRoot = projectRoot.resolve(AlignmentTask.GRADLE);
+        Files.createDirectory(gradleRoot);
+        final Path gmeRepos = gradleRoot.resolve(AlignmentTask.GME_REPOS);
+        Files.createFile(gmeRepos);
+        assertThat(gmeRepos).isEmptyFile();
+        final Path gmePluginconfigs = projectRoot.resolve(AlignmentTask.GME_PLUGINCONFIGS);
+        Files.createFile(gmePluginconfigs);
+        assertThat(gmePluginconfigs).isEmptyFile();
+        TestUtils.align(projectRoot.toFile(), projectRoot.getFileName().toString(),
+                Collections.singletonMap("dependencyOverride.com.yammer.metrics:*@org.acme.gradle:root", ""));
+        assertThat(gme).isNotEmptyFile();
+        assertThat(gmeRepos).isNotEmptyFile();
+        assertThat(gmePluginconfigs).isNotEmptyFile();
     }
 
     @Test

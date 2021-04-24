@@ -27,6 +27,9 @@ import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.beanutils.ContextClassLoaderLocal;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.NameFileFilter;
+import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -81,16 +84,16 @@ import static org.jboss.gm.common.utils.FileUtils.append;
  * (whether it's a single or multi module project)
  */
 public class AlignmentTask extends DefaultTask {
-
-    public static final String INJECT_GME_START = "buildscript { apply from: \"gme.gradle\" }";
-    public static final String INJECT_GME_START_KOTLIN = "buildscript { project.apply { from(\"gme.gradle\") } }";
-    public static final String INJECT_GME_END = "apply from: \"gme-pluginconfigs.gradle\"";
-    public static final String INJECT_GME_END_KOTLIN = "project.apply { from(\"gme-pluginconfigs.gradle\") }";
     public static final String GME = "gme.gradle";
+    public static final String INJECT_GME_START = "buildscript { apply from: \"" + GME + "\" }";
+    public static final String INJECT_GME_START_KOTLIN = "buildscript { project.apply { from(\"" + GME + "\") } }";
+    public static final String GME_PLUGINCONFIGS = "gme-pluginconfigs.gradle";
+    public static final String INJECT_GME_END = "apply from: \"" + GME_PLUGINCONFIGS + "\"";
+    public static final String INJECT_GME_END_KOTLIN = "project.apply { from(\"" + GME_PLUGINCONFIGS + "\") }";
     public static final String GRADLE = "gradle";
     public static final String GME_REPOS = "gme-repos.gradle";
-    public static final String APPLY_GME_REPOS = "buildscript { apply from: new File(buildscript.getSourceFile().getParentFile(),\"gme-repos.gradle\"), to: buildscript }";
-    public static final String GME_PLUGINCONFIGS = "gme-pluginconfigs.gradle";
+    public static final String APPLY_GME_REPOS = "buildscript { apply from: new File(buildscript.getSourceFile().getParentFile(), \""
+            + GME_REPOS + "\"), to: buildscript }";
     public static final String NAME = "generateAlignmentMetadata";
 
     private static final ContextClassLoaderLocal<AtomicBoolean> configOutput = new ContextClassLoaderLocal<AtomicBoolean>() {
@@ -293,10 +296,9 @@ public class AlignmentTask extends DefaultTask {
     private void writeGmeMarkerFile(Configuration configuration, File rootGradle) throws IOException, ManipulationException {
         File rootDir = getProject().getRootDir();
         File gmeGradle = new File(rootDir, GME);
+        Files.copy(getClass().getResourceAsStream('/' + GME), gmeGradle.toPath(),
+                StandardCopyOption.REPLACE_EXISTING);
 
-        if (!gmeGradle.exists()) {
-            Files.copy(getClass().getResourceAsStream('/' + GME), gmeGradle.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        }
         if (!isEmpty(configuration.manipulationVersion())) {
             String gmeGradleString = FileUtils.readFileToString(gmeGradle, Charset.defaultCharset());
             String currentVersion = gmeGradleString.replaceFirst(
@@ -334,12 +336,9 @@ public class AlignmentTask extends DefaultTask {
 
     private void writeGmeConfigMarkerFile(File rootGradle) throws IOException {
         File rootDir = getProject().getRootDir();
-        File gmeGradle = new File(rootDir, GME_PLUGINCONFIGS);
-
-        if (!gmeGradle.exists()) {
-            Files.copy(getClass().getResourceAsStream('/' + GME_PLUGINCONFIGS), gmeGradle.toPath(),
-                    StandardCopyOption.REPLACE_EXISTING);
-        }
+        File gmePluginConfigsGradle = new File(rootDir, GME_PLUGINCONFIGS);
+        Files.copy(getClass().getResourceAsStream('/' + GME_PLUGINCONFIGS), gmePluginConfigsGradle.toPath(),
+                StandardCopyOption.REPLACE_EXISTING);
 
         if (rootGradle.exists()) {
 
@@ -379,7 +378,8 @@ public class AlignmentTask extends DefaultTask {
         if (!gradleScriptsDirectory.exists()) {
             return;
         }
-        final Collection<File> extraGradleScripts = FileUtils.listFiles(gradleScriptsDirectory, new SuffixFileFilter(".gradle"),
+        final Collection<File> extraGradleScripts = FileUtils.listFiles(gradleScriptsDirectory,
+                FileFilterUtils.and(new SuffixFileFilter(".gradle"), new NotFileFilter(new NameFileFilter(GME_REPOS))),
                 DirectoryFileFilter.DIRECTORY);
         for (File extraGradleScript : extraGradleScripts) {
             final List<String> lines = FileUtils.readLines(extraGradleScript, Charset.defaultCharset());

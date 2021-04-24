@@ -1,6 +1,8 @@
 package org.jboss.gm.common;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.commonjava.maven.ext.io.rest.Translator;
@@ -11,6 +13,7 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TestRule;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -57,7 +60,7 @@ public class ConfigurationTest {
 
         assertEquals(deploy, c.deployUrl());
 
-        assertEquals(c.restRetryDuration(), Translator.RETRY_DURATION_SEC);
+        assertEquals(Translator.RETRY_DURATION_SEC, c.restRetryDuration());
     }
 
     @Test
@@ -77,5 +80,19 @@ public class ConfigurationTest {
     public void verifyDefaultState() {
         Configuration c = ConfigFactory.create(Configuration.class);
         assertNull(c.overrideTransitive());
+    }
+
+    @Test
+    public void verifyDumpCurrentConfig() {
+        final Configuration c = ConfigFactory.create(Configuration.class);
+        final String currentConfig = c.dumpCurrentConfig();
+        final String lineEnding = "(\\u000D\\u000A|[\\u000A\\u000D])";
+        final String keyValue = "(\\t(.*) : (.*))" + lineEnding;
+        final Pattern p = Pattern.compile("^" + lineEnding + "(" + keyValue + ")*$");
+        assertThat(currentConfig).matches(p);
+        final String[] lines = currentConfig.split(System.lineSeparator());
+        assertThat(lines).isNotEmpty();
+        final String[] keys = Arrays.stream(lines).map(line -> line.split(":")[0].trim()).toArray(String[]::new);
+        assertThat(keys).hasSize(lines.length).isSorted();
     }
 }

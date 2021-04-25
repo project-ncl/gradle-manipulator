@@ -1,9 +1,13 @@
 package org.jboss.gm.common;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.aeonbits.owner.Accessible;
 import org.aeonbits.owner.Config;
@@ -224,20 +228,27 @@ public interface Configuration extends Accessible, Reloadable {
 
     /**
      * Return the current configuration as a formatted string.
+     *
+     * @return the current configuration as a formatted string
      */
     default String dumpCurrentConfig() {
+        final List<String> values = Arrays.stream(Configuration.class.getMethods())
+                .map(method -> method.getAnnotation(Key.class)).filter(Objects::nonNull).map(Key::value).sorted()
+                .collect(Collectors.toList());
+        final StringBuilder currentProperties = new StringBuilder(900);
 
-        StringBuilder currentProperties = new StringBuilder();
-        for (Method method : Configuration.class.getMethods()) {
-            if (method.isAnnotationPresent(Config.Key.class)) {
-                Config.Key val = method.getAnnotation(Config.Key.class);
-                currentProperties.append(System.lineSeparator());
-                currentProperties.append('\t');
-                currentProperties.append(val.value());
-                currentProperties.append(" : ");
-                currentProperties.append(this.getProperties().get(val.value()));
-            }
+        if (!values.isEmpty()) {
+            currentProperties.append(System.lineSeparator());
         }
+
+        for (String value : values) {
+            currentProperties.append('\t');
+            currentProperties.append(value);
+            currentProperties.append(" : ");
+            currentProperties.append(this.getProperties().get(value));
+            currentProperties.append(System.lineSeparator());
+        }
+
         return currentProperties.toString();
     }
 }

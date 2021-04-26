@@ -27,6 +27,8 @@ public class RESTUtils {
                     configuration.restMaxSize(),
                     Translator.CHUNK_SPLIT_COUNT,
                     configuration.restRepositoryGroup(),
+                    configuration.restBrewPullActive(),
+                    configuration.restMode(),
                     configuration.versionIncrementalSuffix(),
                     configuration.restHeaders(),
                     configuration.restConnectionTimeout(),

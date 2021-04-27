@@ -20,8 +20,6 @@ plugins {
     id("de.undercouch.download") version "4.1.1"
     id("io.morethan.jmhreport") version "0.9.0" apply false
     id("me.champeau.gradle.jmh") version "0.5.2" apply false
-// Remove nebula as incorrectly changes the version
-//    id("nebula.release") version "15.3.0"
     id("net.ltgt.errorprone") version "1.3.0" apply false
     id("org.unbroken-dome.test-sets") version "3.0.1"
     id("ru.vyarus.animalsniffer") version "1.5.2" apply false
@@ -32,13 +30,6 @@ plugins {
 
 subprojects {
     apply(plugin = "org.jboss.gm.analyzer")
-}
-
-if (!JavaVersion.current().isJava11Compatible()) {
-    throw GradleException("JDK 11 or higher is required to build. " +
-            "One option is to download it from https://adoptopenjdk.net/. If you believe you already " +
-            "have it, please check that the JAVA_HOME environment variable is pointing at the " +
-            "JDK 11 installation.")
 }
 
 allprojects {
@@ -84,21 +75,6 @@ subprojects {
 
         tasks {
             withType(JavaCompile::class) {
-
-                options.compilerArgs.addAll(listOf(
-                        "-Xlint:all",
-                        // We suppress the "try" warning because it disallows managing an auto-closeable with
-                        // try-with-resources without referencing the auto-closeable within the try block.
-                        "-Xlint:-try",
-                        // We suppress the "processing" warning as suggested in
-                        // https://groups.google.com/forum/#!topic/bazel-discuss/_R3A9TJSoPM
-                        "-Xlint:-processing",
-                        // We suppress the "options" warning because it prevents compilation on modern JDKs
-                        "-Xlint:-options",
-
-                        // Fail build on any warning
-                        "-Werror"
-                ))
 
                 options.encoding = "UTF-8"
 
@@ -167,28 +143,6 @@ subprojects {
                 maxHeapSize = "1500m"
             }
 
-            withType(Javadoc::class) {
-                exclude("io/opentelemetry/**/internal/**")
-
-                with(options as StandardJavadocDocletOptions) {
-                    source = "8"
-                    encoding = "UTF-8"
-                    docEncoding = "UTF-8"
-                    breakIterator(true)
-
-                    addBooleanOption("html5", true)
-
-                    links("https://docs.oracle.com/javase/8/docs/api/")
-                    addBooleanOption("Xdoclint:all,-missing", true)
-
-                    afterEvaluate {
-                        val title = "${project.description}"
-                        docTitle = title
-                        windowTitle = title
-                    }
-                }
-            }
-
             afterEvaluate {
                 withType(Jar::class) {
                     val moduleName: String by project
@@ -200,8 +154,6 @@ subprojects {
                 }
             }
         }
-
-        // https://docs.gradle.org/current/samples/sample_jvm_multi_project_with_code_coverage.html
 
         // Do not generate reports for individual projects
         tasks.named("jacocoTestReport") {
@@ -248,13 +200,6 @@ subprojects {
                     failOnVersionConflict()
                     preferProjectModules()
                 }
-            }
-        }
-
-        configure<SpotlessExtension> {
-            java {
-                googleJavaFormat("1.9")
-                licenseHeaderFile(rootProject.file("buildscripts/spotless.license.java"), "(package|import|class|// Includes work from:)")
             }
         }
 
@@ -424,30 +369,6 @@ subprojects {
         configure<SigningExtension> {
             useInMemoryPgpKeys(System.getenv("GPG_PRIVATE_KEY"), System.getenv("GPG_PASSWORD"))
             sign(the<PublishingExtension>().publications["mavenPublication"])
-        }
-    }
-}
-
-allprojects {
-    tasks.register("updateVersionInDocs") {
-        group = "documentation"
-        doLast {
-            val versionParts = version.toString().split('.')
-            val minorVersionNumber = Integer.parseInt(versionParts[1])
-            val nextSnapshot = "${versionParts[0]}.${minorVersionNumber + 1}.0-SNAPSHOT"
-
-            val readme = file("README.md")
-            if (readme.exists()) {
-                val readmeText = readme.readText()
-                val updatedText = readmeText
-                        .replace("""<version>\d+\.\d+\.\d+</version>""".toRegex(), "<version>${version}</version>")
-                        .replace("""<version>\d+\.\d+\.\d+-SNAPSHOT</version>""".toRegex(), "<version>${nextSnapshot}</version>")
-                        .replace("""(implementation.*io\.opentelemetry:.*:)(\d+\.\d+\.\d+)(?!-SNAPSHOT)(.*)""".toRegex(), "\$1${version}\$3")
-                        .replace("""(implementation.*io\\.opentelemetry:.*:)(\d+\\.\d+\.\d+-SNAPSHOT)(.*)""".toRegex(), "\$1${nextSnapshot}\$3")
-                        .replace("""<!--VERSION_STABLE-->.*<!--/VERSION_STABLE-->""".toRegex(), "<!--VERSION_STABLE-->${version}<!--/VERSION_STABLE-->")
-                        .replace("""<!--VERSION_UNSTABLE-->.*<!--/VERSION_UNSTABLE-->""".toRegex(), "<!--VERSION_UNSTABLE-->${version}-alpha<!--/VERSION_UNSTABLE-->")
-                readme.writeText(updatedText)
-            }
         }
     }
 }

@@ -5,6 +5,7 @@ import lombok.experimental.UtilityClass;
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
+import org.gradle.api.plugins.BasePluginConvention;
 
 @UtilityClass
 public class ProjectUtils {
@@ -74,10 +75,11 @@ public class ProjectUtils {
      * @return the value for the archivesBaseName or null if not set
      */
     public static String getArchivesBaseName(Project project) {
-        final Object abn = project.findProperty("archivesBaseName");
-
-        if (abn != null && !project.getName().equals(abn)) {
-            return abn.toString();
+        if (project.getConvention().findPlugin(BasePluginConvention.class) != null) {
+            String archivesBaseName = project.getConvention().getPlugin(BasePluginConvention.class).getArchivesBaseName();
+            if (!project.getName().equals(archivesBaseName)) {
+                return archivesBaseName;
+            }
         }
         return null;
     }

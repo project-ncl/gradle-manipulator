@@ -25,19 +25,9 @@ allprojects {
         flatDir {
             dirs = [file("repo/")]
         }
-        /*maven {
-            url = uri("https://localhost/test-repo1")
-        }
-        maven {
-            url = uri("https://localhost/test-repo2")
-        }*/
-        ivy {
-            url = uri("https://localhost:8089/ivy-repo")
-        }
     }
 
     sourceCompatibility = 1.8
-
 }
 
 dependencyLocking {

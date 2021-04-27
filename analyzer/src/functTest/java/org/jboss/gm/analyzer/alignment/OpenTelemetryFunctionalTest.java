@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
 
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.api.Project;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
@@ -97,22 +96,18 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         assertEquals(AlignmentTask.INJECT_GME_END_KOTLIN,
                 FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE + ".kts")));
 
-        System.out.println("### Children are " + alignmentModel.getChildren());
-        System.out.println(
-                "### Exporters Children are " + alignmentModel.findCorrespondingChild("exporters").getChildren().keySet());
-        for (String k : alignmentModel.findCorrespondingChild("exporters").getChildren().keySet()) {
-            System.out.println(
-                    "### Exporters::value::" + alignmentModel.findCorrespondingChild("exporters").getChildren().get(k));
-        }
-
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("io.opentelemetry");
             assertThat(am.getName()).isEqualTo("opentelemetry-java");
             assertThat(am.getVersion()).isEqualTo("0.17.0.redhat-00001");
 
             assertThat(am.getChildren().keySet()).hasSize(4).containsExactly("bom", "api", "dependencyManagement", "exporters");
-            assertEquals(am.getChildren().get("bom").getName(), "io.opentelemetry:opentelemetry-bom:0.17.0.redhat-00001");
-            assertEquals(am.getChildren().get("api").getName(), "io.opentelemetry:opentelemetry-api:0.17.0.redhat-00001");
+
+            assertThat(am.getChildren().get("bom").toString())
+                    .isEqualTo("io.opentelemetry:opentelemetry-bom:0.17.0.redhat-00001");
+            assertThat(am.getChildren().get("api").toString()).isEqualTo("io.opentelemetry:api:0.17.0.redhat-00001");
+            assertThat(am.findCorrespondingChild("exporters").getChildren().get("jaeger").toString())
+                    .isEqualTo("io.opentelemetry.exporters:opentelemetry-exporter-jaeger:0.17.0.redhat-00001");
 
             assertThat(am.findCorrespondingChild("bom")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("0.17.0.redhat-00001");
@@ -121,5 +116,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         });
 
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs")));
+        assertThat(systemOutRule.getLog()).contains("io.opentelemetry.exporters:opentelemetry-exporter-jaeger:0.17.0");
+        assertThat(systemOutRule.getLog()).contains("io.opentelemetry:opentelemetry-bom:0.17.0");
     }
 }

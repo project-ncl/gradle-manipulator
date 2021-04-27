@@ -313,10 +313,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                 .containsEntry("org.hibernate:hibernate-core:5.3.7.Final",
                         SimpleProjectVersionRef.parse("org.hibernate:hibernate-core:5.3.7.Final-redhat-00001"));
         final String expectedTextString = String.format(
-                "------------------- project org.acme.gradle:root%n" +
-                        "\tProject version : 1.0.1 --> 1.0.1.redhat-00002%n" +
-                        "%n" +
-                        "------------------- project org.acme.gradle:root%n" +
+                "------------------- project org.acme.gradle:root (path: :)%n" +
                         "\tProject version : 1.0.1 --> 1.0.1.redhat-00002%n" +
                         "%n" +
                         "\tDependencies : com.yammer.metrics:metrics-core:2.2.0 --> com.yammer.metrics:metrics-core:2.2.0-redhat-00001%n"
@@ -354,10 +351,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(textFile).isRegularFile().isReadable();
         final String textString = FileUtils.readFileToString(textFile.toFile(), StandardCharsets.UTF_8);
         final String expectedTextString = String.format(
-                "------------------- project org.acme.gradle:root%n" +
-                        "\tProject version : 1.0.1 --> 1.0.1.redhat-00002%n" +
-                        "%n" +
-                        "------------------- project org.acme.gradle:root%n" +
+                "------------------- project org.acme.gradle:root (path: :)%n" +
                         "\tProject version : 1.0.1 --> 1.0.1.redhat-00002%n" +
                         "%n" +
                         "\tDependencies : com.yammer.metrics:metrics-core:2.2.0 --> com.yammer.metrics:metrics-core:2.2.0-redhat-00001%n"
@@ -397,10 +391,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(textFile).isRegularFile().isReadable();
         final String textString = FileUtils.readFileToString(textFile.toFile(), StandardCharsets.UTF_8);
         final String expectedTextString = String.format(
-                "------------------- project org.acme.gradle:root%n" +
-                        "\tProject version : 1.0.1 --> 1.0.1.redhat-00002%n" +
-                        "%n" +
-                        "------------------- project org.acme.gradle:root%n" +
+                "------------------- project org.acme.gradle:root (path: :)%n" +
                         "\tProject version : 1.0.1 --> 1.0.1.redhat-00002%n" +
                         "%n" +
                         "\tDependencies : com.yammer.metrics:metrics-core:2.2.0 --> com.yammer.metrics:metrics-core:2.2.0-redhat-00001%n"

@@ -111,7 +111,6 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(repositories).extracting("url").containsOnly(
                 "https://repo.maven.apache.org/maven2/",
                 "https://oss.sonatype.org/content/repositories/snapshots/",
-                "https://localhost:8089/ivy-repo",
                 "https://dl.google.com/dl/android/maven2/",
                 "https://jcenter.bintray.com/");
     }

@@ -1,0 +1,9 @@
+plugins {
+    id "java-library"
+    id "maven-publish"
+
+    id "ru.vyarus.animalsniffer"
+}
+
+description = 'OpenTelemetry - Jaeger Thrift Exporter'
+ext.moduleName = "io.opentelemetry.exporter.jaeger.thrift"

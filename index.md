@@ -123,6 +123,37 @@ The tool uses its own logging system (that backs onto the Gradle logging system)
 * If `loggingColours` is set to true it will also use colours (default: true).
 * If `loggingLevel` is set to true it will output the logging category e.g. INFO. (default: false).
 
+#### Summary Logging
+
+GME will output a summary of its changes at the end of the run. As well as reporting version and dependency alignment,
+it is also possible to report what _hasn't_ been aligned by setting the property `reportNonAligned=true`. This summary
+may also be output to a file by setting the property `reportTxtOutputFile` to the name of the file, e.g.,
+`alignmentReport.txt`. The file's path will always be relative to the execution root `build` directory.
+
+Finally, it will also output the comparator summary as a JSON file. The file's path will always be relative to the
+execution root `build` directory. By default, the file will be named `alignmentReport.json`. However, the name of this
+file may be changed by setting the `reportJSONOutputFile` property to an alternate name for the file.
+
+    {
+      "executionRoot" : {
+        "groupId" : "org.foo",
+        "artifactId" : "foo-parent",
+        "version" : "7.0.0.Final-rebuild-1",
+        "originalGAV" : "org.foo:foo-parent:7.0.0.Final"
+      },
+      "modules" : [ {
+        "gav" : {
+          "groupId" : "org.foo",
+          "artifactId" : "foo-parent",
+          "version" : "7.0.0.Final-rebuild-1",
+          "originalGAV" : "org.foo:foo-parent:7.0.0.Final"
+        },
+        ...
+
+This JSON file may be read as POJO by using the [JSONUtils](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/util/JSONUtils.java)
+class which utilises the [json](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/json)
+package.
+
 ### Feature Guide
 
 Below are links to more specific information about configuring sets of features in GME:

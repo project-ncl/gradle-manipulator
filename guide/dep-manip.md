@@ -22,6 +22,17 @@ GME will then call the following endpoints
 
 It will initially call the `lookup/gavs` endpoint. By default PME will pass *all* the GAVs to the endpoint **automatically auto-sizing** the data sent to DA according to the project size. Note that the initial split batches can also be configured manually via `-DrestMaxSize=<...>`. If the endpoint returns a 503 or 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint and the request retried. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`. An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group.
 
+Scanning for artifacts to align in Brew is configured with `-DrestBrewPullActive=<...>` (by default: false).
+
+The mode of the alignment is specified with `-DrestMode`. By default it is empty. The Dependency Analysis tool is configured so that a mode will align to particular version suffixes. The available modes are:
+
+- PERSISTENT
+- TEMPORARY
+- SERVICE
+- SERVICE-TEMPORARY
+
+with more to be added in the future.
+
 The lookup REST endpoint should follow:
 
 

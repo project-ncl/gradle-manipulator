@@ -113,13 +113,21 @@ public class AlignmentTask extends DefaultTask {
         final Path root = project.getRootDir().toPath();
         final ManipulationModel alignmentModel = cache.getModel();
 
-        String groupId = ProjectUtils.getRealGroupId(project);
-        String projectName = project.getName();
-
         // Only output the config once to avoid noisy logging.
         if (logger.isInfoEnabled() && !configOutput.get().getAndSet(true)) {
             logger.info("Configuration now has properties {}", configuration.dumpCurrentConfig());
         }
+        final String archivesBaseName = ProjectUtils.getArchivesBaseName(project);
+        if (archivesBaseName != null) {
+            logger.warn("Found archivesBaseName override ; resetting project name '{}' to '{}' ", project.getName(),
+                    archivesBaseName);
+            alignmentModel.findCorrespondingChild(project).setName(archivesBaseName);
+            ProjectUtils.updateNameField(project, archivesBaseName);
+        }
+
+        String groupId = ProjectUtils.getRealGroupId(project);
+        String projectName = project.getName();
+
         final String currentProjectVersion = project.getVersion().toString();
         logger.info("Starting alignment task for project in directory '{}' with GAV {}:{}:{}",
                 project.getProjectDir().getName(), groupId, projectName, currentProjectVersion);
@@ -186,101 +194,7 @@ public class AlignmentTask extends DefaultTask {
 
             // when the set is empty, we know that this was the last alignment task to execute.
             if (cache.removeProject(project)) {
-                logger.info("Completed scanning {} projects; now processing for exclusions/REST/overrides...",
-                        cache.getDependencies().size());
-                Set<ProjectVersionRef> allDeps = cache.getDependencies().values().stream()
-                        .flatMap(m -> m.values().stream()).collect(Collectors.toSet());
-
-                final AlignmentService alignmentService = AlignmentServiceFactory
-                        .getAlignmentService(configuration, cache.getDependencies().keySet());
-
-                final Response alignmentResponse = alignmentService.align(
-                        new AlignmentService.Request(cache.getProjectVersionRefs(configuration.versionSuffixSnapshot()),
-                                allDeps));
-
-                final Map<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = cache
-                        .getDependencies();
-                final String newVersion = alignmentResponse.getNewProjectVersion();
-
-                // While we've completed processing (sub)projects the current one is not going to be the root; so
-                // explicitly retrieve it and set its version.
-                if (configuration.versionModificationEnabled()) {
-                    logger.info("Updating model version for {} from {} to {}", rootProject,
-                            rootProject.getVersion(), newVersion);
-                    alignmentModel.setVersion(newVersion);
-                }
-                // Even if version modification is disabled, set the original version for consistency in the JSON file.
-                final Optional<Project> originalVersion = rootProject.getAllprojects()
-                        .stream()
-                        .filter(p -> !DEFAULT_VERSION.equals(
-                                p.getVersion().toString()))
-                        .findAny();
-                if (originalVersion.isPresent()) {
-                    alignmentModel.setOriginalVersion(originalVersion.get().getVersion().toString());
-                } else {
-                    throw new ManipulationUncheckedException("Unable to locate a suitable original version");
-                }
-
-                final Set<ProjectVersionRef> nonAligned = new HashSet<>();
-                // Iterate through all modules and set their version
-                projectDependencies.forEach((key, value) -> {
-                    final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(key);
-                    if (configuration.versionModificationEnabled()) {
-                        logger.info("Updating sub-project {} (path: {}) from version {} to {} ",
-                                correspondingModule, correspondingModule.getProjectPathName(), value, newVersion);
-                        correspondingModule.setVersion(newVersion);
-                    }
-                    updateModuleDynamicDependencies(correspondingModule, value);
-                    updateModuleDependencies(correspondingModule, value, alignmentResponse);
-                });
-
-                // artifactId / rootProject.getName
-                final String artifactId = SettingsFileIO.writeProjectNameIfNeeded(getProject().getRootDir());
-                if (!isEmpty(artifactId)) {
-                    logger.debug("Located artifactId ({}) for {}::{}", artifactId, alignmentModel.getGroup(),
-                            alignmentModel.getVersion());
-                    alignmentModel.setName(artifactId);
-                }
-
-                // groupId
-                if (isEmpty(alignmentModel.getGroup())) {
-                    List<String> candidates = cache.getModel().getChildren()
-                            .values()
-                            .stream().map(ManipulationModel::getGroup)
-                            .filter(StringUtils::isNotBlank)
-                            .distinct()
-                            .collect(Collectors.toList());
-
-                    logger.debug("Found potential candidates of {} to establish a groupId.", candidates);
-                    final String commonPrefix = StringUtils.stripEnd(StringUtils.getCommonPrefix(candidates
-                            .toArray(new String[0])), ".");
-
-                    if (isEmpty(commonPrefix)) {
-                        throw new ManipulationException(
-                                "Empty groupId but unable to determine a suitable replacement from any child modules.");
-                    }
-
-                    logger.warn("groupId for {} ({}) is empty. Defaulting to common prefix of '{}'", project.getRootProject(),
-                            project.getProjectDir(), commonPrefix);
-                    alignmentModel.setGroup(commonPrefix);
-                }
-
-                logger.info("Completed processing for alignment and writing {} ", cache);
-                GroovyUtils.runCustomGroovyScript(logger, InvocationStage.LAST, project.getRootDir(), configuration,
-                        project.getRootProject(),
-                        alignmentModel);
-                writeManipulationModel(project.getRootDir(), alignmentModel);
-                // Ordering is important here ; we mustn't inject the gme-repos file before iterating over all *.gradle
-                // files.
-                updateAllExtraGradleFilesWithGmeRepos();
-
-                logger.info("For project script is {}  and build file {} ", project.getBuildscript(), project.getBuildFile());
-                logger.info("For project {} ", project.getBuildscript().getSourceFile());
-                writeGmeMarkerFile(configuration, project.getRootProject().getBuildFile());
-                writeGmeConfigMarkerFile(project.getRootProject().getBuildFile());
-                writeGmeReposMarkerFile();
-                writeRepositorySettingsFile(cache.getRepositories());
-                processAlignmentReport(project, configuration, cache, nonAligned);
+                align(configuration, cache, alignmentModel, rootProject);
             } else {
                 logger.debug("Still have {} projects to scan", cache.getProjectCounterRemaining());
             }
@@ -291,6 +205,115 @@ public class AlignmentTask extends DefaultTask {
         } catch (ManipulationException | IOException e) {
             throw new ManipulationUncheckedException(e);
         }
+    }
+
+    /**
+     * Internal function to complete alignment - REST calls, file modifications etc after all projects are processed.
+     *
+     * @param configuration the current Configuration
+     * @param cache the cache object
+     * @param alignmentModel the current alignmentModel
+     * @param rootProject a pointer to the root Gradle project
+     * @throws ManipulationException if an error occurs
+     * @throws IOException if an error occurs
+     */
+    private void align(Configuration configuration, ManipulationCache cache, ManipulationModel alignmentModel,
+            Project rootProject) throws ManipulationException, IOException {
+        logger.info("Completed scanning {} projects; now processing for exclusions/REST/overrides...",
+                cache.getDependencies().size());
+        Set<ProjectVersionRef> allDeps = cache.getDependencies().values().stream()
+                .flatMap(m -> m.values().stream()).collect(Collectors.toSet());
+
+        final AlignmentService alignmentService = AlignmentServiceFactory
+                .getAlignmentService(configuration, cache.getDependencies().keySet());
+
+        final Response alignmentResponse = alignmentService.align(
+                new AlignmentService.Request(cache.getProjectVersionRefs(configuration.versionSuffixSnapshot()),
+                        allDeps));
+
+        final Map<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = cache
+                .getDependencies();
+        final String newVersion = alignmentResponse.getNewProjectVersion();
+
+        // While we've completed processing (sub)projects the current one is not going to be the root; so
+        // explicitly retrieve it and set its version.
+        if (configuration.versionModificationEnabled()) {
+            logger.info("Updating model version for {} from {} to {}", rootProject,
+                    rootProject.getVersion(), newVersion);
+            alignmentModel.setVersion(newVersion);
+        }
+        // Even if version modification is disabled, set the original version for consistency in the JSON file.
+        final Optional<Project> originalVersion = rootProject.getAllprojects()
+                .stream()
+                .filter(p -> !DEFAULT_VERSION.equals(
+                        p.getVersion().toString()))
+                .findAny();
+        if (originalVersion.isPresent()) {
+            alignmentModel.setOriginalVersion(originalVersion.get().getVersion().toString());
+        } else {
+            throw new ManipulationUncheckedException("Unable to locate a suitable original version");
+        }
+
+        final Set<ProjectVersionRef> nonAligned = new HashSet<>();
+        // Iterate through all modules and set their version
+        projectDependencies.forEach((key, value) -> {
+            final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(key);
+            if (configuration.versionModificationEnabled()) {
+                logger.info("Updating sub-project {} (path: {}) from version {} to {} ",
+                        correspondingModule, correspondingModule.getProjectPathName(), value, newVersion);
+                correspondingModule.setVersion(newVersion);
+            }
+            updateModuleDynamicDependencies(correspondingModule, value);
+            updateModuleDependencies(correspondingModule, value, alignmentResponse);
+        });
+
+        // artifactId / rootProject.getName
+        final String artifactId = SettingsFileIO.writeProjectNameIfNeeded(getProject().getRootDir());
+        if (!isEmpty(artifactId)) {
+            logger.debug("Located artifactId ({}) for {}::{}", artifactId, alignmentModel.getGroup(),
+                    alignmentModel.getVersion());
+            alignmentModel.setName(artifactId);
+        }
+
+        // groupId
+        if (isEmpty(alignmentModel.getGroup())) {
+            List<String> candidates = cache.getModel().getChildren()
+                    .values()
+                    .stream().map(ManipulationModel::getGroup)
+                    .filter(StringUtils::isNotBlank)
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            logger.debug("Found potential candidates of {} to establish a groupId.", candidates);
+            final String commonPrefix = StringUtils.stripEnd(StringUtils.getCommonPrefix(candidates
+                    .toArray(new String[0])), ".");
+
+            if (isEmpty(commonPrefix)) {
+                throw new ManipulationException(
+                        "Empty groupId but unable to determine a suitable replacement from any child modules.");
+            }
+
+            logger.warn("groupId for {} ({}) is empty. Defaulting to common prefix of '{}'", rootProject,
+                    rootProject.getProjectDir(), commonPrefix);
+            alignmentModel.setGroup(commonPrefix);
+        }
+
+        logger.info("Completed processing for alignment and writing {} ", cache);
+        GroovyUtils.runCustomGroovyScript(logger, InvocationStage.LAST, rootProject.getRootDir(), configuration,
+                rootProject,
+                alignmentModel);
+        writeManipulationModel(rootProject.getRootDir(), alignmentModel);
+        // Ordering is important here ; we mustn't inject the gme-repos file before iterating over all *.gradle
+        // files.
+        updateAllExtraGradleFilesWithGmeRepos();
+
+        logger.info("For project script is {}  and build file {} ", rootProject.getBuildscript(), rootProject.getBuildFile());
+        logger.info("For project {} ", rootProject.getBuildscript().getSourceFile());
+        writeGmeMarkerFile(configuration, rootProject.getBuildFile());
+        writeGmeConfigMarkerFile(rootProject.getBuildFile());
+        writeGmeReposMarkerFile();
+        writeRepositorySettingsFile(cache.getRepositories());
+        processAlignmentReport(rootProject, configuration, cache, nonAligned);
     }
 
     private void writeGmeMarkerFile(Configuration configuration, File rootGradle) throws IOException, ManipulationException {
@@ -667,23 +690,14 @@ public class AlignmentTask extends DefaultTask {
         final ManipulationModel alignmentModel = cache.getModel();
         final String originalGa = alignmentModel.getGroup() + ":" + alignmentModel.getName();
         final StringBuilder builder = new StringBuilder(500);
-        append(builder, "------------------- project {}", originalGa);
-        final String originalVersion = alignmentModel.getOriginalVersion();
-        final String newVersion = alignmentModel.getVersion();
         final PME jsonReport = new PME();
         final List<ModulesItem> modules = jsonReport.getModules();
-        final String gav = originalGa + ":" + newVersion;
-        final ProjectVersionRef pvr = SimpleProjectVersionRef.parse(gav);
+        final ProjectVersionRef pvr = SimpleProjectVersionRef.parse(originalGa + ":" + alignmentModel.getVersion());
         final GAV g = new GAV();
-        final String originalGav = originalGa + ":" + originalVersion;
+        final String originalGav = originalGa + ":" + alignmentModel.getOriginalVersion();
         g.setOriginalGAV(originalGav);
         g.setPVR(pvr);
         jsonReport.setGav(g);
-
-        if (!originalVersion.equals(newVersion)) {
-            append(builder, "\tProject version : {} --> {}", originalVersion, newVersion);
-            builder.append(System.lineSeparator());
-        }
 
         final Map<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = cache
                 .getDependencies();
@@ -696,13 +710,12 @@ public class AlignmentTask extends DefaultTask {
             final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(name);
             final String group = correspondingModule.getGroup().isEmpty() ? alignmentModel.getGroup()
                     : correspondingModule.getGroup();
-            final String artifact = correspondingModule.getName();
-            final String ga = group + ":" + artifact;
-            final String v = correspondingModule.getOriginalVersion() == null ? originalVersion
+            final String ga = group + ":" + correspondingModule.getName();
+            final String v = correspondingModule.getOriginalVersion() == null ? alignmentModel.getOriginalVersion()
                     : correspondingModule.getOriginalVersion();
             final String newModuleVersion = correspondingModule.getVersion();
             final String newModuleGav = ga + ":" + newModuleVersion;
-            append(builder, "------------------- project {}", ga);
+            append(builder, "------------------- project {} (path: {})", ga, name.getPath());
 
             if (!v.equals(newModuleVersion)) {
                 append(builder, "\tProject version : {} --> {}", v, newModuleVersion);

@@ -3,6 +3,7 @@ package org.jboss.gm.analyzer.alignment;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collections;
 
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.api.Project;
@@ -58,7 +59,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException, ManipulationException {
+    public void verifyOpenTelemetryGradle() throws IOException, URISyntaxException, ManipulationException {
 
         final File projectRoot = tempDir.newFolder("opentelemetry");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
@@ -81,5 +82,41 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         });
 
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs")));
+    }
+
+    @Test
+    public void verifyOpenTelemetryKotlin() throws IOException, URISyntaxException, ManipulationException {
+
+        final File projectRoot = tempDir.newFolder("opentelemetry-kotlin");
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(),
+                Collections.singletonMap("overrideTransitive", "false"));
+
+        assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
+        assertEquals(AlignmentTask.INJECT_GME_START_KOTLIN, TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_END_KOTLIN,
+                FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE + ".kts")));
+
+        assertThat(alignmentModel).isNotNull().satisfies(am -> {
+            assertThat(am.getGroup()).isEqualTo("io.opentelemetry");
+            assertThat(am.getName()).isEqualTo("opentelemetry-java");
+            assertThat(am.getVersion()).isEqualTo("0.17.0.redhat-00001");
+
+            assertThat(am.getChildren().keySet()).hasSize(4).containsExactly("bom", "api", "dependencyManagement", "exporters");
+
+            assertThat(am.getChildren().get("bom").toString())
+                    .isEqualTo("io.opentelemetry:opentelemetry-bom:0.17.0.redhat-00001");
+            assertThat(am.getChildren().get("api").toString()).isEqualTo("io.opentelemetry:api:0.17.0.redhat-00001");
+            assertThat(am.findCorrespondingChild("exporters").getChildren().get("jaeger").toString())
+                    .isEqualTo("io.opentelemetry.exporters:opentelemetry-exporter-jaeger:0.17.0.redhat-00001");
+
+            assertThat(am.findCorrespondingChild("bom")).satisfies(root -> {
+                assertThat(root.getVersion()).isEqualTo("0.17.0.redhat-00001");
+                assertThat(root.getAlignedDependencies()).isEmpty();
+            });
+        });
+
+        verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs")));
+        assertThat(systemOutRule.getLog()).contains("io.opentelemetry.exporters:opentelemetry-exporter-jaeger:0.17.0");
+        assertThat(systemOutRule.getLog()).contains("io.opentelemetry:opentelemetry-bom:0.17.0");
     }
 }

@@ -65,47 +65,47 @@ public class ManifestVerificationFunctionalTest {
         File manifestFile = new File(projectRoot, "build/tmp/jar/MANIFEST.MF");
         assertTrue(manifestFile.exists());
 
-        assertThat(FileUtils.readFileToString(manifestFile, Charset.defaultCharset()).trim().contains("Manifest-Version: 1.0\n"
-                + "Bundle-Description: Apache Thrift library\n"
-                + "Implementation-Title: libthrift\n"
-                + "Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt\n"
-                + "Bundle-SymbolicName: org.apache.thrift\n"
-                + "Implementation-Version: 0.13.0.temporary-redhat-00001\n"
-                + "Bundle-ManifestVersion: 2\n"
-                + "Bundle-ActivationPolicy: lazy\n"
-                + "Specification-Vendor: org.apache.thrift\n"
-                + "Specification-Title: libthrift\n"
-                + "Implementation-Vendor-Id: org.apache.thrift\n"
-                + "Import-Package: javax.net,javax.net.ssl,javax.security.auth.callback,j\n"
-                + " avax.security.sasl,javax.servlet;resolution:=optional,javax.servlet.h\n"
-                + " ttp;resolution:=optional,org.slf4j;resolution:=optional;version=\"[1.4\n"
-                + " ,2)\",org.apache.http.client;resolution:=optional,org.apache.http.para\n"
-                + " ms;resolution:=optional,org.apache.http.entity;resolution:=optional,o\n"
-                + " rg.apache.http.client.methods;resolution:=optional,org.apache.http;re\n"
-                + " solution:=optional\n"
-                + "Implementation-Vendor: org.apache.thrift\n"
-                + "Export-Package: org.apache.thrift.async;uses:=\"org.apache.thrift.proto\n"
-                + " col,org.apache.thrift.transport,org.slf4j,org.apache.thrift\";version=\n"
-                + " \"0.13.0.temporary-redhat-00001\",org.apache.thrift.protocol;uses:=\"org\n"
-                + " .apache.thrift.transport,org.apache.thrift,org.apache.thrift.scheme\";\n"
-                + " version=\"0.13.0.temporary-redhat-00001\",org.apache.thrift.server;uses\n"
-                + " :=\"org.apache.thrift.transport,org.apache.thrift.protocol,org.apache.\n"
-                + " thrift,org.slf4j,javax.servlet,javax.servlet.http\";version=\"0.13.0.te\n"
-                + " mporary-redhat-00001\",org.apache.thrift.transport;uses:=\"org.apache.t\n"
-                + " hrift.protocol,org.apache.thrift,org.apache.http.client,org.apache.ht\n"
-                + " tp.params,org.apache.http.entity,org.apache.http.client.methods,org.a\n"
-                + " pache.http,org.slf4j,javax.net.ssl,javax.net,javax.security.sasl,java\n"
-                + " x.security.auth.callback\";version=\"0.13.0.temporary-redhat-00001\",org\n"
-                + " .apache.thrift;uses:=\"org.apache.thrift.protocol,org.apache.thrift.as\n"
-                + " ync,org.apache.thrift.server,org.apache.thrift.transport,org.slf4j,or\n"
-                + " g.apache.log4j,org.apache.thrift.scheme\";version=\"0.13.0.temporary-re\n"
-                + " dhat-00001\",org.apache.thrift.meta_data;uses:=\"org.apache.thrift\";ver\n"
-                + " sion=\"0.13.0.temporary-redhat-00001\",org.apache.thrift.scheme;uses:=\"\n"
-                + " org.apache.thrift.protocol,org.apache.thrift\";version=\"0.13.0.tempora\n"
-                + " ry-redhat-00001\"\n"
-                + "Bundle-Name: Apache Thrift\n"
-                + "Bundle-Version: 0.13.0.temporary-redhat-00001\n"
-                + "Specification-Version: 0.13.0.temporary-redhat-00001\n"));
+        assertThat(FileUtils.readFileToString(manifestFile, Charset.defaultCharset()).trim()).contains(
+                "Manifest-Version: 1.0\r\n" +
+                        "Implementation-Version: 0.13.0.temporary-redhat-00001\r\n" +
+                        "Bundle-ManifestVersion: 2\r\n" +
+                        "Bundle-SymbolicName: org.apache.thrift\r\n" +
+                        "Bundle-Name: Apache Thrift\r\n" +
+                        "Bundle-Version: 0.13.0.temporary-redhat-00001\r\n" +
+                        "Bundle-Description: Apache Thrift library\r\n" +
+                        "Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt\r\n" +
+                        "Bundle-ActivationPolicy: lazy\r\n" +
+                        "Export-Package: org.apache.thrift.async;uses:=\"org.apache.thrift.protoco\r\n" +
+                        " l,org.apache.thrift.transport,org.slf4j,org.apache.thrift\";version=\"0.1\r\n" +
+                        " 3.0.temporary-redhat-00001\",org.apache.thrift.protocol;uses:=\"org.apach\r\n" +
+                        " e.thrift.transport,org.apache.thrift,org.apache.thrift.scheme\";version=\r\n" +
+                        " \"0.13.0.temporary-redhat-00001\",org.apache.thrift.server;uses:=\"org.apa\r\n" +
+                        " che.thrift.transport,org.apache.thrift.protocol,org.apache.thrift,org.s\r\n" +
+                        " lf4j,javax.servlet,javax.servlet.http\";version=\"0.13.0.temporary-redhat\r\n" +
+                        " -00001\",org.apache.thrift.transport;uses:=\"org.apache.thrift.protocol,o\r\n" +
+                        " rg.apache.thrift,org.apache.http.client,org.apache.http.params,org.apac\r\n" +
+                        " he.http.entity,org.apache.http.client.methods,org.apache.http,org.slf4j\r\n" +
+                        " ,javax.net.ssl,javax.net,javax.security.sasl,javax.security.auth.callba\r\n" +
+                        " ck\";version=\"0.13.0.temporary-redhat-00001\",org.apache.thrift;uses:=\"or\r\n" +
+                        " g.apache.thrift.protocol,org.apache.thrift.async,org.apache.thrift.serv\r\n" +
+                        " er,org.apache.thrift.transport,org.slf4j,org.apache.log4j,org.apache.th\r\n" +
+                        " rift.scheme\";version=\"0.13.0.temporary-redhat-00001\",org.apache.thrift.\r\n" +
+                        " meta_data;uses:=\"org.apache.thrift\";version=\"0.13.0.temporary-redhat-00\r\n" +
+                        " 001\",org.apache.thrift.scheme;uses:=\"org.apache.thrift.protocol,org.apa\r\n" +
+                        " che.thrift\";version=\"0.13.0.temporary-redhat-00001\"\r\n" +
+                        "Import-Package: javax.net,javax.net.ssl,javax.security.auth.callback,jav\r\n" +
+                        " ax.security.sasl,javax.servlet;resolution:=optional,javax.servlet.http;\r\n" +
+                        " resolution:=optional,org.slf4j;resolution:=optional;version=\"[1.4,2)\",o\r\n" +
+                        " rg.apache.http.client;resolution:=optional,org.apache.http.params;resol\r\n" +
+                        " ution:=optional,org.apache.http.entity;resolution:=optional,org.apache.\r\n" +
+                        " http.client.methods;resolution:=optional,org.apache.http;resolution:=op\r\n" +
+                        " tional\r\n" +
+                        "Specification-Version: 0.13.0.temporary-redhat-00001\r\n" +
+                        "Implementation-Title: libthrift\r\n" +
+                        "Specification-Title: libthrift\r\n" +
+                        "Specification-Vendor: org.apache.thrift\r\n" +
+                        "Implementation-Vendor: org.apache.thrift\r\n" +
+                        "Implementation-Vendor-Id: org.apache.thrift");
 
         Path pathToArtifacts = publishDirectory.toPath().resolve(
                 Paths.get("org/apache/thrift/libthrift/0.13.0.temporary-redhat-00001/"));

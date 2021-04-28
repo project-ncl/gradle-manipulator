@@ -276,13 +276,10 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                 .containsEntry("org.springframework:spring-context:5.1.6.RELEASE",
                         SimpleProjectVersionRef.parse("org.springframework:spring-context:5.1.6.RELEASE-redhat-00005"));
         final String expectedTextString = String.format(
-                "------------------- project org.acme:root%n" +
+                "------------------- project org.acme:root (path: :)%n" +
                         "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
                         "%n" +
-                        "------------------- project org.acme:root%n" +
-                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
-                        "%n" +
-                        "------------------- project org.acme:subproject1%n" +
+                        "------------------- project org.acme:subproject1 (path: :subproject1)%n" +
                         "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
                         "%n" +
                         "\tDependencies : org.springframework:spring-context:5.1.6.RELEASE --> org.springframework:spring-context:5.1.6.RELEASE-redhat-00005%n"
@@ -290,13 +287,13 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                         "\tDependencies : org.hibernate:hibernate-core:5.4.2.Final --> org.hibernate:hibernate-core:5.4.2.Final-redhat-00001%n"
                         +
                         "%n" +
-                        "------------------- project org.acme:subproject2%n" +
+                        "------------------- project org.acme:subproject2 (path: :subproject2)%n" +
                         "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
                         "%n" +
                         "\tDependencies : org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1 --> org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1-redhat-00001%n"
                         +
                         "%n" +
-                        "------------------- project org.acme:subproject11%n" +
+                        "------------------- project org.acme:subproject11 (path: :subproject1:subproject11)%n" +
                         "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
                         "%n" +
                         "\tDependencies : org.springframework:spring-context:5.1.6.RELEASE --> org.springframework:spring-context:5.1.6.RELEASE-redhat-00005%n"
@@ -330,13 +327,10 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(textFile).isRegularFile().isReadable();
         final String textString = org.apache.commons.io.FileUtils.readFileToString(textFile.toFile(), StandardCharsets.UTF_8);
         final String expectedTextString = String.format(
-                "------------------- project org.acme:root%n" +
+                "------------------- project org.acme:root (path: :)%n" +
                         "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
                         "%n" +
-                        "------------------- project org.acme:root%n" +
-                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
-                        "%n" +
-                        "------------------- project org.acme:subproject1%n" +
+                        "------------------- project org.acme:subproject1 (path: :subproject1)%n" +
                         "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
                         "%n" +
                         "\tDependencies : org.springframework:spring-context:5.1.6.RELEASE --> org.springframework:spring-context:5.1.6.RELEASE-redhat-00005%n"
@@ -344,13 +338,13 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                         "\tDependencies : org.hibernate:hibernate-core:5.4.2.Final --> org.hibernate:hibernate-core:5.4.2.Final-redhat-00001%n"
                         +
                         "%n" +
-                        "------------------- project org.acme:subproject2%n" +
+                        "------------------- project org.acme:subproject2 (path: :subproject2)%n" +
                         "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
                         "%n" +
                         "\tDependencies : org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1 --> org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1-redhat-00001%n"
                         +
                         "%n" +
-                        "------------------- project org.acme:subproject11%n" +
+                        "------------------- project org.acme:subproject11 (path: :subproject1:subproject11)%n" +
                         "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
                         "%n" +
                         "\tDependencies : org.springframework:spring-context:5.1.6.RELEASE --> org.springframework:spring-context:5.1.6.RELEASE-redhat-00005%n"
@@ -386,13 +380,10 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(textFile).isRegularFile().isReadable();
         final String textString = org.apache.commons.io.FileUtils.readFileToString(textFile.toFile(), StandardCharsets.UTF_8);
         final String expectedTextString = String.format(
-                "------------------- project org.acme:root%n" +
+                "------------------- project org.acme:root (path: :)%n" +
                         "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
                         "%n" +
-                        "------------------- project org.acme:root%n" +
-                        "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
-                        "%n" +
-                        "------------------- project org.acme:subproject1%n" +
+                        "------------------- project org.acme:subproject1 (path: :subproject1)%n" +
                         "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
                         "%n" +
                         "\tDependencies : org.springframework:spring-context:5.1.6.RELEASE --> org.springframework:spring-context:5.1.6.RELEASE-redhat-00005%n"
@@ -401,7 +392,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                         +
                         "\tNon-Aligned Dependencies : junit:junit:4.12%n" +
                         "%n" +
-                        "------------------- project org.acme:subproject2%n" +
+                        "------------------- project org.acme:subproject2 (path: :subproject2)%n" +
                         "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
                         "%n" +
                         "\tDependencies : org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1 --> org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1-redhat-00001%n"
@@ -410,7 +401,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                         "\tNon-Aligned Dependencies : com.google.inject:guice:4.2.2%n" +
                         "\tNon-Aligned Dependencies : org.apache.commons:commons-lang3:3.8.1%n" +
                         "%n" +
-                        "------------------- project org.acme:subproject11%n" +
+                        "------------------- project org.acme:subproject11 (path: :subproject1:subproject11)%n" +
                         "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
                         "%n" +
                         "\tDependencies : org.springframework:spring-context:5.1.6.RELEASE --> org.springframework:spring-context:5.1.6.RELEASE-redhat-00005%n"

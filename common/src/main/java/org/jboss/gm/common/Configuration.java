@@ -189,6 +189,23 @@ public interface Configuration extends Accessible, Reloadable {
     @DefaultValue("false")
     boolean reportNonAligned();
 
+    /**
+     * Indicates whether we want to search for artifacts in brew or not.
+     * Default value: false
+     */
+    @Key("restBrewPullActive")
+    @DefaultValue("false")
+    boolean restBrewPullActive();
+
+    /**
+     * Mode of the artifacts to align. For temporary builds, the mode is: 'TEMPORARY', 'PERSISTENT' for permanent,
+     * 'SERVICE' for service builds, and 'SERVICE-TEMPORARY' for temporary service builds .
+     * Default value: empty string
+     */
+    @Key("restMode")
+    @DefaultValue("")
+    String restMode();
+
     class DependencyConverter implements Converter<DependencyPrecedence> {
         /**
          * Converts the given input into an Object of type T.

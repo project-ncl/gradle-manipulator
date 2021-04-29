@@ -104,7 +104,7 @@ public abstract class BaseScript extends GradleBaseScript {
         return fileIO;
     }
 
-    // TODO: @Override from PME
+    @Override
     public Translator getRESTAPI() {
         return restAPI;
     }

@@ -23,13 +23,13 @@ There are multiple ways that the plugins can be applied.
 
 * Utilise the below CLI (this is the **recommended** approach).
 * Add plugin configuration to project manually.
-* Apply script to project that handles all the details (this method is used by the `analyzer` plugin which configures the project to use the `manipulation` plugin automatically).
-* Use an init script (see example [here](https://github.com/project-ncl/gradle-manipulator#testing-on-a-real-project)).
+* Apply a script to project that handles all the details (this method is used by the `analyzer` plugin which configures the project to use the `manipulation` plugin automatically).
+* Use an init script (see below).
 
 It should also be noted that the project itself contains a properly configured init script for the `analyzer` plugin (which gets released along with the plugin).
 Furthermore, when the `analyzer` plugin executes, it alters the main gradle script of the target project to include the manipulation plugin.
 
-#### CLI
+##### CLI
 
 <table bgcolor="#ffff00">
 <tr>
@@ -81,6 +81,23 @@ It is possible to run the Gradle process using a different JDK by passing in the
 
 To obtain the CLI it may be downloaded from Maven Central [here](https://repo1.maven.org/maven2/org/jboss/gm/cli).
 
+##### Init Script
+
+If a development version is being used, the init script is placed during the build into
+`analyzer/build/resources/main/analyzer-init.gradle`. If a released version is being used, it is deployed as
+`analyzer-<version>-init.gradle`and may be found in Maven Central, i.e., for version 2.7,
+(https://repo1.maven.org/maven2/org/jboss/gm/analyzer/2.7/analyzer-2.7-init.gradle).
+
+Now, by executing
+
+```
+./gradlew --info --init-script analyzer-init.gradle generateAlignmentMetadata -DrestURL=http://some.da.server
+```
+
+you should get the `manipulation.json` file in the root of the project.
+
+For detailed documentation on the parameters please see [here](https://project-ncl.github.io/gradle-manipulator/).
+
 #### Troubleshooting
 
 * Gradle build daemon disappeared unexpectedly
@@ -113,7 +130,7 @@ Certain project builds don't apply the publish plugin directly (be it the legacy
 
 You can disable GME using the `manipulation.disable` property:
 
-	$ gradle -Dmanipulation.disable=true...
+    $ gradle -Dmanipulation.disable=true...
 
 #### Logging
 

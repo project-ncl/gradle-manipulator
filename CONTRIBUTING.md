@@ -1,4 +1,3 @@
-
 # Table of Contents
 
 Contributions to the project are very welcome! Please submit pull requests with any changes (preferably with tests).
@@ -12,6 +11,9 @@ Contributions to the project are very welcome! Please submit pull requests with 
    * [Logging](#logging)
    * [Exceptions](#exceptions)
    * [Gradle Test Runner](#gradle-test-runner)
+ * [Building](#building)
+   * [Running Tests](#running-tests)
+   * [Skipping Tests](#skipping-tests)
  * [Releasing](#releasing)
    * [Prerequisites](#prerequisites)
    * [Release command](#release-command)
@@ -100,6 +102,48 @@ using single-test debugging):
 ```
 Note that instead of calling `GradleRunner.create` the `TestUtils` class is used instead which passes on the extra system
 properties.
+
+### Building
+
+To build GME and run all tests, use
+
+```
+gradle clean build
+```
+
+If you also wish to publish the artifacts to you local maven repository, replace `build` with `publishToMavenLocal`
+
+```
+gradle clean publishToMavenLocal
+```
+
+#### Running Tests
+
+Normally, Gradle will only run tests if the code has changed. However, you may wish to force all tests to run using
+
+```
+gradle cleanTest test
+```
+
+Similarly, you can force all functional tests to run using
+
+```
+gradle cleanFunctionalTest functionalTest
+```
+
+#### Skipping Tests
+
+If you wish to build excluding all tests and functional tests, use
+
+```
+gradle clean publishToMavenLocal -x test -x functionalTest
+```
+
+You may run only certain tests, e.g., the tests in a class named `TestClass`, using
+
+```
+gradle test --tests TestClass
+```
 
 ### Releasing
 

@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.aeonbits.owner.ConfigCache;
+import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.gradle.internal.Pair;
@@ -197,7 +198,7 @@ public class Main implements Callable<Void> {
                     .map(entry -> "-D" + entry.getKey() + '=' + entry.getValue())
                     .collect(Collectors.toSet());
 
-            if (colour) {
+            if (colour && StringUtils.isEmpty(System.getenv("NO_COLOR"))) {
                 build.setColorOutput(true);
             } else {
                 jvmArgs.add("-DloggingColours=false");

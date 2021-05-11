@@ -15,10 +15,13 @@ import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
+
+import ch.qos.logback.core.pattern.color.ANSIConstants;
 
 import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
@@ -42,6 +45,9 @@ public class MainTest {
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
+    @Rule
+    public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
+
     @Test
     public void testGradleNotFound() throws IOException {
         Main m = new Main();
@@ -63,7 +69,24 @@ public class MainTest {
         String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "help" };
         m.run(args);
 
+        assertFalse(systemOutRule.getLog().contains("loggingColours=false"));
         assertTrue(systemOutRule.getLog().contains("Welcome to Gradle"));
+        assertTrue(systemOutRule.getLog().contains(ANSIConstants.ESC_START));
+    }
+
+    @Test
+    public void testInvokeGradleDisabledColor() throws Exception {
+
+        final File projectRoot = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
+        environmentVariables.set("NO_COLOR", "1");
+
+        Main m = new Main();
+        String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "help" };
+        m.run(args);
+
+        assertTrue(systemOutRule.getLog().contains("loggingColours=false"));
+        assertTrue(systemOutRule.getLog().contains("Welcome to Gradle"));
+        assertFalse(systemOutRule.getLog().contains(ANSIConstants.ESC_START));
     }
 
     @Test
@@ -167,17 +190,19 @@ public class MainTest {
         assertTrue(gmeGradle.exists());
         assertTrue(FileUtils.readFileToString(gmeGradle, Charset.defaultCharset())
                 .contains("org.jboss.gm:manipulation:" + actualVersion.getProperty("version")));
+        assertTrue(systemOutRule.getLog().contains(ANSIConstants.ESC_START));
     }
 
     @Test
     public void testInvokeAlignmentFails() throws Exception {
-
         final File target = tempDir.newFolder();
         final File source = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
         final File root = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath())
                 .getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();
         final File projectRoot = new File(target, source.getName());
         FileUtils.copyFile(source, projectRoot);
+
+        environmentVariables.set("NO_COLOR", "1");
 
         // This hack-fest is because the development version is not in Maven Central so it won't be resolvable
         // This adds the compiled libraries as flat dir repositories.
@@ -210,6 +235,7 @@ public class MainTest {
             assertTrue(e.getCause().getMessage().contains("must be configured in order for dependency scanning to work"));
         }
         assertTrue(systemErrRule.getLog().contains("'restURL' must be configured in order for dependency scanning to work"));
+        assertFalse(systemErrRule.getLog().contains(ANSIConstants.ESC_START));
     }
 
     @Test

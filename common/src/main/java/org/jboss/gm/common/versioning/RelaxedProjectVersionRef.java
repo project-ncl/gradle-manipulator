@@ -17,7 +17,7 @@ import org.gradle.api.artifacts.ResolvedDependency;
 /**
  * This is a special ProjectVersionRef that allows a null for a version and delegates to the
  * appropriate implementation.
- * <p/>
+ * <p>
  * The majority of this is merely a wrapper and not implemented - just enough to store the
  * original mapping key in the {@link org.jboss.gm.common.ManipulationCache} and provide comparison functionality.
  *

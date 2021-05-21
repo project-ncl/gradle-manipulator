@@ -29,17 +29,26 @@ public class ManipulationCache {
 
     private static final String NAME_PREFIX = "manipulationModelCache";
 
-    /** Root project */
+    /**
+     * Root project.
+     *
+     * @return the root project
+     */
     @Getter
     private final Project rootProject;
 
     /**
      * Will be built up to contain all the projects that need alignment. The same reference is passed to each task
-     * and is used to make sure that the result of alignment is only written once (by the last alignment task to be performed)
+     * and is used to make sure that the result of alignment is only written once (by the last alignment task to be
+     * performed).
      */
     private final Set<String> projectCounter = new HashSet<>();
 
-    /** Root model **/
+    /**
+     * Root model.
+     *
+     * @return the root model
+     */
     @Getter
     private ManipulationModel model;
 
@@ -48,6 +57,8 @@ public class ManipulationCache {
     /**
      * This is the project dependencies - it represents a mapping of project module to a map of the original Dependency
      * (which might be dynamic) to the fully resolved GAV.
+     *
+     * @return the project dependencies
      */
     @Getter
     private final Map<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>> dependencies = new LinkedHashMap<>();
@@ -59,7 +70,6 @@ public class ManipulationCache {
      * Retrieves the cache given any project. It will access the root project, check if the
      * cache exists and create it if required.
      * <p>
-     * </p>
      * <b>Only used by AlignmentPlugin</b>
      *
      * @param project the {@link Project} reference.

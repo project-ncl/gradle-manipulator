@@ -17,10 +17,11 @@ public final class ManipulationIO {
     }
 
     /**
-     * This is meant to be called from as part of a Gradle task that is executed for each project/subproject of the build
-     * Is assumes that a task for various projects is never called in parallel
+     * This is meant to be called from as part of a Gradle task that is executed for each project/subproject of the
+     * build. It assumes that a task for various projects is never called in parallel.
      *
-     * @return a valid ManipulationModel.
+     * @param rootDir the root directory
+     * @return a valid manipulation model
      */
     public static ManipulationModel readManipulationModel(File rootDir) {
         try {
@@ -33,7 +34,11 @@ public final class ManipulationIO {
     }
 
     /**
-     * Write the model to disk - override any existing file that might exist
+     * Write the model to disk - override any existing file that might exist.
+     *
+     * @param rootDir the root directory
+     * @param updatedManipulationModel whether to update the manipulation model
+     * @throws ManipulationException if an error occurs
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void writeManipulationModel(File rootDir, ManipulationModel updatedManipulationModel)

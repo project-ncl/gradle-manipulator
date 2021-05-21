@@ -46,6 +46,9 @@ public class ManipulationModel {
 
     /**
      * Name of the project as defined by the build system.
+     *
+     * @param name the project name
+     * @return the project name
      */
     @JsonProperty
     @Getter
@@ -54,6 +57,8 @@ public class ManipulationModel {
 
     /**
      * This should be effectively the same as the folder name.
+     *
+     * @return the folder name
      */
     @JsonProperty
     @Getter
@@ -61,6 +66,9 @@ public class ManipulationModel {
 
     /**
      * Version of the project.
+     *
+     * @param version the version of the project
+     * @return the version of the project
      */
     @JsonProperty
     @Getter
@@ -134,14 +142,18 @@ public class ManipulationModel {
     }
 
     /**
-     * Returns the alignments for this project only, doesn't include children
+     * Returns the alignments for this project only, doesn't include children.
+     *
+     * @return the alignments for this project only
      */
     public Map<String, ProjectVersionRef> getAlignedDependencies() {
         return alignedDependencies;
     }
 
     /**
-     * Returns all alignments for this project and those of the children
+     * Returns all alignments for this project and those of the children.
+     *
+     * @return all alignments for this project and those of the children
      */
     @JsonIgnore
     public Map<String, ProjectVersionRef> getAllAlignedDependencies() {

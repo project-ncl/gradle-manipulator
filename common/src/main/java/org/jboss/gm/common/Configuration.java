@@ -139,7 +139,6 @@ public interface Configuration extends Accessible, Reloadable {
     /**
      * Whether to explicitly override all transitive dependencies as well. Defaults to false.
      * <p>
-     * </p>
      * This method is purposely <b>not</b> annotated with a <code>DefaultValue</code> so that
      * we can determine between the user explicitly configuring this to be true or false and
      * implicitly assuming it is false. If a shadow plugin configuration (i.e. shading) is detected
@@ -154,6 +153,8 @@ public interface Configuration extends Accessible, Reloadable {
      * This value is used to represent the dependency configuration. While PME supports
      * BOM and REST configs ; currently within Gradle only REST is supported. If this
      * value is set to "" (or "NONE")
+     *
+     * @return the value used to represent the dependency configuration
      */
     @Key("dependencySource")
     @ConverterClass(DependencyConverter.class)
@@ -161,9 +162,11 @@ public interface Configuration extends Accessible, Reloadable {
     DependencyPrecedence dependencyConfiguration();
 
     /**
-     * Path to a file where project's artifact repositories will be exported in the maven settings format.
-     *
+     * Path to the file where project's artifact repositories will be exported in the maven settings format.
+     * <p>
      * PNC will use this file to configure repository proxying.
+     *
+     * @return the path to the file where project's artifact repositories will be exported in the maven settings format
      */
     @Key("repoRemovalBackup")
     String repositoriesFile();
@@ -172,6 +175,8 @@ public interface Configuration extends Accessible, Reloadable {
      * Represents the version of the Manipulation Plugin to inject. By default this returns
      * empty representing the current version. This can be set to a numeric version. The version
      * must exist in Maven Central for it to be valid.
+     *
+     * @return the version of the Manipulation Plugin to inject
      */
     @Key("manipulationVersion")
     @DefaultValue("")
@@ -191,7 +196,10 @@ public interface Configuration extends Accessible, Reloadable {
 
     /**
      * Indicates whether we want to search for artifacts in brew or not.
+     * <p>
      * Default value: false
+     *
+     * @return whether we want to search for artifacts in brew or not
      */
     @Key("restBrewPullActive")
     @DefaultValue("false")
@@ -199,8 +207,11 @@ public interface Configuration extends Accessible, Reloadable {
 
     /**
      * Mode of the artifacts to align. For temporary builds, the mode is: 'TEMPORARY', 'PERSISTENT' for permanent,
-     * 'SERVICE' for service builds, and 'SERVICE-TEMPORARY' for temporary service builds .
+     * 'SERVICE' for service builds, and 'SERVICE-TEMPORARY' for temporary service builds.
+     * <p>
      * Default value: empty string
+     *
+     * @return the mode of the artifacts to align
      */
     @Key("restMode")
     @DefaultValue("")
@@ -212,7 +223,7 @@ public interface Configuration extends Accessible, Reloadable {
          * If the method returns null, null will be returned by the Config object.
          * The converter is instantiated for every call, so it shouldn't have any internal state.
          *
-         * @param method the method invoked on the <tt>{@link Config} object</tt>
+         * @param method the method invoked on the {@link Config} object
          * @param input the property value specified as input text to be converted to the T return type
          * @return the object of type T converted from the input string.
          * @since 1.0.4
@@ -232,7 +243,7 @@ public interface Configuration extends Accessible, Reloadable {
          * If the method returns null, null will be returned by the Config object.
          * The converter is instantiated for every call, so it shouldn't have any internal state.
          *
-         * @param method the method invoked on the <tt>{@link Config} object</tt>
+         * @param method the method invoked on the {@link Config} object
          * @param input the property value specified as input text to be converted to the T return type
          * @return the object of type T converted from the input string.
          * @since 1.0.4

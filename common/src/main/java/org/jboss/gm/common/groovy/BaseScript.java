@@ -113,6 +113,7 @@ public abstract class BaseScript extends GradleBaseScript {
      * Internal use only - the org.jboss.gm.analyzer.alignment.AlignmentTask uses this to
      * initialise the values
      *
+     * @param logger the logger
      * @param stage the current invocation stage
      * @param rootDir the root directory of the project.
      * @param properties the current configuration properties

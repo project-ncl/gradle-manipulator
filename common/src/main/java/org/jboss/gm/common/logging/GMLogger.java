@@ -286,11 +286,9 @@ public class GMLogger implements Logger {
     /**
      * Log a message at the TRACE level according to the specified format
      * and argument.
-     * <p/>
      * <p>
      * This form avoids superfluous object creation when the logger
      * is disabled for the TRACE level.
-     * </p>
      *
      * @param format the format string
      * @param arg the argument
@@ -304,11 +302,9 @@ public class GMLogger implements Logger {
     /**
      * Log a message at the TRACE level according to the specified format
      * and arguments.
-     * <p/>
      * <p>
      * This form avoids superfluous object creation when the logger
      * is disabled for the TRACE level.
-     * </p>
      *
      * @param format the format string
      * @param arg1 the first argument
@@ -323,14 +319,12 @@ public class GMLogger implements Logger {
     /**
      * Log a message at the TRACE level according to the specified format
      * and arguments.
-     * <p/>
      * <p>
      * This form avoids superfluous string concatenation when the logger
      * is disabled for the TRACE level. However, this variant incurs the hidden
      * (and relatively small) cost of creating an <code>Object[]</code> before invoking the method,
      * even if this logger is disabled for TRACE. The variants taking {@link #trace(String, Object) one} and
      * {@link #trace(String, Object, Object) two} arguments exist solely in order to avoid this hidden cost.
-     * </p>
      *
      * @param format the format string
      * @param arguments a list of 3 or more arguments
@@ -464,11 +458,9 @@ public class GMLogger implements Logger {
     /**
      * Log a message at the DEBUG level according to the specified format
      * and argument.
-     * <p/>
      * <p>
      * This form avoids superfluous object creation when the logger
      * is disabled for the DEBUG level.
-     * </p>
      *
      * @param format the format string
      * @param arg the argument
@@ -481,11 +473,9 @@ public class GMLogger implements Logger {
     /**
      * Log a message at the DEBUG level according to the specified format
      * and arguments.
-     * <p/>
      * <p>
      * This form avoids superfluous object creation when the logger
      * is disabled for the DEBUG level.
-     * </p>
      *
      * @param format the format string
      * @param arg1 the first argument
@@ -611,11 +601,9 @@ public class GMLogger implements Logger {
     /**
      * Log a message at the INFO level according to the specified format
      * and argument.
-     * <p/>
      * <p>
      * This form avoids superfluous object creation when the logger
      * is disabled for the INFO level.
-     * </p>
      *
      * @param format the format string
      * @param arg the argument
@@ -628,11 +616,9 @@ public class GMLogger implements Logger {
     /**
      * Log a message at the INFO level according to the specified format
      * and arguments.
-     * <p/>
      * <p>
      * This form avoids superfluous object creation when the logger
      * is disabled for the INFO level.
-     * </p>
      *
      * @param format the format string
      * @param arg1 the first argument
@@ -757,11 +743,9 @@ public class GMLogger implements Logger {
     /**
      * Log a message at the WARN level according to the specified format
      * and argument.
-     * <p/>
      * <p>
      * This form avoids superfluous object creation when the logger
      * is disabled for the WARN level.
-     * </p>
      *
      * @param format the format string
      * @param arg the argument
@@ -774,7 +758,6 @@ public class GMLogger implements Logger {
     /**
      * Log a message at the WARN level according to the specified format
      * and arguments.
-     * <p/>
      * <p>
      * This form avoids superfluous string concatenation when the logger
      * is disabled for the WARN level. However, this variant incurs the hidden
@@ -782,7 +765,6 @@ public class GMLogger implements Logger {
      * even if this logger is disabled for WARN. The variants taking
      * {@link #warn(String, Object) one} and {@link #warn(String, Object, Object) two}
      * arguments exist solely in order to avoid this hidden cost.
-     * </p>
      *
      * @param format the format string
      * @param arguments a list of 3 or more arguments
@@ -795,11 +777,9 @@ public class GMLogger implements Logger {
     /**
      * Log a message at the WARN level according to the specified format
      * and arguments.
-     * <p/>
      * <p>
      * This form avoids superfluous object creation when the logger
      * is disabled for the WARN level.
-     * </p>
      *
      * @param format the format string
      * @param arg1 the first argument
@@ -925,11 +905,9 @@ public class GMLogger implements Logger {
     /**
      * Log a message at the ERROR level according to the specified format
      * and argument.
-     * <p/>
      * <p>
      * This form avoids superfluous object creation when the logger
      * is disabled for the ERROR level.
-     * </p>
      *
      * @param format the format string
      * @param arg the argument
@@ -942,11 +920,9 @@ public class GMLogger implements Logger {
     /**
      * Log a message at the ERROR level according to the specified format
      * and arguments.
-     * <p/>
      * <p>
      * This form avoids superfluous object creation when the logger
      * is disabled for the ERROR level.
-     * </p>
      *
      * @param format the format string
      * @param arg1 the first argument
@@ -960,7 +936,6 @@ public class GMLogger implements Logger {
     /**
      * Log a message at the ERROR level according to the specified format
      * and arguments.
-     * <p/>
      * <p>
      * This form avoids superfluous string concatenation when the logger
      * is disabled for the ERROR level. However, this variant incurs the hidden
@@ -968,7 +943,6 @@ public class GMLogger implements Logger {
      * even if this logger is disabled for ERROR. The variants taking
      * {@link #error(String, Object) one} and {@link #error(String, Object, Object) two}
      * arguments exist solely in order to avoid this hidden cost.
-     * </p>
      *
      * @param format the format string
      * @param arguments a list of 3 or more arguments

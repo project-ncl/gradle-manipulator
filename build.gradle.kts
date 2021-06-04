@@ -26,7 +26,7 @@ plugins {
 
 apply(plugin = "net.researchgate.release")
 
-if(!JavaVersion.current().isJava11Compatible){
+if (!JavaVersion.current().isJava11Compatible) {
     throw GradleException("This build must be run with at least Java 11")
 }
 
@@ -145,6 +145,18 @@ subprojects {
 
     if (project.name == "common" || project.name == "cli") {
         apply(plugin = "java-library")
+
+        tasks.withType<Jar> {
+            manifest {
+                attributes["Built-By"] = System.getProperty("user.name")
+                attributes["Build-Timestamp"] = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(Date())
+                attributes["Scm-Revision"] = Grgit.open(mapOf("currentDir" to project.rootDir)).use { g -> g.head().id }
+                attributes["Created-By"] = "Gradle ${gradle.gradleVersion}"
+                attributes["Build-Jdk"] = System.getProperty("java.version") + " ; " + System.getProperty("java.vendor") + " ; " + System.getProperty("java.vm.version")
+                attributes["Build-OS"] = System.getProperty("os.name") + " ; " + System.getProperty("os.arch") + " ; " + System.getProperty("os.version")
+                attributes["Implementation-Version"] = "${project.version}"
+            }
+        }
     } else {
         // Don't apply Gradle plugin code to the cli tool.
         apply(plugin = "java-gradle-plugin")
@@ -156,11 +168,23 @@ subprojects {
             }
         }
     }
-    if ( project.name != "common") {
-        apply(plugin = "signing")
-        apply(plugin = "maven-publish")
+
+    apply(plugin = "signing")
+    apply(plugin = "maven-publish")
+    apply(plugin = "net.linguica.maven-settings")
+
+    val sourcesJar by tasks.registering(Jar::class) {
+        archiveClassifier.set("sources")
+        from(sourceSets.main.get().allSource)
+    }
+
+    val javadocJar by tasks.registering(Jar::class) {
+        archiveClassifier.set("javadoc")
+        from(tasks["javadoc"])
+    }
+
+    if (project.name != "common") {
         apply(plugin = "com.github.johnrengelman.shadow")
-        apply(plugin = "net.linguica.maven-settings")
 
         /**
          * The configuration below has been created by reading the documentation at:
@@ -184,14 +208,14 @@ subprojects {
             exclude("analyzer-init.gradle")
             // Minimise the resulting uber-jars to ensure we don't have massive jars
             minimize() {
-               // Sometimes minimisation takes away too much ... ensure we keep these.
-               exclude(dependency("com.fasterxml.jackson.core:.*:.*"))
-               exclude(dependency("org.commonjava.maven.ext:.*:.*"))
-               exclude(dependency("org.commonjava.maven.atlas:.*:.*"))
-               exclude(dependency("org.aeonbits.owner:.*:.*"))
-               exclude(dependency("org.slf4j:.*:.*"))
-               exclude(dependency("org.apache.maven:.*:.*"))
-           }
+                // Sometimes minimisation takes away too much ... ensure we keep these.
+                exclude(dependency("com.fasterxml.jackson.core:.*:.*"))
+                exclude(dependency("org.commonjava.maven.ext:.*:.*"))
+                exclude(dependency("org.commonjava.maven.atlas:.*:.*"))
+                exclude(dependency("org.aeonbits.owner:.*:.*"))
+                exclude(dependency("org.slf4j:.*:.*"))
+                exclude(dependency("org.apache.maven:.*:.*"))
+            }
             doFirst {
                 manifest {
                     attributes["Built-By"] = System.getProperty("user.name")
@@ -203,16 +227,6 @@ subprojects {
                     attributes["Implementation-Version"] = "${project.version}"
                 }
             }
-        }
-
-        val sourcesJar by tasks.registering(Jar::class) {
-            archiveClassifier.set("sources")
-            from(sourceSets.main.get().allSource)
-        }
-
-        val javadocJar by tasks.registering(Jar::class) {
-            archiveClassifier.set("javadoc")
-            from(tasks["javadoc"])
         }
 
         // configure publishing of the shadowJar
@@ -295,8 +309,78 @@ subprojects {
                 sign(publishing.publications["shadow"])
             }
         }
-    }
+    } else {
+        publishing {
+            publications {
+                create<MavenPublication>("mavenJava") {
+                    from(components["java"])
+                    artifact(sourcesJar.get())
+                    artifact(javadocJar.get())
 
+                    pom {
+                        name.set("Gradle Manipulation Extension")
+                        description.set("A tool to work with ProjectNCL to manipulate Gradle builds.")
+                        url.set("https://github.com/project-ncl/gradle-manipulator")
+                        packaging = "jar"
+
+                        licenses {
+                            license {
+                                name.set("The Apache License, Version 2.0")
+                                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                            }
+                        }
+                        developers {
+                            developer {
+                                id.set("geoand")
+                                name.set("Georgios Andrianakis")
+                                email.set("gandrian@redhat.com")
+                            }
+                            developer {
+                                id.set("rnc")
+                                name.set("Nick Cross")
+                                email.set("ncross@redhat.com")
+                            }
+                            developer {
+                                id.set("TomasHofman")
+                                name.set("Tomas Hofman")
+                                email.set("thofman@redhat.com")
+                            }
+                            developer {
+                                id.set("metacosm")
+                                name.set("Chris Laprun")
+                                email.set("claprun@redhat.com")
+                            }
+                        }
+                        scm {
+                            connection.set("scm:git:http://github.com/project-ncl/gradle-manipulator.git")
+                            developerConnection.set("scm:git:git@github.com:project-ncl/gradle-manipulator.git")
+                            url.set("https://github.com/project-ncl/gradle-manipulator")
+                        }
+                    }
+                }
+            }
+            repositories {
+                if (isReleaseBuild) {
+                    maven {
+                        name = "sonatype-nexus-staging"
+                        url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+                    }
+                } else {
+                    maven {
+                        name = "sonatype-nexus-snapshots"
+                        url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+                    }
+                }
+            }
+        }
+
+        if (isReleaseBuild) {
+            signing {
+                useGpgCmd()
+                sign(publishing.publications["mavenJava"])
+            }
+        }
+    }
 
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8

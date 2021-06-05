@@ -246,61 +246,10 @@ subprojects {
                         }
                     }
 
-                    pom {
-                        name.set("Gradle Manipulation Extension")
-                        description.set("A tool to work with ProjectNCL to manipulate Gradle builds.")
-                        url.set("https://github.com/project-ncl/gradle-manipulator")
-                        packaging = "jar"
-
-                        licenses {
-                            license {
-                                name.set("The Apache License, Version 2.0")
-                                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                            }
-                        }
-                        developers {
-                            developer {
-                                id.set("geoand")
-                                name.set("Georgios Andrianakis")
-                                email.set("gandrian@redhat.com")
-                            }
-                            developer {
-                                id.set("rnc")
-                                name.set("Nick Cross")
-                                email.set("ncross@redhat.com")
-                            }
-                            developer {
-                                id.set("TomasHofman")
-                                name.set("Tomas Hofman")
-                                email.set("thofman@redhat.com")
-                            }
-                            developer {
-                                id.set("metacosm")
-                                name.set("Chris Laprun")
-                                email.set("claprun@redhat.com")
-                            }
-                        }
-                        scm {
-                            connection.set("scm:git:http://github.com/project-ncl/gradle-manipulator.git")
-                            developerConnection.set("scm:git:git@github.com:project-ncl/gradle-manipulator.git")
-                            url.set("https://github.com/project-ncl/gradle-manipulator")
-                        }
-                    }
+                    generatePom()
                 }
             }
-            repositories {
-                if (isReleaseBuild) {
-                    maven {
-                        name = "sonatype-nexus-staging"
-                        url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
-                    }
-                } else {
-                    maven {
-                        name = "sonatype-nexus-snapshots"
-                        url = uri("https://oss.sonatype.org/content/repositories/snapshots")
-                    }
-                }
-            }
+            generateRepositories(this, this@Build_gradle)
         }
 
         if (isReleaseBuild) {
@@ -317,63 +266,11 @@ subprojects {
                     artifact(sourcesJar.get())
                     artifact(javadocJar.get())
 
-                    pom {
-                        name.set("Gradle Manipulation Extension")
-                        description.set("A tool to work with ProjectNCL to manipulate Gradle builds.")
-                        url.set("https://github.com/project-ncl/gradle-manipulator")
-                        packaging = "jar"
-
-                        licenses {
-                            license {
-                                name.set("The Apache License, Version 2.0")
-                                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                            }
-                        }
-                        developers {
-                            developer {
-                                id.set("geoand")
-                                name.set("Georgios Andrianakis")
-                                email.set("gandrian@redhat.com")
-                            }
-                            developer {
-                                id.set("rnc")
-                                name.set("Nick Cross")
-                                email.set("ncross@redhat.com")
-                            }
-                            developer {
-                                id.set("TomasHofman")
-                                name.set("Tomas Hofman")
-                                email.set("thofman@redhat.com")
-                            }
-                            developer {
-                                id.set("metacosm")
-                                name.set("Chris Laprun")
-                                email.set("claprun@redhat.com")
-                            }
-                        }
-                        scm {
-                            connection.set("scm:git:http://github.com/project-ncl/gradle-manipulator.git")
-                            developerConnection.set("scm:git:git@github.com:project-ncl/gradle-manipulator.git")
-                            url.set("https://github.com/project-ncl/gradle-manipulator")
-                        }
-                    }
+                    generatePom()
                 }
             }
-            repositories {
-                if (isReleaseBuild) {
-                    maven {
-                        name = "sonatype-nexus-staging"
-                        url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
-                    }
-                } else {
-                    maven {
-                        name = "sonatype-nexus-snapshots"
-                        url = uri("https://oss.sonatype.org/content/repositories/snapshots")
-                    }
-                }
-            }
+            generateRepositories(this, this@Build_gradle)
         }
-
         if (isReleaseBuild) {
             signing {
                 useGpgCmd()
@@ -414,6 +311,66 @@ subprojects {
             "compile" {
                 exclude(group = "ch.qos.logback", module = "logback-core")
             }
+        }
+    }
+
+}
+
+fun generateRepositories(publishingExtension: PublishingExtension, buildGradle: Build_gradle) {
+        publishingExtension.repositories {
+            if (buildGradle.isReleaseBuild) {
+                maven {
+                    name = "sonatype-nexus-staging"
+                    url = project.uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+                }
+            } else {
+                maven {
+                    name = "sonatype-nexus-snapshots"
+                    url = project.uri("https://oss.sonatype.org/content/repositories/snapshots")
+                }
+            }
+        }
+    }
+
+fun MavenPublication.generatePom() {
+    pom {
+        name.set("Gradle Manipulation Extension")
+        description.set("A tool to work with ProjectNCL to manipulate Gradle builds.")
+        url.set("https://github.com/project-ncl/gradle-manipulator")
+        packaging = "jar"
+
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+        developers {
+            developer {
+                id.set("geoand")
+                name.set("Georgios Andrianakis")
+                email.set("gandrian@redhat.com")
+            }
+            developer {
+                id.set("rnc")
+                name.set("Nick Cross")
+                email.set("ncross@redhat.com")
+            }
+            developer {
+                id.set("TomasHofman")
+                name.set("Tomas Hofman")
+                email.set("thofman@redhat.com")
+            }
+            developer {
+                id.set("metacosm")
+                name.set("Chris Laprun")
+                email.set("claprun@redhat.com")
+            }
+        }
+        scm {
+            connection.set("scm:git:http://github.com/project-ncl/gradle-manipulator.git")
+            developerConnection.set("scm:git:git@github.com:project-ncl/gradle-manipulator.git")
+            url.set("https://github.com/project-ncl/gradle-manipulator")
         }
     }
 }

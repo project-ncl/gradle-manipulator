@@ -94,10 +94,10 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
         assertTrue(systemOutRule.getLog().contains("original version is 1.0.1" + System.lineSeparator()));
         assertThat(FileUtils.readFileToString(new File(projectRoot, "build.gradle"), Charset.defaultCharset()))
                 .contains("classpath \"org.hibernate:hibernate-core:5.3.7.Final-redhat-00001")
-                .contains("publishing {\n" +
-                        "  publications {\n" +
-                        "    nebula {\n" +
-                        "      artifact(\"build/distributions/${project.name}-${version}.zip\")\n");
+                .contains("publishing {" + System.lineSeparator() +
+                        "  publications {" + System.lineSeparator() +
+                        "    nebula {" + System.lineSeparator() +
+                        "      artifact(\"build/distributions/${project.name}-${version}.zip\")" + System.lineSeparator());
         assertThat(FileUtils.readFileToString(new File(projectRoot, "settings.gradle"), Charset.defaultCharset()))
                 .doesNotContain("x-pack").contains("another-pack");
         assertTrue(systemOutRule.getLog().contains("Retrieved"));

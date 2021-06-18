@@ -20,6 +20,7 @@ import org.commonjava.maven.ext.common.json.GAV;
 import org.commonjava.maven.ext.common.json.ModulesItem;
 import org.commonjava.maven.ext.common.json.PME;
 import org.commonjava.maven.ext.common.util.JSONUtils;
+import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
 import org.gradle.testkit.runner.GradleRunner;
 import org.jboss.byteman.contrib.bmunit.BMRule;
@@ -60,11 +61,16 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
 
     @Before
     public void setup() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
+        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json;charset=utf-8")
                         .withBody(readSampleDAResponse("simple-project-da-response.json"))));
+        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                        .withBody(readSampleDAResponse("simple-project-da-response-project.json"))));
 
         System.setProperty(Configuration.DA, "http://127.0.0.1:" + wireMockRule.port() + "/da/rest/v-1");
     }
@@ -220,7 +226,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
 
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, false);
 
-        verify(postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
+        verify(postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
                 .withRequestBody(notMatching(".*SNAPSHOT.*")));
 
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();

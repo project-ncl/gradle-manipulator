@@ -89,8 +89,17 @@ public interface Configuration extends Accessible, Reloadable {
     @DefaultValue("false")
     boolean versionSuffixSnapshot();
 
-    @Key(RESTState.REST_REPO_GROUP)
-    String restRepositoryGroup();
+    /**
+     * Mode of the artifacts to align. For temporary builds, the mode is: 'TEMPORARY', 'PERSISTENT' for permanent,
+     * 'SERVICE' for service builds, and 'SERVICE-TEMPORARY' for temporary service builds.
+     * <p>
+     * Default value: empty string
+     *
+     * @return the mode of the artifacts to align
+     */
+    @Key(RESTState.REST_MODE)
+    @DefaultValue("")
+    String restMode();
 
     @Key(RESTState.REST_MAX_SIZE)
     @DefaultValue("-1")
@@ -204,18 +213,6 @@ public interface Configuration extends Accessible, Reloadable {
     @Key("restBrewPullActive")
     @DefaultValue("false")
     boolean restBrewPullActive();
-
-    /**
-     * Mode of the artifacts to align. For temporary builds, the mode is: 'TEMPORARY', 'PERSISTENT' for permanent,
-     * 'SERVICE' for service builds, and 'SERVICE-TEMPORARY' for temporary service builds.
-     * <p>
-     * Default value: empty string
-     *
-     * @return the mode of the artifacts to align
-     */
-    @Key("restMode")
-    @DefaultValue("")
-    String restMode();
 
     class DependencyConverter implements Converter<DependencyPrecedence> {
         /**

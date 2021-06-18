@@ -77,7 +77,7 @@ public class ManipulationPlugin implements Plugin<Project> {
 
         // we need to change the project version early so various tasks that ready early and create other vars based on it
         // (like the zip tasks) can use the correct version
-        logger.info("Updating project ({}) version {} to {} ", project.getProjectDir(), project.getVersion(),
+        logger.info("Updating project ({}) version {} to {}", project.getProjectDir(), project.getVersion(),
                 correspondingModule.getVersion());
         project.setVersion(correspondingModule.getVersion());
 

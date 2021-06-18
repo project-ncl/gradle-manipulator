@@ -36,7 +36,7 @@ public class DAAlignmentService implements AlignmentService {
 
         final String endpointUrl = configuration.daEndpoint();
 
-        if (endpointUrl == null && (dependencySource != NONE)) {
+        if (endpointUrl == null && dependencySource != NONE) {
             throw new ManipulationUncheckedException("'{}' must be configured in order for dependency scanning to work",
                     Configuration.DA);
         }
@@ -46,28 +46,40 @@ public class DAAlignmentService implements AlignmentService {
 
     @Override
     public Response align(AlignmentService.Request request) throws RestException {
-        final List<ProjectVersionRef> translateRequest = new ArrayList<>(request.getDependencies().size() + 1);
-
         if (dependencySource == NONE) {
             logger.warn("No dependencySource configured ; unable to call endpoint");
             return new Response(Collections.emptyMap());
         }
 
-        translateRequest.addAll(request.getProject());
-        translateRequest.addAll(request.getDependencies());
+        // XXX: lookupVersions expects List, but AlignmentService.Request.getDependencies() returns Set
+        final List<ProjectVersionRef> vParams = new ArrayList<>(request.getDependencies());
 
-        logger.debug("Passing {} GAVs following into the REST client api {} ", translateRequest.size(), translateRequest);
-        logger.info("Calling REST client with {} GAVS...", translateRequest.size());
-        final Map<ProjectVersionRef, String> translationMap = restEndpoint.translateVersions(translateRequest);
-        logger.info("REST Client returned {} ", translationMap);
+        logger.debug("Passing {} GAVs into the REST client api {}", vParams.size(), vParams);
 
-        Response result = new Response(translationMap);
+        final Map<ProjectVersionRef, String> vMap = restEndpoint.lookupVersions(vParams);
 
-        if (!request.getProject().isEmpty()) {
-            logger.info("Retrieving project version {} and returning {} ", request.getProject().get(0),
-                    translationMap.get(request.getProject().get(0)));
-            result.setNewProjectVersion(translationMap.get(request.getProject().get(0)));
+        logger.info("REST Client returned: {}", vMap);
+
+        final Response response = new Response(vMap);
+
+        final List<ProjectVersionRef> pParams = request.getProject();
+
+        if (!pParams.isEmpty()) {
+            logger.debug("Passing {} project GAVs into the REST client api {}", pParams.size(), pParams);
+
+            final Map<ProjectVersionRef, String> pMap = restEndpoint.lookupProjectVersions(pParams);
+
+            logger.info("REST Client returned for project versions: {}", pMap);
+
+            final ProjectVersionRef projectVersion = pParams.get(0);
+            final String newProjectVersion = pMap.get(projectVersion);
+
+            logger.info("Retrieving project version {} and returning {}", projectVersion, newProjectVersion);
+
+            response.getTranslationMap().putAll(pMap);
+            response.setNewProjectVersion(newProjectVersion);
         }
-        return result;
+
+        return response;
     }
 }

@@ -259,7 +259,7 @@ public class AlignmentTask extends DefaultTask {
         projectDependencies.forEach((key, value) -> {
             final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(key);
             if (configuration.versionModificationEnabled()) {
-                logger.info("Updating sub-project {} (path: {}) from version {} to {} ",
+                logger.info("Updating sub-project {} (path: {}) from version {} to {}",
                         correspondingModule, correspondingModule.getProjectPathName(), value, newVersion);
                 correspondingModule.setVersion(newVersion);
             }
@@ -298,7 +298,7 @@ public class AlignmentTask extends DefaultTask {
             alignmentModel.setGroup(commonPrefix);
         }
 
-        logger.info("Completed processing for alignment and writing {} ", cache);
+        logger.info("Completed processing for alignment and writing {}", cache);
         GroovyUtils.runCustomGroovyScript(logger, InvocationStage.LAST, rootProject.getRootDir(), configuration,
                 rootProject,
                 alignmentModel);
@@ -307,8 +307,8 @@ public class AlignmentTask extends DefaultTask {
         // files.
         updateAllExtraGradleFilesWithGmeRepos();
 
-        logger.info("For project script is {}  and build file {} ", rootProject.getBuildscript(), rootProject.getBuildFile());
-        logger.info("For project {} ", rootProject.getBuildscript().getSourceFile());
+        logger.info("For project script is {}  and build file {}", rootProject.getBuildscript(), rootProject.getBuildFile());
+        logger.info("For project {}", rootProject.getBuildscript().getSourceFile());
         writeGmeMarkerFile(configuration, rootProject.getBuildFile());
         writeGmeConfigMarkerFile(rootProject.getBuildFile());
         writeGmeReposMarkerFile();
@@ -549,7 +549,7 @@ public class AlignmentTask extends DefaultTask {
                     }
 
                     if (depMap.put(relaxedProjectVersionRef, pvr) == null) {
-                        logger.debug("For {}, with original key {}, adding dependency to scan {} ", configuration,
+                        logger.debug("For {}, with original key {}, adding dependency to scan {}", configuration,
                                 relaxedProjectVersionRef, pvr);
                     }
 

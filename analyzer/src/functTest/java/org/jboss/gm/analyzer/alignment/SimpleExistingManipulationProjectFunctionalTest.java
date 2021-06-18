@@ -7,6 +7,7 @@ import java.util.Collection;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMRules;
@@ -48,11 +49,16 @@ public class SimpleExistingManipulationProjectFunctionalTest extends AbstractWir
 
     @Before
     public void setup() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
+        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json;charset=utf-8")
                         .withBody(readSampleDAResponse("simple-project-da-response.json"))));
+        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                        .withBody(readSampleDAResponse("simple-project-da-response-project.json"))));
         System.setProperty(Configuration.DA, "http://127.0.0.1:" + wireMockRule.port() + "/da/rest/v-1");
     }
 
@@ -84,7 +90,7 @@ public class SimpleExistingManipulationProjectFunctionalTest extends AbstractWir
         });
 
         // we care about how many calls are made to DA from an implementation perspective which is why we assert
-        verify(0, postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs")));
+        verify(0, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
     }
 
     @Test
@@ -122,6 +128,6 @@ public class SimpleExistingManipulationProjectFunctionalTest extends AbstractWir
         });
 
         // we care about how many calls are made to DA from an implementation perspective which is why we assert
-        verify(0, postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs")));
+        verify(0, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
     }
 }

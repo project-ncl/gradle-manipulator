@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.RestException;
 import org.jboss.gm.common.Configuration;
 import org.junit.Before;
@@ -40,16 +41,20 @@ public class DAAlignmentServiceWiremockTest {
 
     @Before
     public void setup() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
+        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json;charset=utf-8")
                         .withBody(readSampleDAResponse())));
+        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                        .withBody(readSampleDAProjectResponse())));
     }
 
     @Test
     public void alignmentWorksAsExpected() throws RestException {
-
         System.setProperty(Configuration.DA, String.format("http://localhost:%d/da/rest/v-1", PORT));
         final Configuration configuration = ConfigFactory.create(Configuration.class);
 
@@ -76,6 +81,14 @@ public class DAAlignmentServiceWiremockTest {
     private String readSampleDAResponse() throws URISyntaxException, IOException {
         return FileUtils.readFileToString(
                 Paths.get(DAAlignmentServiceWiremockTest.class.getClassLoader().getResource("sample-da-response.json")
+                        .toURI()).toFile(),
+                StandardCharsets.UTF_8.name());
+    }
+
+    private String readSampleDAProjectResponse() throws URISyntaxException, IOException {
+        return FileUtils.readFileToString(
+                Paths.get(DAAlignmentServiceWiremockTest.class.getClassLoader().getResource("sample-da-response-project" +
+                        ".json")
                         .toURI()).toFile(),
                 StandardCharsets.UTF_8.name());
     }

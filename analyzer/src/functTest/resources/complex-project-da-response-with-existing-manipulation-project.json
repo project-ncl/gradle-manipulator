@@ -1,0 +1,8 @@
+[
+  {
+    "latestVersion": "1.0.0.redhat-00003",
+    "version": "1.0.0",
+    "groupId": "org.jboss.gm.analyzer.functest",
+    "artifactId": "complex"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "latestVersion": "1.1.2-redhat-00003",
+    "version": "1.1.2",
+    "groupId": "org.acme",
+    "artifactId": "root"
+  },
+  {
+    "latestVersion": "1.1.2-redhat-00004",
+    "version": "1.1.2",
+    "groupId": "org.acme",
+    "artifactId": "subproject11"
+  },
+  {
+    "latestVersion": "1.1.2-redhat-00002",
+    "version": "1.1.2",
+    "groupId": "org.acme",
+    "artifactId": "subproject2"
+  },
+  {
+    "latestVersion": "1.1.2-redhat-00003",
+    "version": "1.1.2",
+    "groupId": "org.acme",
+    "artifactId": "subproject1"
+  }
+]

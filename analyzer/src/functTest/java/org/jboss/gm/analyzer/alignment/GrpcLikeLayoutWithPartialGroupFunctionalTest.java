@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
@@ -52,14 +53,16 @@ public class GrpcLikeLayoutWithPartialGroupFunctionalTest
     }
 
     private void stubDACall() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
-                .inScenario("multi-module")
-                .whenScenarioStateIs(com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED)
+        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("spring-like-layout-da-" + "root" + ".json")))
-                .willSetStateTo("project root called"));
+                        .withBody(readSampleDAResponse("spring-like-layout-da-root.json"))));
+        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                        .withBody(readSampleDAResponse("spring-like-layout-da-root-project.json"))));
     }
 
     @Test
@@ -95,6 +98,6 @@ public class GrpcLikeLayoutWithPartialGroupFunctionalTest
 
         });
 
-        verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs")));
+        verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
     }
 }

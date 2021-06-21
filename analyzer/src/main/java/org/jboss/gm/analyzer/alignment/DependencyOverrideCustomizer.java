@@ -86,7 +86,7 @@ public class DependencyOverrideCustomizer implements ResponseCustomizer {
         }
 
         if (!overrideMap.isEmpty()) {
-            logger.debug("Returning overrideMap of {} ", overrideMap);
+            logger.debug("Returning overrideMap of {}", overrideMap);
             result = new DependencyOverrideCustomizer(overrideMap);
         }
         // If null is returned this is filtered out in AlignmentServiceFactory::geResponseCustomizer with the filter

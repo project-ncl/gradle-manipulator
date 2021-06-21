@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.jboss.gm.common.Configuration;
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,11 +30,16 @@ public class InvalidProjectFunctionalTest extends AbstractWiremockTest {
 
     @Before
     public void setup() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
+        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json;charset=utf-8")
                         .withBody(readSampleDAResponse("invalid-project-da-response.json"))));
+        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                        .withBody(readSampleDAResponse("invalid-project-da-response-project.json"))));
 
         System.setProperty(Configuration.DA, "http://127.0.0.1:" + wireMockRule.port() + "/da/rest/v-1");
     }

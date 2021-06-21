@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
@@ -48,14 +49,16 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
     }
 
     private void stubDACall() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo("/da/rest/v-1/reports/lookup/gavs"))
-                .inScenario("multi-module")
-                .whenScenarioStateIs(com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED)
+        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("spring-like-layout-da-" + "root" + ".json")))
-                .willSetStateTo("project root called"));
+                        .withBody(readSampleDAResponse("spring-like-layout-da-root.json"))));
+        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                        .withBody(readSampleDAResponse("spring-like-layout-da-root-project.json"))));
     }
 
     @Test
@@ -81,7 +84,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
             });
         });
 
-        verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs")));
+        verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
     }
 
     @Test
@@ -115,7 +118,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
             });
         });
 
-        verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/reports/lookup/gavs")));
+        verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
         assertThat(systemOutRule.getLog()).contains("io.opentelemetry.exporters:opentelemetry-exporter-jaeger:0.17.0");
         assertThat(systemOutRule.getLog()).contains("io.opentelemetry:opentelemetry-bom:0.17.0");
     }

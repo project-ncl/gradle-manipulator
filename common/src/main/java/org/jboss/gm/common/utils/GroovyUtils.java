@@ -58,7 +58,7 @@ public class GroovyUtils {
             FileIO fileIO = new FileIO(galleyInfra);
 
             for (String script : scripts) {
-                logger.info("Attempting to read URL {} ", script);
+                logger.info("Attempting to read URL {}", script);
                 try {
                     groovyFiles.add(fileIO.resolveURL(script));
                 } catch (IOException e) {
@@ -82,7 +82,7 @@ public class GroovyUtils {
             final InvocationStage stage;
             final InvocationPoint invocationPoint = script.getClass().getAnnotation(InvocationPoint.class);
 
-            logger.info("For target stage {} attempting to invoke groovy script {} ", targetStage, scriptFile);
+            logger.info("For target stage {} attempting to invoke groovy script {}", targetStage, scriptFile);
             if (invocationPoint != null) {
                 logger.debug("InvocationPoint is {}", invocationPoint.invocationPoint());
                 stage = invocationPoint.invocationPoint();

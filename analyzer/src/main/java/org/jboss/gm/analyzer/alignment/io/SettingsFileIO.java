@@ -42,7 +42,7 @@ public final class SettingsFileIO {
             // Might not exist for a single project build.
             if (settingsGradle.exists()) {
                 List<String> lines = FileUtils.readLines(settingsGradle, Charset.defaultCharset());
-                logger.debug("Examining settings.gradle content {} ", lines);
+                logger.debug("Examining settings.gradle content {}", lines);
                 for (String line : lines) {
                     Matcher m = SETTINGS_ROOT_PROJECT.matcher(line);
                     if (m.find()) {
@@ -72,7 +72,7 @@ public final class SettingsFileIO {
         try {
             List<String> lines = FileUtils.readLines(gitConfig, Charset.defaultCharset());
 
-            logger.debug("Examining git config content {} ", lines);
+            logger.debug("Examining git config content {}", lines);
             for (String line : lines) {
                 Matcher matcher = SCM_URL_LINE_EXPR.matcher(line);
 

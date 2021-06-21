@@ -42,7 +42,7 @@ information.text = newContent
 
 Translator translator = gmeScript.getRESTAPI();
 ProjectVersionRef pvr = SimpleProjectVersionRef.parse("org.hibernate:hibernate-core:5.3.7.Final")
-Map<ProjectVersionRef, String> result = translator.translateVersions(Collections.singletonList(pvr))
+Map<ProjectVersionRef, String> result = translator.lookupVersions(Collections.singletonList(pvr))
 gmeScript.getLogger().warn("Alignment result is {}", result)
 File target = gmeScript.getProject().getBuildFile()
 newContent = target.text.replaceFirst("classpath \"org.hibernate:hibernate-core:5.3.7.Final",

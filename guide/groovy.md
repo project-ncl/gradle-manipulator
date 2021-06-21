@@ -86,9 +86,8 @@ The following API is made available:
 </td>
 </tr>
 </table>
-</table>
 
-| [getRESTAPI](https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-io/latest/org/commonjava/maven/ext/io/rest/Translator.html) getRESTAPI() | Get the REST Version Translator. |
+| [Translator](https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-io/latest/org/commonjava/maven/ext/io/rest/Translator.html) getRESTAPI() | Get the REST Version Translator. |
 
 
 When running as `FIRST` Gradle has not parsed and created the Project which means the `getModel`/`getProject` calls are not available. However it is possible to ammend the Gradle scripts directly on disk which will then be read as part of the following alignment process.

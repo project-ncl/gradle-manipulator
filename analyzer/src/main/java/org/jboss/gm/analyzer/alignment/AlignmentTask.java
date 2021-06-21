@@ -221,8 +221,8 @@ public class AlignmentTask extends DefaultTask {
             Project rootProject) throws ManipulationException, IOException {
         logger.info("Completed scanning {} projects; now processing for exclusions/REST/overrides...",
                 cache.getDependencies().size());
-        Set<ProjectVersionRef> allDeps = cache.getDependencies().values().stream()
-                .flatMap(m -> m.values().stream()).collect(Collectors.toSet());
+        final List<ProjectVersionRef> allDeps = cache.getDependencies().values().stream()
+                .flatMap(m -> m.values().stream()).collect(Collectors.toList());
 
         final AlignmentService alignmentService = AlignmentServiceFactory
                 .getAlignmentService(configuration, cache.getDependencies().keySet());
@@ -277,12 +277,11 @@ public class AlignmentTask extends DefaultTask {
 
         // groupId
         if (isEmpty(alignmentModel.getGroup())) {
-            List<String> candidates = cache.getModel().getChildren()
+            final Set<String> candidates = cache.getModel().getChildren()
                     .values()
                     .stream().map(ManipulationModel::getGroup)
                     .filter(StringUtils::isNotBlank)
-                    .distinct()
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toSet());
 
             logger.debug("Found potential candidates of {} to establish a groupId.", candidates);
             final String commonPrefix = StringUtils.stripEnd(StringUtils.getCommonPrefix(candidates
@@ -426,7 +425,7 @@ public class AlignmentTask extends DefaultTask {
 
                 logger.debug("Examining configuration {}", configuration.getName());
 
-                // using getAllDependencies here instead of getDependencies because the later
+                // using getAllDependencies here instead of getDependencies because the latter
                 // was returning an empty array for the root project of SpringLikeLayoutFunctionalTest
                 final DependencySet allDependencies = configuration.getAllDependencies();
                 final Set<ProjectDependency> allProjectDependencies = allDependencies
@@ -441,8 +440,8 @@ public class AlignmentTask extends DefaultTask {
 
                     if (defaultResolutionStrategy.getConflictResolution() == ConflictResolution.strict) {
                         // failOnVersionConflict() sets this which causes our plugin to crash out. Reset to latest to make an attempt
-                        // at continuing. As Gradle creates 'decorated' we can't use reflection to change the value back to the
-                        // default. Therefore use preferProjectModules as its not eager-fail.
+                        // at continuing. As Gradle creates 'decorated', we can't use reflection to change the value
+                        // back to the default. Therefore, use preferProjectModules as its not eager-fail.
                         logger.warn("Detected use of conflict resolution strategy strict ; resetting to preferProjectModules.");
                         defaultResolutionStrategy.preferProjectModules();
                     }
@@ -460,7 +459,7 @@ public class AlignmentTask extends DefaultTask {
                 LenientConfiguration lenient;
                 if (configuration
                         .getAllDependencyConstraints().stream()
-                        .noneMatch(d -> d instanceof DefaultProjectDependencyConstraint)) {
+                        .noneMatch(DefaultProjectDependencyConstraint.class::isInstance)) {
                     lenient = configuration.copyRecursive().getResolvedConfiguration().getLenientConfiguration();
                 } else {
                     logger.warn("DefaultProjectDependencyConstraint found ({}), not copying configuration",

@@ -68,7 +68,7 @@ public class DAAlignmentServiceWiremockTest {
                 Collections.singletonList(projectGav),
                 Stream.of(hibernateGav,
                         undertowGav,
-                        mockitoGav).collect(Collectors.toSet())));
+                        mockitoGav).collect(Collectors.toList())));
 
         assertThat(response).isNotNull().satisfies(r -> {
             assertThat(r.getNewProjectVersion()).isNull();

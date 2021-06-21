@@ -15,13 +15,19 @@ plugins {
     idea
     id("com.adarshr.test-logger") version "2.1.1"
     id("com.diffplug.gradle.spotless") version "3.25.0"
-    id("com.github.johnrengelman.shadow") version "5.2.0"
     id("com.gradle.plugin-publish") version "0.12.0"
     id("io.freefair.lombok") version "4.1.6" apply false
     id("net.linguica.maven-settings") version "0.5"
     id("net.researchgate.release") version "2.8.1"
     id("org.ajoberstar.grgit") version "4.1.0"
     id("org.kordamp.gradle.jacoco") version "0.42.1"
+
+    if ( org.gradle.util.GradleVersion.current().compareTo(org.gradle.util.GradleVersion.version("6.0")) < 0) {
+        id("com.github.johnrengelman.shadow") version "5.2.0"
+
+    } else {
+        id("com.github.johnrengelman.shadow") version "6.1.0"
+    }
 }
 
 apply(plugin = "net.researchgate.release")
@@ -119,7 +125,7 @@ if (isReleaseBuild && GradleVersion.current().version != "5.6.4") {
 subprojects {
     extra["assertjVersion"] = "3.19.0"
     extra["atlasVersion"] = "0.17.2"
-    extra["bytemanVersion"] = "4.0.13"
+    extra["bytemanVersion"] = "4.0.15"
     extra["commonsBeanVersion"] = "1.9.4"
     extra["commonsVersion"] = "2.6"
     extra["gradleVersion"] = "5.6.4"
@@ -227,6 +233,7 @@ subprojects {
                     attributes["Implementation-Version"] = "${project.version}"
                 }
             }
+            isZip64 = true
         }
 
         // configure publishing of the shadowJar

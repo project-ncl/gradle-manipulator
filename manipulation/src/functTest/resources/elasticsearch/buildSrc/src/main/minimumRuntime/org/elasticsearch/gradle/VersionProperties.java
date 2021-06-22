@@ -35,17 +35,19 @@ public class VersionProperties {
     }
 
     private static Properties getVersionProperties() {
-        Properties props = new Properties();
-        InputStream propsStream = VersionProperties.class.getResourceAsStream("/version.properties");
-        if (propsStream == null) {
-            throw new IllegalStateException("/version.properties resource missing");
-        }
-        try {
-            props.load(propsStream);
+        Properties versionProps = new Properties();
+
+        try (InputStream propsStream = VersionProperties.class.getResourceAsStream("/version.properties")) {
+            if (propsStream == null) {
+                throw new IllegalStateException("/version.properties resource missing");
+            }
+
+            versionProps.load(propsStream);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load version properties", e);
         }
-        return props;
+
+        return versionProps;
     }
 
     public static boolean isElasticsearchSnapshot() {

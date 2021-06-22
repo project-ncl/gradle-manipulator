@@ -2,6 +2,7 @@ package org.jboss.gm.cli;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.Properties;
 
@@ -121,7 +122,10 @@ public class DifferentJVMTest {
         FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
 
         Properties actualVersion = new Properties();
-        actualVersion.load(new FileReader(new File(root, "gradle.properties")));
+
+        try (Reader reader = new FileReader(new File(root, "gradle.properties"))) {
+            actualVersion.load(reader);
+        }
 
         Main m = new Main();
         String[] args = new String[] { "-t", projectRoot.getParentFile().getAbsolutePath(), "generateAlignmentMetadata",
@@ -171,7 +175,10 @@ public class DifferentJVMTest {
         FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
 
         Properties actualVersion = new Properties();
-        actualVersion.load(new FileReader(new File(root, "gradle.properties")));
+
+        try (Reader reader = new FileReader(new File(root, "gradle.properties"))) {
+            actualVersion.load(reader);
+        }
 
         Main m = new Main();
         String[] args = new String[] { "-t", projectRoot.getParentFile().getAbsolutePath(), "generateAlignmentMetadata",

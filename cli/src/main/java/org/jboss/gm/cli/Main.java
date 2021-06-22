@@ -3,6 +3,7 @@ package org.jboss.gm.cli;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -196,7 +197,7 @@ public class Main implements Callable<Void> {
             BuildLauncher build = connection.newBuild();
             Set<String> jvmArgs = jvmPropertyParams.entrySet().stream()
                     .map(entry -> "-D" + entry.getKey() + '=' + entry.getValue())
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
 
             if (colour && StringUtils.isEmpty(System.getenv("NO_COLOR"))) {
                 build.setColorOutput(true);

@@ -113,8 +113,8 @@ public class MainTest {
 
         Main m = new Main();
         String[] args = new String[] { "-t", projectRoot.getParentFile().getAbsolutePath(), "tasks",
-                "-DgroovyScripts=" + groovy.toString(),
-                "-DdependencyOverride.org.jboss.slf4j:*@*=" };
+                "-DdependencyOverride.org.jboss.slf4j:*@*=",
+                "-DgroovyScripts=" + groovy };
         m.run(args);
 
         assertTrue(systemOutRule.getLog().contains("Running Groovy script on"));
@@ -135,7 +135,7 @@ public class MainTest {
 
         Main m = new Main();
         String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "tasks",
-                "-DgroovyScripts=" + groovy.toString(),
+                "-DgroovyScripts=" + groovy,
                 "-DdependencyOverride.org.jboss.slf4j:*@*=",
                 "-Dmanipulation.disable=true" };
         m.run(args);
@@ -259,8 +259,8 @@ public class MainTest {
 
         Main m = new Main();
         String[] args = new String[] { "--no-colour", "-t", projectRoot.getParentFile().getAbsolutePath(), "tasks",
-                "-DgroovyScripts=" + groovy.toString(),
-                "-DdependencyOverride.org.jboss.slf4j:*@*=", "--no-colour" };
+                "-DdependencyOverride.org.jboss.slf4j:*@*=",
+                "-DgroovyScripts=" + groovy };
         m.run(args);
 
         assertTrue(systemOutRule.getLog().contains("Running Groovy script on"));
@@ -285,7 +285,7 @@ public class MainTest {
     }
 
     @Test
-    public void testGradleInvalidTarget2() throws IOException {
+    public void testGradleInvalidTarget2() {
         Main m = new Main();
         String[] args = new String[] { "-t", UUID.randomUUID().toString() };
         try {

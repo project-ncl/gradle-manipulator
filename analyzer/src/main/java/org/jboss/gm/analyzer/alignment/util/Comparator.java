@@ -14,13 +14,14 @@ import org.gradle.api.artifacts.UnresolvedDependency;
 public class Comparator {
 
     /**
-     * Determines whether the set contains the GAV from the UnresolvedDependency
+     * Determines whether the set contains the GAV from the {@link UnresolvedDependency}.
      *
-     * @param projectDependencies - the set of dependencies of examine.
-     * @param unresolvedDependency - the UnresolvedDependency to verify
-     * @return true if it does match.
+     * @param projectDependencies the set of dependencies of examine
+     * @param unresolvedDependency the UnresolvedDependency to verify
+     * @return true if it does match
      */
-    public static boolean contains(Set<ProjectDependency> projectDependencies, UnresolvedDependency unresolvedDependency) {
+    public static boolean contains(Set<ProjectDependency> projectDependencies,
+            UnresolvedDependency unresolvedDependency) {
         ModuleVersionSelector moduleVersionSelector = unresolvedDependency.getSelector();
         for (ProjectDependency projectDependency : projectDependencies) {
             if (StringUtils.equals(moduleVersionSelector.getGroup(), projectDependency.getGroup()) &&
@@ -33,11 +34,11 @@ public class Comparator {
     }
 
     /**
-     * Determines whether the set contains the GAV from the ResolvedDependency
+     * Determines whether the set contains the GAV from the {@link ResolvedDependency}.
      *
-     * @param projectDependencies - the set of dependencies of examine.
-     * @param dependency - the ResolvedDependency to verify
-     * @return true if it does match.
+     * @param projectDependencies the set of dependencies of examine
+     * @param dependency the ResolvedDependency to verify
+     * @return true if it does match
      */
     public static boolean contains(Set<ProjectDependency> projectDependencies, ResolvedDependency dependency) {
         for (ProjectDependency projectDependency : projectDependencies) {

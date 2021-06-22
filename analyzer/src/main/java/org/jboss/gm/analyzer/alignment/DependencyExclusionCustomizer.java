@@ -42,8 +42,8 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
 
     @Override
     public AlignmentService.Request customize(AlignmentService.Request request) {
-        final Set<ProjectVersionRef> dependenciesWithoutExclusions = request.getDependencies().stream()
-                .filter(predicate).collect(Collectors.toSet());
+        final List<ProjectVersionRef> dependenciesWithoutExclusions = request.getDependencies().stream()
+                .filter(predicate).collect(Collectors.toList());
 
         return new AlignmentService.Request(request.getProject(), dependenciesWithoutExclusions);
     }

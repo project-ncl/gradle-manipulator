@@ -51,8 +51,7 @@ public class DAAlignmentService implements AlignmentService {
             return new Response(Collections.emptyMap());
         }
 
-        // XXX: lookupVersions expects List, but AlignmentService.Request.getDependencies() returns Set
-        final List<ProjectVersionRef> vParams = new ArrayList<>(request.getDependencies());
+        final List<ProjectVersionRef> vParams = request.getDependencies();
 
         logger.debug("Passing {} GAVs into the REST client api {}", vParams.size(), vParams);
 

@@ -30,7 +30,7 @@ public class DependencyExclusionCustomizerTest {
         final DependencyExclusionCustomizer sut = new DependencyExclusionCustomizer(excludeHibernatePredicate);
 
         final AlignmentService.Request originalReq = new AlignmentService.Request(Collections.singletonList(project),
-                Stream.of(hibernateGav, undertowGav, mockitoGav).collect(Collectors.toSet()));
+                Stream.of(hibernateGav, undertowGav, mockitoGav).collect(Collectors.toList()));
         final AlignmentService.Request customizedReq = sut.customize(originalReq);
 
         assertThat(customizedReq).isNotNull().satisfies(r -> {

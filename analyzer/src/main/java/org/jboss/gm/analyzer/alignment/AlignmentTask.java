@@ -459,7 +459,7 @@ public class AlignmentTask extends DefaultTask {
                 LenientConfiguration lenient;
                 if (configuration
                         .getAllDependencyConstraints().stream()
-                        .noneMatch(DefaultProjectDependencyConstraint.class::isInstance)) {
+                        .noneMatch(d -> d instanceof DefaultProjectDependencyConstraint)) {
                     lenient = configuration.copyRecursive().getResolvedConfiguration().getLenientConfiguration();
                 } else {
                     logger.warn("DefaultProjectDependencyConstraint found ({}), not copying configuration",

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -82,12 +83,13 @@ public class GMEFunctionalTest extends AbstractWiremockTest {
                         .getParentFile().getParentFile().getParentFile().getParentFile().getParentFile(), ".git"),
                 new File(projectRoot, ".git"));
         File rootBuildFile = new File(projectRoot, "build.gradle.kts");
-        Stream<String> lines = Files.lines(rootBuildFile.toPath());
-        lines = lines.map(l -> l.replaceAll("(id[(]\"com.adarshr.test-logger)",
-                "id(\"org.jboss.gm.analyzer\") \n $1")).collect(Collectors.toList()).stream();
-
-        Files.write(rootBuildFile.toPath(), lines.map(l -> l.replaceAll("(apply[(]plugin = \"idea\")",
-                "apply(plugin = \"org.jboss.gm.analyzer\") \n $1")).collect(Collectors.toList()));
+        try (Stream<String> lines = Files.lines(rootBuildFile.toPath())) {
+            final List<String> linesList = lines.map(l -> l.replaceAll("(id[(]\"com.adarshr.test-logger)",
+                    "id(\"org.jboss.gm.analyzer\") \n $1")).map(l -> l.replaceAll("(apply[(]plugin = \"idea\")",
+                            "apply(plugin = \"org.jboss.gm.analyzer\") \n $1"))
+                    .collect(Collectors.toList());
+            Files.write(rootBuildFile.toPath(), linesList);
+        }
 
         final Map<String, String> map = new HashMap<>();
         map.put("overrideTransitive", "false");

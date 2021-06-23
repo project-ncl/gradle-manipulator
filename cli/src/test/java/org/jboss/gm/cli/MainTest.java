@@ -10,6 +10,8 @@ import java.util.Properties;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.gradle.api.logging.LogLevel;
 import org.jboss.gm.analyzer.alignment.AlignmentPlugin;
 import org.jboss.gm.common.model.ManipulationModel;
@@ -48,6 +50,14 @@ public class MainTest {
 
     @Rule
     public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
+
+    private String escapeBackslashes(String dir) {
+        if (SystemUtils.IS_OS_WINDOWS) {
+            return FilenameUtils.normalize(dir, true).replace("/", "\\\\\\\\");
+        }
+
+        return dir;
+    }
 
     @Test
     public void testGradleNotFound() throws IOException {
@@ -161,12 +171,14 @@ public class MainTest {
         final File initFile = tempDir.newFile();
         String init = FileUtils.readFileToString(new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
                 Charset.defaultCharset());
+        final String dir1 = escapeBackslashes(
+                new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent());
+        final String dir2 = escapeBackslashes(
+                new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent());
         init = init.replaceFirst("(mavenCentral[(][)])", "$1" +
-                "\n        flatDir {\n        dirs '" +
-                new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent() +
+                "\n        flatDir {\n            dirs '" + dir1 +
                 "'\n        }\n" +
-                "\n        flatDir {\n        dirs '" +
-                new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent() +
+                "\n        flatDir {\n            dirs '" + dir2 +
                 "'\n        }\n");
         System.out.println("Writing to " + initFile + ":" + init);
         FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
@@ -211,14 +223,16 @@ public class MainTest {
         // This hack-fest is because the development version is not in Maven Central so it won't be resolvable
         // This adds the compiled libraries as flat dir repositories.
         final File initFile = tempDir.newFile();
+        final String dir1 = escapeBackslashes(
+                new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent());
+        final String dir2 = escapeBackslashes(
+                new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent());
         String init = FileUtils.readFileToString(new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
                 Charset.defaultCharset());
         init = init.replaceFirst("(mavenCentral[(][)])", "$1" +
-                "\n        flatDir {\n        dirs '" +
-                new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent() +
+                "\n        flatDir {\n            dirs '" + dir1 +
                 "'\n        }\n" +
-                "\n        flatDir {\n        dirs '" +
-                new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent() +
+                "\n        flatDir {\n            dirs '" + dir2 +
                 "'\n        }\n");
         System.out.println("Writing to " + initFile + ":" + init);
         FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());

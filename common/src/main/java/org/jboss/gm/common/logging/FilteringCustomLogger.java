@@ -22,12 +22,6 @@ public class FilteringCustomLogger implements OutputEventListener {
             "org.gradle.launcher.daemon",
             "org.gradle.workers.internal.WorkerDaemonClientsManager");
 
-    private final List<String> acceptableCategories = Arrays.asList(
-            "org.gradle.api.Task",
-            "io.spring.gradle.dependencymanagement",
-            "org.jboss.gm", // Don't filter our own categories
-            "org.gradle.groovy");
-
     public static void enableFilter() {
         OutputEventListenerBackedLoggerContext context = (OutputEventListenerBackedLoggerContext) LoggerFactory
                 .getILoggerFactory();
@@ -42,12 +36,6 @@ public class FilteringCustomLogger implements OutputEventListener {
     public void onOutput(OutputEvent event) {
         LogEvent logEvent = (LogEvent) event;
         if (ignoreCategories.stream().noneMatch(i -> logEvent.getCategory().startsWith(i))) {
-            if (acceptableCategories.stream().noneMatch(i -> logEvent.getCategory().startsWith(i))) {
-                // Can't use logger to output a warning as causes stack overflow.
-                // TODO: Remove?
-                // System.err.println("Unknown event using category " + logEvent.getCategory() + " : ");
-                delegate.onOutput(event);
-            }
             delegate.onOutput(event);
         }
     }

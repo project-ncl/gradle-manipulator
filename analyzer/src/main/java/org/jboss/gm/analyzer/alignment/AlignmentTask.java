@@ -459,6 +459,7 @@ public class AlignmentTask extends DefaultTask {
                 LenientConfiguration lenient;
                 if (configuration
                         .getAllDependencyConstraints().stream()
+                        // Don't alter below to DefaultProjectDependencyConstraint.class::isInstance as breaks Gradle 4.10
                         .noneMatch(d -> d instanceof DefaultProjectDependencyConstraint)) {
                     lenient = configuration.copyRecursive().getResolvedConfiguration().getLenientConfiguration();
                 } else {

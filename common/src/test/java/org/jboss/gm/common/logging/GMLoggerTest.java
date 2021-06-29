@@ -11,6 +11,7 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TestRule;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class GMLoggerTest {
@@ -39,5 +40,10 @@ public class GMLoggerTest {
         assertTrue(systemOutRule.getLog().contains("[INFO] [org.jboss.gm.common.logging.GMLoggerTest]"));
         assertTrue(systemOutRule.getLog().contains("[INFO][GMLogger"));
         assertTrue(systemOutRule.getLog().contains("[DEBUG][GMLogger"));
+    }
+
+    @Test
+    public void checkContext() {
+        assertNotNull(FilteringCustomLogger.getContext());
     }
 }

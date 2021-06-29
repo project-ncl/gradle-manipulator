@@ -3,10 +3,13 @@ package org.jboss.gm.common.logging;
 import java.util.Arrays;
 import java.util.List;
 
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.gradle.api.logging.LogLevel;
 import org.gradle.internal.logging.events.LogEvent;
 import org.gradle.internal.logging.events.OutputEvent;
 import org.gradle.internal.logging.events.OutputEventListener;
 import org.gradle.internal.logging.slf4j.OutputEventListenerBackedLoggerContext;
+import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 
 public class FilteringCustomLogger implements OutputEventListener {
@@ -22,16 +25,22 @@ public class FilteringCustomLogger implements OutputEventListener {
             "org.gradle.launcher.daemon",
             "org.gradle.workers.internal.WorkerDaemonClientsManager");
 
-    private final List<String> acceptableCategories = Arrays.asList(
-            "org.gradle.api.Task",
-            "io.spring.gradle.dependencymanagement",
-            "org.jboss.gm", // Don't filter our own categories
-            "org.gradle.groovy");
-
     public static void enableFilter() {
-        OutputEventListenerBackedLoggerContext context = (OutputEventListenerBackedLoggerContext) LoggerFactory
-                .getILoggerFactory();
+        OutputEventListenerBackedLoggerContext context = getContext();
         context.setOutputEventListener(new FilteringCustomLogger(context.getOutputEventListener()));
+    }
+
+    public static OutputEventListenerBackedLoggerContext getContext() {
+        ILoggerFactory factory = LoggerFactory.getILoggerFactory();
+
+        if (factory instanceof OutputEventListenerBackedLoggerContext) {
+            return (OutputEventListenerBackedLoggerContext) factory;
+        } else {
+            // Don't think this can ever happen...
+            throw new ManipulationUncheckedException(
+                    "Internal LoggerFactory isn't a OutputEventListenerBackedLoggerContext ({})",
+                    factory.getClass());
+        }
     }
 
     private FilteringCustomLogger(OutputEventListener outputEventListener) {
@@ -42,13 +51,12 @@ public class FilteringCustomLogger implements OutputEventListener {
     public void onOutput(OutputEvent event) {
         LogEvent logEvent = (LogEvent) event;
         if (ignoreCategories.stream().noneMatch(i -> logEvent.getCategory().startsWith(i))) {
-            if (acceptableCategories.stream().noneMatch(i -> logEvent.getCategory().startsWith(i))) {
-                // Can't use logger to output a warning as causes stack overflow.
-                // TODO: Remove?
-                // System.err.println("Unknown event using category " + logEvent.getCategory() + " : ");
+            if (logEvent.getCategory().startsWith("org.commonjava.maven.ext")) {
+                delegate.onOutput(new LogEvent(logEvent.getTimestamp(), logEvent.getCategory(), LogLevel.LIFECYCLE,
+                        logEvent.getMessage(), logEvent.getThrowable()));
+            } else {
                 delegate.onOutput(event);
             }
-            delegate.onOutput(event);
         }
     }
 }

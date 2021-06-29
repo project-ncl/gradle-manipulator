@@ -1,6 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,9 @@ import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.io.rest.RestException;
 import org.commonjava.maven.ext.io.rest.Translator;
+import org.gradle.api.logging.LogLevel;
 import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.logging.FilteringCustomLogger;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.utils.RESTUtils;
 import org.slf4j.Logger;
@@ -50,13 +51,20 @@ public class DAAlignmentService implements AlignmentService {
             logger.warn("No dependencySource configured ; unable to call endpoint");
             return new Response(Collections.emptyMap());
         }
-
+        final LogLevel originalLevel = FilteringCustomLogger.getContext().getLevel();
         final List<ProjectVersionRef> vParams = request.getDependencies();
 
         logger.debug("Passing {} GAVs into the REST client api {}", vParams.size(), vParams);
 
-        final Map<ProjectVersionRef, String> vMap = restEndpoint.lookupVersions(vParams);
-
+        final Map<ProjectVersionRef, String> vMap;
+        try {
+            if (originalLevel == LogLevel.LIFECYCLE) {
+                FilteringCustomLogger.getContext().setLevel(LogLevel.INFO);
+            }
+            vMap = restEndpoint.lookupVersions(vParams);
+        } finally {
+            FilteringCustomLogger.getContext().setLevel(originalLevel);
+        }
         logger.info("REST Client returned: {}", vMap);
 
         final Response response = new Response(vMap);
@@ -66,7 +74,15 @@ public class DAAlignmentService implements AlignmentService {
         if (!pParams.isEmpty()) {
             logger.debug("Passing {} project GAVs into the REST client api {}", pParams.size(), pParams);
 
-            final Map<ProjectVersionRef, String> pMap = restEndpoint.lookupProjectVersions(pParams);
+            final Map<ProjectVersionRef, String> pMap;
+            try {
+                if (originalLevel == LogLevel.LIFECYCLE) {
+                    FilteringCustomLogger.getContext().setLevel(LogLevel.INFO);
+                }
+                pMap = restEndpoint.lookupProjectVersions(pParams);
+            } finally {
+                FilteringCustomLogger.getContext().setLevel(originalLevel);
+            }
 
             logger.info("REST Client returned for project versions: {}", pMap);
 

@@ -1,6 +1,7 @@
 package org.jboss.gm.cli;
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -198,6 +199,8 @@ public class Main implements Callable<Void> {
             Set<String> jvmArgs = jvmPropertyParams.entrySet().stream()
                     .map(entry -> "-D" + entry.getKey() + '=' + entry.getValue())
                     .collect(Collectors.toCollection(LinkedHashSet::new));
+            jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments().stream()
+                    .filter(s -> s.startsWith("-Xdebug") || s.startsWith("-Xrunjdwp")).collect(Collectors.toSet()));
 
             if (colour && StringUtils.isEmpty(System.getenv("NO_COLOR"))) {
                 build.setColorOutput(true);

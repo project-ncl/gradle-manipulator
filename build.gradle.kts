@@ -42,7 +42,7 @@ tasks {
     }
 }
 
-tasks.afterReleaseBuild { dependsOn(":analyzer:publish", ":manipulation:publish", ":cli:publish", ":analyzer:publishPlugins", ":manipulation:publishPlugins") }
+tasks.afterReleaseBuild { dependsOn(":common:publish", ":analyzer:publish", ":manipulation:publish", ":cli:publish", ":analyzer:publishPlugins", ":manipulation:publishPlugins") }
 
 // This was tasks.beforeReleaseBuild to hook into the release plugin system but we are manually handling the task ordering
 tasks.register("fixupReadme") {

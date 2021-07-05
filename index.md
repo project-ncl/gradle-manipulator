@@ -86,7 +86,7 @@ To obtain the CLI it may be downloaded from Maven Central [here](https://repo1.m
 If a development version is being used, the init script is placed during the build into
 `analyzer/build/resources/main/analyzer-init.gradle`. If a released version is being used, it is deployed as
 `analyzer-<version>-init.gradle`and may be found in Maven Central, i.e., for version 2.7,
-(https://repo1.maven.org/maven2/org/jboss/gm/analyzer/2.7/analyzer-2.7-init.gradle).
+[https://repo1.maven.org/maven2/org/jboss/gm/analyzer/2.7/analyzer-2.7-init.gradle](https://repo1.maven.org/maven2/org/jboss/gm/analyzer/2.7/analyzer-2.7-init.gradle).
 
 Now, by executing
 

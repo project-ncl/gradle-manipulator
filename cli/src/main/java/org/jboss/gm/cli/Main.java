@@ -20,7 +20,6 @@ import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.gradle.internal.Pair;
-import org.gradle.tooling.BuildException;
 import org.gradle.tooling.BuildLauncher;
 import org.gradle.tooling.GradleConnectionException;
 import org.gradle.tooling.GradleConnector;
@@ -217,19 +216,16 @@ public class Main implements Callable<Void> {
             build.setStandardOutput(System.out);
             build.setStandardError(System.err);
             build.run();
-        } catch (BuildException e) {
-            logger.error("Caught exception running build", e.getCause());
-            throw new ManipulationException("Caught exception running build", e.getCause());
-        } catch (GradleConnectionException e) {
+        } catch (RuntimeException e) {
             // Unable to do instanceof comparison due to different classloader
-            if (e.getCause().getClass().getName().equals("org.gradle.api.UncheckedIOException")) {
+            if (e.getCause() != null && "org.gradle.api.UncheckedIOException".equals(e.getCause().getClass().getName())) {
                 logger.debug("Hit https://github.com/gradle/gradle/issues/9339 ", e);
                 logger.error(
                         "Build exception but unable to transfer message due to mix of JDK versions. Examine log for problems");
             } else {
                 logger.error("Gradle connection exception", e);
             }
-            throw new ManipulationException("Problem executing build");
+            throw new ManipulationException("Problem executing build", e);
         }
     }
 

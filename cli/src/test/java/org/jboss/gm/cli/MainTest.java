@@ -14,6 +14,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.gradle.api.logging.LogLevel;
 import org.jboss.gm.analyzer.alignment.AlignmentPlugin;
+import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Rule;
@@ -249,13 +250,16 @@ public class MainTest {
                 "-DignoreUnresolvableDependencies=true",
                 "-DdependencyOverride.junit:junit@*=4.10"
         };
+
         try {
             m.run(args);
-            fail("No exception thrown");
         } catch (Exception e) {
-            assertTrue(e.getCause().getMessage().contains("must be configured in order for dependency scanning to work"));
+            // Ignored as exception can vary between gradle versions and systemErr should contain correct message
         }
-        assertTrue(systemErrRule.getLog().contains("'restURL' must be configured in order for dependency scanning to work"));
+
+        assertTrue(systemErrRule.getLog()
+                .contains("'" + Configuration.DA + "' must be configured in order for dependency scanning to work"));
+
         assertFalse(systemErrRule.getLog().contains(ANSIConstants.ESC_START));
     }
 

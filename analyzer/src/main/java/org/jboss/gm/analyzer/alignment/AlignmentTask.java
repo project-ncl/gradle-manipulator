@@ -51,7 +51,6 @@ import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
-import org.gradle.api.internal.artifacts.dependencies.DefaultProjectDependencyConstraint;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.publish.PublishingExtension;
@@ -102,6 +101,26 @@ public class AlignmentTask extends DefaultTask {
             return new AtomicBoolean();
         }
     };
+
+    /*
+     * While instanceof DefaultProjectDependencyConstraint works at run time under Gradle 4.10, it does not work at
+     * compile time as the class does not exist. Therefore, we need to use Class.forName().isInstance() in place of
+     * instanceof DefaultProjectDependencyConstraint.
+     */
+    private static final Class<?> DEPENDENCY_CONSTRAINT_CLASS;
+    private static final String DEPENDENCY_CONSTRAINT_CLASS_NAME = "org.gradle.api.internal.artifacts.dependencies.DefaultProjectDependencyConstraint";
+
+    static {
+        Class<?> dependencyConstraintClass;
+
+        try {
+            dependencyConstraintClass = Class.forName(DEPENDENCY_CONSTRAINT_CLASS_NAME);
+        } catch (ClassNotFoundException e) {
+            dependencyConstraintClass = null;
+        }
+
+        DEPENDENCY_CONSTRAINT_CLASS = dependencyConstraintClass;
+    }
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
@@ -396,7 +415,7 @@ public class AlignmentTask extends DefaultTask {
 
     private void updateAllExtraGradleFilesWithGmeRepos() throws IOException, ManipulationException {
         final File rootDir = getProject().getRootDir();
-        final File gradleScriptsDirectory = rootDir.toPath().resolve("gradle").toFile();
+        final File gradleScriptsDirectory = rootDir.toPath().resolve(GRADLE).toFile();
         if (!gradleScriptsDirectory.exists()) {
             return;
         }
@@ -414,6 +433,18 @@ public class AlignmentTask extends DefaultTask {
                 FileUtils.writeLines(extraGradleScript, result);
             }
         }
+    }
+
+    /**
+     * Determines whether the specified {@code Object} is assignment-compatible with {@code
+     * DefaultProjectDependencyConstraint}. This method performs the dynamic equivalent of {@code instanceof
+     * DefaultProjectDependencyConstraint}.
+     *
+     * @param obj the object to check
+     * @return true if the given object is an instance of {@code DefaultProjectDependencyConstraint}
+     */
+    private static boolean isDefaultProjectDependencyConstraint(Object obj) {
+        return DEPENDENCY_CONSTRAINT_CLASS != null && DEPENDENCY_CONSTRAINT_CLASS.isInstance(obj);
     }
 
     private Map<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(Project project, Configuration internalConfig,
@@ -459,8 +490,7 @@ public class AlignmentTask extends DefaultTask {
                 LenientConfiguration lenient;
                 if (configuration
                         .getAllDependencyConstraints().stream()
-                        // Don't alter below to DefaultProjectDependencyConstraint.class::isInstance as breaks Gradle 4.10
-                        .noneMatch(d -> d instanceof DefaultProjectDependencyConstraint)) {
+                        .noneMatch(AlignmentTask::isDefaultProjectDependencyConstraint)) {
                     lenient = configuration.copyRecursive().getResolvedConfiguration().getLenientConfiguration();
                 } else {
                     logger.warn("DefaultProjectDependencyConstraint found ({}), not copying configuration",

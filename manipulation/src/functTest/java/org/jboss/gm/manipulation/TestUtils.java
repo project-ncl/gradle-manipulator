@@ -18,15 +18,21 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.assertj.core.groups.Tuple;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.internal.Pair;
-import org.gradle.internal.SystemProperties;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.internal.DefaultGradleRunner;
 import org.jboss.gm.common.model.ManipulationModel;
 
+import static org.apache.commons.lang3.StringUtils.equalsAny;
+import static org.apache.commons.lang3.StringUtils.startsWithAny;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 public final class TestUtils {
+
+    private static final String[] PROPERTY_PREFIXES = { "java.", "user.", "sun." };
+
+    private static final String[] OTHER_PROPERTIES = { "file.separator", "line.separator", "os.arch", "os.name", "os.version",
+            "path.separator" };
 
     private TestUtils() {
     }
@@ -97,13 +103,15 @@ public final class TestUtils {
 
     static GradleRunner createGradleRunner() {
         Set<String> newKeys = new HashSet<>(System.getProperties().stringPropertyNames());
-        newKeys = (newKeys.stream().filter(k -> !(SystemProperties.getInstance().isStandardProperty(k) ||
-                k.startsWith("java.") || k.startsWith("sun.") || k.startsWith("user."))).collect(Collectors.toSet()));
 
-        List<String> jvmArgs = new ArrayList<>();
+        newKeys.removeIf(k -> startsWithAny(k, PROPERTY_PREFIXES) || equalsAny(k, OTHER_PROPERTIES));
+
+        List<String> jvmArgs = new ArrayList<>(newKeys.size() + 1);
+
         for (String a : newKeys) {
             jvmArgs.add("-D" + a + '=' + System.getProperty(a));
         }
+
         jvmArgs.add("-DgmeFunctionalTest=true"); // Used to indicate for the plugin to reinitialise the configuration.
 
         System.out.println("Will be using jvm args of " + jvmArgs);

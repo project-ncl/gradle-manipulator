@@ -16,6 +16,7 @@ import org.gradle.internal.Pair;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.testkit.runner.UnexpectedBuildFailure;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Rule;
@@ -27,6 +28,7 @@ import org.junit.rules.TestRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 public class SimpleProjectFunctionalTest {
 
@@ -41,6 +43,7 @@ public class SimpleProjectFunctionalTest {
 
     @Test
     public void ignoreMissingManipulationFile() throws IOException, URISyntaxException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
 
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         TestUtils.copyDirectory("simple-project", simpleProjectRoot);
@@ -60,6 +63,7 @@ public class SimpleProjectFunctionalTest {
 
     @Test
     public void testDisableGME() throws IOException, URISyntaxException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
 
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         TestUtils.copyDirectory("simple-project", simpleProjectRoot);
@@ -78,6 +82,8 @@ public class SimpleProjectFunctionalTest {
 
     @Test
     public void ensureProperPomGenerated() throws IOException, URISyntaxException, XmlPullParserException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
+
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         TestUtils.copyDirectory("simple-project", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
@@ -107,6 +113,8 @@ public class SimpleProjectFunctionalTest {
 
     @Test
     public void ensureDocs() throws IOException, URISyntaxException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
+
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         TestUtils.copyDirectory("simple-project", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
@@ -126,6 +134,8 @@ public class SimpleProjectFunctionalTest {
 
     @Test
     public void ensurePublish() throws IOException, URISyntaxException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
+
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         TestUtils.copyDirectory("simple-project", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
@@ -161,6 +171,8 @@ public class SimpleProjectFunctionalTest {
 
     @Test
     public void enforceDeployPluginThatWasAlreadyConfigured() throws Exception {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
+
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         TestUtils.copyDirectory("simple-project", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
@@ -181,6 +193,8 @@ public class SimpleProjectFunctionalTest {
 
     @Test(expected = UnexpectedBuildFailure.class)
     public void enforceDifferentDeployPluginThanConfigured() throws Exception {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
+
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
         TestUtils.copyDirectory("simple-project", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();

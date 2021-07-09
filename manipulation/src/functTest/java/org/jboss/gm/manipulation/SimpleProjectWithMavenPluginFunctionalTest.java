@@ -59,7 +59,6 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
                 .withArguments("uploadArchives", "--stacktrace", "--info")
                 .withPluginClasspath()
                 .forwardOutput()
-                .forwardOutput()
                 .build();
         assertThat(buildResult.task(":install").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
         assertThat(buildResult.task(":uploadArchives").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);

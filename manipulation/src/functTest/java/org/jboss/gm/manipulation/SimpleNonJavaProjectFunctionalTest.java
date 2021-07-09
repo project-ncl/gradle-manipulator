@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
+import org.gradle.util.GradleVersion;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
@@ -14,6 +15,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 public class SimpleNonJavaProjectFunctionalTest {
 
@@ -28,6 +30,8 @@ public class SimpleNonJavaProjectFunctionalTest {
 
     @Test
     public void ensurePublish() throws IOException, URISyntaxException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
+
         final File simpleProjectRoot = tempDir.newFolder("simple-non-java-project");
         TestUtils.copyDirectory("simple-non-java-project", simpleProjectRoot);
         assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();

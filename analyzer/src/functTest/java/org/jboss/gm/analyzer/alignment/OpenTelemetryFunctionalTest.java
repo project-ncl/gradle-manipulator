@@ -8,6 +8,7 @@ import java.util.Collections;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.FileUtils;
@@ -28,6 +29,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
 
@@ -42,7 +44,6 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
 
     @Before
     public void setup() throws IOException, URISyntaxException {
-
         stubDACall();
 
         System.setProperty(Configuration.DA, "http://127.0.0.1:" + wireMockRule.port() + "/da/rest/v-1");
@@ -63,6 +64,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void verifyOpenTelemetryGradle() throws IOException, URISyntaxException, ManipulationException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
 
         final File projectRoot = tempDir.newFolder("opentelemetry");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
@@ -89,6 +91,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void verifyOpenTelemetryKotlin() throws IOException, URISyntaxException, ManipulationException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
 
         final File projectRoot = tempDir.newFolder("opentelemetry-kotlin");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(),

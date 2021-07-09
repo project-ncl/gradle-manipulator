@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
+import org.gradle.util.GradleVersion;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
@@ -19,6 +20,7 @@ import org.junit.rules.TestRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 public class KafkaProjectWithMavenPluginFunctionalTest {
 
@@ -36,6 +38,8 @@ public class KafkaProjectWithMavenPluginFunctionalTest {
 
     @Test
     public void verifyProjectNamingOverrides() throws IOException, URISyntaxException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.2")) >= 0);
+
         // this makes gradle use the set property as maven local directory
         // we do this in order to avoid polluting the maven local and also be absolutely sure
         // that no prior invocations affect the execution
@@ -62,8 +66,8 @@ public class KafkaProjectWithMavenPluginFunctionalTest {
         File repoPathToPom = pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile();
         assertTrue(systemOutRule.getLog().contains(
                 "Located archivesBaseName override ; forcing project name to 'connect-runtime' from 'runtime' for correct usage"));
-        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile().exists()).isTrue();
-        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar").toFile().exists()).isTrue();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
         assertThat(FileUtils.readFileToString(repoPathToPom, Charset.defaultCharset()))
                 .contains("artifactId>connect-transforms");
     }

@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
 import org.junit.Before;
@@ -31,6 +32,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 public class GMEFunctionalTest extends AbstractWiremockTest {
 
@@ -45,7 +47,6 @@ public class GMEFunctionalTest extends AbstractWiremockTest {
 
     @Before
     public void setup() throws IOException, URISyntaxException {
-
         stubDACall();
 
         System.setProperty(Configuration.DA, "http://127.0.0.1:" + wireMockRule.port() + "/da/rest/v-1");
@@ -67,6 +68,7 @@ public class GMEFunctionalTest extends AbstractWiremockTest {
     @Test
     @SuppressWarnings("ConstantConditions")
     public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
 
         final File projectRoot = tempDir.newFolder("gme-like-project");
 

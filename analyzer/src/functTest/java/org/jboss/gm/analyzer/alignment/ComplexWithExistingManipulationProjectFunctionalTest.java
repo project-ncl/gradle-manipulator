@@ -9,6 +9,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.FileUtils;
@@ -28,6 +29,7 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.Assume.assumeTrue;
 
 public class ComplexWithExistingManipulationProjectFunctionalTest extends AbstractWiremockTest {
 
@@ -60,8 +62,9 @@ public class ComplexWithExistingManipulationProjectFunctionalTest extends Abstra
     @Test
     // Note : if this test has started failing check the latest version of undertow on
     // http://central.maven.org/maven2/io/undertow/undertow-core/
-    public void ensureAlignmentFileCreated()
-            throws IOException, URISyntaxException, ManipulationException {
+    public void ensureAlignmentFileCreated() throws IOException, URISyntaxException, ManipulationException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
+
         final File projectRoot = tempDir.newFolder("complex-project-with-existing-manipulation");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 

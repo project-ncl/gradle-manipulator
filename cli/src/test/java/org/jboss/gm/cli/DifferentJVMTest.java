@@ -14,10 +14,10 @@ import org.codehaus.plexus.archiver.tar.TarGZipUnArchiver;
 import org.codehaus.plexus.logging.console.ConsoleLoggerManager;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.api.logging.LogLevel;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.AlignmentPlugin;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.rules.LoggingRule;
-import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Rule;
@@ -30,6 +30,7 @@ import org.junit.runners.MethodSorters;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DifferentJVMTest {
@@ -97,7 +98,7 @@ public class DifferentJVMTest {
 
     @Test
     public void runWithDefaultJDK() throws Exception {
-        Assume.assumeTrue(SystemUtils.IS_OS_LINUX);
+        assumeTrue(SystemUtils.IS_OS_LINUX);
 
         final File target = tempDir.newFolder();
         final File source = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
@@ -150,7 +151,7 @@ public class DifferentJVMTest {
 
     @Test
     public void runWithJDK8() throws Exception {
-        Assume.assumeTrue(SystemUtils.IS_OS_LINUX);
+        assumeTrue(SystemUtils.IS_OS_LINUX);
 
         final File target = tempDir.newFolder();
         final File source = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
@@ -205,7 +206,7 @@ public class DifferentJVMTest {
 
     @Test
     public void runWithJDK8Fails() throws Exception {
-        Assume.assumeTrue(SystemUtils.IS_OS_LINUX);
+        assumeTrue(SystemUtils.IS_OS_LINUX);
 
         final File target = tempDir.newFolder();
         final File source = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());

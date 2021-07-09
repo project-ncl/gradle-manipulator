@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
+import org.gradle.util.GradleVersion;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
@@ -26,6 +27,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 @RunWith(BMUnitRunner.class)
 public class CruiseControlFunctionalTest extends AbstractWiremockTest {
@@ -57,6 +59,8 @@ public class CruiseControlFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void ensureAlignmentFileCreated() throws IOException, URISyntaxException, ManipulationException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
+
         final File projectRoot = tempDir.newFolder("cruise-control");
 
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());

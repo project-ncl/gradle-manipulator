@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
+import org.gradle.util.GradleVersion;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
@@ -25,6 +26,7 @@ import org.junit.rules.TestRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 public class ManifestVerificationFunctionalTest {
     private static final String ARTIFACT_NAME = "mongodb-driver-core-4.1.0.temporary-redhat-00001";
@@ -41,7 +43,6 @@ public class ManifestVerificationFunctionalTest {
 
     @Test
     public void verifyThriftManifest() throws IOException, URISyntaxException {
-
         final File m2Directory = tempDir.newFolder(".m2");
         System.setProperty("maven.repo.local", m2Directory.getAbsolutePath());
 
@@ -116,6 +117,8 @@ public class ManifestVerificationFunctionalTest {
 
     @Test
     public void verifyReactiveManifest() throws IOException, URISyntaxException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("6.0")) < 0);
+
         final File m2Directory = tempDir.newFolder(".m2");
         System.setProperty("maven.repo.local", m2Directory.getAbsolutePath());
 
@@ -128,7 +131,6 @@ public class ManifestVerificationFunctionalTest {
 
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(projectRoot)
-                .withGradleVersion("5.6.4")
                 //.withDebug(true)
                 .withArguments("uploadArchives", "--info")
                 .withPluginClasspath()

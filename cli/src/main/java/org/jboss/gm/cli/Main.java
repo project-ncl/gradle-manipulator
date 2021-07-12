@@ -65,7 +65,9 @@ public class Main implements Callable<Void> {
     @Option(names = "--trace", description = "Enable trace.")
     private boolean trace;
 
-    @Option(names = { "-t", "--target" }, required = true, description = "Target Gradle directory.")
+    @Option(names = { "-t", "--target" },
+            description = "Target Gradle directory (default: ${DEFAULT-VALUE}).",
+            defaultValue = "${sys:user.dir}")
     private File target;
 
     @SuppressWarnings({ "MismatchedQueryAndUpdateOfCollection", "FieldMayBeFinal" })

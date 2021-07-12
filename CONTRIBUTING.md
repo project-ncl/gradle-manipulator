@@ -31,7 +31,7 @@ The documentation for the project can be found [here](https://project-ncl.github
 ### IDE Config and Code Style
 
 This project has a strictly enforced code style. Code formatting is done by the Eclipse code formatter, using the config files
-found in the `ide-config` directory. By default when you run `./gradlew build` the code will be formatted automatically.
+found in the `ide-config` directory. By default, when you run `./gradlew build` the code will be formatted automatically.
 
 #### Eclipse Setup
 
@@ -54,19 +54,19 @@ select the `eclipse.importorder` file as the import order config file.
 
 #### Logging
 
-The tooling overrides the logging to support integration into ProjectNCL. Therefore to retrieve a standard Gradle logger instance do :
+The tooling overrides the logging to support integration into ProjectNCL. Therefore, to retrieve a standard Gradle logger instance, do:
 
 ```java
      org.gradle.api.logging.Logger logger = org.jboss.gm.common.logging.GMLogger.getLogger(getClass());
 ```
 The Gradle logger interface extends `org.slf4j.Logger`. It is recommended to use `info` and `debug` categories as appropriate.
 
-During tests it may be useful to retrieve logging output. The following rule will capture output for examination:
+During tests, it may be useful to retrieve logging output. The following rule will capture output for examination:
 ``
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 ``
-Due to how the Gradle logging system initialises outside of the TestKit the unit tests may not output logging as the Gradle logging defaults to LIFECYCLE level by default. Therefore a new Logging rule has been provided which can configure the logging level on a per test basis.
+Due to how the Gradle logging system initialises outside of the TestKit, the unit tests may not output logging as the Gradle logging defaults to LIFECYCLE level by default. Therefore, a new Logging rule has been provided which can configure the logging level on a per test basis.
 ```
     @Rule
     public final LoggingRule loggingRule = new LoggingRule(LogLevel.INFO);
@@ -75,7 +75,7 @@ Due to how the Gradle logging system initialises outside of the TestKit the unit
 #### Exceptions
 
 * Internal code may use checked exceptions such as `ManipulationException`.
-* All external invocation points cannot throw a checked exception so must use an unchecked exception (e.g. `ManipulationUncheckedException`.
+* All external invocation points cannot throw a checked exception, so they must use an unchecked exception (e.g., `ManipulationUncheckedException`).
 * The `org.gradle.api.InvalidUserDataException` can be used for configuration errors.
 * Avoid throwing `RuntimeException` ; rather, use a more explicit exception.
 
@@ -83,7 +83,7 @@ Due to how the Gradle logging system initialises outside of the TestKit the unit
 
 The [test runner](https://docs.gradle.org/current/userguide/test_kit.html) may be used for functional testing. Note that it is
 recommended that `withDebug(true)` is **not** used in the manipulator sub-module by default but just enabled as required. This is because debug runs
-in-process which can lead to some strange side affects.
+in-process which can lead to some strange side effects.
 
 To pass specific property / environment variables through the following pattern should be followed (which will also work when
 using single-test debugging):
@@ -139,7 +139,7 @@ If you wish to build excluding all tests and functional tests, use
 gradle clean publishToMavenLocal -x test -x functionalTest
 ```
 
-You may run only certain tests, e.g., the tests in a class named `TestClass`, using
+You may run only certain tests (e.g., the tests in a class named `TestClass`) using
 
 ```
 gradle test --tests TestClass
@@ -188,7 +188,7 @@ signing.gnupg.keyName=someKey
 signing.passphrase=pass
 ```
 
-Note: By default the signing is configured to use GPG. It will automatically look for the `gpg2` executable. On Fedora systems this is normally a symbolic link e.g.
+Note: By default the signing is configured to use GPG. It will automatically look for the `gpg2` executable. On Fedora systems this is normally a symbolic link, e.g.,
 ```
     /usr/bin/gpg*
     /usr/bin/gpg2 -> gpg*
@@ -212,7 +212,7 @@ The plugins can be released using the following command (from the master branch 
 
 The command will both publish the plugin to the Gradle Plugin Portal and to Maven Central.
 
-Note: It is **very** important to execute this exact command when releasing. Adding other tasks (e.g. `clean`) can cause the release to fail, or even worse leave the release in an inconsistent state. If `clean` is needed run it separately before the main command. If a release needs to be rolled back the following must be checked and cleaned up:
+Note: It is **very** important to execute this exact command when releasing. Adding other tasks (e.g., `clean`) can cause the release to fail, or even worse leave the release in an inconsistent state. If `clean` is needed, run it separately before the main command. If a release needs to be rolled back the following must be checked and cleaned up:
 
 * Gradle Plugins Portal (https://plugins.gradle.org/)
 * Sonatype Staging (https://oss.sonatype.org/#stagingRepositories)
@@ -236,7 +236,7 @@ To change the version that will be deployed just add `-Pversion=whatever`.
 
 #### Releasing SNAPSHOT version
 
-The artifacts can be pushed to the Sonatype snapshot repository (e.g. https://oss.sonatype.org/content/repositories/snapshots/org/jboss/gm/analyzer/analyzer/) wit the following command:
+The artifacts can be pushed to the Sonatype snapshot repository (e.g., https://oss.sonatype.org/content/repositories/snapshots/org/jboss/gm/analyzer/analyzer/) with the following command:
 
     gradle publishAllPublicationsToSonatype-nexus-snapshotsRepository
 

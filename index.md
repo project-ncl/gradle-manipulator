@@ -13,7 +13,10 @@ Two plugins make up the extension, the `analyzer` plugin and the `manipulation` 
 The job of the `analyzer` plugin is to generate a metadata file that contains altered dependencies for each project of a Gradle Project.
 The file is then meant to be used by the `manipulation` plugin to enforce the versions of the dependencies that are captured in the metadata file.
 
-The metadata file is named `manipulation.json` and is created by the `generateAlignmentMetadata` task of the `alignment` plugin in the root directory of the target Gradle project.
+The metadata file is named `manipulation.json` and is created by the `generateAlignmentMetadata` task of the `alignment` plugin in the root directory of the target Gradle project. The file is in JSON format, may be read and written through [this](https://www.javadoc.io/static/org.jboss.gm/common/2.8/org/jboss/gm/common/io/ManipulationIO.html) utility class. The Java source may be found [here](https://github.com/project-ncl/gradle-manipulator/blob/master/common/src/main/java/org/jboss/gm/common/model/ManipulationModel.java) and the documentation is [here](https://www.javadoc.io/doc/org.jboss.gm/common/latest/org/jboss/gm/common/model/ManipulationModel.html). An example from the functional tests of the `manipulation.json` is [here](https://github.com/project-ncl/gradle-manipulator/blob/master/manipulation/src/functTest/resources/simple-project/manipulation.json).
+
+
+
 
 ### Usage
 

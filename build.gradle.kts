@@ -24,7 +24,6 @@ plugins {
 
     if ( org.gradle.util.GradleVersion.current().compareTo(org.gradle.util.GradleVersion.version("6.0")) < 0) {
         id("com.github.johnrengelman.shadow") version "5.2.0"
-
     } else {
         id("com.github.johnrengelman.shadow") version "6.1.0"
     }
@@ -200,10 +199,12 @@ subprojects {
          * https://github.com/johnrengelman/shadow/blob/master/build.gradle
          */
 
-        // make build task depend on shadowJar
-        val build: DefaultTask by tasks
-        val shadowJar = tasks["shadowJar"] as ShadowJar
-        build.dependsOn(shadowJar)
+        // make assemble/build task depend on shadowJar
+        tasks {
+            assemble {
+                dependsOn(shadowJar)
+            }
+        }
 
         tasks.withType<ShadowJar> {
             // ensure that a single jar is built which is the shadowed one
@@ -221,6 +222,7 @@ subprojects {
                 exclude(dependency("org.aeonbits.owner:.*:.*"))
                 exclude(dependency("org.slf4j:.*:.*"))
                 exclude(dependency("org.apache.maven:.*:.*"))
+                exclude(dependency("com.konghq:.*:.*"))
             }
             doFirst {
                 manifest {

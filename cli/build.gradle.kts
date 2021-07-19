@@ -39,4 +39,8 @@ tasks {
             attributes["Main-Class"] = "org.jboss.gm.cli.Main"
         }
     }
+
+     "test" {
+         dependsOn(":analyzer:assemble")
+     }
 }

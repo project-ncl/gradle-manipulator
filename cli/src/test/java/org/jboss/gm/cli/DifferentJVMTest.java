@@ -41,7 +41,7 @@ public class DifferentJVMTest {
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
-    public final SystemErrRule systemErrRule = new SystemErrRule().enableLog().muteForSuccessfulTests();
+    public final SystemErrRule systemErrRule = new SystemErrRule().enableLog();
 
     @Rule
     public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
@@ -111,14 +111,18 @@ public class DifferentJVMTest {
         final File initFile = tempDir.newFile();
         String init = FileUtils.readFileToString(new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
                 Charset.defaultCharset());
-        init = init.replaceFirst("(mavenCentral[(][)])", "$1" +
+        init = init.replaceFirst("(?s)mavenLocal.*snapshots\"\\n\\s+[}]",
                 "\n        flatDir {\n        dirs '" +
-                new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent() +
-                "'\n        }\n" +
-                "\n        flatDir {\n        dirs '" +
-                new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent() +
-                "'\n        }\n");
-        System.out.println("Writing to " + initFile + ":" + init);
+                        new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().getPath())
+                                .getParent()
+                        +
+                        "'\n        }\n" +
+                        "\n        flatDir {\n        dirs '" +
+                        new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().getPath())
+                                .getParent()
+                        +
+                        "'\n        }\n");
+        System.err.println("Writing to " + initFile + ":" + init);
         FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
 
         Properties actualVersion = new Properties();
@@ -164,14 +168,18 @@ public class DifferentJVMTest {
         final File initFile = tempDir.newFile();
         String init = FileUtils.readFileToString(new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
                 Charset.defaultCharset());
-        init = init.replaceFirst("(mavenCentral[(][)])", "$1" +
+        init = init.replaceFirst("(?s)mavenLocal.*snapshots\"\\n\\s+[}]",
                 "\n        flatDir {\n        dirs '" +
-                new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent() +
-                "'\n        }\n" +
-                "\n        flatDir {\n        dirs '" +
-                new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent() +
-                "'\n        }\n");
-        System.out.println("Writing to " + initFile + ":" + init);
+                        new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().getPath())
+                                .getParent()
+                        +
+                        "'\n        }\n" +
+                        "\n        flatDir {\n        dirs '" +
+                        new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().getPath())
+                                .getParent()
+                        +
+                        "'\n        }\n");
+        System.err.println("Writing to " + initFile + ":" + init);
         FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
 
         Properties actualVersion = new Properties();
@@ -186,7 +194,7 @@ public class DifferentJVMTest {
                 "-DdependencySource=NONE",
                 "-DignoreUnresolvableDependencies=true",
                 "-DdependencyOverride.junit:junit@*=4.10",
-                "-Dorg.gradle.java.home=" + jdk8.toString(),
+                "-Dorg.gradle.java.home=" + jdk8,
                 "--info"
         };
         m.run(args);
@@ -219,14 +227,18 @@ public class DifferentJVMTest {
         final File initFile = tempDir.newFile();
         String init = FileUtils.readFileToString(new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
                 Charset.defaultCharset());
-        init = init.replaceFirst("(mavenCentral[(][)])", "$1" +
+        init = init.replaceFirst("(?s)mavenLocal.*snapshots\"\\n\\s+[}]",
                 "\n        flatDir {\n        dirs '" +
-                new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent() +
-                "'\n        }\n" +
-                "\n        flatDir {\n        dirs '" +
-                new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParent() +
-                "'\n        }\n");
-        System.out.println("Writing to " + initFile + ":" + init);
+                        new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().getPath())
+                                .getParent()
+                        +
+                        "'\n        }\n" +
+                        "\n        flatDir {\n        dirs '" +
+                        new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().getPath())
+                                .getParent()
+                        +
+                        "'\n        }\n");
+        System.err.println("Writing to " + initFile + ":" + init);
         FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
 
         Main m = new Main();

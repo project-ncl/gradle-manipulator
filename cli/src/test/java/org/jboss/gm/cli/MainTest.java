@@ -40,7 +40,7 @@ public class MainTest {
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
-    public final SystemErrRule systemErrRule = new SystemErrRule().enableLog().muteForSuccessfulTests();
+    public final SystemErrRule systemErrRule = new SystemErrRule().enableLog();
 
     @Rule
     public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
@@ -175,12 +175,12 @@ public class MainTest {
                 new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent());
         final String dir2 = escapeBackslashes(
                 new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent());
-        init = init.replaceFirst("(mavenCentral[(][)])", "$1" +
+        init = init.replaceFirst("(?s)mavenLocal.*snapshots\"\\n\\s+[}]",
                 "\n        flatDir {\n            dirs '" + dir1 +
-                "'\n        }\n" +
-                "\n        flatDir {\n            dirs '" + dir2 +
-                "'\n        }\n");
-        System.out.println("Writing to " + initFile + ":" + init);
+                        "'\n        }\n" +
+                        "\n        flatDir {\n            dirs '" + dir2 +
+                        "'\n        }\n");
+        System.err.println("Writing to " + initFile + ":" + init);
         FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
 
         Properties actualVersion = new Properties();
@@ -202,7 +202,7 @@ public class MainTest {
         File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), "gme.gradle");
         assertTrue(systemOutRule.getLog().contains("Task :generateAlignmentMetadata"));
 
-        System.out.println("Verifying it has injected gme.gradle with version " + actualVersion.getProperty("version"));
+        System.err.println("Verifying it has injected gme.gradle with version " + actualVersion.getProperty("version"));
         assertTrue(gmeGradle.exists());
         assertTrue(FileUtils.readFileToString(gmeGradle, Charset.defaultCharset())
                 .contains("org.jboss.gm:manipulation:" + actualVersion.getProperty("version")));
@@ -229,12 +229,12 @@ public class MainTest {
                 new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent());
         String init = FileUtils.readFileToString(new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
                 Charset.defaultCharset());
-        init = init.replaceFirst("(mavenCentral[(][)])", "$1" +
+        init = init.replaceFirst("(?s)mavenLocal.*snapshots\"\\n\\s+[}]",
                 "\n        flatDir {\n            dirs '" + dir1 +
-                "'\n        }\n" +
-                "\n        flatDir {\n            dirs '" + dir2 +
-                "'\n        }\n");
-        System.out.println("Writing to " + initFile + ":" + init);
+                        "'\n        }\n" +
+                        "\n        flatDir {\n            dirs '" + dir2 +
+                        "'\n        }\n");
+        System.err.println("Writing to " + initFile + ":" + init);
         FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
 
         Properties actualVersion = new Properties();

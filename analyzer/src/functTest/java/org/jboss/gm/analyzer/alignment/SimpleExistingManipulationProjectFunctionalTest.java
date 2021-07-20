@@ -120,7 +120,7 @@ public class SimpleExistingManipulationProjectFunctionalTest extends AbstractWir
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
             assertThat(am.getName()).isEqualTo("root");
             assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
-                assertThat(root.getVersion()).isEqualTo(null);
+                assertThat(root.getVersion()).isNull();
                 assertThat(root.getName()).isEqualTo("root");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
                 assertThat(alignedDependencies).isEmpty();

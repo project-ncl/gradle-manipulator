@@ -12,6 +12,7 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.FileUtils;
@@ -29,6 +30,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.Assume.assumeTrue;
 
 public class VersionConflictProjectFunctionalTest extends AbstractWiremockTest {
 
@@ -59,6 +61,9 @@ public class VersionConflictProjectFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void validateResolutionStrategy() throws IOException, URISyntaxException, ManipulationException {
+        // XXX: Use of pluginManagement.plugins{}
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.6")) >= 0);
+
         final File projectRoot = tempDir.newFolder("version-conflict");
 
         final Map<String, String> map = new HashMap<>();
@@ -91,6 +96,9 @@ public class VersionConflictProjectFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void validateTransitiveDisabledAndShadow() throws IOException, URISyntaxException {
+        // XXX: Use of pluginManagement.plugins{}
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.6")) >= 0);
+
         final File projectRoot = tempDir.newFolder("version-conflict");
 
         final Map<String, String> map = new HashMap<>();
@@ -105,6 +113,9 @@ public class VersionConflictProjectFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void validateTransitiveEnabledAndShadow() throws IOException, URISyntaxException, ManipulationException {
+        // XXX: Use of pluginManagement.plugins{}
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.6")) >= 0);
+
         final File projectRoot = tempDir.newFolder("version-conflict");
 
         final Map<String, String> map = new HashMap<>();

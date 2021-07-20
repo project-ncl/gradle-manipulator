@@ -52,8 +52,8 @@ public class InvalidProjectFunctionalTest extends AbstractWiremockTest {
             TestUtils.align(projectRoot, projectRoot.getName(), true);
             fail("No exception thrown");
         } catch (ManipulationUncheckedException e) {
-            assertThat(e.getMessage().contains(
-                    "For configuration compile; unable to resolve all dependencies: [io.undertow:undertow-core:2.0+, org.apache.commons:commons-lang3:3.8.1.redhat-3]"));
+            assertThat(e.getMessage()).contains(
+                    "For configuration compile; unable to resolve all dependencies: [io.undertow:undertow-core:2.0+, org.apache.commons:commons-lang3:3.8.1.redhat-3]");
         }
     }
 }

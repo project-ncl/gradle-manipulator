@@ -16,6 +16,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.FileUtils;
@@ -35,6 +36,7 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.Assume.assumeTrue;
 
 public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
 
@@ -66,6 +68,9 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
     @Test
     public void ensureAlignmentFileCreated()
             throws IOException, URISyntaxException, XmlPullParserException, ManipulationException {
+        // XXX: Use of platform()
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.2")) >= 0);
+
         final File projectRoot = tempDir.newFolder("complex-project");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
@@ -100,7 +105,7 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
                                     .hasOnlyOneElementSatisfying(t -> assertThat(getVersion(t)).startsWith("3."));
                         });
 
-                assertThat(root.getAlignedDependencies().keySet()).containsOnly(
+                assertThat(root.getAlignedDependencies()).containsOnlyKeys(
                         "org.apache.commons:commons-lang3:latest.release",
                         "org.hdrhistogram:HdrHistogram:2.+",
                         "org.springframework.boot:spring-boot-dependencies:2.1.4.RELEASE",

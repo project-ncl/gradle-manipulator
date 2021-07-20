@@ -69,7 +69,7 @@ tasks.shadowJar {
 }
 
 val osgiJar by tasks.registering(Bundle::class) {
-    archiveClassifier.set("osgi")
+    classifier = "osgi"
     from(tasks.shadowJar.map { zipTree(it.archiveFile) })
     withConvention(BundleTaskConvention::class) {
         bnd(

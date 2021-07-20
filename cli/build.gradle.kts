@@ -1,7 +1,6 @@
 group = "org.jboss.gm"
 
 dependencies {
-
     implementation("ch.qos.logback:logback-classic:${project.extra.get("logbackVersion")}")
     implementation("ch.qos.logback:logback-core:${project.extra.get("logbackVersion")}")
 
@@ -13,8 +12,10 @@ dependencies {
     implementation("org.gradle:gradle-tooling-api:${project.extra.get("gradleVersion")}")
     implementation("info.picocli:picocli:4.0.4")
 
-    implementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
     implementation("org.commonjava.maven.ext:pom-manipulation-core:${project.extra.get("pmeVersion")}")
+    implementation("org.commonjava.maven.ext:pom-manipulation-io:${project.extra.get("pmeVersion")}")
+    implementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
+
     implementation("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
     implementation("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
 
@@ -26,21 +27,24 @@ dependencies {
     runtimeOnly("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
 
     testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsVersion")}")
-    testImplementation(testFixtures(project(":common")))
+    //testImplementation(testFixtures(project(":common")))
+    testImplementation(project(path = ":common", configuration = "testFixturesCompile"))
+
     testImplementation(project(":analyzer"))
     testImplementation("junit:junit:${project.extra.get("junitVersion")}")
+    testImplementation("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
     testImplementation("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
     testImplementation("org.codehaus.plexus:plexus-archiver:4.2.3")
 }
 
 tasks {
     "jar"(Jar::class) {
-        this.manifest {
+        manifest {
             attributes["Main-Class"] = "org.jboss.gm.cli.Main"
         }
     }
 
-     "test" {
-         dependsOn(":analyzer:assemble")
-     }
+    "test" {
+        dependsOn(":analyzer:assemble")
+    }
 }

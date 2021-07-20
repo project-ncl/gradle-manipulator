@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.FileUtils;
@@ -24,6 +25,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 public class PGJDBCKotlinFunctionalTest extends AbstractWiremockTest {
 
@@ -38,7 +40,6 @@ public class PGJDBCKotlinFunctionalTest extends AbstractWiremockTest {
 
     @Before
     public void setup() throws IOException, URISyntaxException {
-
         stubDACall();
 
         System.setProperty(Configuration.DA, "http://127.0.0.1:" + wireMockRule.port() + "/da/rest/v-1");
@@ -59,6 +60,22 @@ public class PGJDBCKotlinFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException, ManipulationException {
+        // XXX:
+        // Script compilation errors:
+        //
+        //   Line 17:     when (extra.has(name)) {
+        //                      ^ Unresolved reference. None of the following candidates is applicable because of receiver type mismatch:
+        //                          public val ExtensionAware.extra: ExtraPropertiesExtension defined in org.gradle.kotlin.dsl
+        //
+        //   Line 18:         true -> extra.get(name) as? String
+        //                            ^ Unresolved reference. None of the following candidates is applicable because of receiver type mismatch:
+        //                                public val ExtensionAware.extra: ExtraPropertiesExtension defined in org.gradle.kotlin.dsl
+        //
+        // 2 errors
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
+        // XXX: Caused by: java.lang.ClassNotFoundException: org.gradle.api.tasks.SourceSet
+        // XXX: See <https://github.com/gradle/gradle/issues/6862>
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.3")) >= 0);
 
         final File projectRoot = tempDir.newFolder("pgjdbc");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());

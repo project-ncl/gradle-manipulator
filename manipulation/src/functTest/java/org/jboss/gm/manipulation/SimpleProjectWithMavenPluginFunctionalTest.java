@@ -59,7 +59,6 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
                 .withArguments("uploadArchives", "--stacktrace", "--info")
                 .withPluginClasspath()
                 .forwardOutput()
-                .forwardOutput()
                 .build();
         assertThat(buildResult.task(":install").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
         assertThat(buildResult.task(":uploadArchives").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
@@ -93,8 +92,8 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
 
     private void verifyArtifacts(File repoDirectory) {
         Path pathToArtifacts = repoDirectory.toPath().resolve(PATH_IN_REPOSITORY);
-        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile().exists()).isTrue();
-        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar").toFile().exists()).isTrue();
-        assertThat(pathToArtifacts.resolve("ivy-1.0.1-redhat-00001.xml").toFile().exists()).isFalse();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
+        assertThat(pathToArtifacts.resolve("ivy-1.0.1-redhat-00001.xml")).doesNotExist();
     }
 }

@@ -15,13 +15,14 @@ gradlePlugin {
             displayName = "GME Manipulation Plugin"
         }
     }
+
     // Disable creation of the plugin marker pom.
     this.isAutomatedPublishing = false
 }
 
 dependencies {
     implementation(project(":common"))
-    // the shadow configuration is used in order to avoid adding gradle and groovy stuff to the shadowed jar
+    // The shadow configuration is used in order to avoid adding gradle and groovy stuff to the shadowed jar
     shadow(localGroovy())
     shadow(gradleApi())
 
@@ -45,8 +46,9 @@ dependencies {
 
     testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsVersion")}")
     testImplementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
-    testImplementation(testFixtures(project(":common")))
-    testImplementation(project(":common"))
+    //testImplementation(project(":common"))
+    //testImplementation(testFixtures(project(":common")))
+    testImplementation(project(path = ":common", configuration = "testFixturesCompile"))
     testImplementation(gradleTestKit())
     testImplementation("junit:junit:${project.extra.get("junitVersion")}")
     testImplementation("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
@@ -58,24 +60,26 @@ dependencies {
     testImplementation(gradleKotlinDsl())
 }
 
-tasks.test {
+tasks.withType<Test> {
     systemProperties["jdk.attach.allowAttachSelf"] = "true"
 }
 
-// separate source set and task for functional tests
-
+// Separate source set and task for functional tests
 val functionalTestSourceSet = sourceSets.create("functionalTest") {
     java.srcDir("src/functTest/java")
     resources.srcDir("src/functTest/resources")
-    compileClasspath += sourceSets["main"].output + configurations.testRuntime
+    compileClasspath += sourceSets["main"].output
     runtimeClasspath += output + compileClasspath
 }
-configurations.getByName("functionalTestImplementation").apply {
-    extendsFrom(configurations.getByName("testImplementation"))
+
+configurations.getByName("functionalTestImplementation") {
+    extendsFrom(configurations["testImplementation"])
 }
-configurations.getByName("functionalTestRuntime").apply {
-    extendsFrom(configurations.getByName("testRuntime"))
+
+configurations.getByName("functionalTestRuntimeOnly") {
+    extendsFrom(configurations["testRuntimeOnly"])
 }
+
 // Previously had to force the addition of the plugin-under-test-metadata.properties but this seems to solve it.
 gradlePlugin.testSourceSets(functionalTestSourceSet)
 
@@ -94,23 +98,23 @@ val functionalTest = task<Test>("functionalTest") {
     testClassesDirs = sourceSets["functionalTest"].output.classesDirs
     classpath = sourceSets["functionalTest"].runtimeClasspath
     mustRunAfter(tasks["test"])
-    //this will be used in the Wiremock tests - the port needs to match what Wiremock is setup to use
+    // This will be used in the Wiremock tests - the port needs to match what Wiremock is setup to use
     environment("DA_ENDPOINT_URL", "http://localhost:8089/da/rest/v-1")
     systemProperties["jdk.attach.allowAttachSelf"] = "true"
 }
 
 val testJar by tasks.registering(Jar::class) {
     mustRunAfter(tasks["functionalTest"])
-    archiveClassifier.set("tests")
+    classifier = "tests"
     from(sourceSets["functionalTest"].output)
-    from(sourceSets.test.get().output)
+    from(sourceSets["test"].output)
 }
 
 // Publish test source jar so it can be reused by manipulator-groovy-examples.
 val testSourcesJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("test-sources")
-    from(sourceSets.test.get().allSource)
-    from(sourceSets.getByName("functionalTest").java.srcDirs)
+    classifier = "test-sources"
+    from(sourceSets["test"].allSource)
+    from(sourceSets["functionalTest"].java.srcDirs)
 }
 
 configure<PublishingExtension> {
@@ -122,10 +126,12 @@ configure<PublishingExtension> {
     }
 }
 
-tasks.check { dependsOn(functionalTest) }
+tasks.getByName("check") {
+    dependsOn(functionalTest)
+}
 
 tasks {
-    //this is done in order to use the proper version in the init gradle files
+    // This is done in order to use the proper version in the init gradle files
     "processResources"(ProcessResources::class) {
         filesMatching("gme.gradle") {
             expand(project.properties)

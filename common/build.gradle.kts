@@ -1,8 +1,7 @@
-
 group = "org.jboss.gm"
 
 plugins {
-    `java-test-fixtures`
+    //`java-test-fixtures`
 }
 
 dependencies {
@@ -34,8 +33,8 @@ dependencies {
     // This is to prevent compilation errors in conjunction with Lombok due to use of PME code.
     compileOnly("org.apache.maven:maven-compat:3.5.0")
 
-    testFixturesImplementation(gradleApi())
-    testFixturesImplementation("junit:junit:${project.extra.get("junitVersion")}")
+    //testFixturesImplementation(gradleApi())
+    //testFixturesImplementation("junit:junit:${project.extra.get("junitVersion")}")
     testImplementation("junit:junit:${project.extra.get("junitVersion")}")
     testImplementation("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
     testImplementation("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")

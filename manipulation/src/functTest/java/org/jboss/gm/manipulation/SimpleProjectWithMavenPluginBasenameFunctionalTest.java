@@ -73,7 +73,7 @@ public class SimpleProjectWithMavenPluginBasenameFunctionalTest {
 
     private void verifyArtifacts(File repoDirectory) {
         Path pathToArtifacts = repoDirectory.toPath().resolve(PATH_IN_REPOSITORY);
-        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile().exists()).isTrue();
-        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar").toFile().exists()).isTrue();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
     }
 }

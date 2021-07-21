@@ -622,7 +622,7 @@ task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
   description = 'Generates an aggregate report from all subprojects'
   dependsOn(javaProjects.test)
 
-  // NCL-6050
+  // XXX: Commented out due to incompatibility with Gradle 4.10
   //additionalSourceDirs.from = javaProjects.sourceSets.main.allSource.srcDirs
   //sourceDirectories.from = javaProjects.sourceSets.main.allSource.srcDirs
   //classDirectories.from = javaProjects.sourceSets.main.output

@@ -4,8 +4,7 @@
 
 plugins {
   id "jacoco" // Java Code Coverage plugin
-  //id "com.github.ben-manes.versions" version "0.28.0"
-  id "com.github.ben-manes.versions" version "0.21.0" // XXX: Lowered for NCL-6050
+  id "com.github.ben-manes.versions" version "0.21.0" // XXX: Was 0.28.0; lowered for compatibility with Gradle 4.10
   id "com.github.spotbugs" version "4.2.4" apply false
   id 'com.github.jk1.dependency-license-report' version '1.13'
   // including this plugin directly instead of by an init script, which allows to use the freshly build version

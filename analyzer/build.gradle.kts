@@ -46,8 +46,6 @@ dependencies {
 
     testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsVersion")}")
     testImplementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
-    //testImplementation(project(":common"))
-    //testImplementation(testFixtures(project(":common")))
     testImplementation(project(path = ":common", configuration = "testFixturesCompile"))
     testImplementation(gradleTestKit())
     testImplementation("junit:junit:${project.extra.get("junitVersion")}")

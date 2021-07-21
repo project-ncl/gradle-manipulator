@@ -231,9 +231,10 @@ public class Main implements Callable<Void> {
             } else {
                 logger.error("Gradle connection exception", e);
             }
+            throw new ManipulationException("Problem executing build");
         } catch (RuntimeException e) {
-            logger.error("Problem executing build", e);
-            throw new ManipulationException("Problem executing build", e);
+            logger.error("Fatal problem executing build", e);
+            throw new ManipulationException("Fatal problem executing build", e);
         }
     }
 

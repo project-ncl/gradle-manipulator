@@ -13,10 +13,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.gradle.api.logging.LogLevel;
+import org.gradle.tooling.internal.consumer.ConnectorServices;
 import org.jboss.gm.analyzer.alignment.AlignmentPlugin;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.rules.LoggingRule;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
@@ -59,6 +61,13 @@ public class MainTest {
         }
 
         return dir;
+    }
+
+    @Before
+    public void reset() {
+        // Reset the daemon between tests : https://discuss.gradle.org/t/stopping-gradle-daemon-via-tooling-api/16004/2
+        // Under 4.10 the daemon appears to cache Config values which corrupt the tests.
+        ConnectorServices.reset();
     }
 
     @Test
@@ -237,12 +246,6 @@ public class MainTest {
         System.err.println("Writing to " + initFile + ":" + init);
         FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
 
-        Properties actualVersion = new Properties();
-
-        try (Reader reader = new FileReader(new File(root, "gradle.properties"))) {
-            actualVersion.load(reader);
-        }
-
         Main m = new Main();
         String[] args = new String[] { "-t", projectRoot.getParentFile().getAbsolutePath(), "generateAlignmentMetadata",
                 "--init-script=" + initFile.getCanonicalPath(),
@@ -253,11 +256,10 @@ public class MainTest {
         try {
             m.run(args);
         } catch (Exception e) {
-            // XXX: Ignored as Exception differs between Gradle versions and System.err is checked later anyway
+            assertTrue(e.getCause().getMessage().contains("must be configured in order for dependency scanning to work"));
         }
 
         assertFalse(systemErrRule.getLog().contains(ANSIConstants.ESC_START));
-        // NCL-6050: FIXME
         assertThat(systemErrRule.getLog())
                 .contains("'" + Configuration.DA + "' must be configured in order for dependency scanning to work");
     }

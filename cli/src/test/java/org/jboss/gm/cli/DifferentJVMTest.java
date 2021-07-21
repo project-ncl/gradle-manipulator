@@ -21,10 +21,12 @@ import org.codehaus.plexus.archiver.zip.ZipUnArchiver;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.console.ConsoleLoggerManager;
 import org.gradle.api.logging.LogLevel;
+import org.gradle.tooling.internal.consumer.ConnectorServices;
 import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.AlignmentPlugin;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.rules.LoggingRule;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Rule;
@@ -120,6 +122,13 @@ public class DifferentJVMTest {
         }
 
         assertThat(JDK8_BIN_DIR).isDirectory();
+    }
+
+    @Before
+    public void reset() {
+        // Reset the daemon between tests : https://discuss.gradle.org/t/stopping-gradle-daemon-via-tooling-api/16004/2
+        // Under 4.10 the daemon appears to cache Config values which corrupt the tests.
+        ConnectorServices.reset();
     }
 
     private String escapeBackslashes(String dir) {
@@ -282,7 +291,10 @@ public class DifferentJVMTest {
         try {
             m.run(args);
         } catch (Exception e) {
-            // XXX: Ignored as Exception differs between Gradle versions and System.err is checked later anyway
+            if (v.compareTo(GradleVersion.version("5.0")) >= 0) {
+                // XXX: Ignored for 4.10 as Exception differs between Gradle versions and System.err is checked later anyway
+                assertTrue(e.getMessage().contains("Problem executing build"));
+            }
         }
 
         File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), "gme.gradle");

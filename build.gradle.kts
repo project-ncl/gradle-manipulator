@@ -44,7 +44,6 @@ plugins {
             id("io.freefair.lombok") version "2.9.5" apply false
         }
         org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.2") -> {
-            // XXX: Versions 3.x < 3.6.1 suffer from <https://github.com/freefair/gradle-plugins/issues/31>
             id("io.freefair.lombok") version "3.0.0" apply false
         }
         org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("6.0") -> {
@@ -194,9 +193,13 @@ subprojects {
 
     extra["lombokVersion"] = extensions.findByType(LombokExtension::class)?.version
 
-    tasks.getByName("generateLombokConfig") {
-        // Don't generate lombok.config files ( https://docs.freefair.io/gradle-plugins/3.6.6/reference/#_lombok_config_handling )
-        enabled = false
+    // XXX: Lombok plugin 3.x < 3.6.1 suffers from <https://github.com/freefair/gradle-plugins/issues/31>
+    if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.0")
+        || org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.2")) {
+        tasks.getByName("generateLombokConfig") {
+            // Don't generate lombok.config files ( https://docs.freefair.io/gradle-plugins/3.6.6/reference/#_lombok_config_handling )
+            enabled = false
+        }
     }
 
     if (project.name == "common" || project.name == "cli") {

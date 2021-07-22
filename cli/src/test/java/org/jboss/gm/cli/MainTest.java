@@ -13,9 +13,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.gradle.api.logging.LogLevel;
+import org.gradle.tooling.internal.consumer.ConnectorServices;
 import org.jboss.gm.analyzer.alignment.AlignmentPlugin;
+import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.rules.LoggingRule;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.EnvironmentVariables;
@@ -27,6 +30,7 @@ import org.junit.rules.TemporaryFolder;
 import ch.qos.logback.core.pattern.color.ANSIConstants;
 
 import static junit.framework.TestCase.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -57,6 +61,13 @@ public class MainTest {
         }
 
         return dir;
+    }
+
+    @Before
+    public void reset() {
+        // Reset the daemon between tests : https://discuss.gradle.org/t/stopping-gradle-daemon-via-tooling-api/16004/2
+        // Under 4.10 the daemon appears to cache Config values which corrupt the tests.
+        ConnectorServices.reset();
     }
 
     @Test
@@ -129,7 +140,6 @@ public class MainTest {
         m.run(args);
 
         assertTrue(systemOutRule.getLog().contains("Running Groovy script on"));
-        assertTrue(systemOutRule.getLog().contains("Tasks runnable from root project"));
         assertTrue(systemOutRule.getLog().contains("dependencyOverride.org.jboss.slf4j:*@*="));
         assertTrue(systemOutRule.getLog().contains("with JVM args '[-DdependencyOverride.org.jboss.slf4j:*@*="));
         assertFalse(systemOutRule.getLog().contains(", DdependencyOverride.org.jboss.slf4j:*@*="));
@@ -158,7 +168,6 @@ public class MainTest {
 
     @Test
     public void testInvokeAlignment() throws Exception {
-
         final File target = tempDir.newFolder();
         final File source = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
         final File root = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath())
@@ -237,26 +246,22 @@ public class MainTest {
         System.err.println("Writing to " + initFile + ":" + init);
         FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
 
-        Properties actualVersion = new Properties();
-
-        try (Reader reader = new FileReader(new File(root, "gradle.properties"))) {
-            actualVersion.load(reader);
-        }
-
         Main m = new Main();
         String[] args = new String[] { "-t", projectRoot.getParentFile().getAbsolutePath(), "generateAlignmentMetadata",
                 "--init-script=" + initFile.getCanonicalPath(),
                 "-DignoreUnresolvableDependencies=true",
                 "-DdependencyOverride.junit:junit@*=4.10"
         };
+
         try {
             m.run(args);
-            fail("No exception thrown");
         } catch (Exception e) {
             assertTrue(e.getCause().getMessage().contains("must be configured in order for dependency scanning to work"));
         }
-        assertTrue(systemErrRule.getLog().contains("'restURL' must be configured in order for dependency scanning to work"));
+
         assertFalse(systemErrRule.getLog().contains(ANSIConstants.ESC_START));
+        assertThat(systemErrRule.getLog())
+                .contains("'" + Configuration.DA + "' must be configured in order for dependency scanning to work");
     }
 
     @Test
@@ -285,7 +290,6 @@ public class MainTest {
         m.run(args);
 
         assertTrue(systemOutRule.getLog().contains("Running Groovy script on"));
-        assertTrue(systemOutRule.getLog().contains("Tasks runnable from root project"));
         assertTrue(systemOutRule.getLog().contains("dependencyOverride.org.jboss.slf4j:*@*="));
         assertTrue(systemOutRule.getLog().contains("with JVM args '[-DdependencyOverride.org.jboss.slf4j:*@*="));
         assertFalse(systemOutRule.getLog().contains(", DdependencyOverride.org.jboss.slf4j:*@*="));

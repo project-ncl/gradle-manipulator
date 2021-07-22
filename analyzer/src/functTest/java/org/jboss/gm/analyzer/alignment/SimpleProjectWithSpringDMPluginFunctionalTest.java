@@ -70,8 +70,8 @@ public class SimpleProjectWithSpringDMPluginFunctionalTest extends AbstractWirem
                 assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00001");
                 assertThat(root.getName()).isEqualTo("root");
                 // only infinispan-core should be present
-                assertThat(root.getAlignedDependencies().keySet())
-                        .containsOnly("org.infinispan:infinispan-core:8.2.11.Final"); // key includes version!
+                assertThat(root.getAlignedDependencies())
+                        .containsOnlyKeys("org.infinispan:infinispan-core:8.2.11.Final"); // key includes version!
                 assertThat(root.getAlignedDependencies().values())
                         .extracting("artifactId", "versionString")
                         .containsOnly(

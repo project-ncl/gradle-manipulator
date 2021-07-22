@@ -12,6 +12,7 @@
 */build
 testdb
 lib/
+lombok.config
 
 # IntelliJ specific files/directories
 out

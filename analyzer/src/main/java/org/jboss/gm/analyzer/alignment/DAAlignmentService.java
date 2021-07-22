@@ -16,6 +16,7 @@ import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.utils.RESTUtils;
 import org.slf4j.Logger;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence.NONE;
 
 /**
@@ -37,7 +38,9 @@ public class DAAlignmentService implements AlignmentService {
 
         final String endpointUrl = configuration.daEndpoint();
 
-        if (endpointUrl == null && dependencySource != NONE) {
+        logger.debug("endpointUrl = {}, dependencySource = {}", endpointUrl, dependencySource);
+
+        if (isEmpty(endpointUrl) && dependencySource != NONE) {
             throw new ManipulationUncheckedException("'{}' must be configured in order for dependency scanning to work",
                     Configuration.DA);
         }

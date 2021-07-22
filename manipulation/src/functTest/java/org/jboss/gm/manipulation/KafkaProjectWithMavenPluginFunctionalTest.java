@@ -62,8 +62,8 @@ public class KafkaProjectWithMavenPluginFunctionalTest {
         File repoPathToPom = pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile();
         assertTrue(systemOutRule.getLog().contains(
                 "Located archivesBaseName override ; forcing project name to 'connect-runtime' from 'runtime' for correct usage"));
-        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile().exists()).isTrue();
-        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar").toFile().exists()).isTrue();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
         assertThat(FileUtils.readFileToString(repoPathToPom, Charset.defaultCharset()))
                 .contains("artifactId>connect-transforms");
     }

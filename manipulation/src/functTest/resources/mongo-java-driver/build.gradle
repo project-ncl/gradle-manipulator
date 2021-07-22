@@ -23,7 +23,6 @@ buildscript {
     }
     dependencies {
         classpath 'com.netflix.nebula:gradle-extra-configurations-plugin:3.0.3'
-        classpath "com.github.spotbugs:spotbugs-gradle-plugin:3.0.0"
         classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:4.3.1'
 
         // Scala plugins
@@ -162,7 +161,6 @@ configure(javaMainProjects) {
 
 configure(javaCodeCheckedProjects) {
     apply plugin: 'checkstyle'
-    apply plugin: "com.github.spotbugs"
     apply plugin: 'jacoco'
     apply plugin: 'groovy'
     apply plugin: 'codenarc'
@@ -276,22 +274,9 @@ configure(javaCodeCheckedProjects) {
         configProperties.checkstyleConfigDir = configDir
     }
 
-    spotbugs {
-        excludeFilter = new File(configDir, 'findbugs-exclude.xml')
-        sourceSets = [sourceSets.main]
-        toolVersion = '3.1.7'
-    }
-
     codenarc {
         toolVersion = '1.1'
         reportFormat = project.buildingWith('xmlReports.enabled') ? 'xml' : 'html'
-    }
-
-    tasks.withType(com.github.spotbugs.SpotBugsTask) {
-        reports {
-            xml.enabled = project.buildingWith('xmlReports.enabled')
-            html.enabled = !project.buildingWith('xmlReports.enabled')
-        }
     }
 
     tasks.withType(Test) {

@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
+import org.gradle.util.GradleVersion;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
@@ -17,6 +18,7 @@ import org.junit.rules.TestRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 public class PostgresProjectFunctionalTest {
     private static final String TEST = "pgjdbc";
@@ -35,6 +37,22 @@ public class PostgresProjectFunctionalTest {
 
     @Test
     public void ensurePublishAvoidanceAndPublish() throws IOException, URISyntaxException {
+        // XXX:
+        // Script compilation errors:
+        //
+        //   Line 539:                 registerFeature("sspi") {
+        //                             ^ Unresolved reference: registerFeature
+        //
+        //  Line 540:                     usingSourceSet(sourceSets["main"])
+        //                                ^ Unresolved reference: usingSourceSet
+        //
+        //  Line 542:                 registerFeature("osgi") {
+        //                            ^ Unresolved reference: registerFeature
+        //
+        //  Line 543:                     usingSourceSet(sourceSets["main"])
+        //                                ^ Unresolved reference: usingSourceSet
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.3")) >= 0);
+
         // this makes gradle use the set property as maven local directory
         // we do this in order to avoid polluting the maven local and also be absolutely sure
         // that no prior invocations affect the execution
@@ -50,16 +68,16 @@ public class PostgresProjectFunctionalTest {
 
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(projectRoot)
-                .withDebug(true)
                 .withArguments("publish")
                 .withPluginClasspath()
+                //.withDebug(true)
                 .forwardOutput()
                 .build();
         assertThat(buildResult.task(":postgresql:publish").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 
         Path pathToArtifacts = publishDirectory.toPath().resolve(PATH_IN_REPOSITORY);
-        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile().exists()).isTrue();
-        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar").toFile().exists()).isTrue();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
         assertTrue(systemOutRule.getLog().contains(
                 "Updating publication artifactId (postgresql) as it is not consistent with archivesBaseName (postgresql-jre7)"));
     }

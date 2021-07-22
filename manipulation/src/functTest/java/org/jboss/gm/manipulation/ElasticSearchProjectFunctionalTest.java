@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
+import org.gradle.util.GradleVersion;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
@@ -20,6 +21,7 @@ import org.junit.rules.TestRule;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 public class ElasticSearchProjectFunctionalTest {
     private static final String TEST = "elasticsearch";
@@ -38,6 +40,9 @@ public class ElasticSearchProjectFunctionalTest {
 
     @Test
     public void ensurePublishWithNestedPlugin() throws IOException, URISyntaxException {
+        // XXX: Gradle 5.4.1 is required to use elasticsearch.build plugin
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.4.1")) >= 0);
+
         // this makes gradle use the set property as maven local directory
         // we do this in order to avoid polluting the maven local and also be absolutely sure
         // that no prior invocations affect the execution
@@ -61,8 +66,8 @@ public class ElasticSearchProjectFunctionalTest {
         assertThat(buildResult.task(":modules:transport-netty4:publish").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 
         Path pathToArtifacts = publishDirectory.toPath().resolve(PATH_IN_REPOSITORY);
-        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile().exists()).isTrue();
-        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar").toFile().exists()).isTrue();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
         assertThat(
                 FileUtils.readFileToString(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile(),
                         Charset.defaultCharset())).contains("transport-netty4-client");
@@ -74,6 +79,9 @@ public class ElasticSearchProjectFunctionalTest {
 
     @Test
     public void ensurePublishWithNestedPluginDisabledHook() throws IOException, URISyntaxException {
+        // XXX: Gradle 5.4.1 is required to use elasticsearch.build plugin
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.4.1")) >= 0);
+
         // this makes gradle use the set property as maven local directory
         // we do this in order to avoid polluting the maven local and also be absolutely sure
         // that no prior invocations affect the execution
@@ -98,8 +106,8 @@ public class ElasticSearchProjectFunctionalTest {
 
         // verify published artifacts
         Path pathToArtifacts = publishDirectory.toPath().resolve(PATH_IN_REPOSITORY);
-        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile().exists()).isFalse();
-        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar").toFile().exists()).isFalse();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).doesNotExist();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).doesNotExist();
         assertFalse(systemOutRule.getLog().contains("Detected application of plugin hook"));
     }
 }

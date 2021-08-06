@@ -27,7 +27,7 @@ task installDist(type: Copy, group: 'Install') {
     destinationDir = file(installPath)
 
     from jar
-    from configurations.compile
+    from configurations.implementation
 }
 
 task installJavadoc(type: Copy, group: 'Install', dependsOn: javadoc) {
@@ -46,7 +46,7 @@ task copyDependencies(type: Copy, group: 'Build') {
     project.assemble.dependsOn it
 
     destinationDir = file("$buildDir/deps")
-    from configurations.testRuntime
+    from configurations.testRuntimeOnly
     // exclude some very specific unit test dependencies
     exclude '**/junit*.jar', '**/mockito*.jar', '**/hamcrest*.jar'
 }

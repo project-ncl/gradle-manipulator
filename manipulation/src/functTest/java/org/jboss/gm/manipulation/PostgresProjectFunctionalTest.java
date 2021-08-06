@@ -53,6 +53,11 @@ public class PostgresProjectFunctionalTest {
         //                                ^ Unresolved reference: usingSourceSet
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.3")) >= 0);
 
+        // XXX: In plugin 'com.github.lburgazzoli.karaf' type
+        // XXX: 'com.github.lburgazzoli.gradle.plugin.karaf.features.KarafFeaturesTask' property 'karaf' is missing an
+        // XXX: input or output annotation.
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
+
         // this makes gradle use the set property as maven local directory
         // we do this in order to avoid polluting the maven local and also be absolutely sure
         // that no prior invocations affect the execution

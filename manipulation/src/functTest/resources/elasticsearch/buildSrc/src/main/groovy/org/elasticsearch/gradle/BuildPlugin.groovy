@@ -463,7 +463,7 @@ class BuildPlugin implements Plugin<Project> {
             name "elastic"
             url "https://artifacts.elastic.co/maven"
         }
-        repos.jcenter()
+        repos.mavenCentral()
         String luceneVersion = VersionProperties.lucene
         if (luceneVersion.contains('-snapshot')) {
             // extract the revision number from the version with a regex matcher

@@ -86,7 +86,7 @@ compileMinimumRuntimeGroovy {
 dependencies {
   if (project.ext.has("isEclipse") == false || project.ext.isEclipse == false) {
       // eclipse is confused if this is set explicitly
-    compile sourceSets.minimumRuntime.output
+    implementation sourceSets.minimumRuntime.output
   }
   minimumRuntimeCompile "junit:junit:${props.getProperty('junit')}"
   minimumRuntimeCompile localGroovy()
@@ -102,31 +102,34 @@ jar {
  *****************************************************************************/
 
 repositories {
-  jcenter()
+  mavenCentral()
+  maven {
+    url "https://plugins.gradle.org/m2/"
+  }
 }
 
 dependencies {
-  compile localGroovy()
-  compile "com.carrotsearch.randomizedtesting:junit4-ant:${props.getProperty('randomizedrunner')}"
-  compile "com.carrotsearch.randomizedtesting:randomizedtesting-runner:${props.getProperty('randomizedrunner')}"
+  implementation localGroovy()
+  implementation "com.carrotsearch.randomizedtesting:junit4-ant:${props.getProperty('randomizedrunner')}"
+  implementation "com.carrotsearch.randomizedtesting:randomizedtesting-runner:${props.getProperty('randomizedrunner')}"
 
-  compile 'com.netflix.nebula:gradle-extra-configurations-plugin:3.0.3'
-  compile 'com.netflix.nebula:nebula-publishing-plugin:4.4.4'
-  compile 'com.netflix.nebula:gradle-info-plugin:3.0.3'
-  compile 'org.eclipse.jgit:org.eclipse.jgit:3.2.0.201312181205-r'
-  compile 'com.perforce:p4java:2012.3.551082' // THIS IS SUPPOSED TO BE OPTIONAL IN THE FUTURE....
-  compile 'org.apache.rat:apache-rat:0.11'
-  compile "org.elasticsearch:jna:4.5.1"
-  compile 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
-  compile 'de.thetaphi:forbiddenapis:2.6'
-  compile 'com.avast.gradle:gradle-docker-compose-plugin:0.8.12'
-  testCompile "junit:junit:${props.getProperty('junit')}"
+  implementation 'com.netflix.nebula:gradle-extra-configurations-plugin:3.0.3'
+  implementation 'com.netflix.nebula:nebula-publishing-plugin:4.4.4'
+  implementation 'com.netflix.nebula:gradle-info-plugin:3.0.3'
+  implementation 'org.eclipse.jgit:org.eclipse.jgit:3.2.0.201312181205-r'
+  implementation 'com.perforce:p4java:2012.3.551082' // THIS IS SUPPOSED TO BE OPTIONAL IN THE FUTURE....
+  implementation 'org.apache.rat:apache-rat:0.11'
+  implementation "org.elasticsearch:jna:4.5.1"
+  implementation 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
+  implementation 'de.thetaphi:forbiddenapis:2.6'
+  implementation 'com.avast.gradle:gradle-docker-compose-plugin:0.8.12'
+  testImplementation "junit:junit:${props.getProperty('junit')}"
 }
 
 
 // Gradle 2.14+ removed ProgressLogger(-Factory) classes from the public APIs
 // Use logging dependency instead
-// Gradle 4.3.1 stopped releasing the logging jars to jcenter, just use the last available one
+// Gradle 4.3.1 stopped releasing the logging jars, just use the last available one
 GradleVersion logVersion = GradleVersion.current() > GradleVersion.version('4.3') ? GradleVersion.version('4.3') : GradleVersion.current()
 
 dependencies {

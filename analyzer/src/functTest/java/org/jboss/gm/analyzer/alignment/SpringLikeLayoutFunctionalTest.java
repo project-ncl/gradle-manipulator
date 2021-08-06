@@ -9,6 +9,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.FileUtils;
@@ -30,6 +31,7 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.Assume.assumeTrue;
 
 public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
@@ -65,6 +67,8 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException, ManipulationException {
+        // XXX: Caused by: java.lang.ClassNotFoundException: org.gradle.api.artifacts.maven.PomFilterContainer
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
 
         final File projectRoot = tempDir.newFolder("spring-like-layout");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());

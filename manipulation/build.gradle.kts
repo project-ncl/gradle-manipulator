@@ -9,12 +9,14 @@ pluginBundle {
 gradlePlugin {
     plugins {
         create("manipulationPlugin") {
-            description = "Plugin that reads the alignment data from \${project.rootDir}/manipulation.json and configures build and publishing to use those versions"
+            description = "Plugin that reads the alignment data from \${project.rootDir}/manipulation.json and " +
+                "configures build and publishing to use those versions"
             id = "org.jboss.gm.manipulation"
             implementationClass = "org.jboss.gm.manipulation.ManipulationPlugin"
             displayName = "GME Manipulation Plugin"
         }
     }
+
     // Disable creation of the plugin marker pom.
     this.isAutomatedPublishing = false
 }
@@ -87,6 +89,30 @@ val functionalTest = task<Test>("functionalTest") {
     mustRunAfter(tasks["test"])
 }
 
+// Implicit dependencies detected by Gradle 7
+// See <https://docs.gradle.org/7.0/userguide/validation_problems.html#implicit_dependency>
 tasks.getByName("check") {
     dependsOn(functionalTest)
+}
+
+tasks.whenTaskAdded {
+    if (name == "publishPluginJar") {
+        dependsOn("spotlessJava")
+    }
+}
+
+tasks.getByName("delombok") {
+    dependsOn("spotlessJava")
+}
+
+tasks.getByName("test") {
+    dependsOn("shadowJar")
+}
+
+tasks.getByName("functionalTest") {
+    dependsOn("shadowJar")
+}
+
+tasks.getByName("publishShadowPublicationToMavenLocal") {
+    dependsOn("publishPluginJavaDocsJar", "publishPluginJar", "jar")
 }

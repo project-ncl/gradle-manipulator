@@ -79,7 +79,7 @@ configure(allprojects) { project ->
     }
 
     dependencies {
-        testCompile("junit:junit:4.12") {
+        testImplementation("junit:junit:4.12") {
             exclude group: "org.hamcrest", module: "hamcrest-core"
         }
     }
@@ -93,7 +93,7 @@ configure(rootProject) {
     description = "Root project"
 
     dependencies {
-        testCompile(project(":subproject1"))
-        testCompile(project(":subproject2"))
+        testImplementation(project(":subproject1"))
+        testImplementation(project(":subproject2"))
     }
 }

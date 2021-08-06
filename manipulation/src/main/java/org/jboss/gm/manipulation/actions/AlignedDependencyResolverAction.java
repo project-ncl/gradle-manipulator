@@ -42,8 +42,8 @@ public class AlignedDependencyResolverAction implements Action<DependencyResolve
             } else {
                 version = resolveDetails.getTarget().getVersion();
                 if (!isEmpty(version)) {
-                    resolvedDependenciesRepository.record(new SimpleProjectRef(requested.getGroup(), requested.getName()),
-                            version);
+                    resolvedDependenciesRepository.record(new SimpleProjectRef(requested.getGroup(),
+                            requested.getName()), version);
                 }
             }
         }
@@ -55,10 +55,10 @@ public class AlignedDependencyResolverAction implements Action<DependencyResolve
 
         if (aligned != null) {
             logger.info("Overriding dependency {} with new version {}", key, aligned);
-            resolveDetails.because(key + " is aligned to " + aligned.toString()).useVersion(aligned.getVersionString());
+            resolveDetails.because(key + " is aligned to " + aligned).useVersion(aligned.getVersionString());
         } else {
-            logger.debug("Unable to find a mapping for {} in module {} with alignedDependencies {}", key, module.getName(),
-                    alignedDependencies);
+            logger.debug("Unable to find a mapping for {} in module {} with alignedDependencies {}", key,
+                    module.getName(), alignedDependencies);
         }
     }
 }

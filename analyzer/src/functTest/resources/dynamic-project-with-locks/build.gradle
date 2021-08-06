@@ -1,6 +1,5 @@
 buildscript {
     repositories {
-        jcenter()
         maven {
             url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
         }
@@ -37,11 +36,11 @@ dependencyLocking {
 
 dependencies {
     implementation "org.apache.commons:commons-lang3:latest.release"
-    compile('org.hdrhistogram:HdrHistogram:2.+')
-    compile('com.google.inject:guice:4.2.2')
-    compile('org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1')
+    implementation('org.hdrhistogram:HdrHistogram:2.+')
+    implementation('com.google.inject:guice:4.2.2')
+    implementation('org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1')
 
-    compile group: 'io.undertow', name: 'undertow-core', version: '2.0+'
+    implementation group: 'io.undertow', name: 'undertow-core', version: '2.0+'
 }
 
 

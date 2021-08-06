@@ -63,13 +63,13 @@ repositories {
 }
 
 dependencies {
-    compile "org.slf4j:slf4j-api:${slf4jVersion}"
-    compile "org.apache.httpcomponents:httpclient:${httpclientVersion}"
-    compile "org.apache.httpcomponents:httpcore:${httpcoreVersion}"
-    compile "javax.servlet:servlet-api:${servletVersion}"
-    compile "javax.annotation:javax.annotation-api:${javaxAnnotationVersion}"
+    implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+    implementation "org.apache.httpcomponents:httpclient:${httpclientVersion}"
+    implementation "org.apache.httpcomponents:httpcore:${httpcoreVersion}"
+    implementation "javax.servlet:servlet-api:${servletVersion}"
+    implementation "javax.annotation:javax.annotation-api:${javaxAnnotationVersion}"
 
-    testCompile "junit:junit:${junitVersion}"
-    testCompile "org.mockito:mockito-all:${mockitoVersion}"
-    testRuntime "org.slf4j:slf4j-log4j12:${slf4jVersion}"
+    testImplementation "junit:junit:${junitVersion}"
+    testImplementation "org.mockito:mockito-all:${mockitoVersion}"
+    testRuntimeOnly "org.slf4j:slf4j-log4j12:${slf4jVersion}"
 }

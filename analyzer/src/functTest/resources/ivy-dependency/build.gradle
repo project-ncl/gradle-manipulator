@@ -9,8 +9,8 @@ sourceCompatibility = 1.8
 
 repositories {
     ivy {
-        url "http://download.eclipse.org/eclipse/updates/4.6/R-4.6.3-201703010400/plugins/"
-        layout "pattern", {
+        url "https://download.eclipse.org/eclipse/updates/4.6/R-4.6.3-201703010400/plugins/"
+        patternLayout {
             artifact "[artifact].[ext]"
         }
     }

@@ -3,6 +3,8 @@ package org.jboss.gm.analyzer.alignment;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
@@ -52,8 +54,16 @@ public class InvalidProjectFunctionalTest extends AbstractWiremockTest {
             TestUtils.align(projectRoot, projectRoot.getName(), true);
             fail("No exception thrown");
         } catch (ManipulationUncheckedException e) {
-            assertThat(e.getMessage()).contains(
-                    "For configuration compile; unable to resolve all dependencies: [io.undertow:undertow-core:2.0+, org.apache.commons:commons-lang3:3.8.1.redhat-3]");
+            String regex = ".*For configuration compileClasspath, unable to resolve all project dependencies: \\[(.*)].*";
+            Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
+            Matcher matcher = pattern.matcher(e.getMessage());
+            assertThat(matcher.matches()).isTrue();
+            assertThat(matcher.groupCount()).isEqualTo(1);
+            String[] dependencies = matcher.group(1).split(", ");
+            String[] expectedDependencies = { "io.undertow:undertow-core:2.0+",
+                    "org.apache.commons:commons-lang3:3.8.1.redhat-3",
+                    "org.springframework:spring-context:5.1.6.INVALID_VERSION" };
+            assertThat(dependencies).containsExactly(expectedDependencies);
         }
     }
 }

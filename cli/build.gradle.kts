@@ -47,3 +47,13 @@ tasks {
         dependsOn(":analyzer:assemble")
     }
 }
+
+// Implicit dependencies detected by Gradle 7
+// See <https://docs.gradle.org/7.0/userguide/validation_problems.html#implicit_dependency>
+tasks.getByName("test") {
+    dependsOn("shadowJar")
+}
+
+tasks.getByName("publishShadowPublicationToMavenLocal") {
+    dependsOn("jar")
+}

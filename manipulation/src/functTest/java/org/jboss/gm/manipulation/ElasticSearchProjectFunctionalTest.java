@@ -43,6 +43,10 @@ public class ElasticSearchProjectFunctionalTest {
         // XXX: Gradle 5.4.1 is required to use elasticsearch.build plugin
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.4.1")) >= 0);
 
+        // XXX: Could not find method minimumRuntimeCompile() for arguments [junit:junit:4.12] on object of type
+        // XXX: org.gradle.api.internal.artifacts.dsl.dependencies.DefaultDependencyHandler.
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
+
         // this makes gradle use the set property as maven local directory
         // we do this in order to avoid polluting the maven local and also be absolutely sure
         // that no prior invocations affect the execution
@@ -81,6 +85,10 @@ public class ElasticSearchProjectFunctionalTest {
     public void ensurePublishWithNestedPluginDisabledHook() throws IOException, URISyntaxException {
         // XXX: Gradle 5.4.1 is required to use elasticsearch.build plugin
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.4.1")) >= 0);
+
+        // XXX: Could not find method minimumRuntimeCompile() for arguments [junit:junit:4.12] on object of type
+        // XXX: org.gradle.api.internal.artifacts.dsl.dependencies.DefaultDependencyHandler.
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
 
         // this makes gradle use the set property as maven local directory
         // we do this in order to avoid polluting the maven local and also be absolutely sure

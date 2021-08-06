@@ -15,6 +15,7 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.model.ManipulationModel;
@@ -39,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
@@ -53,7 +55,6 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
     @Before
     public void setup() throws IOException, URISyntaxException {
-
         stubDACall();
 
         System.setProperty(Configuration.DA, "http://127.0.0.1:" + wireMockRule.port() + "/da/rest/v-1");
@@ -74,6 +75,8 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException, ManipulationException {
+        // XXX: Caused by: java.lang.ClassNotFoundException: org.gradle.api.artifacts.maven.PomFilterContainer
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
 
         final File projectRoot = tempDir.newFolder("grpc-like-layout");
         final Map<String, String> props = Collections.singletonMap("dependencyExclusion.io.netty:*@*",
@@ -123,7 +126,6 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void ensureMissingGroupIdThrowsException() throws IOException, URISyntaxException {
-
         final File projectRoot = tempDir.newFolder("grpc-like-layout");
 
         //noinspection ConstantConditions
@@ -143,7 +145,6 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void ensureMissingVersionThrowsException() throws IOException, URISyntaxException {
-
         final File projectRoot = tempDir.newFolder("grpc-like-layout");
 
         //noinspection ConstantConditions
@@ -160,6 +161,8 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void ensureAlignmentFileWithArchiveBaseNameOverride() throws IOException, URISyntaxException, ManipulationException {
+        // XXX: Caused by: java.lang.ClassNotFoundException: org.gradle.api.artifacts.maven.PomFilterContainer
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
 
         final File projectRoot = tempDir.newFolder("grpc-like-layout");
         final Map<String, String> props = Collections.singletonMap("dependencySource", "NONE");

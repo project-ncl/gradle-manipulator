@@ -4,7 +4,6 @@ plugins {
 }
 
 apply plugin: 'java'
-apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
 //apply(from: "project.gradle");
@@ -25,7 +24,6 @@ publishing {
 repositories {
     mavenLocal()
     mavenCentral()
-    jcenter()
 }
 
 version = "1.2"

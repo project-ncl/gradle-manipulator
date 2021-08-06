@@ -8,9 +8,9 @@ dependencyManagement {
 }
 
 dependencies {
-    compile(project(":subproject2"))
-    compile(project(":subproject1"))
-    compile("org.springframework:spring-context:5.1.6.RELEASE")
+    implementation(project(":subproject2"))
+    implementation(project(":subproject1"))
+    implementation("org.springframework:spring-context:5.1.6.RELEASE")
     optional("io.netty:netty-buffer")
-    testCompile("io.projectreactor:reactor-test")
+    testImplementation("io.projectreactor:reactor-test")
 }

@@ -16,11 +16,11 @@ if (project == rootProject) {
 
 
 repositories {
-  jcenter()
+  mavenCentral()
 }
 
 dependencies {
-  compile localGroovy()
+  implementation localGroovy()
 }
 
 // this happens when included as a normal project in the build, which we do

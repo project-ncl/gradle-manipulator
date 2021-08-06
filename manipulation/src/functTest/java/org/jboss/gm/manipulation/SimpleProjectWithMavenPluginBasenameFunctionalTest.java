@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
+import org.gradle.util.GradleVersion;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
@@ -18,6 +19,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 public class SimpleProjectWithMavenPluginBasenameFunctionalTest {
 
@@ -35,6 +37,10 @@ public class SimpleProjectWithMavenPluginBasenameFunctionalTest {
 
     @Test
     public void ensureProperPomGeneratedForLegacyPlugin() throws IOException, URISyntaxException {
+        // XXX: Caused by: org.gradle.api.plugins.UnknownPluginException: Plugin [id: 'maven'] was not found in any of
+        // XXX: the following sources
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
+
         // this makes gradle use the set property as maven local directory
         // we do this in order to avoid polluting the maven local and also be absolutely sure
         // that no prior invocations affect the execution

@@ -13,8 +13,14 @@ plugins {
     signing
     `maven-publish`
     idea
-    id("com.diffplug.gradle.spotless") version "3.25.0"
-    id("com.gradle.plugin-publish") version "0.12.0"
+
+    if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.4")) {
+        id("com.diffplug.gradle.spotless") version "4.5.1"
+    } else {
+        id("com.diffplug.spotless") version "5.14.2"
+    }
+
+    id("com.gradle.plugin-publish") version "0.15.0"
     id("net.linguica.maven-settings") version "0.5"
     id("net.researchgate.release") version "2.8.1"
     id("org.ajoberstar.grgit") version "4.1.0"
@@ -85,10 +91,14 @@ if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.vers
 }
 
 tasks.getByName("afterReleaseBuild") {
-    dependsOn(":common:publish", ":analyzer:publish", ":manipulation:publish", ":cli:publish", ":analyzer:publishPlugins", ":manipulation:publishPlugins")
+    dependsOn(
+        ":common:publish", ":analyzer:publish", ":manipulation:publish", ":cli:publish", ":analyzer:publishPlugins",
+        ":manipulation:publishPlugins"
+    )
 }
 
-// This was tasks.beforeReleaseBuild to hook into the release plugin system but we are manually handling the task ordering
+// This was tasks.beforeReleaseBuild to hook into the release plugin system, but we are manually handling the task
+// ordering
 tasks.register("fixupReadme") {
     doLast {
         if ("true" == System.getProperty("release","") && project == project.rootProject) {
@@ -97,7 +107,7 @@ tasks.register("fixupReadme") {
             val searchString = "https://repo1.maven.org/maven2/org/jboss/gm/analyzer"
 
             if (!source.exists() || Files.readAllLines(source.toPath()).none { s -> s.contains(searchString) }) {
-                throw GradleException ("Unable to find '$searchString' in README.md")
+                throw GradleException("Unable to find '$searchString' in README.md")
             }
 
             project.copy {
@@ -125,10 +135,10 @@ tasks.register("fixupReadme") {
     }
 }
 
-// In https://github.com/researchgate/gradle-release/blob/master/src/main/groovy/net/researchgate/release/ReleasePlugin.groovy#L116
-// the list of task interdependencies is specified. However as per https://github.com/researchgate/gradle-release/issues/298
-// we want to ensure the tag is done before the build so the manifest (etc) points to the correct SHA. As the beforeReleaseBuild
-// then runs at the wrong point with this change we manually inject a task (fixupReadme) below.
+// In https://github.com/researchgate/gradle-release/blob/master/src/main/groovy/net/researchgate/release/ReleasePlugin.groovy#L116,
+// the list of task interdependencies is specified. However, as per https://github.com/researchgate/gradle-release/issues/298,
+// we want to ensure the tag is done before the build so the manifest (etc.) points to the correct SHA. As the beforeReleaseBuild
+// then runs at the wrong point with this change, we manually inject a task (fixupReadme) below.
 tasks.getByName("preTagCommit") {
     logger.info("Altering preTagCommit to run after checkSnapshotDependencies instead of runBuildTasks")
     setMustRunAfter(listOf(tasks["checkSnapshotDependencies"]) )
@@ -165,7 +175,7 @@ allprojects {
     apply(plugin = "idea")
 }
 
-val isReleaseBuild = ("true" == System.getProperty("release",""))
+val isReleaseBuild = ("true" == System.getProperty("release", ""))
 if (isReleaseBuild && GradleVersion.current().version != "5.6.4") {
     throw GradleException("Gradle 5.6.4 is required to release this project")
 }
@@ -187,7 +197,12 @@ subprojects {
     extra["slf4jVersion"] = "1.7.30"
     extra["systemRulesVersion"] = "1.19.0"
 
-    apply(plugin = "com.diffplug.gradle.spotless")
+    if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.4")) {
+        apply(plugin = "com.diffplug.gradle.spotless")
+    } else {
+        apply(plugin = "com.diffplug.spotless")
+    }
+
     apply(plugin = "com.adarshr.test-logger")
     apply(plugin = "io.freefair.lombok")
 
@@ -434,20 +449,20 @@ subprojects {
 }
 
 fun generateRepositories(publishingExtension: PublishingExtension, buildGradle: Build_gradle) {
-        publishingExtension.repositories {
-            if (buildGradle.isReleaseBuild) {
-                maven {
-                    name = "sonatype-nexus-staging"
-                    url = project.uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
-                }
-            } else {
-                maven {
-                    name = "sonatype-nexus-snapshots"
-                    url = project.uri("https://oss.sonatype.org/content/repositories/snapshots")
-                }
+    publishingExtension.repositories {
+        if (buildGradle.isReleaseBuild) {
+            maven {
+                name = "sonatype-nexus-staging"
+                url = project.uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+            }
+        } else {
+            maven {
+                name = "sonatype-nexus-snapshots"
+                url = project.uri("https://oss.sonatype.org/content/repositories/snapshots")
             }
         }
     }
+}
 
 fun MavenPublication.generatePom() {
     pom {

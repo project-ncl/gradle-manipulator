@@ -3,6 +3,7 @@ package org.jboss.gm.analyzer.alignment;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
 import org.gradle.testkit.runner.BuildResult;
+import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.jboss.gm.common.io.ManipulationIO;
@@ -58,8 +60,10 @@ public final class TestUtils {
             Map<String, String> systemProps)
             throws IOException, URISyntaxException {
 
+        URL resource = TestUtils.class.getClassLoader().getResource(projectDirName);
+        assertThat(resource).isNotNull();
         FileUtils.copyDirectory(Paths
-                .get(TestUtils.class.getClassLoader().getResource(projectDirName).toURI()).toFile(), projectRoot);
+                .get(resource.toURI()).toFile(), projectRoot);
         return align(projectRoot, expectFailure, systemProps);
     }
 
@@ -108,7 +112,9 @@ public final class TestUtils {
             buildResult = runner.build();
         }
 
-        assertThat(buildResult.task(":" + AlignmentTask.NAME).getOutcome()).isEqualTo(outcome);
+        BuildTask task = buildResult.task(":" + AlignmentTask.NAME);
+        assertThat(task).isNotNull();
+        assertThat(task.getOutcome()).isEqualTo(outcome);
 
         if (expectFailure) {
             throw new ManipulationUncheckedException(buildResult.getOutput());

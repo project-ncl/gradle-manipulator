@@ -11,6 +11,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.internal.Pair;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Rule;
@@ -21,6 +22,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 public class SimpleProjectWithMavenPluginFunctionalTest {
 
@@ -37,7 +39,12 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
 
     @Test
-    public void ensureProperPomGeneratedForLegacyPlugin() throws IOException, URISyntaxException, XmlPullParserException {
+    public void ensureProperPomGeneratedForLegacyPlugin() throws IOException, URISyntaxException,
+            XmlPullParserException {
+        // XXX: Caused by: org.gradle.api.plugins.UnknownPluginException: Plugin [id: 'maven'] was not found in any of
+        // XXX: the following sources
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
+
         // this makes gradle use the set property as maven local directory
         // we do this in order to avoid polluting the maven local and also be absolutely sure
         // that no prior invocations affect the execution

@@ -43,6 +43,10 @@ public class ManifestVerificationFunctionalTest {
 
     @Test
     public void verifyThriftManifest() throws IOException, URISyntaxException {
+        // XXX: Caused by: org.gradle.api.plugins.UnknownPluginException: Plugin [id: 'maven'] was not found in any of
+        // XXX: the following sources
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
+
         final File m2Directory = tempDir.newFolder(".m2");
         System.setProperty("maven.repo.local", m2Directory.getAbsolutePath());
 
@@ -117,7 +121,9 @@ public class ManifestVerificationFunctionalTest {
 
     @Test
     public void verifyReactiveManifest() throws IOException, URISyntaxException {
-        // XXX: Plugin with id 'osgi' not found.
+        // XXX: A problem occurred evaluating root project 'reactive-streams'.
+        // XXX: > Plugin with id 'osgi' not found.
+        // XXX: See <https://docs.gradle.org/current/userguide/upgrading_version_5.html#the_osgi_plugin_has_been_removed>
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("6.0")) < 0);
 
         final File m2Directory = tempDir.newFolder(".m2");
@@ -178,6 +184,11 @@ public class ManifestVerificationFunctionalTest {
 
     @Test
     public void verifyMongoManifest() throws IOException, URISyntaxException {
+        // XXX: A problem occurred configuring project ':driver-core'.
+        // XXX: > Configuration <compile> not found.
+        // XXX: See <https://github.com/mfuerstenau/gradle-buildconfig-plugin/issues/30>
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
+
         final File m2Directory = tempDir.newFolder(".m2");
         System.setProperty("maven.repo.local", m2Directory.getAbsolutePath());
 

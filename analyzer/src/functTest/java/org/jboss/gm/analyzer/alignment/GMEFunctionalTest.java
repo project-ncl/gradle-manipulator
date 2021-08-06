@@ -68,7 +68,7 @@ public class GMEFunctionalTest extends AbstractWiremockTest {
     @Test
     @SuppressWarnings("ConstantConditions")
     public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException {
-        // XXX: java.lang.ClassNotFoundException: org.gradle.api.tasks.SourceSet
+        // XXX: Caused by: java.lang.ClassNotFoundException: org.gradle.api.tasks.SourceSet
         // XXX: See <https://github.com/gradle/gradle/issues/6862>
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.3")) >= 0);
 

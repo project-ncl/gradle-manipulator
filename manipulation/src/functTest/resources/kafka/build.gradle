@@ -19,7 +19,6 @@ buildscript {
   repositories {
     mavenLocal()
     mavenCentral()
-    jcenter()
     maven {
       url "https://plugins.gradle.org/m2/"
     }
@@ -660,14 +659,14 @@ project(':connect:api') {
   archivesBaseName = "connect-api"
 
   dependencies {
-//    compile project(':clients')
-    compile libs.slf4jApi
-    compile libs.jaxrsApi
+//    implementation project(':clients')
+    implementation libs.slf4jApi
+    implementation libs.jaxrsApi
 
-    testCompile libs.junit
+    testImplementation libs.junit
 
-    testRuntime libs.slf4jlog4j
-//    testCompile project(':clients').sourceSets.test.output
+    testRuntimeOnly libs.slf4jlog4j
+//    testImplementation project(':clients').sourceSets.test.output
   }
 
   javadoc {
@@ -679,6 +678,8 @@ project(':connect:api') {
       options.links "https://docs.oracle.com/javase/8/docs/api/"
   }
 
+  // XXX: Can't change to (testR|r)untimeOnly here as resolving configuration directly is not allowed
+  // XXX: See <https://docs.gradle.org/current/userguide/declaring_dependencies.html> for more information
   tasks.create(name: "copyDependantLibs", type: Copy) {
     from (configurations.testRuntime) {
       include('slf4j-log4j12*')
@@ -701,15 +702,15 @@ project(':connect:transforms') {
   archivesBaseName = "connect-transforms"
 
   dependencies {
-    compile project(':connect:api')
-    compile libs.slf4jApi
+    implementation project(':connect:api')
+    implementation libs.slf4jApi
 
-    testCompile libs.easymock
-    testCompile libs.junit
-    testCompile libs.powermockJunit4
-    testCompile libs.powermockEasymock
+    testImplementation libs.easymock
+    testImplementation libs.junit
+    testImplementation libs.powermockJunit4
+    testImplementation libs.powermockEasymock
 
-    testRuntime libs.slf4jlog4j
+    testRuntimeOnly libs.slf4jlog4j
   }
 
   javadoc {
@@ -738,17 +739,17 @@ project(':connect:json') {
   archivesBaseName = "connect-json"
 
   dependencies {
-    compile project(':connect:api')
-    compile libs.jacksonDatabind
-    compile libs.jacksonJDK8Datatypes
-    compile libs.slf4jApi
+    implementation project(':connect:api')
+    implementation libs.jacksonDatabind
+    implementation libs.jacksonJDK8Datatypes
+    implementation libs.slf4jApi
 
-    testCompile libs.easymock
-    testCompile libs.junit
-    testCompile libs.powermockJunit4
-    testCompile libs.powermockEasymock
+    testImplementation libs.easymock
+    testImplementation libs.junit
+    testImplementation libs.powermockJunit4
+    testImplementation libs.powermockEasymock
 
-    testRuntime libs.slf4jlog4j
+    testRuntimeOnly libs.slf4jlog4j
   }
 
   javadoc {
@@ -778,31 +779,31 @@ project(':connect:runtime') {
 
   dependencies {
 
-    compile project(':connect:api')
-    compile project(':connect:json')
-    compile project(':connect:transforms')
+    implementation project(':connect:api')
+    implementation project(':connect:json')
+    implementation project(':connect:transforms')
 
-    compile libs.slf4jApi
-    compile libs.jacksonJaxrsJsonProvider
-    compile libs.jerseyContainerServlet
-    compile libs.jerseyHk2
-    compile libs.jaxbApi // Jersey dependency that was available in the JDK before Java 9
-    compile libs.activation // Jersey dependency that was available in the JDK before Java 9
-    compile libs.jettyServer
-    compile libs.jettyServlet
-    compile libs.jettyServlets
-    compile libs.jettyClient
-    compile(libs.reflections)
-    compile(libs.mavenArtifact)
+    implementation libs.slf4jApi
+    implementation libs.jacksonJaxrsJsonProvider
+    implementation libs.jerseyContainerServlet
+    implementation libs.jerseyHk2
+    implementation libs.jaxbApi // Jersey dependency that was available in the JDK before Java 9
+    implementation libs.activation // Jersey dependency that was available in the JDK before Java 9
+    implementation libs.jettyServer
+    implementation libs.jettyServlet
+    implementation libs.jettyServlets
+    implementation libs.jettyClient
+    implementation(libs.reflections)
+    implementation(libs.mavenArtifact)
 
-    testCompile libs.easymock
-    testCompile libs.junit
-    testCompile libs.powermockJunit4
-    testCompile libs.powermockEasymock
-    testCompile libs.mockitoCore
-    testCompile libs.httpclient
+    testImplementation libs.easymock
+    testImplementation libs.junit
+    testImplementation libs.powermockJunit4
+    testImplementation libs.powermockEasymock
+    testImplementation libs.mockitoCore
+    testImplementation libs.httpclient
 
-    testRuntime libs.slf4jlog4j
+    testRuntimeOnly libs.slf4jlog4j
   }
 
   javadoc {
@@ -874,15 +875,15 @@ project(':connect:file') {
   archivesBaseName = "connect-file"
 
   dependencies {
-    compile project(':connect:api')
-    compile libs.slf4jApi
+    implementation project(':connect:api')
+    implementation libs.slf4jApi
 
-    testCompile libs.easymock
-    testCompile libs.junit
-    testCompile libs.powermockJunit4
-    testCompile libs.powermockEasymock
+    testImplementation libs.easymock
+    testImplementation libs.junit
+    testImplementation libs.powermockJunit4
+    testImplementation libs.powermockEasymock
 
-    testRuntime libs.slf4jlog4j
+    testRuntimeOnly libs.slf4jlog4j
   }
 
   javadoc {
@@ -911,17 +912,17 @@ project(':connect:basic-auth-extension') {
   archivesBaseName = "connect-basic-auth-extension"
 
   dependencies {
-    compile project(':connect:api')
-    compile libs.slf4jApi
+    implementation project(':connect:api')
+    implementation libs.slf4jApi
 
-    testCompile libs.bcpkix
-    testCompile libs.easymock
-    testCompile libs.junit
-    testCompile libs.powermockJunit4
-    testCompile libs.powermockEasymock
+    testImplementation libs.bcpkix
+    testImplementation libs.easymock
+    testImplementation libs.junit
+    testImplementation libs.powermockJunit4
+    testImplementation libs.powermockEasymock
 
-    testRuntime libs.slf4jlog4j
-    testRuntime libs.jerseyContainerServlet
+    testRuntimeOnly libs.slf4jlog4j
+    testRuntimeOnly libs.jerseyContainerServlet
   }
 
   javadoc {
@@ -950,19 +951,19 @@ project(':connect:mirror') {
   archivesBaseName = "connect-mirror"
 
   dependencies {
-    compile project(':connect:api')
-    compile project(':connect:runtime')
-    compile project(':connect:mirror-client')
-//    compile project(':clients')
-    compile libs.argparse4j
-    compile libs.slf4jApi
+    implementation project(':connect:api')
+    implementation project(':connect:runtime')
+    implementation project(':connect:mirror-client')
+//    implementation project(':clients')
+    implementation libs.argparse4j
+    implementation libs.slf4jApi
 
-    testCompile libs.junit
-    testCompile libs.mockitoCore
-    testCompile project(':connect:runtime').sourceSets.test.output
+    testImplementation libs.junit
+    testImplementation libs.mockitoCore
+    testImplementation project(':connect:runtime').sourceSets.test.output
 
-    testRuntime project(':connect:runtime')
-    testRuntime libs.slf4jlog4j
+    testRuntimeOnly project(':connect:runtime')
+    testRuntimeOnly libs.slf4jlog4j
   }
 
   javadoc {
@@ -991,9 +992,9 @@ project(':connect:mirror-client') {
   archivesBaseName = "connect-mirror-client"
 
   dependencies {
-    compile libs.slf4jApi
-    testCompile libs.junit
-    testRuntime libs.slf4jlog4j
+    implementation libs.slf4jApi
+    testImplementation libs.junit
+    testRuntimeOnly libs.slf4jlog4j
   }
 
   javadoc {

@@ -96,7 +96,7 @@ val functionalTest = task<Test>("functionalTest") {
     testClassesDirs = sourceSets["functionalTest"].output.classesDirs
     classpath = sourceSets["functionalTest"].runtimeClasspath
     mustRunAfter(tasks["test"])
-    // This will be used in the Wiremock tests - the port needs to match what Wiremock is setup to use
+    // This will be used in the Wiremock tests - the port needs to match what Wiremock is set up to use
     environment("DA_ENDPOINT_URL", "http://localhost:8089/da/rest/v-1")
     systemProperties["jdk.attach.allowAttachSelf"] = "true"
 }
@@ -124,10 +124,6 @@ configure<PublishingExtension> {
     }
 }
 
-tasks.getByName("check") {
-    dependsOn(functionalTest)
-}
-
 tasks {
     // This is done in order to use the proper version in the init gradle files
     "processResources"(ProcessResources::class) {
@@ -138,4 +134,32 @@ tasks {
             expand(project.properties)
         }
     }
+}
+
+// Implicit dependencies detected by Gradle 7
+// See <https://docs.gradle.org/7.0/userguide/validation_problems.html#implicit_dependency>
+tasks.getByName("check") {
+    dependsOn(functionalTest)
+}
+
+tasks.whenTaskAdded {
+    if (name == "publishPluginJar") {
+        dependsOn("spotlessJava")
+    }
+}
+
+tasks.getByName("delombok") {
+    dependsOn("spotlessJava")
+}
+
+tasks.getByName("test") {
+    dependsOn("shadowJar")
+}
+
+tasks.getByName("functionalTest") {
+    dependsOn("shadowJar")
+}
+
+tasks.getByName("publishShadowPublicationToMavenLocal") {
+    dependsOn("publishPluginJavaDocsJar", "publishPluginJar")
 }

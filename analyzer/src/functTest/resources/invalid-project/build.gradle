@@ -10,8 +10,8 @@ version = '1.0.1'
 sourceCompatibility = 1.8
 
 dependencies {
-    compile group: 'io.undertow', name: 'undertow-core', version: '2.0+'
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1.redhat-3'
+    implementation group: 'io.undertow', name: 'undertow-core', version: '2.0+'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1.redhat-3'
     implementation('org.springframework:spring-context:5.1.6.INVALID_VERSION')
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
 }

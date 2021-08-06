@@ -322,11 +322,11 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                 "------------------- project org.acme.gradle:root (path: :)%n" +
                         "\tProject version : 1.0.1 --> 1.0.1.redhat-00002%n" +
                         "%n" +
-                        "\tDependencies : com.yammer.metrics:metrics-core:2.2.0 --> com.yammer.metrics:metrics-core:2.2.0-redhat-00001%n"
-                        +
                         "\tDependencies : org.hibernate:hibernate-core:5.3.7.Final --> org.hibernate:hibernate-core:5.3.7.Final-redhat-00001%n"
                         +
                         "\tDependencies : io.undertow:undertow-core:2.0.15.Final --> io.undertow:undertow-core:2.0.15.Final-redhat-00001%n"
+                        +
+                        "\tDependencies : com.yammer.metrics:metrics-core:2.2.0 --> com.yammer.metrics:metrics-core:2.2.0-redhat-00001%n"
                         +
                         "%n");
         assertThat(systemOutRule.getLog()).contains(expectedTextString);
@@ -360,11 +360,11 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                 "------------------- project org.acme.gradle:root (path: :)%n" +
                         "\tProject version : 1.0.1 --> 1.0.1.redhat-00002%n" +
                         "%n" +
-                        "\tDependencies : com.yammer.metrics:metrics-core:2.2.0 --> com.yammer.metrics:metrics-core:2.2.0-redhat-00001%n"
-                        +
                         "\tDependencies : org.hibernate:hibernate-core:5.3.7.Final --> org.hibernate:hibernate-core:5.3.7.Final-redhat-00001%n"
                         +
                         "\tDependencies : io.undertow:undertow-core:2.0.15.Final --> io.undertow:undertow-core:2.0.15.Final-redhat-00001%n"
+                        +
+                        "\tDependencies : com.yammer.metrics:metrics-core:2.2.0 --> com.yammer.metrics:metrics-core:2.2.0-redhat-00001%n"
                         +
                         "%n");
         assertThat(textString).isEqualTo(expectedTextString);
@@ -400,14 +400,14 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                 "------------------- project org.acme.gradle:root (path: :)%n" +
                         "\tProject version : 1.0.1 --> 1.0.1.redhat-00002%n" +
                         "%n" +
-                        "\tDependencies : com.yammer.metrics:metrics-core:2.2.0 --> com.yammer.metrics:metrics-core:2.2.0-redhat-00001%n"
-                        +
                         "\tDependencies : org.hibernate:hibernate-core:5.3.7.Final --> org.hibernate:hibernate-core:5.3.7.Final-redhat-00001%n"
                         +
                         "\tDependencies : io.undertow:undertow-core:2.0.15.Final --> io.undertow:undertow-core:2.0.15.Final-redhat-00001%n"
                         +
-                        "\tNon-Aligned Dependencies : junit:junit:4.12%n" +
+                        "\tDependencies : com.yammer.metrics:metrics-core:2.2.0 --> com.yammer.metrics:metrics-core:2.2.0-redhat-00001%n"
+                        +
                         "\tNon-Aligned Dependencies : org.apache.commons:commons-lang3:3.8.1%n" +
+                        "\tNon-Aligned Dependencies : junit:junit:4.12%n" +
                         "%n");
         assertThat(textString).isEqualTo(expectedTextString);
         assertThat(systemOutRule.getLog()).contains(expectedTextString);

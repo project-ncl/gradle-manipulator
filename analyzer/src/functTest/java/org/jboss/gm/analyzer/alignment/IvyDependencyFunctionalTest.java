@@ -3,14 +3,16 @@ package org.jboss.gm.analyzer.alignment;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
 import org.junit.Before;
@@ -25,13 +27,13 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Aligns a project with Ivy dependency (without groupId).
  *
- * Currently it is only expected that the build doesn't fail, and dependency is not aligned.
+ * Currently, it is only expected that the build doesn't fail and the dependency is not aligned.
  */
 public class IvyDependencyFunctionalTest extends AbstractWiremockTest {
 
@@ -62,28 +64,32 @@ public class IvyDependencyFunctionalTest extends AbstractWiremockTest {
 
     @Test
     public void test() throws IOException, URISyntaxException {
+        // XXX: Use of patternLayout()
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
+
         final File projectRoot = tempDir.newFolder("ivy-dependency");
 
-        final File settings = new File(projectRoot, "settings.xml");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(),
                 Collections.emptyMap());
 
         assertThat(alignmentModel.findCorrespondingChild("root")).satisfies(root -> {
             assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00002");
             assertThat(root.getName()).isEqualTo("root");
-            assertThat(settings).exists();
             final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
-            assertThat(alignedDependencies)
-                    .isEmpty();
+            assertThat(alignedDependencies).isEmpty();
         });
 
-        assertTrue(FileUtils.readFileToString(settings, Charset.defaultCharset())
-                .contains("http://download.eclipse.org/eclipse/updates/4.6/R-4.6.3-201703010400/plugins/"));
-
+        final Path settings = projectRoot.toPath().resolve("settings.xml");
+        assertThat(settings).isRegularFile().isReadable();
+        assertThat(Files.readAllBytes(settings)).asString(StandardCharsets.UTF_8)
+                .contains("https://download.eclipse.org/eclipse/updates/4.6/R-4.6.3-201703010400/plugins/");
     }
 
     @Test
     public void testNoRepoBackup() throws IOException, URISyntaxException {
+        // XXX: Use of patternLayout()
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
+
         final File projectRoot = tempDir.newFolder("ivy-dependency");
 
         final File settings = new File(projectRoot, "settings.xml");

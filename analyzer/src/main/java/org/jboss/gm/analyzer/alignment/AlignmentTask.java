@@ -13,9 +13,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -250,8 +249,6 @@ public class AlignmentTask extends DefaultTask {
                 new AlignmentService.Request(cache.getProjectVersionRefs(configuration.versionSuffixSnapshot()),
                         allDeps));
 
-        final Map<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = cache
-                .getDependencies();
         final String newVersion = alignmentResponse.getNewProjectVersion();
 
         // While we've completed processing (sub)projects the current one is not going to be the root; so
@@ -273,7 +270,8 @@ public class AlignmentTask extends DefaultTask {
             throw new ManipulationUncheckedException("Unable to locate a suitable original version");
         }
 
-        final Set<ProjectVersionRef> nonAligned = new HashSet<>();
+        final Map<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = cache
+                .getDependencies();
         // Iterate through all modules and set their version
         projectDependencies.forEach((key, value) -> {
             final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(key);
@@ -331,6 +329,7 @@ public class AlignmentTask extends DefaultTask {
         writeGmeConfigMarkerFile(rootProject.getBuildFile());
         writeGmeReposMarkerFile();
         writeRepositorySettingsFile(cache.getRepositories());
+        final Set<ProjectVersionRef> nonAligned = new LinkedHashSet<>();
         processAlignmentReport(rootProject, configuration, cache, nonAligned);
     }
 
@@ -450,7 +449,7 @@ public class AlignmentTask extends DefaultTask {
     private Map<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(Project project, Configuration internalConfig,
             Set<ProjectVersionRef> lockFileDeps) {
 
-        final Map<RelaxedProjectVersionRef, ProjectVersionRef> depMap = new HashMap<>();
+        final Map<RelaxedProjectVersionRef, ProjectVersionRef> depMap = new LinkedHashMap<>();
         project.getConfigurations().all(configuration -> {
             if (configuration.isCanBeResolved()) {
 
@@ -505,12 +504,12 @@ public class AlignmentTask extends DefaultTask {
 
                 if (!unresolvedDependencies.isEmpty()) {
                     if (internalConfig.ignoreUnresolvableDependencies()) {
-                        logger.warn("For configuration {}; ignoring all unresolvable dependencies: {}",
+                        logger.warn("For configuration {}, ignoring all unresolvable dependencies: {}",
                                 configuration.getName(),
                                 unresolvedDependencies);
                     } else {
 
-                        logger.error("For configuration {}; unable to resolve all dependencies: {}",
+                        logger.error("For configuration {}, unable to resolve all dependencies: {}",
                                 configuration.getName(),
                                 lenient.getUnresolvedModuleDependencies());
                         for (UnresolvedDependency ud : unresolvedDependencies) {
@@ -595,10 +594,9 @@ public class AlignmentTask extends DefaultTask {
 
     private Set<UnresolvedDependency> getUnresolvedDependenciesExcludingProjectDependencies(LenientConfiguration lenient,
             Set<ProjectDependency> allProjectModules) {
-        return lenient.getUnresolvedModuleDependencies()
-                .stream()
-                .filter(d -> !Comparator.contains(allProjectModules, d))
-                .collect(Collectors.toSet());
+        Set<UnresolvedDependency> unresolvedDependencies = new LinkedHashSet<>(lenient.getUnresolvedModuleDependencies());
+        unresolvedDependencies.removeIf(d -> Comparator.contains(allProjectModules, d));
+        return unresolvedDependencies;
     }
 
     private void updateModuleDynamicDependencies(ManipulationModel correspondingModule,

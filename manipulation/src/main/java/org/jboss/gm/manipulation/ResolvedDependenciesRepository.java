@@ -13,12 +13,12 @@ import org.jboss.gm.common.logging.GMLogger;
  */
 public class ResolvedDependenciesRepository {
 
-    private Map<ProjectRef, String> gaToVersion = new HashMap<>();
+    private final Map<ProjectRef, String> gaToVersion = new HashMap<>();
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
     public void record(ProjectRef projectRef, String version) {
-        logger.debug("Recording resolved dependency " + projectRef.toString());
+        logger.debug("Recording resolved dependency {}", projectRef);
         gaToVersion.put(projectRef, version);
     }
 

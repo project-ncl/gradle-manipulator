@@ -57,7 +57,7 @@ public class AlignedDependencyResolverAction implements Action<DependencyResolve
             logger.info("Overriding dependency {} with new version {}", key, aligned);
             resolveDetails.because(key + " is aligned to " + aligned).useVersion(aligned.getVersionString());
         } else {
-            logger.debug("Unable to find a mapping for {} in module {} with alignedDependencies {}", key,
+            logger.trace("Unable to find a mapping for {} in module {} with alignedDependencies {}", key,
                     module.getName(), alignedDependencies);
         }
     }

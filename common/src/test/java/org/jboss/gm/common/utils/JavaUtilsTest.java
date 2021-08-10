@@ -1,13 +1,18 @@
 package org.jboss.gm.common.utils;
 
-import org.assertj.core.util.Files;
+import java.io.IOException;
+
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class JavaUtilsTest {
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
 
     @Test
     public void testJava() {
@@ -15,8 +20,8 @@ public class JavaUtilsTest {
     }
 
     @Test
-    public void testJavaCompare() throws ManipulationException {
-        assertFalse(JavaUtils.compareJavaHome(Files.temporaryFolder()));
+    public void testJavaCompare() throws ManipulationException, IOException {
+        assertFalse(JavaUtils.compareJavaHome(folder.newFolder()));
         assertTrue(JavaUtils.compareJavaHome(JavaUtils.getJavaHome()));
     }
 }

@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.assertj.core.api.StringAssert;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
@@ -89,11 +90,10 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
 
         // verify that the custom groovy script altered the build script
         final List<String> lines = FileUtils.readLines(new File(projectRoot, "build.gradle"), Charset.defaultCharset());
-        assertThat(lines).filteredOn(
-                l -> l.contains("new CustomVersion"))
-                .hasOnlyOneElementSatisfying(e -> assertThat(e).contains("CustomVersion( '1.0.1.redhat-00002', project )"));
-        assertThat(lines).filteredOn(l -> l.contains("undertowVersion ="))
-                .hasOnlyOneElementSatisfying(l -> assertThat(l).contains("2.0.15.Final-redhat-00001"));
+        assertThat(lines, StringAssert.class).filteredOn(l -> l.contains("new CustomVersion")).singleElement()
+                .contains("CustomVersion( '1.0.1.redhat-00002', project )");
+        assertThat(lines, StringAssert.class).filteredOn(l -> l.contains("undertowVersion =")).singleElement()
+                .contains("2.0.15.Final-redhat-00001");
         assertTrue(lines.stream().anyMatch(s -> s.contains("CustomVersion( '1.0.1.redhat-00002', project )")));
         assertTrue(systemOutRule.getLog().contains("Attempting to read URL"));
         assertTrue(systemOutRule.getLog().contains("found new version is 1.0.1.redhat-00002"));

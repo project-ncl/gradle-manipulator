@@ -34,8 +34,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 import static org.junit.Assume.assumeTrue;
 
 public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
@@ -77,7 +79,8 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
 
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot,
+                Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.jboss.gm.analyzer.functest");
@@ -90,19 +93,23 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
                         .hasSize(5)
                         .extracting("artifactId", "versionString")
                         .contains(
-                                // ensure that the aligned versions as are always used for dynamic and regular dependencies
+                                // ensure that the aligned versions as are always used for dynamic and regular
+                                // dependencies
                                 tuple("undertow-core", "2.0.19.Final-redhat-00001"),
                                 tuple("spring-boot-dependencies", "2.1.4.RELEASE.redhat-3"),
                                 tuple("hibernate-core", "5.3.9.Final-redhat-00001"))
-                        // we can't assert on a specific version because we have used a range as the dependency's version
+                        // we can't assert on a specific version because we have used a range as the dependency's
+                        // version
                         .filteredOn(t -> !getVersion(t).contains("redhat"))
                         .satisfies(l -> {
-                            // make sure the two dynamic dependencies not aligned exist and have versions similar to what we expect
-
+                            // make sure the two dynamic dependencies not aligned exist and have versions similar to
+                            // what we expect
                             assertThat(l).filteredOn(t -> "HdrHistogram".equals(getArtifactId(t)))
-                                    .hasOnlyOneElementSatisfying(t -> assertThat(getVersion(t)).startsWith("2."));
+                                    .map(ComplexProjectFunctionalTest::getVersion).singleElement(as(STRING))
+                                    .startsWith("2.");
                             assertThat(l).filteredOn(t -> "commons-lang3".equals(getArtifactId(t)))
-                                    .hasOnlyOneElementSatisfying(t -> assertThat(getVersion(t)).startsWith("3."));
+                                    .map(ComplexProjectFunctionalTest::getVersion).singleElement(as(STRING))
+                                    .startsWith("3.");
                         });
 
                 assertThat(root.getAlignedDependencies()).containsOnlyKeys(
@@ -125,11 +132,11 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
                 "https://dl.google.com/dl/android/maven2/");
     }
 
-    private String getArtifactId(Tuple tuple) {
+    private static String getArtifactId(Tuple tuple) {
         return tuple.toList().get(0).toString();
     }
 
-    private String getVersion(Tuple tuple) {
+    private static String getVersion(Tuple tuple) {
         return tuple.toList().get(1).toString();
     }
 }

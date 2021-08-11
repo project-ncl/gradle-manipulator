@@ -3,11 +3,10 @@ package org.jboss.gm.cli;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -198,11 +197,11 @@ public class Main implements Callable<Void> {
             envVars.put("JAVA_HOME", javaHome.getAbsolutePath());
 
             BuildLauncher build = connection.newBuild();
-            Set<String> jvmArgs = jvmPropertyParams.entrySet().stream()
+            Collection<String> jvmArgs = jvmPropertyParams.entrySet().stream()
                     .map(entry -> "-D" + entry.getKey() + '=' + entry.getValue())
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
+                    .collect(Collectors.toList());
             jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments().stream()
-                    .filter(s -> s.startsWith("-Xdebug") || s.startsWith("-Xrunjdwp")).collect(Collectors.toSet()));
+                    .filter(s -> s.startsWith("-Xdebug") || s.startsWith("-Xrunjdwp")).collect(Collectors.toList()));
 
             if (colour && StringUtils.isEmpty(System.getenv("NO_COLOR"))) {
                 build.setColorOutput(true);

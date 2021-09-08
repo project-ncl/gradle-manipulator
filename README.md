@@ -18,7 +18,7 @@ This is a Gradle tool to align versions and dependencies within the project acco
 # Plugins
 
 Both plugins work in conjunction and therefore the same version is required for each. The analyzer plugin will inject a reference
-to the manipulation plugin. It is compatible (to run or build) with Gradle 4.10.x - 6.x.
+to the manipulation plugin. It is compatible (to run or build) with Gradle 4.10.x - 7.x.
 
 ## Analyzer
 

@@ -14,6 +14,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.tooling.internal.consumer.ConnectorServices;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.AlignmentPlugin;
 import org.jboss.gm.analyzer.alignment.AlignmentTask;
 import org.jboss.gm.common.Configuration;
@@ -263,8 +264,14 @@ public class MainTest {
         }
 
         assertThat(systemErrRule.getLog()).doesNotContain(ANSIConstants.ESC_START);
-        assertThat(systemErrRule.getLog())
-                .contains("'" + Configuration.DA + "' must be configured in order for dependency scanning to work");
+
+        if (GradleVersion.current().compareTo(GradleVersion.version("5.4.1")) >= 0) {
+            assertThat(systemErrRule.getLog()).contains(
+                    "'" + Configuration.DA + "' must be configured in order for dependency scanning to work");
+        } else {
+            assertThat(systemOutRule.getLog()).contains(
+                    "'" + Configuration.DA + "' must be configured in order for dependency scanning to work");
+        }
     }
 
     @Test

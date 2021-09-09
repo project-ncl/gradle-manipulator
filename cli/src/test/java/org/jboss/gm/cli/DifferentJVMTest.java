@@ -255,7 +255,6 @@ public class DifferentJVMTest {
     public void runWithJDK8Fails() throws Exception {
         // XXX: See <https://github.com/gradle/gradle/issues/9339>
         GradleVersion v = GradleVersion.current();
-        assumeTrue(v.compareTo(GradleVersion.version("5.0")) < 0 || v.compareTo(GradleVersion.version("5.3.1")) >= 0);
 
         final File target = tempDir.newFolder();
         final File source = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
@@ -301,7 +300,7 @@ public class DifferentJVMTest {
         // XXX: Caused by: java.io.StreamCorruptedException: invalid type code: 00
         assumeTrue(v.compareTo(GradleVersion.version("5.3.1")) != 0);
 
-        if (v.compareTo(GradleVersion.version("5.0")) >= 0) {
+        if (v.compareTo(GradleVersion.version("5.4.1")) >= 0) {
             assertThat(systemErrRule.getLog()).contains("Task 'FOOgenerateAlignmentMetadataBAR' not found in root "
                     + "project");
         } else {

@@ -3,7 +3,6 @@ package org.jboss.gm.cli;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -116,7 +115,7 @@ public class Main implements Callable<Void> {
         cl.setOverwrittenOptionsAllowed(true);
 
         int result = cl.execute(args);
-        if (handler.getException() != null) {
+        if (handler.hasException()) {
             throw handler.getException();
         }
         return result;
@@ -221,36 +220,22 @@ public class Main implements Callable<Void> {
             build.setStandardError(System.err);
             build.run();
         } catch (BuildException e) {
-            Throwable throwable = e.getCause();
-
-            if (throwable != null) {
-                String s = throwable.toString();
-
-                if (s.startsWith("org.gradle.internal.exceptions.LocationAwareException")) {
-                    Throwable cause = e.getCause();
-                    boolean manipulationUncheckedException = false;
-
-                    while (cause != null) {
-                        if (cause.toString()
-                                .startsWith("org.commonjava.maven.ext.common.ManipulationUncheckedException")) {
-                            manipulationUncheckedException = true;
-                            break;
-                        }
-
-                        cause = cause.getCause();
-                    }
-
-                    if (!manipulationUncheckedException) {
-                        logger.debug("Hit https://github.com/gradle/gradle/issues/9339 ", e);
-                        logger.error(
-                                "Build exception but unable to transfer message due to mix of JDK versions. Examine log for problems");
-                        throw new ManipulationException("Problem executing build", e.getCause());
-                    }
+            if (e.getCause() != null) {
+                Throwable cause = e.getCause();
+                // In Gradle 4.10/7.2 the loop is required as the cause contains
+                //      org.gradle.internal.exceptions.LocationAwareException
+                //      org.gradle.execution.TaskSelectionException
+                while (cause.getCause() != null) {
+                    cause = cause.getCause();
                 }
+                logger.debug("Hit https://github.com/gradle/gradle/issues/9339 ", e);
+                logger.error(
+                        "Build exception but unable to transfer message due to mix of JDK versions. Examine log for problems");
+                throw new ManipulationException("Problem executing build", cause);
+            } else {
+                logger.error("Caught exception running build", e);
+                throw new ManipulationException("Caught exception running build", e);
             }
-
-            logger.error("Caught exception running build", e.getCause());
-            throw new ManipulationException("Caught exception running build", e.getCause());
         } catch (GradleConnectionException e) {
             // Unable to do instanceof comparison due to different classloader
             if ("org.gradle.api.UncheckedIOException".equals(e.getCause().getClass().getName())) {
@@ -334,6 +319,10 @@ public class Main implements Callable<Void> {
         public int handleExecutionException(Exception ex, CommandLine commandLine, CommandLine.ParseResult parseResult) {
             this.exception = ex;
             return 1;
+        }
+
+        public boolean hasException() {
+            return exception != null;
         }
 
         public Exception getException() {

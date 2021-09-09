@@ -24,6 +24,7 @@ import org.gradle.api.logging.LogLevel;
 import org.gradle.tooling.internal.consumer.ConnectorServices;
 import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.AlignmentPlugin;
+import org.jboss.gm.analyzer.alignment.AlignmentTask;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Before;
@@ -38,7 +39,6 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runners.MethodSorters;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
@@ -131,7 +131,7 @@ public class DifferentJVMTest {
         ConnectorServices.reset();
     }
 
-    private String escapeBackslashes(String dir) {
+    private static String escapeBackslashes(String dir) {
         if (SystemUtils.IS_OS_WINDOWS) {
             return FilenameUtils.normalize(dir, true).replace("/", "\\\\\\\\");
         }
@@ -182,11 +182,12 @@ public class DifferentJVMTest {
         };
         m.run(args);
 
-        File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), "gme.gradle");
+        File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), AlignmentTask.GME);
         assertTrue(systemOutRule.getLog().contains("Task :generateAlignmentMetadata"));
         assertTrue(systemOutRule.getLog().matches("(?s).*Environment:.*JAVA_HOME:.*"));
 
-        System.out.println("Verifying it has injected gme.gradle with version " + actualVersion.getProperty("version"));
+        System.out.println("Verifying it has injected " + AlignmentTask.GME + " with version "
+                + actualVersion.getProperty("version"));
         assertTrue(gmeGradle.exists());
         assertTrue(FileUtils.readFileToString(gmeGradle, Charset.defaultCharset())
                 .contains("org.jboss.gm:manipulation:" + actualVersion.getProperty("version")));
@@ -242,8 +243,9 @@ public class DifferentJVMTest {
         assertTrue(systemOutRule.getLog().contains("Task :generateAlignmentMetadata"));
         assertTrue(systemOutRule.getLog().matches("(?s).*Environment.*JAVA_HOME.*jdk8.*"));
 
-        File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), "gme.gradle");
-        System.out.println("Verifying it has injected gme.gradle with version " + actualVersion.getProperty("version"));
+        File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), AlignmentTask.GME);
+        System.out.println("Verifying it has injected " + AlignmentTask.GME + " with version "
+                + actualVersion.getProperty("version"));
         assertTrue(gmeGradle.exists());
         assertTrue(FileUtils.readFileToString(gmeGradle, Charset.defaultCharset())
                 .contains("org.jboss.gm:manipulation:" + actualVersion.getProperty("version")));
@@ -253,7 +255,6 @@ public class DifferentJVMTest {
     public void runWithJDK8Fails() throws Exception {
         // XXX: See <https://github.com/gradle/gradle/issues/9339>
         GradleVersion v = GradleVersion.current();
-        assumeTrue(v.compareTo(GradleVersion.version("5.0")) < 0 || v.compareTo(GradleVersion.version("5.3.1")) >= 0);
 
         final File target = tempDir.newFolder();
         final File source = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
@@ -291,21 +292,24 @@ public class DifferentJVMTest {
         try {
             m.run(args);
         } catch (Exception e) {
-            if (v.compareTo(GradleVersion.version("5.0")) >= 0) {
-                // XXX: Ignored for 4.10 as Exception differs between Gradle versions and System.err is checked later anyway
-                assertTrue(e.getMessage().contains("Problem executing build"));
-            }
+            assertThat(e.getMessage()).contains("Problem executing build");
         }
 
-        File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), "gme.gradle");
-        assertFalse(gmeGradle.exists());
+        File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), AlignmentTask.GME);
+        assertThat(gmeGradle).doesNotExist();
         // XXX: Caused by: java.io.StreamCorruptedException: invalid type code: 00
         assumeTrue(v.compareTo(GradleVersion.version("5.3.1")) != 0);
-        assertTrue(systemErrRule.getLog().contains("Task 'FOOgenerateAlignmentMetadataBAR' not found in root project"));
-        // XXX: Gradle 4.x doesn't trigger the same Exception
-        assumeTrue(v.compareTo(GradleVersion.version("5.0")) >= 0);
-        assertTrue(systemErrRule.getLog().contains(
-                "Build exception but unable to transfer message due to mix of JDK versions. Examine log for problems"));
-        assertTrue(systemOutRule.getLog().contains("Java home overridden to: " + JDK8_DIR));
+
+        if (v.compareTo(GradleVersion.version("5.4.1")) >= 0) {
+            assertThat(systemErrRule.getLog()).contains("Task 'FOOgenerateAlignmentMetadataBAR' not found in root "
+                    + "project");
+        } else {
+            assertThat(systemOutRule.getLog()).contains("Task 'FOOgenerateAlignmentMetadataBAR' not found in root "
+                    + "project");
+        }
+
+        assertThat(systemErrRule.getLog()).contains(
+                "Build exception but unable to transfer message due to mix of JDK versions. Examine log for problems");
+        assertThat(systemOutRule.getLog()).contains("Java home overridden to: " + JDK8_DIR);
     }
 }

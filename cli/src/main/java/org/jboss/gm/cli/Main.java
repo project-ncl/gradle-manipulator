@@ -115,7 +115,7 @@ public class Main implements Callable<Void> {
         cl.setOverwrittenOptionsAllowed(true);
 
         int result = cl.execute(args);
-        if (handler.getException() != null) {
+        if (handler.hasException()) {
             throw handler.getException();
         }
         return result;
@@ -220,8 +220,22 @@ public class Main implements Callable<Void> {
             build.setStandardError(System.err);
             build.run();
         } catch (BuildException e) {
-            logger.error("Caught exception running build", e.getCause());
-            throw new ManipulationException("Caught exception running build", e.getCause());
+            if (e.getCause() != null) {
+                Throwable cause = e.getCause();
+                // In Gradle 4.10/7.2 the loop is required as the cause contains
+                //      org.gradle.internal.exceptions.LocationAwareException
+                //      org.gradle.execution.TaskSelectionException
+                while (cause.getCause() != null) {
+                    cause = cause.getCause();
+                }
+                logger.debug("Hit https://github.com/gradle/gradle/issues/9339 ", e);
+                logger.error(
+                        "Build exception but unable to transfer message due to mix of JDK versions. Examine log for problems");
+                throw new ManipulationException("Problem executing build", cause);
+            } else {
+                logger.error("Caught exception running build", e);
+                throw new ManipulationException("Caught exception running build", e);
+            }
         } catch (GradleConnectionException e) {
             // Unable to do instanceof comparison due to different classloader
             if ("org.gradle.api.UncheckedIOException".equals(e.getCause().getClass().getName())) {
@@ -231,6 +245,7 @@ public class Main implements Callable<Void> {
             } else {
                 logger.error("Gradle connection exception", e);
             }
+
             throw new ManipulationException("Problem executing build");
         } catch (RuntimeException e) {
             logger.error("Fatal problem executing build", e);
@@ -304,6 +319,10 @@ public class Main implements Callable<Void> {
         public int handleExecutionException(Exception ex, CommandLine commandLine, CommandLine.ParseResult parseResult) {
             this.exception = ex;
             return 1;
+        }
+
+        public boolean hasException() {
+            return exception != null;
         }
 
         public Exception getException() {

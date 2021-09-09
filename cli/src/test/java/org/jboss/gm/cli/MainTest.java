@@ -14,7 +14,9 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.tooling.internal.consumer.ConnectorServices;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.AlignmentPlugin;
+import org.jboss.gm.analyzer.alignment.AlignmentTask;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.rules.LoggingRule;
@@ -29,11 +31,11 @@ import org.junit.rules.TemporaryFolder;
 
 import ch.qos.logback.core.pattern.color.ANSIConstants;
 
-import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class MainTest {
 
@@ -55,7 +57,7 @@ public class MainTest {
     @Rule
     public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
-    private String escapeBackslashes(String dir) {
+    private static String escapeBackslashes(String dir) {
         if (SystemUtils.IS_OS_WINDOWS) {
             return FilenameUtils.normalize(dir, true).replace("/", "\\\\\\\\");
         }
@@ -208,10 +210,11 @@ public class MainTest {
         int result = m.run(args);
         assertEquals(0, result);
 
-        File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), "gme.gradle");
+        File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), AlignmentTask.GME);
         assertTrue(systemOutRule.getLog().contains("Task :generateAlignmentMetadata"));
 
-        System.err.println("Verifying it has injected gme.gradle with version " + actualVersion.getProperty("version"));
+        System.err.println("Verifying it has injected " + AlignmentTask.GME + " with version "
+                + actualVersion.getProperty("version"));
         assertTrue(gmeGradle.exists());
         assertTrue(FileUtils.readFileToString(gmeGradle, Charset.defaultCharset())
                 .contains("org.jboss.gm:manipulation:" + actualVersion.getProperty("version")));
@@ -256,12 +259,19 @@ public class MainTest {
         try {
             m.run(args);
         } catch (Exception e) {
-            assertTrue(e.getCause().getMessage().contains("must be configured in order for dependency scanning to work"));
+            assertThat(e.getCause().getMessage()).contains("must be configured in order for dependency scanning to "
+                    + "work");
         }
 
-        assertFalse(systemErrRule.getLog().contains(ANSIConstants.ESC_START));
-        assertThat(systemErrRule.getLog())
-                .contains("'" + Configuration.DA + "' must be configured in order for dependency scanning to work");
+        assertThat(systemErrRule.getLog()).doesNotContain(ANSIConstants.ESC_START);
+
+        if (GradleVersion.current().compareTo(GradleVersion.version("5.4.1")) >= 0) {
+            assertThat(systemErrRule.getLog()).contains(
+                    "'" + Configuration.DA + "' must be configured in order for dependency scanning to work");
+        } else {
+            assertThat(systemOutRule.getLog()).contains(
+                    "'" + Configuration.DA + "' must be configured in order for dependency scanning to work");
+        }
     }
 
     @Test

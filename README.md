@@ -24,7 +24,7 @@ to the manipulation plugin. It is compatible (to run or build) with Gradle 4.10.
 
 The `analyzer` directory contains the gradle plugin that generates metadata information about aligned dependencies and the project version.
 
-Latest version of the Analyzer init script : https://repo1.maven.org/maven2/org/jboss/gm/analyzer/2.8/analyzer-2.8-init.gradle
+Latest version of the Analyzer init script : https://repo1.maven.org/maven2/org/jboss/gm/analyzer/2.9/analyzer-2.9-init.gradle
 
 
 ## Manipulation

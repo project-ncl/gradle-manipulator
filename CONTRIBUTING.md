@@ -204,7 +204,7 @@ See [this](https://docs.gradle.org/current/userguide/signing_plugin.html) for mo
 
 #### Release command
 
-The plugins can be released using the following command (from the master branch of the repository):
+The plugins can be released using the following command (from the main branch of the repository):
 
     # Optional command: ./gradlew clean
 

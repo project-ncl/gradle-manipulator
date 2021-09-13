@@ -135,7 +135,7 @@ tasks.register("fixupReadme") {
     }
 }
 
-// In https://github.com/researchgate/gradle-release/blob/master/src/main/groovy/net/researchgate/release/ReleasePlugin.groovy#L116,
+// In https://github.com/researchgate/gradle-release/blob/main/src/main/groovy/net/researchgate/release/ReleasePlugin.groovy#L116,
 // the list of task interdependencies is specified. However, as per https://github.com/researchgate/gradle-release/issues/298,
 // we want to ensure the tag is done before the build so the manifest (etc.) points to the correct SHA. As the beforeReleaseBuild
 // then runs at the wrong point with this change, we manually inject a task (fixupReadme) below.
@@ -314,7 +314,7 @@ subprojects {
          * https://imperceptiblethoughts.com/shadow/plugins/
          *
          * Another great source of information is the configuration of the shadow plugin itself:
-         * https://github.com/johnrengelman/shadow/blob/master/build.gradle
+         * https://github.com/johnrengelman/shadow/blob/main/build.gradle
          */
         apply(plugin = "com.github.johnrengelman.shadow")
 

@@ -2,7 +2,7 @@ group = "org.jboss.gm"
 
 pluginBundle {
     website = "https://project-ncl.github.io/gradle-manipulator/"
-    vcsUrl = "https://github.com/project-ncl/gradle-manipulator/tree/master/analyzer"
+    vcsUrl = "https://github.com/project-ncl/gradle-manipulator/tree/main/analyzer"
     tags = listOf("versions", "alignment")
 }
 

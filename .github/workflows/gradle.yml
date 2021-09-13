@@ -6,10 +6,10 @@ name: CI
 on:
   push:
     branches:
-    - master
+    - main
   pull_request:
     branches:
-    - master
+    - main
 
 jobs:
   build:
@@ -53,7 +53,7 @@ jobs:
         verbose: true
 
   snapshot:
-    if: github.repository == 'project-ncl/gradle-manipulator' && github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.repository == 'project-ncl/gradle-manipulator' && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

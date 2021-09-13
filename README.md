@@ -1,4 +1,4 @@
-[![Build Status (Travis CI)](https://travis-ci.org/project-ncl/gradle-manipulator.svg?branch=master)](https://travis-ci.org/project-ncl/gradle-manipulator.svg?branch=master)
+[![Build Status (Travis CI)](https://travis-ci.org/project-ncl/gradle-manipulator.svg?branch=main)](https://travis-ci.org/project-ncl/gradle-manipulator.svg?branch=main)
 
 # Table of Contents
 
@@ -34,7 +34,7 @@ modifies the project to use those dependencies and project version.
 
 ## Contributions
 
-Contributions are more than welcome! Before contributing to the project, please read [this](https://github.com/project-ncl/gradle-manipulator/blob/master/CONTRIBUTING.md). To contribute sample Groovy scripts (for this project or the sibling PME project) please see the [Groovy Examples](https://github.com/project-ncl/manipulator-groovy-examples) project.
+Contributions are more than welcome! Before contributing to the project, please read [this](https://github.com/project-ncl/gradle-manipulator/blob/main/CONTRIBUTING.md). To contribute sample Groovy scripts (for this project or the sibling PME project) please see the [Groovy Examples](https://github.com/project-ncl/manipulator-groovy-examples) project.
 
 ## Documentation
 

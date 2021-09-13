@@ -46,7 +46,7 @@ BuildPlugin.configureRepositories(project)
 
 String licenseCommit
 if (VersionProperties.elasticsearch.toString().endsWith('-SNAPSHOT')) {
-  licenseCommit = scminfo.change ?: "master" // leniency for non git builds
+  licenseCommit = scminfo.change ?: "main" // leniency for non git builds
 } else {
   licenseCommit = "v${version}"
 }

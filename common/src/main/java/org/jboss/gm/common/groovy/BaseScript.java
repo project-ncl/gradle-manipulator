@@ -49,9 +49,10 @@ public abstract class BaseScript extends GradleBaseScript {
      */
     @Override
     public Project getProject() {
-        if (stage == InvocationStage.FIRST) {
-            logger.error("getProject unsupported for InvocationStage FIRST");
-            throw new ManipulationUncheckedException("getProject is not supported for Groovy in initial stage.");
+        if (stage == InvocationStage.PREPARSE || stage == InvocationStage.FIRST) {
+            logger.error("getProject unsupported for InvocationStage {}", stage.name());
+            throw new ManipulationUncheckedException(
+                    "Getting the project is not supported for Groovy in stage " + stage.name());
         }
         return rootProject;
     }
@@ -63,9 +64,9 @@ public abstract class BaseScript extends GradleBaseScript {
      */
     @Override
     public ManipulationModel getModel() {
-        if (stage == InvocationStage.FIRST) {
-            logger.error("getModel unsupported for InvocationStage FIRST");
-            throw new ManipulationUncheckedException("Model is not supported for Groovy in initial stage.");
+        if (stage == InvocationStage.PREPARSE || stage == InvocationStage.FIRST) {
+            logger.error("getModel unsupported for InvocationStage {}", stage.name());
+            throw new ManipulationUncheckedException("Getting the model is not supported for Groovy in stage " + stage.name());
         }
         return model;
     }
@@ -122,8 +123,7 @@ public abstract class BaseScript extends GradleBaseScript {
      * @param model the current aligned model.
      */
     public void setValues(Logger logger, InvocationStage stage, File rootDir, Properties properties, Translator restAPI,
-            Project rootProject,
-            ManipulationModel model) {
+            Project rootProject, ManipulationModel model) {
         this.logger = logger;
         this.stage = stage;
         this.rootProject = rootProject;
@@ -134,7 +134,7 @@ public abstract class BaseScript extends GradleBaseScript {
 
         File repoCache;
         try {
-            if (stage == InvocationStage.FIRST || stage == InvocationStage.BOTH) {
+            if (rootProject == null) {
                 repoCache = Files.createTempDirectory("repo-cache-").toFile();
             } else {
                 repoCache = new File(rootProject.getBuildDir(), "repo-cache-");

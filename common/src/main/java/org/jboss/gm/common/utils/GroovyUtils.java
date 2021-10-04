@@ -11,6 +11,7 @@ import lombok.experimental.UtilityClass;
 
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.commonjava.maven.ext.core.groovy.CommonBaseScript;
 import org.commonjava.maven.ext.core.groovy.InvocationPoint;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.commonjava.maven.ext.io.FileIO;
@@ -93,7 +94,7 @@ public class GroovyUtils {
             if (targetStage == stage || stage == InvocationStage.ALL) {
                 // Inject the values via a new BaseScript so user's can have completion.
                 if (script instanceof BaseScript) {
-                    ((BaseScript) script).setValues(logger, stage, target, configuration.getProperties(),
+                    ((BaseScript) script).setValues(logger, targetStage, target, configuration.getProperties(),
                             RESTUtils.getTranslator(configuration), rootProject, alignmentModel);
                 } else {
                     throw new ManipulationException("Cannot cast {} to a BaseScript to set values.", script);

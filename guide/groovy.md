@@ -21,7 +21,6 @@ The argument should a comma separated list of HTTP / HTTPS URLs.
 
 Each groovy script will be run on the execution root (i.e. where Gradle is invoked).
 
-
 Each script <b>must</b> use the following annotations:
 
 ```
@@ -35,17 +34,28 @@ import org.jboss.gm.common.groovy.BaseScript
 
 ```
 
-where InvocationStage may be `FIRST`, `LAST` or `BOTH`. This denotes whether the script is ran
-before all other manipulators, after or both. The script therefore encodes how and when it is run.
-
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    <b>NOTE</b> : Prior to GME 1.4 the annotations used the simpler <a href="http://docs.groovy-lang.org/latest/html/gapi/groovy/transform/BaseScript.html">BaseScript</a> annotation e.g. <i>@BaseScript GMEBaseScript gmeScript</i>
+    <b>NOTE</b> : Prior to GME 1.4, the annotations used the simpler <a href="http://docs.groovy-lang.org/latest/html/gapi/groovy/transform/BaseScript.html">BaseScript</a> annotation e.g. <code>@BaseScript GMEBaseScript gmeScript</code>
 </td>
 </tr>
 </table>
 
+### Invocation Stages
+
+In the example script, we saw the use of the `@InvocationPoint` annotation which controls when the script is run. It
+takes a single argument, `invocationPoint`, with the type `InvocationStage`. The possible values for `InvocationStage`
+are `PREPARSE`, `FIRST`, `LAST`, and `ALL`. These values are relative to when the manipulations to the build files are
+made. The table below provides a description of the invocation stages available for running a script.
+
+| Stage      | Description                                                                                                                                                                              | Since      |
+|------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| `PREPARSE` | Alias for `FIRST`.                                                                                                                                                                       | 2.10       |
+| `FIRST`    | Runs the script before any other manipulators. It is safe to modify build files on disk during this stage.                                                                               | 1.5        |
+| `LAST`     | Runs the script after any other manipulators.                                                                                                                                            | 1.5        |
+| ~`BOTH`~   | Runs the script during stages `FIRST` and `LAST`. _Note that as of version 2.10, `BOTH` has been replaced by `ALL`_.                                                                     | [1.5, 2.9] |
+| `ALL`      | Runs the script during _all_ possible stages: `FIRST`, and `LAST`.  The `getInvocationStage()` API can be used to determine in which stage the script is currently running.              | 2.10       |
 
 ### API
 
@@ -90,7 +100,7 @@ The following API is made available:
 | [Translator](https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-io/latest/org/commonjava/maven/ext/io/rest/Translator.html) getRESTAPI() | Get the REST Version Translator. |
 
 
-When running as `FIRST` Gradle has not parsed and created the Project which means the `getModel`/`getProject` calls are not available. However it is possible to ammend the Gradle scripts directly on disk which will then be read as part of the following alignment process.
+When running as `FIRST`, Gradle has not parsed and created the Project which means the `getModel`/`getProject` calls are not available. However, it is possible to amend the Gradle scripts directly on disk which will then be read as part of the following alignment process.
 
 The API can then be invoked by e.g.
 
@@ -145,9 +155,9 @@ It is possible to use the `Translator` API to call onto the Dependency Anlalyser
 
 ### Developing Groovy Scripts
 
-To make it easier to develop scripts for both GME (this project) and [PME](https://github.com/release-engineering/pom-manipulation-ext) an example project has been setup. The [manipulator-groovy-examples](https://github.com/project-ncl/manipulator-groovy-examples) provides a framework to develop and test such scripts.
+To make it easier to develop scripts for both GME (this project) and [PME](https://github.com/release-engineering/pom-manipulation-ext) an example project has been set up. The [manipulator-groovy-examples](https://github.com/project-ncl/manipulator-groovy-examples) provides a framework to develop and test such scripts.
 
-**Note**: To debug Groovy scripts, while it is possible to use a debugger on the CLI for those scripts with invocation point `FIRST`, for those scripts with `LAST` it is not possible to run the CLI _and_ debug on the Groovy script. Instead run Gradle directly and invoke the plugin like
+**Note**: To debug Groovy scripts, while it is possible to use a debugger on the CLI for those scripts with invocation point `FIRST`, for those scripts with `LAST` it is not possible to run the CLI _and_ debug on the Groovy script. Instead, run Gradle directly and invoke the plugin like
 
     gradle
     --no-daemon
@@ -158,4 +168,4 @@ To make it easier to develop scripts for both GME (this project) and [PME](https
     -DgroovyScripts=file://...../script.groovy
     -Dorg.gradle.debug=true
 
-The are two crucial aspects - you need to activate Groovy debugging via `org.gradle.debug=true` and the source must be added to your IDE so it can see it.
+There are two crucial aspects - you need to activate Groovy debugging via `org.gradle.debug=true` and the source must be added to your IDE so it can see it.

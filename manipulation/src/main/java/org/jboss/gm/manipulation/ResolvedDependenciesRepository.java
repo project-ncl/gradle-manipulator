@@ -17,11 +17,23 @@ public class ResolvedDependenciesRepository {
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
+    /**
+     * Records a dependency which does not have a declared version.
+     *
+     * @param projectRef the dependency
+     * @param version the version
+     */
     public void record(ProjectRef projectRef, String version) {
         logger.debug("Recording resolved dependency {}", projectRef);
         gaToVersion.put(projectRef, version);
     }
 
+    /**
+     * Gets the version of the given dependency.
+     *
+     * @param projectRef the dependency
+     * @return the version
+     */
     public String get(ProjectRef projectRef) {
         return gaToVersion.get(projectRef);
     }

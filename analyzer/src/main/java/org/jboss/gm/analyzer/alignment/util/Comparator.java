@@ -10,9 +10,11 @@ import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.UnresolvedDependency;
 
+/**
+ * Utility class for comparing dependencies.
+ */
 @UtilityClass
 public class Comparator {
-
     /**
      * Determines whether the set contains the GAV from the {@link UnresolvedDependency}.
      *

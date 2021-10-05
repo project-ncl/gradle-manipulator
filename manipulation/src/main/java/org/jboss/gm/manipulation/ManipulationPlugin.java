@@ -28,12 +28,23 @@ import org.jboss.gm.manipulation.actions.UploadTaskTransformerAction;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
+/**
+ * The manipulation plugin.
+ */
 public class ManipulationPlugin implements Plugin<Project> {
-
+    /**
+     * The name of the legacy maven plugin, i.e., &quot;maven&quot;.
+     */
     public static final String LEGACY_MAVEN_PLUGIN = "maven";
     // This plugin wraps the legacy maven plugin.
+    /**
+     * The name of the legacy nexus maven plugin, i.e., &quot;com.bmuschko.nexus&quot;.
+     */
     private static final String LEGACY_MAVEN_PLUGIN_NEXUS = "com.bmuschko.nexus";
     // Plugin "nebula.maven-base-publish" encompasses maven-publish
+    /**
+     * The name of the maven publish plugin, i.e., &quot;maven-publish&quot;.
+     */
     public static final String MAVEN_PUBLISH_PLUGIN = "maven-publish";
 
     static {
@@ -49,9 +60,13 @@ public class ManipulationPlugin implements Plugin<Project> {
         }
     };
 
+    /**
+     * Applies the manipulation plugin to the given project.
+     *
+     * @param project the project
+     */
     @Override
     public void apply(Project project) {
-
         if (System.getProperty("gmeFunctionalTest") != null) {
             ConfigCache.getOrCreate(Configuration.class).reload();
         }

@@ -16,6 +16,8 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
 
 /**
+ * Aligned dependency resolver action.
+ *
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
  */
 public class AlignedDependencyResolverAction implements Action<DependencyResolveDetails> {
@@ -24,12 +26,23 @@ public class AlignedDependencyResolverAction implements Action<DependencyResolve
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
+    /**
+     * Creates a new aligned dependency resolver action with the given module and resolved dependencies repository.
+     * 
+     * @param module the module
+     * @param resolvedDependenciesRepository the resolved dependencies repository
+     */
     public AlignedDependencyResolverAction(ManipulationModel module,
             ResolvedDependenciesRepository resolvedDependenciesRepository) {
         this.module = module;
         this.resolvedDependenciesRepository = resolvedDependenciesRepository;
     }
 
+    /**
+     * Executes the aligned dependency resolver action with the given dependency resolve details.
+     *
+     * @param resolveDetails the details about the resolved dependency
+     */
     @Override
     public void execute(DependencyResolveDetails resolveDetails) {
         final ModuleVersionSelector requested = resolveDetails.getRequested();

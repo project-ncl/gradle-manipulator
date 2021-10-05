@@ -22,20 +22,24 @@ import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
  * {@link org.jboss.gm.analyzer.alignment.AlignmentService.RequestCustomizer} that removes dependencies from a
- * {@link org.jboss.gm.analyzer.alignment.AlignmentService.Request}
- *
- * The idea is that this class will be created with a predicate (which can of course be the product of multiple predicates)
- * that will match dependencies that are supposed to be excluded.
- * The hard part is creating the proper predicate for each project based on configuration similar to what PME offers
- *
- * TODO: figure out if we need to worry about order
+ * {@link org.jboss.gm.analyzer.alignment.AlignmentService.Request}.
+ * <p>
+ * The idea is that this class will be created with a predicate (which can of course be the product of multiple
+ * predicates) that will match dependencies that are supposed to be excluded. The hard part is creating the proper
+ * predicate for each project based on configuration similar to what PME offers.
  */
+//  TODO: figure out if we need to worry about order.
 public class DependencyExclusionCustomizer implements AlignmentService.RequestCustomizer {
 
     private static final Logger logger = GMLogger.getLogger(DependencyExclusionCustomizer.class);
 
     private final Predicate<ProjectRef> predicate;
 
+    /**
+     * Creates a dependency exclusion customizer with the given predicate.
+     *
+     * @param predicate the predicate (or product of multiple predicates) that will match dependencies to be excluded
+     */
     public DependencyExclusionCustomizer(Predicate<ProjectRef> predicate) {
         this.predicate = predicate;
     }
@@ -48,6 +52,13 @@ public class DependencyExclusionCustomizer implements AlignmentService.RequestCu
         return new AlignmentService.Request(request.getProject(), dependenciesWithoutExclusions);
     }
 
+    /**
+     * Creates a request customize from the given configuration and set of projects.
+     *
+     * @param configuration holds all configuration values for the two plugins
+     * @param projects the projects
+     * @return the request customizer
+     */
     public static AlignmentService.RequestCustomizer fromConfigurationForModule(Configuration configuration,
             Set<Project> projects) {
         final List<Predicate<ProjectRef>> predicates = new ArrayList<>();

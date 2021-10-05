@@ -20,10 +20,10 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence.NONE;
 
 /**
- * An implementation of {@link AlignmentService} that uses the Dependency Analyzer service
- * in order to get the proper aligned versions of dependencies (as well as the version of the project itself)
+ * An implementation of {@link AlignmentService} that uses the Dependency Analyzer service in order to get the proper
+ * aligned versions of dependencies (as well as the version of the project itself).
  *
- * The heavy lifting is done by {@link org.commonjava.maven.ext.io.rest.DefaultTranslator}
+ * The heavy lifting is done by {@link org.commonjava.maven.ext.io.rest.DefaultTranslator}.
  */
 public class DAAlignmentService implements AlignmentService {
 
@@ -33,6 +33,11 @@ public class DAAlignmentService implements AlignmentService {
 
     private final DependencyState.DependencyPrecedence dependencySource;
 
+    /**
+     * Constructs a new Dependency Analyzer service with the given configuration.
+     *
+     * @param configuration holds all configuration values for the plugins
+     */
     public DAAlignmentService(Configuration configuration) {
         dependencySource = configuration.dependencyConfiguration();
 
@@ -48,6 +53,13 @@ public class DAAlignmentService implements AlignmentService {
         restEndpoint = RESTUtils.getTranslator(configuration);
     }
 
+    /**
+     * Performs the alignment of the given request.
+     *
+     * @param request both the collected project dependencies GAVs and the project GAVs
+     * @return the resulting aligned dependencies from the dependency analyzer
+     * @throws RestException if an error occurs looking up the versions.
+     */
     @Override
     public Response align(AlignmentService.Request request) throws RestException {
         if (dependencySource == NONE) {

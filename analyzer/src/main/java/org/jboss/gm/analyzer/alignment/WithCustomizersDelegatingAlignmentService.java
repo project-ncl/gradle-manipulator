@@ -28,6 +28,13 @@ public class WithCustomizersDelegatingAlignmentService implements AlignmentServi
     private final List<AlignmentService.RequestCustomizer> requestCustomizers;
     private final List<AlignmentService.ResponseCustomizer> responseCustomizers;
 
+    /**
+     * Creates a new alignment service that delegates to the given alignment service.
+     *
+     * @param delegate the alignment service to delegate to
+     * @param requestCustomizers the list of request customizers
+     * @param responseCustomizers the list of response customizers
+     */
     public WithCustomizersDelegatingAlignmentService(DAAlignmentService delegate,
             List<RequestCustomizer> requestCustomizers,
             List<ResponseCustomizer> responseCustomizers) {

@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import lombok.experimental.UtilityClass;
+
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.logging.Logger;
@@ -17,21 +19,30 @@ import org.jboss.gm.common.logging.GMLogger;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
-public final class SettingsFileIO {
-    private static final Pattern SETTINGS_ROOT_PROJECT = Pattern.compile(".*rootProject.name\\s*=\\s*['\"](.*)['\"]");
-    private static final Pattern SCM_URL_LINE_EXPR = Pattern.compile("\\s*url\\s*=(?:.*/)([a-zA-Z0-9\\-._]+)");
-    private static final String GIT_CONFIG = ".git" + File.separator + "config";
+/**
+ * Utility class for settings file I/O.
+ */
+@UtilityClass
+public class SettingsFileIO {
+    private final Pattern SETTINGS_ROOT_PROJECT = Pattern.compile(".*rootProject.name\\s*=\\s*['\"](.*)['\"]");
+    private final Pattern SCM_URL_LINE_EXPR = Pattern.compile("\\s*url\\s*=(?:.*/)([a-zA-Z0-9\\-._]+)");
+    private final String GIT_CONFIG = ".git" + File.separator + "config";
 
-    private static final Logger logger = GMLogger.getLogger(SettingsFileIO.class);
-
-    private SettingsFileIO() {
-    }
+    private final Logger logger = GMLogger.getLogger(SettingsFileIO.class);
 
     // we need to make sure that the name of the root project is stored if not set
     // this is because the manipulation plugin must use the same name
     // otherwise the model won't be found
     // see also: https://discuss.gradle.org/t/rootproject-name-in-settings-gradle-vs-projectname-in-build-gradle/5704/4
-    public static String writeProjectNameIfNeeded(File rootDir) throws IOException {
+
+    /**
+     * Writes the project name if needed.
+     *
+     * @param rootDir the root directory of the settings file
+     * @return the new project name
+     * @throws IOException if an error occurs while writing the settings file
+     */
+    public String writeProjectNameIfNeeded(File rootDir) throws IOException {
         String result = null;
 
         for (String s : Arrays.asList("settings.gradle", "settings.gradle.kts")) {
@@ -67,7 +78,7 @@ public final class SettingsFileIO {
         return result;
     }
 
-    private static String extractProjectNameFromScmUrl(File rootDir) throws IOException {
+    private String extractProjectNameFromScmUrl(File rootDir) throws IOException {
         File gitConfig = findGitDir(rootDir);
         try {
             List<String> lines = FileUtils.readLines(gitConfig, Charset.defaultCharset());
@@ -90,14 +101,14 @@ public final class SettingsFileIO {
     }
 
     // Package private for testing
-    static File findGitDir(File current) {
+    File findGitDir(File current) {
         File prospective = new File(current, GIT_CONFIG);
-        File parent = current.getParentFile();
 
         logger.info("Searching for Git config in {}", prospective);
         if (prospective.isFile()) {
             return prospective;
         }
+        File parent = current.getParentFile();
         if (parent == null) {
             throw new ManipulationUncheckedException(
                     "No .git/config file found, failed to determine the root project name");

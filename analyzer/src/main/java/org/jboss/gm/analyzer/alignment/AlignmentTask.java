@@ -82,16 +82,46 @@ import static org.jboss.gm.common.utils.FileUtils.append;
  * (whether it's a single or multi module project)
  */
 public class AlignmentTask extends DefaultTask {
+    /**
+     * The base filename of {@code gme.gradle} file.
+     */
     public static final String GME = "gme.gradle";
+    /**
+     * The groovy code to inject the {@link AlignmentTask#GME gme.gradle} build script.
+     */
     public static final String INJECT_GME_START = "buildscript { apply from: \"" + GME + "\" }";
+    /**
+     * The kotlin code to inject the {@link AlignmentTask#GME gme.gradle} build script.
+     */
     public static final String INJECT_GME_START_KOTLIN = "buildscript { project.apply { from(\"" + GME + "\") } }";
+    /**
+     * The base filename of the {@code gme-pluginconfigs.gradle} file.
+     */
     public static final String GME_PLUGINCONFIGS = "gme-pluginconfigs.gradle";
+    /**
+     * The groovy code to inject the {@link AlignmentTask#GME_PLUGINCONFIGS gme-pluginconfigs.gradle} build script.
+     */
     public static final String INJECT_GME_END = "apply from: \"" + GME_PLUGINCONFIGS + "\"";
+    /**
+     * The kotlin code to inject the {@link AlignmentTask#GME_PLUGINCONFIGS gme-pluginconfigs.gradle} build script.
+     */
     public static final String INJECT_GME_END_KOTLIN = "project.apply { from(\"" + GME_PLUGINCONFIGS + "\") }";
+    /**
+     * The word {@code gradle}.
+     */
     public static final String GRADLE = "gradle";
+    /**
+     * The base filename of the {@code gme-repos.gradle} file.
+     */
     public static final String GME_REPOS = "gme-repos.gradle";
+    /**
+     * The groovy code to apply the {@link AlignmentTask#GME_REPOS gme-repos.gradle} build script.
+     */
     public static final String APPLY_GME_REPOS = "buildscript { apply from: new File(buildscript.getSourceFile().getParentFile(), \""
             + GME_REPOS + "\"), to: buildscript }";
+    /**
+     * The task name {@code generateAlignmentMetadata}.
+     */
     public static final String NAME = "generateAlignmentMetadata";
 
     private static final ContextClassLoaderLocal<AtomicBoolean> configOutput = new ContextClassLoaderLocal<AtomicBoolean>() {
@@ -123,6 +153,9 @@ public class AlignmentTask extends DefaultTask {
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
+    /**
+     * Perform the alignment task action.
+     */
     @TaskAction
     public void perform() {
         final Project project = getProject();

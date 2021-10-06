@@ -33,6 +33,11 @@ public class ManifestUpdateAction implements Action<Project> {
 
     private final ManipulationModel alignmentModel;
 
+    /**
+     * Creates a new manifest update action with the specified alignment model.
+     *
+     * @param alignmentModel the alignment model
+     */
     public ManifestUpdateAction(ManipulationModel alignmentModel) {
         this.alignmentModel = alignmentModel;
     }

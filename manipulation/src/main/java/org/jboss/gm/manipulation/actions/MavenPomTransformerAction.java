@@ -13,7 +13,7 @@ import org.w3c.dom.NodeList;
 import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
 
 /**
- * Overrides data in pom
+ * Overrides data in a maven POM.
  */
 public class MavenPomTransformerAction
         implements Action<XmlProvider> {
@@ -27,6 +27,12 @@ public class MavenPomTransformerAction
     private final ManipulationModel alignmentConfiguration;
     private final ResolvedDependenciesRepository resolvedDependenciesRepository;
 
+    /**
+     * Creates a new maven POM transformer action
+     *
+     * @param alignmentConfiguration the alignment configuration
+     * @param resolvedDependenciesRepository the resolved dependencies repository
+     */
     public MavenPomTransformerAction(ManipulationModel alignmentConfiguration,
             ResolvedDependenciesRepository resolvedDependenciesRepository) {
         this.alignmentConfiguration = alignmentConfiguration;

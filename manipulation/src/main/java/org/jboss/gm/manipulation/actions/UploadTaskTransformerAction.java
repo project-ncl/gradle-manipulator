@@ -38,6 +38,13 @@ public class UploadTaskTransformerAction implements Action<Project> {
     private Method getRepositoriesMethod;
     private Method withXmlMethod;
 
+    /**
+     * Creates a new upload task transformer action with the given alignment configuration and resolved dependencies
+     * repository.
+     *
+     * @param alignmentConfiguration the alignment configuration
+     * @param resolvedDependenciesRepository the resolved dependencies repository
+     */
     public UploadTaskTransformerAction(ManipulationModel alignmentConfiguration,
             ResolvedDependenciesRepository resolvedDependenciesRepository) {
         this.alignmentConfiguration = alignmentConfiguration;
@@ -59,6 +66,11 @@ public class UploadTaskTransformerAction implements Action<Project> {
         }
     }
 
+    /**
+     * Executes this upload task transformer action on the given project.
+     *
+     * @param project the project
+     */
     @Override
     public void execute(Project project) {
         if (!project.getPluginManager().hasPlugin(LEGACY_MAVEN_PLUGIN)) {
@@ -75,6 +87,11 @@ public class UploadTaskTransformerAction implements Action<Project> {
         });
     }
 
+    /**
+     * Executes this upload task transformer action on the given artifact repository.
+     *
+     * @param repository the repository for resolving and publishing artifacts
+     */
     private void execute(ArtifactRepository repository) {
         try {
             Object pom = getPomMethod.invoke(repository);

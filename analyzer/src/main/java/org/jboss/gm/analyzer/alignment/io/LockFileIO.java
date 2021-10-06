@@ -14,6 +14,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import lombok.experimental.UtilityClass;
+
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -21,20 +23,27 @@ import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
 
-public final class LockFileIO {
+/**
+ * Utility class for lock file I/O.
+ */
+@UtilityClass
+public class LockFileIO {
 
-    private static final String LOCKFILE_EXTENSION = ".lockfile";
+    private final String LOCKFILE_EXTENSION = ".lockfile";
 
-    private LockFileIO() {
-    }
-
-    public static Set<ProjectVersionRef> allProjectVersionRefsFromLockfiles(Path locksRootPath) {
+    /**
+     * Returns a set containing all project version refs from lock files in the given path.
+     *
+     * @param locksRootPath the path to the root for the lock files
+     * @return the set of all project version refs
+     */
+    public Set<ProjectVersionRef> allProjectVersionRefsFromLockfiles(Path locksRootPath) {
         final Set<ProjectVersionRef> result = new HashSet<>();
         getAllLockfiles(locksRootPath).forEach(f -> result.addAll(readProjectVersionRefLocksOfFile(f)));
         return result;
     }
 
-    private static Set<ProjectVersionRef> readProjectVersionRefLocksOfFile(File lockfile) {
+    private Set<ProjectVersionRef> readProjectVersionRefLocksOfFile(File lockfile) {
         try {
             return FileUtils.readLines(lockfile, Charset.defaultCharset())
                     .stream()
@@ -53,7 +62,12 @@ public final class LockFileIO {
         }
     }
 
-    public static void renameAllLockFiles(Path locksRootPath) {
+    /**
+     * Renames all lock files under the given root.
+     *
+     * @param locksRootPath the root path for the lock files
+     */
+    public void renameAllLockFiles(Path locksRootPath) {
         getAllLockfiles(locksRootPath).forEach(f -> {
             final Path path = f.toPath();
             try {
@@ -64,7 +78,7 @@ public final class LockFileIO {
         });
     }
 
-    private static List<File> getAllLockfiles(Path locksRootPath) {
+    private List<File> getAllLockfiles(Path locksRootPath) {
         if (!locksRootPath.toFile().exists()) {
             return Collections.emptyList();
         }
@@ -78,7 +92,13 @@ public final class LockFileIO {
         return Arrays.asList(lockfiles);
     }
 
-    public static Path getLocksRootPath(Project project) {
+    /**
+     * Gets the lock file root path for the given project.
+     *
+     * @param project the project
+     * @return the lock file root path
+     */
+    public Path getLocksRootPath(Project project) {
         return project.getProjectDir().toPath().resolve("gradle/dependency-locks");
     }
 }

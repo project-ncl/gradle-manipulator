@@ -52,6 +52,12 @@ public final class RepositoryExporter {
         mavenSettings.addActiveProfile(mavenProfile.getId());
     }
 
+    /**
+     * Exports all repositories to the given settings file.
+     *
+     * @param repositories the repositories to export
+     * @param settingsFile the settings file to write to
+     */
     public static void export(Map<ArtifactRepository, Path> repositories, File settingsFile) {
         RepositoryExporter repositoryExporter = new RepositoryExporter();
         processRepositories(repositoryExporter, repositories);

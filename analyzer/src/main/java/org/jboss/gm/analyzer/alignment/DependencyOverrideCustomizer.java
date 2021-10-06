@@ -20,20 +20,23 @@ import org.jboss.gm.common.utils.ProjectUtils;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
- * {@link ResponseCustomizer} that changes the versions of
- * aligned dependencies
- *
- * The implementation is very simple and takes Map as a constructor argument and uses the map keys to check
- * if a dependency matches. If so, the map's value is used as the new version
- *
- * TODO: figure out if we need to worry about order
+ * {@link ResponseCustomizer} that changes the versions of aligned dependencies.
+ * <p>
+ * The implementation is very simple and takes Map as a constructor argument and uses the map keys to check if a
+ * dependency matches. If so, the map's value is used as the new version.
  */
+// TODO: figure out if we need to worry about order
 public class DependencyOverrideCustomizer implements ResponseCustomizer {
 
     private static final Logger logger = GMLogger.getLogger(DependencyOverrideCustomizer.class);
 
     private final Map<ProjectRef, String> overrideMap;
 
+    /**
+     * Creates a new dependency override customizer with the given override map.
+     *
+     * @param overrideMap the map to use to check if a dependency matches
+     */
     public DependencyOverrideCustomizer(Map<ProjectRef, String> overrideMap) {
         this.overrideMap = overrideMap;
     }
@@ -51,7 +54,7 @@ public class DependencyOverrideCustomizer implements ResponseCustomizer {
      *
      * @param configuration the Configuration object
      * @param projects the collection of projects
-     * @return An initiated ResponseCustomizer
+     * @return an initiated ResponseCustomizer
      */
     public static ResponseCustomizer fromConfigurationForModule(Configuration configuration,
             Set<Project> projects) {

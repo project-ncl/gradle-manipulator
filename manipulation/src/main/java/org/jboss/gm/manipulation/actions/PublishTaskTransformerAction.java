@@ -27,12 +27,24 @@ public class PublishTaskTransformerAction
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
+    /**
+     * Creates a new publish task transformer action with the given alignment configuration and resolved dependencies
+     * repository.
+     *
+     * @param alignmentConfiguration the alignment configuration
+     * @param resolvedDependenciesRepository the resolved dependencies repository
+     */
     public PublishTaskTransformerAction(ManipulationModel alignmentConfiguration,
             ResolvedDependenciesRepository resolvedDependenciesRepository) {
         this.alignmentConfiguration = alignmentConfiguration;
         this.resolvedDependenciesRepository = resolvedDependenciesRepository;
     }
 
+    /**
+     * Executes this publish task transformer action on the given project.
+     *
+     * @param project the project
+     */
     @Override
     public void execute(Project project) {
         if (!project.getPluginManager().hasPlugin(MAVEN_PUBLISH_PLUGIN)) {

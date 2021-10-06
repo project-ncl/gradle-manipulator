@@ -1,4 +1,4 @@
-[![Build Status (Travis CI)](https://travis-ci.org/project-ncl/gradle-manipulator.svg?branch=main)](https://travis-ci.org/project-ncl/gradle-manipulator.svg?branch=main)
+![Build status (GitHub Actions)](https://github.com/project-ncl/gradle-manipulator/workflows/CI/badge.svg)
 
 # Table of Contents
 

@@ -1,9 +1,10 @@
 package org.jboss.gm.manipulation;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -92,13 +93,15 @@ public final class TestUtils {
             module = alignment;
         }
 
-        final MavenXpp3Reader reader = new MavenXpp3Reader();
-        final Model model = reader.read(new FileReader(generatedPomPath.toFile()));
-        assertThat(model.getGroupId()).isEqualTo(alignment.getGroup());
-        assertThat(model.getArtifactId()).isEqualTo(module.getName());
-        assertThat(model.getVersion()).isEqualTo(module.getVersion());
+        try (final Reader reader = Files.newBufferedReader(generatedPomPath)) {
+            final MavenXpp3Reader mavenXpp3Reader = new MavenXpp3Reader();
+            final Model model = mavenXpp3Reader.read(reader);
+            assertThat(model.getGroupId()).isEqualTo(alignment.getGroup());
+            assertThat(model.getArtifactId()).isEqualTo(module.getName());
+            assertThat(model.getVersion()).isEqualTo(module.getVersion());
 
-        return Pair.of(model, module);
+            return Pair.of(model, module);
+        }
     }
 
     static GradleRunner createGradleRunner() {

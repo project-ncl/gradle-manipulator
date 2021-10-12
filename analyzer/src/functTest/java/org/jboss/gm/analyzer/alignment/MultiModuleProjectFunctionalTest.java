@@ -3,9 +3,11 @@ package org.jboss.gm.analyzer.alignment;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -138,13 +140,15 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
 
         // check that generated settings.xml contains correct remote repositories
         File settingsFile = new File(projectRoot, "settings.xml");
-        SettingsXpp3Reader reader = new SettingsXpp3Reader();
-        Settings generatedSettings = reader.read(new FileInputStream(settingsFile));
-        List<Repository> repositories = generatedSettings.getProfiles().get(0).getRepositories();
-        assertThat(repositories).extracting("url")
-                // should not contain duplicate entries
-                .containsOnly(
-                        "https://repo.maven.apache.org/maven2/");
+        try (Reader reader = Files.newBufferedReader(settingsFile.toPath())) {
+            SettingsXpp3Reader settingsXpp3Reader = new SettingsXpp3Reader();
+            Settings generatedSettings = settingsXpp3Reader.read(reader);
+            List<Repository> repositories = generatedSettings.getProfiles().get(0).getRepositories();
+            assertThat(repositories).extracting("url")
+                    // should not contain duplicate entries
+                    .containsOnly(
+                            "https://repo.maven.apache.org/maven2/");
+        }
 
         // make sure the project name was not changed
         List<String> settingsLines = org.apache.commons.io.FileUtils.readLines(new File(projectRoot, "settings.gradle"),

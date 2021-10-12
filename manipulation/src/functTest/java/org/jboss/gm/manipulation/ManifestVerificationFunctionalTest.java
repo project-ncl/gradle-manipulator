@@ -150,36 +150,37 @@ public class ManifestVerificationFunctionalTest {
         File manifestFile = new File(projectRoot, "api/build/tmp/jar/MANIFEST.MF");
         assertTrue(manifestFile.exists());
 
-        JarInputStream jarInputStream = new JarInputStream(
-                new FileInputStream(new File(projectRoot, "api/build/libs/reactive-streams-1.0.3.temporary-redhat-00001.jar")));
-        List<String> lines = jarInputStream.getManifest().getMainAttributes()
-                .entrySet()
-                .stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue())
-                .sorted(Comparator.naturalOrder())
-                .collect(Collectors.toList());
-        String stringLines = String.join("\n", lines);
+        try (JarInputStream jarInputStream = new JarInputStream(new FileInputStream(new File(projectRoot,
+                "api/build/libs/reactive-streams-1.0.3.temporary-redhat-00001.jar")))) {
+            List<String> lines = jarInputStream.getManifest().getMainAttributes()
+                    .entrySet()
+                    .stream()
+                    .map(entry -> entry.getKey() + ": " + entry.getValue())
+                    .sorted(Comparator.naturalOrder())
+                    .collect(Collectors.toList());
+            String stringLines = String.join("\n", lines);
 
-        assertThat(stringLines)
-                .contains(""
-                        + "Bundle-Description: Reactive Streams API\n"
-                        + "Bundle-DocURL: http://reactive-streams.org\n"
-                        + "Bundle-ManifestVersion: 2\n"
-                        + "Bundle-Name: reactive-streams\n"
-                        + "Bundle-SymbolicName: org.reactivestreams.reactive-streams\n"
-                        + "Bundle-Vendor: Reactive Streams SIG\n"
-                        + "Bundle-Version: 1.0.3.temporary-redhat-00001\n")
-                .contains(""
-                        + "Export-Package: org.reactivestreams;version=\"1.0.3.temporary-redhat-00001\"\n"
-                        + "Implementation-Title: reactive-streams\n"
-                        + "Implementation-Vendor-Id: org.reactivestreams\n"
-                        + "Implementation-Vendor: org.reactivestreams\n"
-                        + "Implementation-Version: 1.0.3.temporary-redhat-00001\n"
-                        + "Manifest-Version: 1.0\n"
-                        + "Require-Capability: osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(version=1.6))\"\n"
-                        + "Specification-Title: reactive-streams\n"
-                        + "Specification-Vendor: org.reactivestreams\n"
-                        + "Specification-Version: 1.0.3.temporary-redhat-00001\n");
+            assertThat(stringLines)
+                    .contains(""
+                            + "Bundle-Description: Reactive Streams API\n"
+                            + "Bundle-DocURL: http://reactive-streams.org\n"
+                            + "Bundle-ManifestVersion: 2\n"
+                            + "Bundle-Name: reactive-streams\n"
+                            + "Bundle-SymbolicName: org.reactivestreams.reactive-streams\n"
+                            + "Bundle-Vendor: Reactive Streams SIG\n"
+                            + "Bundle-Version: 1.0.3.temporary-redhat-00001\n")
+                    .contains(""
+                            + "Export-Package: org.reactivestreams;version=\"1.0.3.temporary-redhat-00001\"\n"
+                            + "Implementation-Title: reactive-streams\n"
+                            + "Implementation-Vendor-Id: org.reactivestreams\n"
+                            + "Implementation-Vendor: org.reactivestreams\n"
+                            + "Implementation-Version: 1.0.3.temporary-redhat-00001\n"
+                            + "Manifest-Version: 1.0\n"
+                            + "Require-Capability: osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(version=1.6))\"\n"
+                            + "Specification-Title: reactive-streams\n"
+                            + "Specification-Vendor: org.reactivestreams\n"
+                            + "Specification-Version: 1.0.3.temporary-redhat-00001\n");
+        }
     }
 
     @Test
@@ -219,24 +220,25 @@ public class ManifestVerificationFunctionalTest {
         File manifestFile = new File(projectRoot, "bson/build/tmp/jar/MANIFEST.MF");
         assertTrue(manifestFile.exists());
 
-        JarInputStream jarInputStream = new JarInputStream(
-                new FileInputStream(new File(projectRoot, "bson/build/libs/bson-4.1.0.temporary-redhat-00001.jar")));
-        List<String> lines = jarInputStream.getManifest().getMainAttributes()
-                .entrySet()
-                .stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue())
-                .sorted(Comparator.naturalOrder())
-                .collect(Collectors.toList());
-        String stringLines = String.join("\n", lines);
+        try (JarInputStream jarInputStream = new JarInputStream(new FileInputStream(new File(projectRoot,
+                "bson/build/libs/bson-4.1.0.temporary-redhat-00001.jar")))) {
+            List<String> lines = jarInputStream.getManifest().getMainAttributes()
+                    .entrySet()
+                    .stream()
+                    .map(entry -> entry.getKey() + ": " + entry.getValue())
+                    .sorted(Comparator.naturalOrder())
+                    .collect(Collectors.toList());
+            String stringLines = String.join("\n", lines);
 
-        assertThat(stringLines).contains("Export-Package: org.bson;version=\"4.1.0\"\n"
-                + "Implementation-Title: bson\n"
-                + "Implementation-Vendor-Id: org.mongodb\n"
-                + "Implementation-Vendor: org.mongodb\n"
-                + "Implementation-Version: 4.1.0.temporary-redhat-00001\n"
-                + "Manifest-Version: 1.0\n"
-                + "Require-Capability: osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(version=1.8))\"\n"
-                + "Specification-Title: bson\n" + "Specification-Vendor: org.mongodb\n"
-                + "Specification-Version: 4.1.0.temporary-redhat-00001");
+            assertThat(stringLines).contains("Export-Package: org.bson;version=\"4.1.0\"\n"
+                    + "Implementation-Title: bson\n"
+                    + "Implementation-Vendor-Id: org.mongodb\n"
+                    + "Implementation-Vendor: org.mongodb\n"
+                    + "Implementation-Version: 4.1.0.temporary-redhat-00001\n"
+                    + "Manifest-Version: 1.0\n"
+                    + "Require-Capability: osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(version=1.8))\"\n"
+                    + "Specification-Title: bson\n" + "Specification-Vendor: org.mongodb\n"
+                    + "Specification-Version: 4.1.0.temporary-redhat-00001");
+        }
     }
 }

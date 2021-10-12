@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,8 +25,8 @@ import org.gradle.testkit.runner.TaskOutcome;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
 
-import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public final class TestUtils {
 
@@ -46,14 +47,14 @@ public final class TestUtils {
     static TestManipulationModel align(File projectRoot, String projectDirName, boolean expectFailure)
             throws IOException, URISyntaxException {
 
-        return align(projectRoot, projectDirName, expectFailure, new HashMap<>());
+        return align(projectRoot, projectDirName, expectFailure, Collections.emptyMap());
     }
 
     static TestManipulationModel align(File projectRoot, boolean expectFailure) {
         if (!new File(projectRoot, "build.gradle").exists() && !new File(projectRoot, "build.gradle.kts").exists()) {
             throw new ManipulationUncheckedException("No valid test directory structure");
         }
-        return align(projectRoot, expectFailure, new HashMap<>());
+        return align(projectRoot, expectFailure, Collections.emptyMap());
     }
 
     static TestManipulationModel align(File projectRoot, String projectDirName, boolean expectFailure,
@@ -62,27 +63,19 @@ public final class TestUtils {
 
         URL resource = TestUtils.class.getClassLoader().getResource(projectDirName);
         assertThat(resource).isNotNull();
-        FileUtils.copyDirectory(Paths
-                .get(resource.toURI()).toFile(), projectRoot);
+        FileUtils.copyDirectory(Paths.get(resource.toURI()).toFile(), projectRoot);
         return align(projectRoot, expectFailure, systemProps);
     }
 
     /**
-     * this method assumes the projectRoot directory already contains the gradle files (usually unpacked from resources)
+     * Creates a new Gradle runner with the given project root and system properties.
      *
-     * @param projectRoot the root directory of the aligned project
-     * @param expectFailure if the the alignment should fail
-     * @param systemProps the system properties to apply for the alignment run
-     * @return the manipulation model
+     * @param projectRoot the root project of the build under test
+     * @param systemProps the system properties for the alignment run
+     * @return the new Gradle runner
      */
-    static TestManipulationModel align(File projectRoot, boolean expectFailure, Map<String, String> systemProps) {
-        assertTrue(projectRoot.toPath().resolve("build.gradle").toFile().exists() ||
-                projectRoot.toPath().resolve("build.gradle.kts").toFile().exists());
-
-        final BuildResult buildResult;
-        final TaskOutcome outcome;
-
-        final Map<String, String> finalSystemProps = new LinkedHashMap<>();
+    static GradleRunner createGradleRunner(File projectRoot, Map<String, String> systemProps) {
+        final Map<String, String> finalSystemProps = new LinkedHashMap<>(systemProps.size() + 1);
         if (!systemProps.containsKey("repoRemovalBackup")) {
             finalSystemProps.put("repoRemovalBackup", "settings.xml");
         }
@@ -97,12 +90,30 @@ public final class TestUtils {
         allArguments.add(AlignmentTask.NAME);
         allArguments.addAll(systemPropsList);
 
-        final GradleRunner runner = GradleRunner.create()
+        return GradleRunner.create()
                 .withProjectDir(projectRoot)
                 .withArguments(allArguments)
                 .withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath();
+    }
+
+    /**
+     * This method assumes the projectRoot directory already contains the gradle files (usually unpacked from
+     * resources).
+     *
+     * @param projectRoot the root directory of the aligned project
+     * @param expectFailure if the alignment should fail
+     * @param systemProps the system properties to apply for the alignment run
+     * @return the manipulation model
+     */
+    static TestManipulationModel align(File projectRoot, boolean expectFailure, Map<String, String> systemProps) {
+        assertTrue(projectRoot.toPath().resolve("build.gradle").toFile().exists() ||
+                projectRoot.toPath().resolve("build.gradle.kts").toFile().exists());
+
+        final GradleRunner runner = createGradleRunner(projectRoot, systemProps);
+        final BuildResult buildResult;
+        final TaskOutcome outcome;
 
         if (expectFailure) {
             buildResult = runner.buildAndFail();
@@ -112,7 +123,8 @@ public final class TestUtils {
             buildResult = runner.build();
         }
 
-        BuildTask task = buildResult.task(":" + AlignmentTask.NAME);
+        final BuildTask task = buildResult.task(":" + AlignmentTask.NAME);
+
         assertThat(task).isNotNull();
         assertThat(task.getOutcome()).isEqualTo(outcome);
 

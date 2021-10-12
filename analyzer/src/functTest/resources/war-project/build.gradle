@@ -1,0 +1,21 @@
+plugins {
+    id 'org.jboss.gm.analyzer'
+    id 'war'
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://maven.repository.redhat.com/techpreview/all'
+    }
+}
+
+dependencies {
+    implementation 'org.jboss.spec.javax.servlet:jboss-servlet-api_2.5_spec:1.0.1.Final'
+}
+
+war {
+    archiveName 'war-project.war'
+}

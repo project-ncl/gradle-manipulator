@@ -1,0 +1,8 @@
+[
+  {
+    "bestMatchVersion": "1.0.1.Final-redhat-3",
+    "version": "1.0.1.Final",
+    "groupId": "org.jboss.spec.javax.servlet",
+    "artifactId": "jboss-servlet-api_2.5_spec"
+  }
+]

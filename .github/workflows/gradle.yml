@@ -7,9 +7,18 @@ on:
   push:
     branches:
     - main
+    paths-ignore:
+    - 'CONTRIBUTING.md'
+    - 'LICENSE'
+    - 'README.md'
+
   pull_request:
     branches:
     - main
+    paths-ignore:
+    - 'CONTRIBUTING.md'
+    - 'LICENSE'
+    - 'README.md'
 
 jobs:
   build:

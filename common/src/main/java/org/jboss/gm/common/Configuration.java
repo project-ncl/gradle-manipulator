@@ -73,6 +73,19 @@ public interface Configuration extends Accessible, Reloadable {
     @Key("accessToken")
     String accessToken();
 
+    @Key("versionOsgi")
+    @DefaultValue("true")
+    boolean versionOsgi();
+
+    @Key("versionOverride")
+    String versionOverride();
+
+    @Key("versionSuffix")
+    String versionSuffix();
+
+    @Key("versionSuffixAlternatives")
+    String versionSuffixAlternatives();
+
     @Key("versionIncrementalSuffix")
     @DefaultValue("redhat")
     String versionIncrementalSuffix();

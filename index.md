@@ -118,7 +118,23 @@ When running the alignment plugin (e.g. via the CLI), it is possible to configur
 
 #### Unresolved Dependencies
 
-If the tool is not able to resolve certain dependencies then it may fail during the alignment phase. Set `ignoreUnresolvableDependencies` to true to ignore those (default: false).
+By default, the alignment phase is set to fail when it encounters any unresolvable dependencies. For example, if the
+dependency `com.redhat:unresolved-dependency` in configuration `default` is unable to be resolved, then the alignment
+phase will fail with an error message indicating which dependencies were unresolvable.
+
+```
+For configuration default, unable to resolve all project dependencies: [com.redhat:unresolved-dependency:]
+```
+
+To ignore any unresolvable dependencies, set the property `ignoreUnresolvableDependencies` to `true`. This allows any
+unresolved dependencies to be skipped, thereby allowing any resolved dependencies to be aligned. You will see a warning
+message indicating which unresolved dependencies were ignored.
+
+```
+For configuration default, ignoring all unresolved dependencies: [com.redhat:unresolved-dependency:]
+```
+
+Even though the alignment is successful at this point, the build itself will fail if the dependency remains unresolved.
 
 #### Publish Plugin Hook
 

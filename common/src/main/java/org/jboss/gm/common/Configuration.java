@@ -73,6 +73,9 @@ public interface Configuration extends Accessible, Reloadable {
     @Key("accessToken")
     String accessToken();
 
+    // Even though the version properties below are already supported through the use of system properties, listing all
+    // available version properties here makes it clear which properties are supported and also allows for programmatic
+    // access to all available properties and not just the ones that are currently being used in the code.
     @Key("versionOsgi")
     @DefaultValue("true")
     boolean versionOsgi();

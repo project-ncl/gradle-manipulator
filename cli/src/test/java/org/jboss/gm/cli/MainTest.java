@@ -9,6 +9,7 @@ import java.nio.charset.Charset;
 import java.util.Properties;
 import java.util.UUID;
 
+import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -70,6 +71,8 @@ public class MainTest {
         // Reset the daemon between tests : https://discuss.gradle.org/t/stopping-gradle-daemon-via-tooling-api/16004/2
         // Under 4.10 the daemon appears to cache Config values which corrupt the tests.
         ConnectorServices.reset();
+        // Spurious caching issues so clear the cache for each test
+        ConfigCache.clear();
     }
 
     @Test

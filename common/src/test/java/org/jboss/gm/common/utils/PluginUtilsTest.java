@@ -80,6 +80,58 @@ public class PluginUtilsTest {
     }
 
     @Test
+    public void testRemovalWithUnbalancedBrackets()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("build.gradle.kts");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "plugins {\n" + "    `gradle-enterprise`\n"
+                        + "    id(\"com.github.burrunan.s3-build-cache\")\n"
+                        + "}\n" + "\n"
+                        + "// This is the name of a current project\n"
+                        + "// Note: it cannot be inferred from the directory name as developer might clone pgjdbc to pgjdbc_tmp (or whatever) folder\n"
+                        + "rootProject.name = \"pgjdbc\"\n" + "\n" + "include(\n"
+                        + "    \"bom\",\n" + "    \"benchmarks\",\n"
+                        + "    \"postgresql\"\n" + ")\n" + "\n"
+                        + "project(\":postgresql\").projectDir = file(\"pgjdbc\")\n"
+                        + "\n"
+                        + "// Gradle inherits Ant \"default excludes\", however we do want to archive those files\n"
+                        + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitattributes\")\n"
+                        + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitignore\")\n"
+                        + "\n" + "fun property(name: String) =\n"
+                        + "    when (extra.has(name)) {\n"
+                        + "        true -> extra.get(name) as? String\n"
+                        + "        else -> null\n" + "    }\n" + "\n"
+                        + "val isCiServer = System.getenv().containsKey(\"CI\")\n"
+                        + "gradleEnterprise {\n" + "        buildScan {\n"
+                        + "        // This { is wrong."
+                        + "        termsOfServiceAgree = \"yes\"\n"
+                        + "        tag(\"CI\")\n" + "        }\n" + "    }\n",
+                Charset.defaultCharset());
+
+        System.setProperty("pluginRemoval", "gradle-enterprise");
+
+        final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
+        PluginUtils.pluginRemoval(logger, configuration, target.getParentFile());
+        assertTrue(systemOutRule.getLog()
+                .contains("Looking to remove gradle-enterprise with configuration block of gradleEnterprise"));
+        assertTrue(systemOutRule.getLog().contains("Removed instances of plugin"));
+
+        String result = "plugins {\n" + "    id(\"com.github.burrunan.s3-build-cache\")\n" + "}\n" + "\n"
+                + "// This is the name of a current project\n"
+                + "// Note: it cannot be inferred from the directory name as developer might clone pgjdbc to pgjdbc_tmp (or whatever) folder\n"
+                + "rootProject.name = \"pgjdbc\"\n" + "\n" + "include(\n" + "    \"bom\",\n" + "    \"benchmarks\",\n"
+                + "    \"postgresql\"\n" + ")\n" + "\n" + "project(\":postgresql\").projectDir = file(\"pgjdbc\")\n" + "\n"
+                + "// Gradle inherits Ant \"default excludes\", however we do want to archive those files\n"
+                + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitattributes\")\n"
+                + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitignore\")\n" + "\n"
+                + "fun property(name: String) =\n" + "    when (extra.has(name)) {\n"
+                + "        true -> extra.get(name) as? String\n" + "        else -> null\n" + "    }\n" + "\n"
+                + "val isCiServer = System.getenv().containsKey(\"CI\")\n\n";
+        assertEquals(result, FileUtils.readFileToString(target, Charset.defaultCharset()));
+    }
+
+    @Test
     public void testRemoval1()
             throws IOException, ManipulationException {
 

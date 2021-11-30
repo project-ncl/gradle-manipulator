@@ -73,15 +73,23 @@ public class PluginUtils {
                             if (startIndex != -1) {
                                 int endIndex = startIndex;
                                 int bracketCount = 1;
+                                boolean inComment = false;
                                 // Find the first opening bracket of the configuration block
                                 while (target.charAt(endIndex) != '{') {
                                     endIndex++;
                                 }
-                                // TODO: Handle comments.
                                 // Calculate the end of the configuration block. Start from just after the first bracket
                                 for (int i = ++endIndex; i < target.length() && bracketCount != 0; i++, endIndex++) {
                                     char current = target.charAt(i);
-                                    if (current == '{') {
+                                    if (inComment) {
+                                        // Nest this so we always hit in comment blocks until we are ready
+                                        // to exit
+                                        if (target.charAt(i + 1) == eol.charAt(0)) {
+                                            inComment = false;
+                                        }
+                                    } else if (current == '/' && target.charAt(i + 1) == '/') {
+                                        inComment = true;
+                                    } else if (current == '{') {
                                         bracketCount++;
                                     } else if (current == '}') {
                                         bracketCount--;

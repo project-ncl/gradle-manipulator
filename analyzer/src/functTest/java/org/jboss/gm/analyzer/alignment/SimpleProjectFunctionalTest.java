@@ -46,6 +46,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static junit.framework.TestCase.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.linesOf;
 import static org.assertj.core.api.Assertions.tuple;
 
 @RunWith(BMUnitRunner.class)
@@ -111,6 +112,12 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(extraGradleFile).exists();
         assertThat(FileUtils.readLines(extraGradleFile, Charset.defaultCharset()))
                 .filteredOn(l -> l.trim().equals(AlignmentTask.APPLY_GME_REPOS)).hasSize(1);
+
+        // Verify the org.gradle.caching has been removed.
+        File properties = new File(projectRoot, "gradle.properties");
+        assertThat(linesOf(properties)).doesNotContain("org.gradle.caching");
+        assertThat(FileUtils.readLines(properties, Charset.defaultCharset()))
+                .filteredOn(l -> l.contains("org.gradle.caching")).hasSize(0);
     }
 
     @Test

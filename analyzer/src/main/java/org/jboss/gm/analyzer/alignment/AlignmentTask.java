@@ -346,6 +346,7 @@ public class AlignmentTask extends DefaultTask {
                     rootProject.getProjectDir(), commonPrefix);
             alignmentModel.setGroup(commonPrefix);
         }
+        processPropertiesForBuildCache(rootProject.getRootDir());
 
         logger.info("Completed processing for alignment and writing {}", cache);
         GroovyUtils.runCustomGroovyScript(logger, InvocationStage.LAST, rootProject.getRootDir(), configuration,
@@ -364,6 +365,16 @@ public class AlignmentTask extends DefaultTask {
         writeRepositorySettingsFile(cache.getRepositories());
         final Set<ProjectVersionRef> nonAligned = new LinkedHashSet<>();
         processAlignmentReport(rootProject, configuration, cache, nonAligned);
+    }
+
+    private void processPropertiesForBuildCache(File rootProject) throws IOException {
+        File properties = new File(rootProject, "gradle.properties");
+        if (properties.exists()) {
+            List<String> lines = org.apache.commons.io.FileUtils.readLines(properties, Charset.defaultCharset());
+            if (lines.removeIf(i -> i.contains("org.gradle.caching"))) {
+                FileUtils.writeLines(properties, lines);
+            }
+        }
     }
 
     private void writeGmeMarkerFile(Configuration configuration, File rootGradle) throws IOException, ManipulationException {

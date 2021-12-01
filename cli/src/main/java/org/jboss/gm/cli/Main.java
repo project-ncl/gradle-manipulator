@@ -32,6 +32,7 @@ import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.GroovyUtils;
 import org.jboss.gm.common.utils.JavaUtils;
 import org.jboss.gm.common.utils.ManifestUtils;
+import org.jboss.gm.common.utils.PluginUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -286,9 +287,11 @@ public class Main implements Callable<Void> {
             if (logger.isDebugEnabled()) {
                 logger.debug("Configuration reloaded with {}", configuration.dumpCurrentConfig());
             }
-
-            GroovyUtils.runCustomGroovyScript(logger, InvocationStage.FIRST, target, configuration, null, null);
         }
+
+        GroovyUtils.runCustomGroovyScript(logger, InvocationStage.FIRST, target, configuration, null, null);
+
+        PluginUtils.pluginRemoval(logger, configuration, target);
 
         connector.forProjectDirectory(target);
 

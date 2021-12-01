@@ -157,6 +157,9 @@ public interface Configuration extends Accessible, Reloadable {
     @Key("groovyScripts")
     String[] groovyScripts();
 
+    @Key("pluginRemoval")
+    String[] pluginRemoval();
+
     @Key("publishPluginHooks")
     @DefaultValue("elasticsearch.esplugin")
     String[] publishPluginHooks();

@@ -80,6 +80,13 @@ if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.vers
 
 apply(plugin = "net.researchgate.release")
 
+release {
+    // https://github.com/researchgate/gradle-release/issues/340
+    // https://github.com/researchgate/gradle-release/issues/281
+    val gitConfig = getProperty("git") as net.researchgate.release.GitAdapter.GitConfig
+    gitConfig.requireBranch = "main"
+}
+
 if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.0")) {
     task<Wrapper>("wrapper") {
         distributionType = Wrapper.DistributionType.ALL

@@ -197,5 +197,6 @@ Below are links to more specific information about configuring sets of features 
 * [Dependency manipulation](guide/dep-manip.html)
 * [Artifact publishing](guide/artifact-publishing.html)
 * [Groovy](guide/groovy.html)
+* [Plugins](guide/plugins.html)
 * [Repositories](guide/misc.html)
 * [Known Issues](guide/known-issues.html)

@@ -193,7 +193,7 @@ subprojects {
     extra["logbackVersion"] = "1.2.3"
     extra["mavenVersion"] = "3.5.0"
     extra["ownerVersion"] = "1.0.12"
-    extra["pmeVersion"] = "4.6-SNAPSHOT"
+    extra["pmeVersion"] = "4.6"
     extra["slf4jVersion"] = "1.7.30"
     extra["systemRulesVersion"] = "1.19.0"
 

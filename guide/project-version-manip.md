@@ -50,8 +50,27 @@ suffix, you need to combine the `versionOverride` and `versionSuffix` properties
 ### Snapshot detection
 
 The tool can detect snapshot versions and either preserve the snapshot or replace it with a real version. This is
-controlled by the property `versionSuffixSnapshot`. The default is false (i.e. remove `SNAPSHOT` and replace by the
+controlled by the property `versionSuffixSnapshot`. The default is false (i.e., remove `SNAPSHOT` and replace by the
 suffix).
+
+### OSGi compliance
+
+If version manipulation is enabled, the extension will also attempt to format the version to be OSGi compliant. For
+example, if the versions are:
+
+    1
+    1.3
+    1.3-GA
+    1.3.0-GA
+
+it will change to
+
+    1.0.0
+    1.3.0
+    1.3.0.GA
+    1.3.0.GA
+
+This is controlled by the property `versionOsgi`. The default is true (i.e., make the versions OSGi compliant).
 
 ### Version suffix alternatives
 

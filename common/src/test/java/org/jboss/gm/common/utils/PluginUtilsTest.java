@@ -4,17 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.api.logging.LogLevel;
-import org.gradle.tooling.internal.consumer.ConnectorServices;
-import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.rules.LoggingRule;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
@@ -32,21 +27,9 @@ public class PluginUtilsTest {
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
-    public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
-
-    @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
-
-    @Before
-    public void reset() {
-        // Reset the daemon between tests : https://discuss.gradle.org/t/stopping-gradle-daemon-via-tooling-api/16004/2
-        // Under 4.10 the daemon appears to cache Config values which corrupt the tests.
-        ConnectorServices.reset();
-        // Spurious caching issues so clear the cache for each test
-        ConfigCache.clear();
-    }
 
     @Test(expected = ManipulationException.class)
     public void testInvalidPlugin()
@@ -56,9 +39,8 @@ public class PluginUtilsTest {
         org.apache.commons.io.FileUtils.writeStringToFile(target,
                 "# empty file", Charset.defaultCharset());
 
-        System.setProperty("pluginRemoval", "gradle-enterprise-2");
-        final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
-        PluginUtils.pluginRemoval(logger, configuration, target.getParentFile());
+        String[] plugins = { "gradle-enterprise-2" };
+        PluginUtils.pluginRemoval( logger, target.getParentFile(), plugins );
     }
 
     @Test
@@ -69,10 +51,8 @@ public class PluginUtilsTest {
         org.apache.commons.io.FileUtils.writeStringToFile(target,
                 "# empty file", Charset.defaultCharset());
 
-        System.setProperty("pluginRemoval", "gradle-enterprise");
-
-        final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
-        PluginUtils.pluginRemoval(logger, configuration, target.getParentFile());
+        String[] plugins = { "gradle-enterprise" };
+        PluginUtils.pluginRemoval( logger, target.getParentFile(), plugins );
 
         assertTrue(systemOutRule.getLog()
                 .contains("Looking to remove gradle-enterprise with configuration block of gradleEnterprise"));
@@ -109,10 +89,8 @@ public class PluginUtilsTest {
                         + "        tag(\"CI\")\n" + "        }\n" + "    }\n",
                 Charset.defaultCharset());
 
-        System.setProperty("pluginRemoval", "gradle-enterprise");
-
-        final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
-        PluginUtils.pluginRemoval(logger, configuration, target.getParentFile());
+        String[] plugins = { "gradle-enterprise" };
+        PluginUtils.pluginRemoval( logger, target.getParentFile(), plugins );
         assertTrue(systemOutRule.getLog()
                 .contains("Looking to remove gradle-enterprise with configuration block of gradleEnterprise"));
         assertTrue(systemOutRule.getLog().contains("Removed instances of plugin"));
@@ -163,10 +141,8 @@ public class PluginUtilsTest {
                         + "}\n",
                 Charset.defaultCharset());
 
-        System.setProperty("pluginRemoval", "gradle-enterprise");
-
-        final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
-        PluginUtils.pluginRemoval(logger, configuration, target.getParentFile());
+        String[] plugins = { "gradle-enterprise" };
+        PluginUtils.pluginRemoval( logger, target.getParentFile(), plugins );
 
         assertTrue(systemOutRule.getLog()
                 .contains("Looking to remove gradle-enterprise with configuration block of gradleEnterprise"));
@@ -227,10 +203,8 @@ public class PluginUtilsTest {
                 + "} if (true) { }\n",
                 Charset.defaultCharset());
 
-        System.setProperty("pluginRemoval", "com.github.burrunan.s3-build-cache,gradle-enterprise");
-
-        final Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
-        PluginUtils.pluginRemoval(logger, configuration, target.getParentFile());
+        String[] plugins = { "com.github.burrunan.s3-build-cache", "gradle-enterprise" };
+        PluginUtils.pluginRemoval( logger, target.getParentFile(), plugins );
 
         assertTrue(systemOutRule.getLog()
                 .contains("Looking to remove gradle-enterprise with configuration block of gradleEnterprise"));

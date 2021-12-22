@@ -1,8 +1,15 @@
 package org.jboss.gm.cli;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -41,6 +48,8 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Unmatched;
 import ch.qos.logback.classic.Level;
+
+import static org.jboss.gm.common.utils.PluginUtils.SEMANTIC_BUILD_VERSIONING;
 
 @SuppressWarnings("unused")
 @Command(name = "GradleAnalyser",
@@ -83,6 +92,7 @@ public class Main implements Callable<Void> {
 
     // Partial workaround for https://github.com/gradle/gradle/issues/3117
     // It may still be necessary on Gradle < 5.3 to do ' LC_ALL=en_US LANG=en_US java -jar '
+    @SuppressWarnings("ConstantConditions")
     private final Map<String, String> envVars = Stream.of(
             Pair.of("LC_ALL", "en_US"),
             Pair.of("LANG", "en_US"),
@@ -165,7 +175,7 @@ public class Main implements Callable<Void> {
         }
     }
 
-    private void executeGradle() throws ManipulationException {
+    private void executeGradle(OutputStream out, boolean quiet, List<String> currentGradleArgs) throws ManipulationException {
         if (installation != null) {
             if (!installation.exists()) {
                 throw new ManipulationException("Unable to locate Gradle installation at {}", installation);
@@ -179,12 +189,14 @@ public class Main implements Callable<Void> {
             DefaultGradleConnector dgc = ((DefaultGradleConnector) connector);
             dgc.daemonMaxIdleTime(10, TimeUnit.SECONDS);
 
-            if (trace) {
+            if (quiet) {
+                currentGradleArgs.add("--quiet");
+            } else if (trace) {
                 dgc.setVerboseLogging(true);
             } else if (debug) {
                 // If debug has been enabled in the CLI propagate that through as info (we have customised logging).
                 // Insert it at the start to allow overrides (e.g. for debugging)
-                gradleArgs.add(0, "--info");
+                currentGradleArgs.add(0, "--info");
             }
         }
 
@@ -205,19 +217,19 @@ public class Main implements Callable<Void> {
             jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments().stream()
                     .filter(s -> s.startsWith("-Xdebug") || s.startsWith("-Xrunjdwp")).collect(Collectors.toSet()));
 
-            if (colour && StringUtils.isEmpty(System.getenv("NO_COLOR"))) {
+            if (!quiet && colour && StringUtils.isEmpty(System.getenv("NO_COLOR"))) {
                 build.setColorOutput(true);
             } else {
                 jvmArgs.add("-DloggingColours=false");
             }
 
             logger.info("Executing CLI {} on Gradle project {} with JVM args '{}' and arguments '{}'",
-                    ManifestUtils.getManifestInformation(), target, jvmArgs, gradleArgs);
+                    ManifestUtils.getManifestInformation(), target, jvmArgs, currentGradleArgs);
 
             build.setEnvironmentVariables(envVars);
             build.setJvmArguments(jvmArgs);
-            build.withArguments(gradleArgs);
-            build.setStandardOutput(System.out);
+            build.withArguments(currentGradleArgs);
+            build.setStandardOutput(out);
             build.setStandardError(System.err);
             build.run();
         } catch (BuildException e) {
@@ -289,17 +301,42 @@ public class Main implements Callable<Void> {
             }
         }
 
+        connector.forProjectDirectory(target);
+
+        if (PluginUtils.checkForSemanticBuildVersioning(logger, target)) {
+            org.apache.commons.io.output.ByteArrayOutputStream stdout = new org.apache.commons.io.output.ByteArrayOutputStream();
+            List<String> versionQuery = new ArrayList<>();
+            versionQuery.add("--console=plain");
+            versionQuery.add("printVersion");
+            executeGradle(stdout, true, versionQuery);
+            try {
+                String projectVersion = stdout.toString(Charset.defaultCharset()).trim();
+
+                if (StringUtils.isEmpty(projectVersion)) {
+                    throw new ManipulationException(
+                            "Unable to determine a project version. Has this been built from an upstream tag?");
+                }
+                logger.debug("Found project version {}", projectVersion);
+                Files.write(Paths.get(target.getPath(), "gradle.properties"),
+                        (System.lineSeparator() + "version=" + projectVersion + System.lineSeparator())
+                                .getBytes(StandardCharsets.UTF_8),
+                        StandardOpenOption.APPEND);
+            } catch (IOException e) {
+                throw new ManipulationException("Unable to append version to gradle.properties", e);
+            }
+
+            PluginUtils.pluginRemoval( logger, target, new String[] { SEMANTIC_BUILD_VERSIONING } );
+        }
+
         GroovyUtils.runCustomGroovyScript(logger, InvocationStage.FIRST, target, configuration, null, null);
 
-        PluginUtils.pluginRemoval(logger, configuration, target);
-
-        connector.forProjectDirectory(target);
+        PluginUtils.pluginRemoval( logger, target, configuration.pluginRemoval() );
 
         if (configuration.disableGME()) {
             logger.info("Gradle Manipulator disabled");
         } else {
             logger.debug("Executing Gradle");
-            executeGradle();
+            executeGradle(System.out, false, gradleArgs);
         }
 
         return null;

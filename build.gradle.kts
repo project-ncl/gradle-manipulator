@@ -197,7 +197,7 @@ subprojects {
     extra["groovyVersion"] = "3.0.5"
     extra["jacksonVersion"] = "2.11.2"
     extra["junitVersion"] = "4.13.1"
-    extra["logbackVersion"] = "1.2.3"
+    extra["logbackVersion"] = "1.2.9"
     extra["mavenVersion"] = "3.5.0"
     extra["ownerVersion"] = "1.0.12"
     extra["pmeVersion"] = "4.6"

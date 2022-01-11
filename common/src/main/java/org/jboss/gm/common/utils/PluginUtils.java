@@ -4,35 +4,42 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.FileIO;
+import org.gradle.internal.Pair;
 import org.slf4j.Logger;
 
 public class PluginUtils {
-    private static final Map<String, String> SUPPORTED_PLUGINS = new HashMap<>();
+    private static final Map<String, Pair<String, Set<String>>> SUPPORTED_PLUGINS = new HashMap<>();
 
     public static final String SEMANTIC_BUILD_VERSIONING = "net.vivin.gradle-semantic-build-versioning";
 
     static {
-        SUPPORTED_PLUGINS.put("com.github.ben-manes.versions", "dependencyUpdates");
-        SUPPORTED_PLUGINS.put("com.github.burrunan.s3-build-cache", "buildCache");
-        SUPPORTED_PLUGINS.put("de.marcphilipp.nexus-publish", "nexusPublishing");
-        SUPPORTED_PLUGINS.put("gradle-enterprise", "gradleEnterprise");
-        SUPPORTED_PLUGINS.put("io.codearte.nexus-staging", "nexusStaging");
-        SUPPORTED_PLUGINS.put("io.github.gradle-nexus.publish-plugin", "nexusPublishing");
-        SUPPORTED_PLUGINS.put("signing", "signing");
-        SUPPORTED_PLUGINS.put(SEMANTIC_BUILD_VERSIONING, "preRelease");
+        SUPPORTED_PLUGINS.put("com.github.ben-manes.versions", Pair.of("dependencyUpdates", Collections.emptySet()));
+        SUPPORTED_PLUGINS.put("com.github.burrunan.s3-build-cache", Pair.of("buildCache", Collections.emptySet()));
+        SUPPORTED_PLUGINS.put("de.marcphilipp.nexus-publish", Pair.of("nexusPublishing", Collections.emptySet()));
+        SUPPORTED_PLUGINS.put("gradle-enterprise", Pair.of("gradleEnterprise", Collections.emptySet()));
+        SUPPORTED_PLUGINS.put("io.codearte.nexus-staging",
+                Pair.of("nexusStaging", Stream.of("closeRepository", "releaseRepository", "closeAndReleaseRepository").collect(
+                        Collectors.toSet())));
+        SUPPORTED_PLUGINS.put("io.github.gradle-nexus.publish-plugin", Pair.of("nexusPublishing", Collections.emptySet()));
+        SUPPORTED_PLUGINS.put("signing", Pair.of("signing", Collections.emptySet()));
+        SUPPORTED_PLUGINS.put(SEMANTIC_BUILD_VERSIONING, Pair.of("preRelease", Collections.emptySet()));
     }
 
     /**
@@ -72,12 +79,17 @@ public class PluginUtils {
         files.addAll(kotlinFiles);
 
         for (String plugin : plugins) {
+            Pair<String, Set<String>> pair = SUPPORTED_PLUGINS.get(plugin);
+            Set<String> tasks = new HashSet<>();
+            String configTask;
 
-            String configTask = SUPPORTED_PLUGINS.get(plugin);
             if (plugin.matches(".signing.")) {
                 configTask = "signing";
-            } else if (configTask == null) {
+            } else if (pair == null) {
                 throw new ManipulationException("No support for removing plugin {}", plugin);
+            } else {
+                configTask = pair.getLeft();
+                tasks = pair.getRight();
             }
 
             for (File buildFile : files) {
@@ -91,8 +103,16 @@ public class PluginUtils {
                         eol = "\n";
                     }
 
+                    // Remove the plugin
                     boolean removed = lines.removeIf(i -> i.contains(plugin));
 
+                    // Remove any task references.
+                    // TODO: Handle if the task reference spans multiple lines
+                    for (String t : Objects.requireNonNull(tasks)) {
+                        removed |= lines.removeIf(i -> i.contains(t));
+                    }
+
+                    // Remove any configuration block
                     String content = String.join(eol, lines);
                     Matcher m = Pattern.compile("(^|\\s)+" + configTask).matcher(content);
                     int startIndex = m.find() ? m.start() : -1;

@@ -1,10 +1,13 @@
 package org.jboss.gm.analyzer.alignment;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
@@ -18,6 +21,9 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Ref;
 import org.gradle.api.Project;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
@@ -90,10 +96,27 @@ public class WarFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void verifyWar() throws IOException, ManipulationException, URISyntaxException {
+    public void verifyWar()
+            throws IOException, ManipulationException, URISyntaxException, GitAPIException {
         final Path projectRoot = tempDir.newFolder(PROJECT_NAME).toPath();
+        final Map<String, String> properties = new HashMap<>();
+        final File folder = tempDir.newFolder();
+
+        // On a new release the SNAPSHOT artifact (e.g. 3.2-SNAPSHOT) for the manipulation library
+        // may not be available causing this to fail. We can't do the same as DifferentJVMTest as
+        // we need the manipulation library built. Hence, we'll use JGit to establish the last tag
+        // (i.e. release) and use that.
+        List<Ref> refs = Git.cloneRepository()
+                .setURI("https://github.com/project-ncl/gradle-manipulator.git")
+                .setDirectory(folder)
+                .call()
+                .tagList()
+                .call();
+        String name = refs.get(refs.size() - 1).getName();
+        properties.put("manipulationVersion", name.substring(name.lastIndexOf('/') + 1));
+
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot.toFile(),
-                projectRoot.getFileName().toString(), Collections.emptyMap());
+                projectRoot.getFileName().toString(), properties);
 
         assertThat(projectRoot.resolve(AlignmentTask.GME)).exists();
         assertThat(projectRoot.resolve(AlignmentTask.GRADLE).resolve(AlignmentTask.GME_REPOS)).exists();

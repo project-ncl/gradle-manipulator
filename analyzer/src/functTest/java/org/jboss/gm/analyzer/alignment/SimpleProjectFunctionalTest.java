@@ -115,7 +115,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
 
         // Verify the org.gradle.caching has been removed.
         File properties = new File(projectRoot, "gradle.properties");
-        assertThat(linesOf(properties)).doesNotContain("org.gradle.caching");
+        assertThat(linesOf(properties)).anyMatch(value -> !value.contains("org.gradle.caching"));
         assertThat(FileUtils.readLines(properties, Charset.defaultCharset()))
                 .filteredOn(l -> l.contains("org.gradle.caching")).hasSize(0);
     }

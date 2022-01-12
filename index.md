@@ -29,17 +29,18 @@ There are multiple ways that the plugins can be applied.
 It should also be noted that the project itself contains a properly configured init script for the `analyzer` plugin (which gets released along with the plugin).
 Furthermore, when the `analyzer` plugin executes, it alters the main gradle script of the target project to include the manipulation plugin.
 
-##### CLI
-
 <table bgcolor="#ffff00">
 <tr>
 <td>
-    <b>NOTE</b> : The CLI is only available from version 1.4.
+    <b>NOTE</b> : Plugin removal and handling of the Gradle-Semanatic-Build-Versioning plugin is only available through the CLI.
 </td>
 </tr>
 </table>
 
-The CLI is capable of running arbitrary groovy scripts prior to the build. See [here](https://project-ncl.github.io/gradle-manipulator/guide/groovy.html) for further details on this.
+
+##### CLI
+
+The CLI (available after version 1.4) is capable of running arbitrary groovy scripts prior to the build. See [here](https://project-ncl.github.io/gradle-manipulator/guide/groovy.html) for further details on this.
 
 ```
 Usage: GradleAnalyser [-dhV] [-l=<installation>] -t=<target>

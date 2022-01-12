@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -325,12 +326,12 @@ public class Main implements Callable<Void> {
                 throw new ManipulationException("Unable to append version to gradle.properties", e);
             }
 
-            PluginUtils.pluginRemoval( logger, target, new String[] { SEMANTIC_BUILD_VERSIONING } );
+            PluginUtils.pluginRemoval(logger, target, Collections.singleton(SEMANTIC_BUILD_VERSIONING));
         }
 
         GroovyUtils.runCustomGroovyScript(logger, InvocationStage.FIRST, target, configuration, null, null);
 
-        PluginUtils.pluginRemoval( logger, target, configuration.pluginRemoval() );
+        PluginUtils.pluginRemoval(logger, target, configuration.pluginRemoval());
 
         if (configuration.disableGME()) {
             logger.info("Gradle Manipulator disabled");

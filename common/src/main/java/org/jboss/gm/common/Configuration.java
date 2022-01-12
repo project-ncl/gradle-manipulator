@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.Accessible;
@@ -158,7 +159,7 @@ public interface Configuration extends Accessible, Reloadable {
     String[] groovyScripts();
 
     @Key("pluginRemoval")
-    String[] pluginRemoval();
+    Set<String> pluginRemoval();
 
     @Key("publishPluginHooks")
     @DefaultValue("elasticsearch.esplugin")

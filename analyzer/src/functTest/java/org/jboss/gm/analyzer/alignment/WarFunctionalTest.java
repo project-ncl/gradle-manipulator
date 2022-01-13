@@ -1,13 +1,13 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
@@ -100,19 +100,15 @@ public class WarFunctionalTest extends AbstractWiremockTest {
             throws IOException, ManipulationException, URISyntaxException, GitAPIException {
         final Path projectRoot = tempDir.newFolder(PROJECT_NAME).toPath();
         final Map<String, String> properties = new HashMap<>();
-        final File folder = tempDir.newFolder();
 
         // On a new release the SNAPSHOT artifact (e.g. 3.2-SNAPSHOT) for the manipulation library
         // may not be available causing this to fail. We can't do the same as DifferentJVMTest as
         // we need the manipulation library built. Hence, we'll use JGit to establish the last tag
         // (i.e. release) and use that.
-        List<Ref> refs = Git.cloneRepository()
-                .setURI("https://github.com/project-ncl/gradle-manipulator.git")
-                .setDirectory(folder)
-                .call()
-                .tagList()
-                .call();
-        String name = refs.get(refs.size() - 1).getName();
+        Collection<Ref> refs2 = Git.lsRemoteRepository().setRemote("https://github.com/project-ncl/gradle-manipulator.git")
+                .setTags(true).call();
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
+        String name = refs2.stream().map(Ref::getName).max(Comparator.naturalOrder()).get();
         properties.put("manipulationVersion", name.substring(name.lastIndexOf('/') + 1));
 
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot.toFile(),

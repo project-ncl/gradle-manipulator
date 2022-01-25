@@ -12,29 +12,25 @@ GME can override a set of dependency versions using a remote REST endpoint as it
 
 #### REST Endpoint
 
-GME can prescan the project, collect up all used `group:artifact:version` and call a REST endpoint using the endpoint property `restURL` (provided from the Dependency Analysis tool [here](https://github.com/project-ncl/dependency-analysis)), which will then return a list of possible new versions. Note that the URL should be the subset of the endpoint e.g.
+GME can prescan the project, collect up all used `group:artifact:version` and call a REST endpoint using the endpoint property `restURL` (provided from the Dependency Analysis tool [here](https://github.com/project-ncl/dependency-analysis), versions >= 2.1, hereinafter referred to as DA), which will then return a list of possible new versions. Note that the URL should be the subset of the endpoint e.g.
 
     http://foo.bar.com/da/rest/v-1
 
 GME will then call the following endpoints
 
-    reports/lookup/gavs
+    lookup/maven/latest
+    lookup/maven
 
-It will initially call the `lookup/gavs` endpoint. By default PME will pass *all* the GAVs to the endpoint **automatically auto-sizing** the data sent to DA according to the project size. Note that the initial split batches can also be configured manually via `-DrestMaxSize=<...>`. If the endpoint returns a 503 or 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint and the request retried. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`. An optional `restRepositoryGroup` parameter may be specified so that the endpoint can use a particular repository group.
+in that order. By default GME will pass *all* the GAVs to the endpoint **automatically sizing** the data sent to DA according to the project size. Note that the initial split batches can also be configured manually via `-DrestMaxSize=<...>`. If that value is set to 0, then everything is sent without any auto-sizing. If the endpoint returns a 503 or 504 timeout the batch is automatically split into smaller chunks in an attempt to reduce load on the endpoint and the request retried. It will by default chunk down to size of 4 before aborting. This can be configured with `-DrestMinSize=<...>`.
 
-Scanning for artifacts to align in Brew is configured with `-DrestBrewPullActive=<...>` (by default: false).
+A boolean flag `restBrewPullActive` flag switches on and off the version lookup in Brew and the default value is false. Switching it off might have positive effect on performance. Finally, the string identifier `restMode` indicates type of versions to lookup. By default it is empty. Modes are configurable in DA, so it is needed to check the DA config/consult with DA maintainers for the list of configured modes. Usual modes might be e.g.
 
-The mode of the alignment is specified with `-DrestMode`. By default it is empty. The Dependency Analysis tool is configured so that a mode will align to particular version suffixes. The available modes are:
+- `PERSISTENT`
+- `TEMPORARY`
+- `SERVICE`
+- `SERVICE-TEMPORARY`
 
-- PERSISTENT
-- TEMPORARY
-- SERVICE
-- SERVICE-TEMPORARY
-
-with more to be added in the future.
-
-The lookup REST endpoint should follow:
-
+with more to be added in the future. The lookup REST endpoint should follow:
 
 <table>
 <tr>
@@ -43,9 +39,10 @@ The lookup REST endpoint should follow:
 </tr>
 <tr>
 <td>
-   <pre lang="xml" style="font-size: 10px">
+   <pre style="font-size: 10px"><code class="language-json">
 [
-    [ "repositoryGroup" : "id" ]
+    [ "brewPullActive": true, ]
+    [ "mode": "MODE-ID", ]
     {
         "groupId": "org.foo",
         "artifactId": "bar",
@@ -53,23 +50,20 @@ The lookup REST endpoint should follow:
     },
     ...
 ]
-    </pre>
+    </code></pre>
 </td>
 <td>
-  <pre lang="xml" style="font-size: 10px">
+   <pre style="font-size: 10px"><code class="language-json">
 [
     {
         "groupId": "org.foo",
         "artifactId": "bar",
         "version": "1.0.0.Final",
-        "availableVersions": ["1.0.0.Final-rebuild-2",
-"1.0.0.Final-rebuild-1", "1.0.1.Final-rebuild-1"],
         "bestMatchVersion": "1.0.0.Final-rebuild-2",
-        "blacklisted": false,
-        "whitelisted": true
     },
     ...
-]  </pre>
+]
+   </code></pre>
 </td>
 </tr>
 </table>

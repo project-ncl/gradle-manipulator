@@ -176,8 +176,9 @@ public class PluginUtils {
         if (settingsFile.exists()) {
             try {
                 List<String> lines = FileUtils.readLines(settingsFile, Charset.defaultCharset());
+                Pattern p = Pattern.compile("^((?!^\\s*//).*" + Pattern.quote(SEMANTIC_BUILD_VERSIONING) + ".*)$");
                 for (String s : lines) {
-                    if (s.contains(SEMANTIC_BUILD_VERSIONING)) {
+                    if (p.matcher(s).matches()) {
                         logger.info("Found Semantic Build Versioning Plugin: {}", s);
                         return true;
                     }

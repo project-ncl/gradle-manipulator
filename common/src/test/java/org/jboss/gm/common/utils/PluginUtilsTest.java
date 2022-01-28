@@ -338,4 +338,55 @@ public class PluginUtilsTest {
         assertFalse(FileUtils.readFileToString(target, Charset.defaultCharset()).contains("com.github.ben-manes.versions"));
         assertTrue(FileUtils.readFileToString(subtarget, Charset.defaultCharset()).trim().isEmpty());
     }
+
+    @Test
+    public void testCheckForSemanticPlugin1()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("settings.gradle");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "import org.gradle.util.GradleVersion\n" + "\n"
+                        + "buildscript {\n" + "  repositories {\n"
+                        + "    maven {\n"
+                        + "      url 'https://plugins.gradle.org/m2/'\n"
+                        + "    }\n" + "  }\n" + "  dependencies {\n"
+                        + "    // Needed to override an old version of Apache HttpClient that was being included by the\n"
+                        + "    // net.vivin.gradle-semantic-build-versioning plugin.\n"
+                        + "    // See https://www.jfrog.com/jira/browse/GAP-317 for more info.\n"
+                        + "    classpath 'org.apache.httpcomponents:httpclient:4.5.13'\n"
+                        + "    classpath 'gradle.plugin.net.vivin:gradle-semantic-build-versioning:4.0.0'\n"
+                        + "  }\n" + "}\n" + "\n",
+                Charset.defaultCharset());
+
+        boolean result = PluginUtils.checkForSemanticBuildVersioning(logger, target.getParentFile());
+        assertFalse(result);
+        assertFalse(systemOutRule.getLog().contains("Found Semantic Build Versioning Plugin"));
+    }
+
+    @Test
+    public void testCheckForSemanticPlugin2()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("settings.gradle");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "import org.gradle.util.GradleVersion\n" + "\n"
+                        + "buildscript {\n" + "  repositories {\n"
+                        + "    maven {\n"
+                        + "      url 'https://plugins.gradle.org/m2/'\n"
+                        + "    }\n" + "  }\n" + "  dependencies {\n"
+                        + "    classpath 'org.apache.httpcomponents:httpclient:4.5.13'\n"
+                        + "    classpath 'gradle.plugin.net.vivin:gradle-semantic-build-versioning:4.0.0'\n"
+                        + "  }\n" + "}\n" + "\n"
+                        + "apply plugin: 'net.vivin.gradle-semantic-build-versioning'\n"
+                        + "\n" + "//otherwise it defaults to the folder name\n"
+                        + "rootProject.name = 'cruise-control'\n" + "\n"
+                        + "include 'cruise-control', "
+                        + "'cruise-control-metrics-reporter', "
+                        + "'cruise-control-core'\n",
+                Charset.defaultCharset());
+
+        boolean result = PluginUtils.checkForSemanticBuildVersioning(logger, target.getParentFile());
+        assertTrue(result);
+        assertTrue(systemOutRule.getLog().contains("Found Semantic Build Versioning Plugin"));
+    }
 }

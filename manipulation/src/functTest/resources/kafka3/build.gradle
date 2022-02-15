@@ -1,0 +1,1508 @@
+
+
+// Licensed to the Apache Software Foundation (ASF) under one or more
+// contributor license agreements.  See the NOTICE file distributed with
+// this work for additional information regarding copyright ownership.
+// The ASF licenses this file to You under the Apache License, Version 2.0
+// (the "License"); you may not use this file except in compliance with
+// the License.  You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import org.ajoberstar.grgit.Grgit
+
+import java.nio.charset.StandardCharsets
+
+buildscript {
+  repositories {
+    maven { url 'https://maven.repository.redhat.com/ga/' }
+    mavenCentral()
+  }
+  apply from: "$rootDir/gradle/dependencies.gradle"
+
+  dependencies {
+    // For Apache Rat plugin to ignore non-Git files
+    classpath "org.ajoberstar.grgit:grgit-core:$versions.grgit"
+  }
+}
+
+plugins {
+
+  // including this plugin directly instead of by an init script, which allows to use the freshly build version
+  id 'org.jboss.gm.manipulation'
+
+  id 'com.diffplug.spotless' version '5.12.5'
+  id 'idea'
+  id 'java-library'
+  id 'org.owasp.dependencycheck' version '6.1.6'
+  id 'org.nosphere.apache.rat' version "0.7.0"
+
+  // Red Hat Build
+  id 'com.github.jk1.dependency-license-report' version '1.16'
+
+  id "com.github.spotbugs" version '4.7.1' apply false
+  id 'org.gradle.test-retry' version '1.3.1' apply false
+  id 'org.scoverage' version '5.0.0' apply false
+  id 'com.github.johnrengelman.shadow' version '6.1.0' apply false
+}
+
+// Red Hat build -- Use the licence report plugin to automatically compile the licences
+// used into one nice html report.
+apply plugin: 'com.github.jk1.dependency-license-report'
+
+licenseReport {
+    projects = [
+        project,
+        project.getChildProjects().get("core"),
+        project.getChildProjects().get("clients"),
+        project.getChildProjects().get("connect"),
+        project.getChildProjects().get("streams")
+    ]
+
+    excludes = ['org.scala-lang:scala-compiler']
+}
+
+spotless {
+  scala {
+    target 'streams/**/*.scala'
+    scalafmt("$versions.scalafmt").configFile('checkstyle/.scalafmt.conf')
+    licenseHeaderFile 'checkstyle/java.header', 'package'
+  }
+}
+
+allprojects {
+
+  apply plugin: 'org.jboss.gm.manipulation'
+
+  repositories {
+    maven { url 'https://maven.repository.redhat.com/ga/' }
+    mavenCentral()
+  }
+
+  configurations.all {
+    // zinc is the Scala incremental compiler, it has a configuration for its own dependencies
+    // that are unrelated to the project dependencies, we should not change them
+    if (name != "zinc") {
+      resolutionStrategy {
+        force(
+          // be explicit about the javassist dependency version instead of relying on the transitive version
+          libs.javassist,
+          // ensure we have a single version in the classpath despite transitive dependencies
+          libs.scalaLibrary,
+          libs.scalaReflect,
+          libs.jacksonAnnotations,
+          // be explicit about the Netty dependency version instead of relying on the version set by
+          // ZooKeeper (potentially older and containing CVEs)
+          libs.nettyHandler,
+          libs.nettyTransportNativeEpoll
+        )
+      }
+    }
+  }
+}
+
+ext {
+  gradleVersion = versions.gradle
+  minJavaVersion = "8"
+  buildVersionFileName = "kafka-version.properties"
+
+  defaultMaxHeapSize = "2g"
+  defaultJvmArgs = ["-Xss4m", "-XX:+UseParallelGC"]
+  if (JavaVersion.current() == JavaVersion.VERSION_16)
+    defaultJvmArgs.add("--illegal-access=permit")
+
+  userMaxForks = project.hasProperty('maxParallelForks') ? maxParallelForks.toInteger() : null
+  userIgnoreFailures = project.hasProperty('ignoreFailures') ? ignoreFailures : false
+
+  userMaxTestRetries = project.hasProperty('maxTestRetries') ? maxTestRetries.toInteger() : 0
+  userMaxTestRetryFailures = project.hasProperty('maxTestRetryFailures') ? maxTestRetryFailures.toInteger() : 0
+
+  skipSigning = project.hasProperty('skipSigning') && skipSigning.toBoolean()
+  shouldSign = !skipSigning && !version.endsWith("SNAPSHOT")
+
+  mavenUrl = project.hasProperty('mavenUrl') ? project.mavenUrl : ''
+  mavenUsername = project.hasProperty('mavenUsername') ? project.mavenUsername : ''
+  mavenPassword = project.hasProperty('mavenPassword') ? project.mavenPassword : ''
+
+  userShowStandardStreams = project.hasProperty("showStandardStreams") ? showStandardStreams : null
+
+  userTestLoggingEvents = project.hasProperty("testLoggingEvents") ? Arrays.asList(testLoggingEvents.split(",")) : null
+
+  userEnableTestCoverage = project.hasProperty("enableTestCoverage") ? enableTestCoverage : false
+
+  // See README.md for details on this option and the reasoning for the default
+  userScalaOptimizerMode = project.hasProperty("scalaOptimizerMode") ? scalaOptimizerMode : "inline-kafka"
+  def scalaOptimizerValues = ["none", "method", "inline-kafka", "inline-scala"]
+  if (!scalaOptimizerValues.contains(userScalaOptimizerMode))
+    throw new GradleException("Unexpected value for scalaOptimizerMode property. Expected one of $scalaOptimizerValues), but received: $userScalaOptimizerMode")
+
+  generatedDocsDir = new File("${project.rootDir}/docs/generated")
+
+  commitId = project.hasProperty('commitId') ? commitId : null
+}
+
+println("Starting build with version $version using Gradle $gradleVersion, Java ${JavaVersion.current()} and Scala ${versions.scala}")
+
+subprojects {
+
+  // enable running :dependencies task recursively on all subprojects
+  // eg: ./gradlew allDeps
+  task allDeps(type: DependencyReportTask) {}
+  // enable running :dependencyInsight task recursively on all subprojects
+  // eg: ./gradlew allDepInsight --configuration runtime --dependency com.fasterxml.jackson.core:jackson-databind
+  task allDepInsight(type: DependencyInsightReportTask) doLast {}
+
+  apply plugin: 'java-library'
+  apply plugin: 'checkstyle'
+  apply plugin: "com.github.spotbugs"
+  apply plugin: 'org.gradle.test-retry'
+
+  // We use the shadow plugin for the jmh-benchmarks module and the `-all` jar can get pretty large, so
+  // don't publish it
+  def shouldPublish = !project.name.equals('jmh-benchmarks')
+
+  if (shouldPublish) {
+    apply plugin: 'maven-publish'
+
+    // Add aliases for the task names used by the maven plugin for backwards compatibility
+    // The maven plugin was replaced by the maven-publish plugin in Gradle 7.0
+    tasks.register('install').configure { dependsOn(publishToMavenLocal) }
+    tasks.register('uploadArchives').configure { dependsOn(publish) }
+  }
+
+  // apply the eclipse plugin only to subprojects that hold code. 'connect' is just a folder.
+  if (!project.name.equals('connect')) {
+    apply plugin: 'eclipse'
+    fineTuneEclipseClasspathFile(eclipse, project)
+  }
+
+  sourceCompatibility = minJavaVersion
+  targetCompatibility = minJavaVersion
+
+  java {
+    consistentResolution {
+      // resolve the compileClasspath and then "inject" the result of resolution as strict constraints into the runtimeClasspath
+      useCompileClasspathVersions()
+    }
+  }
+
+  tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << "-Xlint:all"
+    // temporary exclusions until all the warnings are fixed
+    if (!project.path.startsWith(":connect"))
+      options.compilerArgs << "-Xlint:-rawtypes"
+    options.compilerArgs << "-Xlint:-serial"
+    options.compilerArgs << "-Xlint:-try"
+    options.compilerArgs << "-Werror"
+    // --release is the recommended way to select the target release, but it's only supported in Java 9 so we also
+    // set --source and --target via `sourceCompatibility` and `targetCompatibility`. If/when Gradle supports `--release`
+    // natively (https://github.com/gradle/gradle/issues/2510), we should switch to that.
+    if (JavaVersion.current().isJava9Compatible())
+      options.compilerArgs << "--release" << minJavaVersion
+  }
+
+  if (shouldPublish) {
+
+    publishing {
+      repositories {
+        // To test locally, invoke gradlew with `-PmavenUrl=file:///some/local/path`
+        maven {
+          url = mavenUrl
+          credentials {
+            username = mavenUsername
+            password = mavenPassword
+          }
+        }
+      }
+      publications {
+        mavenJava(MavenPublication) {
+          from components.java
+
+          afterEvaluate {
+            ["srcJar", "javadocJar", "scaladocJar", "testJar", "testSrcJar"].forEach { taskName ->
+              def task = tasks.findByName(taskName)
+              if (task != null)
+                artifact task
+            }
+
+            artifactId = archivesBaseName
+            pom {
+              name = 'Apache Kafka'
+              url = 'https://kafka.apache.org'
+              licenses {
+                license {
+                  name = 'The Apache License, Version 2.0'
+                  url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                  distribution = 'repo'
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (shouldSign) {
+    }
+  }
+
+  // Remove the relevant project name once it's converted to JUnit 5
+  def shouldUseJUnit5 = !(["runtime", "streams"].contains(it.project.name))
+
+  def testLoggingEvents = ["passed", "skipped", "failed"]
+  def testShowStandardStreams = false
+  def testExceptionFormat = 'full'
+  // Gradle built-in logging only supports sending test output to stdout, which generates a lot
+  // of noise, especially for passing tests. We really only want output for failed tests. This
+  // hooks into the output and logs it (so we don't have to buffer it all in memory) and only
+  // saves the output for failing tests. Directory and filenames are such that you can, e.g.,
+  // create a Jenkins rule to collect failed test output.
+  def logTestStdout = {
+    def testId = { TestDescriptor descriptor ->
+      "${descriptor.className}.${descriptor.name}".toString()
+    }
+
+    def logFiles = new HashMap<String, File>()
+    def logStreams = new HashMap<String, FileOutputStream>()
+    beforeTest { TestDescriptor td ->
+      def tid = testId(td)
+      // truncate the file name if it's too long
+      def logFile = new File(
+              "${projectDir}/build/reports/testOutput/${tid.substring(0, Math.min(tid.size(),240))}.test.stdout"
+      )
+      logFile.parentFile.mkdirs()
+      logFiles.put(tid, logFile)
+      logStreams.put(tid, new FileOutputStream(logFile))
+    }
+    onOutput { TestDescriptor td, TestOutputEvent toe ->
+      def tid = testId(td)
+      // Some output can happen outside the context of a specific test (e.g. at the class level)
+      // and beforeTest/afterTest seems to not be invoked for these cases (and similarly, there's
+      // a TestDescriptor hierarchy that includes the thread executing the test, Gradle tasks,
+      // etc). We see some of these in practice and it seems like something buggy in the Gradle
+      // test runner since we see it *before* any tests and it is frequently not related to any
+      // code in the test (best guess is that it is tail output from last test). We won't have
+      // an output file for these, so simply ignore them. If they become critical for debugging,
+      // they can be seen with showStandardStreams.
+      if (td.name == td.className || td.className == null) {
+        // silently ignore output unrelated to specific test methods
+        return
+      } else if (logStreams.get(tid) == null) {
+        println "WARNING: unexpectedly got output for a test [${tid}]" +
+                " that we didn't previously see in the beforeTest hook." +
+                " Message for debugging: [" + toe.message + "]."
+        return
+      }
+      try {
+        logStreams.get(tid).write(toe.message.getBytes(StandardCharsets.UTF_8))
+      } catch (Exception e) {
+        println "ERROR: Failed to write output for test ${tid}"
+        e.printStackTrace()
+      }
+    }
+    afterTest { TestDescriptor td, TestResult tr ->
+      def tid = testId(td)
+      try {
+        logStreams.get(tid).close()
+        if (tr.resultType != TestResult.ResultType.FAILURE) {
+          logFiles.get(tid).delete()
+        } else {
+          def file = logFiles.get(tid)
+          println "${tid} failed, log available in ${file}"
+        }
+      } catch (Exception e) {
+        println "ERROR: Failed to close stdout file for ${tid}"
+        e.printStackTrace()
+      } finally {
+        logFiles.remove(tid)
+        logStreams.remove(tid)
+      }
+    }
+  }
+
+  // The suites are for running sets of tests in IDEs.
+  // Gradle will run each test class, so we exclude the suites to avoid redundantly running the tests twice.
+  def testsToExclude = ['**/*Suite.class']
+  // Exclude PowerMock tests when running with Java 16 until a version of PowerMock that supports Java 16 is released
+  // The relevant issues are https://github.com/powermock/powermock/issues/1094 and https://github.com/powermock/powermock/issues/1099
+  if (JavaVersion.current().isCompatibleWith(JavaVersion.VERSION_16)) {
+    testsToExclude.addAll([
+      // connect tests
+      "**/AbstractHerderTest.*", "**/ConnectClusterStateImplTest.*", "**/ConnectorPluginsResourceTest.*",
+      "**/ConnectorsResourceTest.*", "**/DistributedHerderTest.*", "**/FileOffsetBakingStoreTest.*",
+      "**/ErrorHandlingTaskTest.*", "**/KafkaConfigBackingStoreTest.*", "**/KafkaOffsetBackingStoreTest.*",
+      "**/KafkaBasedLogTest.*", "**/OffsetStorageWriterTest.*", "**/StandaloneHerderTest.*",
+      "**/SourceTaskOffsetCommitterTest.*", "**/WorkerConfigTransformerTest.*", "**/WorkerGroupMemberTest.*",
+      "**/WorkerSinkTaskTest.*", "**/WorkerSinkTaskThreadedTest.*", "**/WorkerSourceTaskTest.*",
+      "**/WorkerTaskTest.*", "**/WorkerTest.*", "**/RestServerTest.*",
+      // streams tests
+      "**/KafkaStreamsTest.*", "**/RepartitionTopicsTest.*", "**/RocksDBMetricsRecorderTest.*",
+      "**/StreamsMetricsImplTest.*", "**/StateManagerUtilTest.*", "**/TableSourceNodeTest.*"
+    ])
+  }
+
+  test {
+    maxParallelForks = userMaxForks ?: Runtime.runtime.availableProcessors()
+    ignoreFailures = userIgnoreFailures
+
+    maxHeapSize = defaultMaxHeapSize
+    jvmArgs = defaultJvmArgs
+
+    testLogging {
+      events = userTestLoggingEvents ?: testLoggingEvents
+      showStandardStreams = userShowStandardStreams ?: testShowStandardStreams
+      exceptionFormat = testExceptionFormat
+    }
+    logTestStdout.rehydrate(delegate, owner, this)()
+
+    exclude testsToExclude
+
+    if (shouldUseJUnit5)
+      useJUnitPlatform()
+
+    retry {
+      maxRetries = userMaxTestRetries
+      maxFailures = userMaxTestRetryFailures
+    }
+  }
+
+  task integrationTest(type: Test, dependsOn: compileJava) {
+    maxParallelForks = userMaxForks ?: Runtime.runtime.availableProcessors()
+    ignoreFailures = userIgnoreFailures
+
+    maxHeapSize = defaultMaxHeapSize
+    jvmArgs = defaultJvmArgs
+
+
+    testLogging {
+      events = userTestLoggingEvents ?: testLoggingEvents
+      showStandardStreams = userShowStandardStreams ?: testShowStandardStreams
+      exceptionFormat = testExceptionFormat
+    }
+    logTestStdout.rehydrate(delegate, owner, this)()
+
+    exclude testsToExclude
+
+    if (shouldUseJUnit5) {
+      useJUnitPlatform {
+        includeTags "integration"
+      }
+    } else {
+      useJUnit {
+        includeCategories 'org.apache.kafka.test.IntegrationTest'
+      }
+    }
+
+    retry {
+      maxRetries = userMaxTestRetries
+      maxFailures = userMaxTestRetryFailures
+    }
+  }
+
+  task unitTest(type: Test, dependsOn: compileJava) {
+    maxParallelForks = userMaxForks ?: Runtime.runtime.availableProcessors()
+    ignoreFailures = userIgnoreFailures
+
+    maxHeapSize = defaultMaxHeapSize
+    jvmArgs = defaultJvmArgs
+
+    testLogging {
+      events = userTestLoggingEvents ?: testLoggingEvents
+      showStandardStreams = userShowStandardStreams ?: testShowStandardStreams
+      exceptionFormat = testExceptionFormat
+    }
+    logTestStdout.rehydrate(delegate, owner, this)()
+
+    exclude testsToExclude
+
+    if (shouldUseJUnit5) {
+      useJUnitPlatform {
+        excludeTags "integration"
+      }
+    } else {
+      useJUnit {
+        excludeCategories 'org.apache.kafka.test.IntegrationTest'
+      }
+    }
+
+    retry {
+      maxRetries = userMaxTestRetries
+      maxFailures = userMaxTestRetryFailures
+    }
+  }
+
+  // remove test output from all test types
+  tasks.withType(Test).all { t ->
+    cleanTest {
+      delete t.reports.junitXml.destination
+      delete t.reports.html.destination
+    }
+  }
+
+  jar {
+    from "$rootDir/LICENSE"
+    from "$rootDir/NOTICE"
+  }
+
+  task srcJar(type: Jar) {
+    archiveClassifier = 'sources'
+    from "$rootDir/LICENSE"
+    from "$rootDir/NOTICE"
+    from sourceSets.main.allSource
+  }
+
+  task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier = 'javadoc'
+    from "$rootDir/LICENSE"
+    from "$rootDir/NOTICE"
+    from javadoc.destinationDir
+  }
+
+  task docsJar(dependsOn: javadocJar)
+
+  javadoc {
+    options.charSet = 'UTF-8'
+    options.docEncoding = 'UTF-8'
+    options.encoding = 'UTF-8'
+    // Turn off doclint for now, see https://blog.joda.org/2014/02/turning-off-doclint-in-jdk-8-javadoc.html for rationale
+    options.addStringOption('Xdoclint:none', '-quiet')
+
+    // The URL structure was changed to include the locale after Java 8
+    if (JavaVersion.current().isJava11Compatible())
+      options.links "https://docs.oracle.com/en/java/javase/${JavaVersion.current().majorVersion}/docs/api/"
+    else
+      options.links "https://docs.oracle.com/javase/8/docs/api/"
+  }
+
+  task systemTestLibs(dependsOn: jar)
+
+  if (!sourceSets.test.allSource.isEmpty()) {
+    task testJar(type: Jar) {
+      archiveClassifier = 'test'
+      from "$rootDir/LICENSE"
+      from "$rootDir/NOTICE"
+      from sourceSets.test.output
+    }
+
+    task testSrcJar(type: Jar, dependsOn: testJar) {
+      archiveClassifier = 'test-sources'
+      from "$rootDir/LICENSE"
+      from "$rootDir/NOTICE"
+      from sourceSets.test.allSource
+    }
+
+  }
+
+  plugins.withType(ScalaPlugin) {
+
+    scala {
+      zincVersion = versions.zinc
+    }
+
+    task scaladocJar(type:Jar, dependsOn: scaladoc) {
+      archiveClassifier = 'scaladoc'
+      from "$rootDir/LICENSE"
+      from "$rootDir/NOTICE"
+      from scaladoc.destinationDir
+    }
+
+    //documentation task should also trigger building scala doc jar
+    docsJar.dependsOn scaladocJar
+
+  }
+
+  tasks.withType(ScalaCompile) {
+    scalaCompileOptions.additionalParameters = [
+      "-deprecation",
+      "-unchecked",
+      "-encoding", "utf8",
+      "-Xlog-reflective-calls",
+      "-feature",
+      "-language:postfixOps",
+      "-language:implicitConversions",
+      "-language:existentials",
+      "-Xlint:constant",
+      "-Xlint:delayedinit-select",
+      "-Xlint:doc-detached",
+      "-Xlint:missing-interpolator",
+      "-Xlint:nullary-unit",
+      "-Xlint:option-implicit",
+      "-Xlint:package-object-classes",
+      "-Xlint:poly-implicit-overload",
+      "-Xlint:private-shadow",
+      "-Xlint:stars-align",
+      "-Xlint:type-parameter-shadow",
+      "-Xlint:unused"
+    ]
+
+    // See README.md for details on this option and the meaning of each value
+    if (userScalaOptimizerMode.equals("method"))
+      scalaCompileOptions.additionalParameters += ["-opt:l:method"]
+    else if (userScalaOptimizerMode.startsWith("inline-")) {
+      List<String> inlineFrom = ["-opt-inline-from:org.apache.kafka.**"]
+      if (project.name.equals('core'))
+        inlineFrom.add("-opt-inline-from:kafka.**")
+      if (userScalaOptimizerMode.equals("inline-scala"))
+        inlineFrom.add("-opt-inline-from:scala.**")
+
+      scalaCompileOptions.additionalParameters += ["-opt:l:inline"]
+      scalaCompileOptions.additionalParameters += inlineFrom
+    }
+
+    if (versions.baseScala != '2.12') {
+      scalaCompileOptions.additionalParameters += ["-opt-warnings", "-Xlint:strict-unsealed-patmat"]
+      // Scala 2.13.2 introduces compiler warnings suppression, which is a pre-requisite for -Xfatal-warnings
+      scalaCompileOptions.additionalParameters += ["-Xfatal-warnings"]
+    }
+
+    // these options are valid for Scala versions < 2.13 only
+    // Scala 2.13 removes them, see https://github.com/scala/scala/pull/6502 and https://github.com/scala/scala/pull/5969
+    if (versions.baseScala == '2.12') {
+      scalaCompileOptions.additionalParameters += [
+        "-Xlint:by-name-right-associative",
+        "-Xlint:nullary-override",
+        "-Xlint:unsound-match"
+      ]
+    }
+
+    // Scalac's `-release` requires Java 9 or higher
+    if (JavaVersion.current().isJava9Compatible())
+      scalaCompileOptions.additionalParameters += ["-release", minJavaVersion]
+
+    configure(scalaCompileOptions.forkOptions) {
+      memoryMaximumSize = defaultMaxHeapSize
+      jvmArgs = defaultJvmArgs
+    }
+  }
+
+  checkstyle {
+    configFile = new File(rootDir, "checkstyle/checkstyle.xml")
+    configProperties = checkstyleConfigProperties("import-control.xml")
+    toolVersion = versions.checkstyle
+  }
+
+  configure(checkstyleMain) {
+    group = 'Verification'
+    description = 'Run checkstyle on all main Java sources'
+  }
+
+  configure(checkstyleTest) {
+    group = 'Verification'
+    description = 'Run checkstyle on all test Java sources'
+  }
+
+  test.dependsOn('checkstyleMain', 'checkstyleTest')
+
+  spotbugs {
+    toolVersion = versions.spotbugs
+    excludeFilter = file("$rootDir/gradle/spotbugs-exclude.xml")
+    ignoreFailures = false
+  }
+  test.dependsOn('spotbugsMain')
+
+  tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
+    reports {
+      // Continue supporting `xmlFindBugsReport` for compatibility
+      xml.enabled(project.hasProperty('xmlSpotBugsReport') || project.hasProperty('xmlFindBugsReport'))
+      html.enabled(!project.hasProperty('xmlSpotBugsReport') && !project.hasProperty('xmlFindBugsReport'))
+    }
+    maxHeapSize = defaultMaxHeapSize
+    jvmArgs = defaultJvmArgs
+  }
+
+  // Ignore core since its a scala project
+  if (it.path != ':core') {
+    if (userEnableTestCoverage) {
+      apply plugin: "jacoco"
+
+      jacoco {
+        toolVersion = versions.jacoco
+      }
+
+      // NOTE: Jacoco Gradle plugin does not support "offline instrumentation" this means that classes mocked by PowerMock
+      // may report 0 coverage, since the source was modified after initial instrumentation.
+      // See https://github.com/jacoco/jacoco/issues/51
+      jacocoTestReport {
+        dependsOn tasks.test
+        sourceSets sourceSets.main
+        reports {
+          html.enabled = true
+          xml.enabled = true
+          csv.enabled = false
+        }
+      }
+
+    }
+  }
+
+  if (userEnableTestCoverage) {
+    def coverageGen = it.path == ':core' ? 'reportScoverage' : 'jacocoTestReport'
+    task reportCoverage(dependsOn: [coverageGen])
+  }
+
+  task determineCommitId {
+    def takeFromHash = 16
+    if (commitId) {
+      commitId = commitId.take(takeFromHash)
+    } else if (file("$rootDir/.git/HEAD").exists()) {
+      def headRef = file("$rootDir/.git/HEAD").text
+      if (headRef.contains('ref: ')) {
+        headRef = headRef.replaceAll('ref: ', '').trim()
+        if (file("$rootDir/.git/$headRef").exists()) {
+          commitId = file("$rootDir/.git/$headRef").text.trim().take(takeFromHash)
+        }
+      } else {
+        commitId = headRef.trim().take(takeFromHash)
+      }
+    } else {
+      commitId = "unknown"
+    }
+  }
+
+}
+
+gradle.taskGraph.whenReady { taskGraph ->
+  taskGraph.getAllTasks().findAll { it.name.contains('spotbugsScoverage') || it.name.contains('spotbugsTest') }.each { task ->
+    task.enabled = false
+  }
+}
+
+def fineTuneEclipseClasspathFile(eclipse, project) {
+  eclipse.classpath.file {
+    beforeMerged { cp ->
+      cp.entries.clear()
+      // for the core project add the directories defined under test/scala as separate source directories
+      if (project.name.equals('core')) {
+        cp.entries.add(new org.gradle.plugins.ide.eclipse.model.SourceFolder("src/test/scala/integration", null))
+        cp.entries.add(new org.gradle.plugins.ide.eclipse.model.SourceFolder("src/test/scala/other", null))
+        cp.entries.add(new org.gradle.plugins.ide.eclipse.model.SourceFolder("src/test/scala/unit", null))
+      }
+    }
+    whenMerged { cp ->
+      // for the core project exclude the separate sub-directories defined under test/scala. These are added as source dirs above
+      if (project.name.equals('core')) {
+        cp.entries.findAll { it.kind == "src" && it.path.equals("src/test/scala") }*.excludes = ["integration/", "other/", "unit/"]
+      }
+      /*
+       * Set all eclipse build output to go to 'build_eclipse' directory. This is to ensure that gradle and eclipse use different
+       * build output directories, and also avoid using the eclpise default of 'bin' which clashes with some of our script directories.
+       * https://discuss.gradle.org/t/eclipse-generated-files-should-be-put-in-the-same-place-as-the-gradle-generated-files/6986/2
+       */
+      cp.entries.findAll { it.kind == "output" }*.path = "build_eclipse"
+      /*
+       * Some projects have explicitly added test output dependencies. These are required for the gradle build but not required
+       * in Eclipse since the dependent projects are added as dependencies. So clean up these from the generated classpath.
+       */
+      cp.entries.removeAll { it.kind == "lib" && it.path.matches(".*/build/(classes|resources)/test") }
+    }
+  }
+}
+
+def checkstyleConfigProperties(configFileName) {
+  [importControlFile: "$rootDir/checkstyle/$configFileName",
+   suppressionsFile: "$rootDir/checkstyle/suppressions.xml",
+   headerFile: "$rootDir/checkstyle/java.header"]
+}
+
+// Aggregates all jacoco results into the root project directory
+if (userEnableTestCoverage) {
+  task jacocoRootReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
+    def javaProjects = subprojects.findAll { it.path != ':core' }
+
+    description = 'Generates an aggregate report from all subprojects'
+    dependsOn(javaProjects.test)
+
+    additionalSourceDirs.from = javaProjects.sourceSets.main.allSource.srcDirs
+    sourceDirectories.from = javaProjects.sourceSets.main.allSource.srcDirs
+    classDirectories.from = javaProjects.sourceSets.main.output
+    executionData.from = javaProjects.jacocoTestReport.executionData
+
+    reports {
+      html.enabled = true
+      xml.enabled = true
+    }
+
+    // workaround to ignore projects that don't have any tests at all
+    onlyIf = { true }
+    doFirst {
+      executionData = files(executionData.findAll { it.exists() })
+    }
+  }
+}
+
+if (userEnableTestCoverage) {
+  task reportCoverage(dependsOn: ['jacocoRootReport', 'core:reportCoverage'])
+}
+
+def connectPkgs = [
+    'connect:api',
+    'connect:basic-auth-extension',
+    'connect:file',
+    'connect:json',
+    'connect:runtime',
+    'connect:transforms',
+    'connect:mirror',
+    'connect:mirror-client'
+]
+
+tasks.create(name: "jarConnect", dependsOn: connectPkgs.collect { it + ":jar" }) {}
+
+tasks.create(name: "testConnect", dependsOn: connectPkgs.collect { it + ":test" }) {}
+
+project(':core') {
+  apply plugin: 'scala'
+
+  // scaladoc generation is configured at the sub-module level with an artifacts
+  // block (cf. see streams-scala). If scaladoc generation is invoked explicitly
+  // for the `core` module, this ensures the generated jar doesn't include scaladoc
+  // files since the `core` module doesn't include public APIs.
+  scaladoc {
+    enabled = false
+  }
+  if (userEnableTestCoverage)
+    apply plugin: "org.scoverage"
+  archivesBaseName = "kafka_${versions.baseScala}"
+
+  dependencies {
+    // `core` is often used in users' tests, define the following dependencies as `api` for backwards compatibility
+    // even though the `core` module doesn't expose any public API
+//    api project(':clients')
+    api libs.scalaLibrary
+
+//    implementation project(':server-common')
+//    implementation project(':metadata')
+//    implementation project(':raft')
+//    implementation project(':storage')
+
+    implementation libs.argparse4j
+    implementation libs.jacksonDatabind
+    implementation libs.jacksonModuleScala
+    implementation libs.jacksonDataformatCsv
+    implementation libs.jacksonJDK8Datatypes
+    implementation libs.joptSimple
+    implementation libs.metrics
+    implementation libs.scalaCollectionCompat
+    implementation libs.scalaJava8Compat
+    // only needed transitively, but set it explicitly to ensure it has the same version as scala-library
+    implementation libs.scalaReflect
+    implementation libs.scalaLogging
+    implementation libs.slf4jApi
+    implementation(libs.zookeeper) {
+      // Dropwizard Metrics are required by ZooKeeper as of v3.6.0,
+      // but the library should *not* be used in Kafka code
+      implementation libs.dropwizardMetrics
+      exclude module: 'slf4j-log4j12'
+      exclude module: 'log4j'
+    }
+    // ZooKeeperMain depends on commons-cli but declares the dependency as `provided`
+    implementation libs.commonsCli
+
+    compileOnly libs.log4j
+
+//    testImplementation project(':clients').sourceSets.test.output
+//    testImplementation project(':metadata').sourceSets.test.output
+//    testImplementation project(':raft').sourceSets.test.output
+    testImplementation libs.bcpkix
+    testImplementation libs.mockitoCore
+    testImplementation libs.easymock
+    testImplementation(libs.apacheda) {
+      exclude group: 'xml-apis', module: 'xml-apis'
+      // `mina-core` is a transitive dependency for `apacheds` and `apacheda`.
+      // It is safer to use from `apacheds` since that is the implementation.
+      exclude module: 'mina-core'
+    }
+    testImplementation libs.apachedsCoreApi
+    testImplementation libs.apachedsInterceptorKerberos
+    testImplementation libs.apachedsProtocolShared
+    testImplementation libs.apachedsProtocolKerberos
+    testImplementation libs.apachedsProtocolLdap
+    testImplementation libs.apachedsLdifPartition
+    testImplementation libs.apachedsMavibotPartition
+    testImplementation libs.apachedsJdbmPartition
+    testImplementation libs.junitJupiter
+    testImplementation libs.slf4jlog4j
+    testImplementation(libs.jfreechart) {
+      exclude group: 'junit', module: 'junit'
+    }
+  }
+
+  if (userEnableTestCoverage) {
+    scoverage {
+      scoverageVersion = versions.scoverage
+      reportDir = file("${rootProject.buildDir}/scoverage")
+      highlighting = false
+      minimumRate = 0.0
+    }
+  }
+
+  configurations {
+    // manually excludes some unnecessary dependencies
+    implementation.exclude module: 'javax'
+    implementation.exclude module: 'jline'
+    implementation.exclude module: 'jms'
+    implementation.exclude module: 'jmxri'
+    implementation.exclude module: 'jmxtools'
+    implementation.exclude module: 'mail'
+    // To prevent a UniqueResourceException due the same resource existing in both
+    // org.apache.directory.api/api-all and org.apache.directory.api/api-ldap-schema-data
+    testImplementation.exclude module: 'api-ldap-schema-data'
+  }
+
+  tasks.create(name: "copyDependantLibs", type: Copy) {
+    from (configurations.testRuntimeClasspath) {
+      include('slf4j-log4j12*')
+      include('log4j*jar')
+    }
+    from (configurations.runtimeClasspath) {
+      exclude('kafka-clients*')
+    }
+    into "$buildDir/dependant-libs-${versions.scala}"
+    duplicatesStrategy 'exclude'
+  }
+    
+  task genProtocolErrorDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'org.apache.kafka.common.protocol.Errors'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "protocol_errors.html").newOutputStream()
+  }
+
+  task genProtocolTypesDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'org.apache.kafka.common.protocol.types.Type'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "protocol_types.html").newOutputStream()
+  }
+
+  task genProtocolApiKeyDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'org.apache.kafka.common.protocol.ApiKeys'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "protocol_api_keys.html").newOutputStream()
+  }
+
+  task genProtocolMessageDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'org.apache.kafka.common.protocol.Protocol'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "protocol_messages.html").newOutputStream()
+  }
+
+  task genAdminClientConfigDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'org.apache.kafka.clients.admin.AdminClientConfig'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "admin_client_config.html").newOutputStream()
+  }
+
+  task genProducerConfigDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'org.apache.kafka.clients.producer.ProducerConfig'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "producer_config.html").newOutputStream()
+  }
+
+  task genConsumerConfigDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'org.apache.kafka.clients.consumer.ConsumerConfig'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "consumer_config.html").newOutputStream()
+  }
+
+  task genKafkaConfigDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'kafka.server.KafkaConfig'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "kafka_config.html").newOutputStream()
+  }
+
+  task genTopicConfigDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'kafka.log.LogConfig'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "topic_config.html").newOutputStream()
+  }
+
+  task genConsumerMetricsDocs(type: JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'org.apache.kafka.clients.consumer.internals.ConsumerMetrics'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "consumer_metrics.html").newOutputStream()
+  }
+
+  task genProducerMetricsDocs(type: JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'org.apache.kafka.clients.producer.internals.ProducerMetrics'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "producer_metrics.html").newOutputStream()
+  }
+
+  task siteDocsTar(dependsOn: ['genProtocolErrorDocs', 'genProtocolTypesDocs', 'genProtocolApiKeyDocs', 'genProtocolMessageDocs',
+                               'genAdminClientConfigDocs', 'genProducerConfigDocs', 'genConsumerConfigDocs',
+                               'genKafkaConfigDocs', 'genTopicConfigDocs',
+                               ':connect:runtime:genConnectConfigDocs', ':connect:runtime:genConnectTransformationDocs',
+                               ':connect:runtime:genConnectPredicateDocs',
+                               ':connect:runtime:genSinkConnectorConfigDocs', ':connect:runtime:genSourceConnectorConfigDocs',
+                               ':streams:genStreamsConfigDocs', 'genConsumerMetricsDocs', 'genProducerMetricsDocs',
+                               ':connect:runtime:genConnectMetricsDocs'], type: Tar) {
+    archiveClassifier = 'site-docs'
+    compression = Compression.GZIP
+    from project.file("$rootDir/docs")
+    into 'site-docs'
+    duplicatesStrategy 'exclude'
+  }
+
+  tasks.create(name: "releaseTarGz", dependsOn: configurations.archives.artifacts, type: Tar) {
+    into "kafka_${versions.baseScala}-${archiveVersion.get()}"
+    compression = Compression.GZIP
+    from(project.file("$rootDir/bin")) { into "bin/" }
+    from(project.file("$rootDir/config")) { into "config/" }
+    from(project.file("$rootDir/licenses")) { into "licenses/" }
+    from "$rootDir/LICENSE-binary" rename {String filename -> filename.replace("-binary", "")}
+    from "$rootDir/NOTICE-binary" rename {String filename -> filename.replace("-binary", "")}
+    from(configurations.runtimeClasspath) { into("libs/") }
+    from(configurations.archives.artifacts.files) { into("libs/") }
+    from(project.siteDocsTar) { into("site-docs/") }
+//    from(project(':tools').jar) { into("libs/") }
+//    from(project(':tools').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':trogdor').jar) { into("libs/") }
+//    from(project(':trogdor').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':shell').jar) { into("libs/") }
+//    from(project(':shell').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:api').jar) { into("libs/") }
+    from(project(':connect:api').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':connect:runtime').jar) { into("libs/") }
+//    from(project(':connect:runtime').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':connect:transforms').jar) { into("libs/") }
+//    from(project(':connect:transforms').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:json').jar) { into("libs/") }
+    from(project(':connect:json').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:file').jar) { into("libs/") }
+    from(project(':connect:file').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:basic-auth-extension').jar) { into("libs/") }
+    from(project(':connect:basic-auth-extension').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:mirror').jar) { into("libs/") }
+    from(project(':connect:mirror').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:mirror-client').jar) { into("libs/") }
+    from(project(':connect:mirror-client').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':streams').jar) { into("libs/") }
+//    from(project(':streams').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':streams:streams-scala').jar) { into("libs/") }
+//    from(project(':streams:streams-scala').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':streams:test-utils').jar) { into("libs/") }
+//    from(project(':streams:test-utils').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':streams:examples').jar) { into("libs/") }
+//    from(project(':streams:examples').configurations.runtimeClasspath) { into("libs/") }
+    duplicatesStrategy 'exclude'
+  }
+
+  // Red Hat build -- We don't need many of elements of the upstream release so we exclude
+  // them from the our own Tar build task
+  tasks.create(name: "releaseRedHatZip", dependsOn: [configurations.archives.artifacts] , type: Zip) {
+    into "kafka_${versions.baseScala}-${version}"
+    // from(project.file("$rootDir/bin")) {
+    //     into "bin/"
+    //     // Red Hat build -- We don't support windows so no need for the .bat files
+    //     exclude "**/windows*"
+    // }
+    // from(project.file("$rootDir/config")) { into "config/" }
+    // from "$rootDir/LICENSE-binary" rename {String filename -> filename.replace("-binary", "")}
+    // from "$rootDir/NOTICE"
+    // from(configurations.runtimeClasspath) {
+    //     into("libs/")
+    // }
+    from(configurations.archives.artifacts.files) {
+        into("libs/")
+        // Red Hat build -- we need to remove any test libraries
+        exclude('**test*')
+    }
+    from(project(':connect:api').jar) { into("libs/") }
+    from(project(':connect:api').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:runtime').jar) { into("libs/") }
+    from(project(':connect:runtime').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:transforms').jar) { into("libs/") }
+    from(project(':connect:transforms').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:json').jar) { into("libs/") }
+    from(project(':connect:json').configurations.runtimeClasspath) { into("libs/") }
+
+        from(project(':connect:file').jar) { into("libs/") }
+    from(project(':connect:file').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:basic-auth-extension').jar) { into("libs/") }
+    from(project(':connect:basic-auth-extension').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:mirror').jar) { into("libs/") }
+    from(project(':connect:mirror').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:mirror-client').jar) { into("libs/") }
+    from(project(':connect:mirror-client').configurations.runtimeClasspath) { into("libs/") }
+
+//    from(project(':streams').jar) { into("libs/") }
+//    from(project(':streams').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':streams:streams-scala').jar) { into("libs/") }
+//    from(project(':streams:streams-scala').configurations.runtimeClasspath) { into("libs/") }
+//    from(project.file("$rootDir/build/reports/dependency-license")) {into "licenses/" }
+    duplicatesStrategy 'exclude'
+  }
+
+  // Red Hat build -- We don't need many of elements of the upstream release so we exclude
+  // them from the our own Tar build task
+  tasks.create(name: "releaseRedHatTarGz", dependsOn: [configurations.archives.artifacts] , type: Tar) {
+    into "kafka_${versions.baseScala}-${version}"
+    compression = Compression.GZIP
+    from(project.file("$rootDir/bin")) {
+        into "bin/"
+        // Red Hat build -- We don't support windows so no need for the .bat files
+        exclude "**/windows*"
+    }
+    from(project.file("$rootDir/config")) { into "config/" }
+    from "$rootDir/LICENSE-binary" rename {String filename -> filename.replace("-binary", "")}
+    from "$rootDir/NOTICE"
+    from(configurations.runtimeClasspath) {
+        into("libs/")
+    }
+    from(configurations.archives.artifacts.files) {
+        into("libs/")
+        // Red Hat build -- we need to remove any test libraries
+        exclude('**test*')
+    }
+    from(project(':connect:api').jar) { into("libs/") }
+    from(project(':connect:api').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:runtime').jar) { into("libs/") }
+    from(project(':connect:runtime').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:transforms').jar) { into("libs/") }
+    from(project(':connect:transforms').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:json').jar) { into("libs/") }
+    from(project(':connect:json').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:file').jar) { into("libs/") }
+    from(project(':connect:file').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:basic-auth-extension').jar) { into("libs/") }
+    from(project(':connect:basic-auth-extension').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:mirror').jar) { into("libs/") }
+    from(project(':connect:mirror').configurations.runtimeClasspath) { into("libs/") }
+    from(project(':connect:mirror-client').jar) { into("libs/") }
+    from(project(':connect:mirror-client').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':streams').jar) { into("libs/") }
+//    from(project(':streams').configurations.runtimeClasspath) { into("libs/") }
+//    from(project(':streams:streams-scala').jar) { into("libs/") }
+//    from(project(':streams:streams-scala').configurations.runtimeClasspath) { into("libs/") }
+//    from(project.file("$rootDir/build/reports/dependency-license")) {into "licenses/" }
+    duplicatesStrategy 'exclude'
+  }
+
+  jar.manifest {
+    attributes(
+      'Version': "${version}"
+    )
+  }
+
+  checkstyle {
+    configProperties = checkstyleConfigProperties("import-control-core.xml")
+  }
+
+  sourceSets {
+    // Set java/scala source folders in the `scala` block to enable joint compilation
+    main {
+      java {
+        srcDirs = []
+      }
+      scala {
+        srcDirs = ["src/generated/java", "src/main/java", "src/main/scala"]
+      }
+    }
+    test {
+      java {
+        srcDirs = []
+      }
+      scala {
+        srcDirs = ["src/test/java", "src/test/scala"]
+      }
+    }
+  }
+}
+
+
+project(':connect:api') {
+  archivesBaseName = "connect-api"
+
+  dependencies {
+//    api project(':clients')
+    implementation libs.slf4jApi
+    implementation libs.jaxrsApi
+
+    testImplementation libs.junitJupiter
+    testRuntimeOnly libs.slf4jlog4j
+//    testImplementation project(':clients').sourceSets.test.output
+  }
+
+  javadoc {
+    include "**/org/apache/kafka/connect/**" // needed for the `aggregatedJavadoc` task
+  }
+}
+
+project(':connect:transforms') {
+  archivesBaseName = "connect-transforms"
+
+  dependencies {
+    api project(':connect:api')
+
+    implementation libs.slf4jApi
+
+    testImplementation libs.easymock
+    testImplementation libs.junitJupiter
+
+    testRuntimeOnly libs.slf4jlog4j
+//    testImplementation project(':clients').sourceSets.test.output
+  }
+
+  javadoc {
+    enabled = false
+  }
+
+  tasks.create(name: "copyDependantLibs", type: Copy) {
+    from (configurations.testRuntimeClasspath) {
+      include('slf4j-log4j12*')
+      include('log4j*jar')
+    }
+    from (configurations.runtimeClasspath) {
+      exclude('kafka-clients*')
+      exclude('connect-*')
+    }
+    into "$buildDir/dependant-libs"
+    duplicatesStrategy 'exclude'
+  }
+
+  jar {
+    dependsOn copyDependantLibs
+  }
+}
+
+project(':connect:json') {
+  archivesBaseName = "connect-json"
+
+  dependencies {
+    api project(':connect:api')
+
+    api libs.jacksonDatabind
+    api libs.jacksonJDK8Datatypes
+
+    implementation libs.slf4jApi
+
+    testImplementation libs.easymock
+    testImplementation libs.junitJupiter
+
+    testRuntimeOnly libs.slf4jlog4j
+//    testImplementation project(':clients').sourceSets.test.output
+  }
+
+  javadoc {
+    enabled = false
+  }
+
+  tasks.create(name: "copyDependantLibs", type: Copy) {
+    from (configurations.testRuntimeClasspath) {
+      include('slf4j-log4j12*')
+      include('log4j*jar')
+    }
+    from (configurations.runtimeClasspath) {
+      exclude('kafka-clients*')
+      exclude('connect-*')
+    }
+    into "$buildDir/dependant-libs"
+    duplicatesStrategy 'exclude'
+  }
+
+  jar {
+    dependsOn copyDependantLibs
+  }
+}
+
+project(':connect:runtime') {
+  archivesBaseName = "connect-runtime"
+
+  dependencies {
+    // connect-runtime is used in tests, use `api` for modules below for backwards compatibility even though
+    // applications should generally not depend on `connect-runtime`
+    api project(':connect:api')
+//    api project(':clients')
+    api project(':connect:json')
+    api project(':connect:transforms')
+
+//    implementation project(':tools')
+
+    implementation libs.slf4jApi
+    implementation libs.log4j
+    implementation libs.jacksonAnnotations
+    implementation libs.jacksonJaxrsJsonProvider
+    implementation libs.jerseyContainerServlet
+    implementation libs.jerseyHk2
+    implementation libs.jaxbApi // Jersey dependency that was available in the JDK before Java 9
+    implementation libs.activation // Jersey dependency that was available in the JDK before Java 9
+    implementation libs.jettyServer
+    implementation libs.jettyServlet
+    implementation libs.jettyServlets
+    implementation libs.jettyClient
+    implementation libs.reflections
+//    implementation libs.mavenArtifact
+
+//    testImplementation project(':clients').sourceSets.test.output
+    testImplementation project(':core')
+//    testImplementation project(':metadata')
+    testImplementation project(':core').sourceSets.test.output
+
+    testImplementation libs.easymock
+    testImplementation libs.junitJupiterApi
+    testImplementation libs.junitVintageEngine
+    testImplementation libs.powermockJunit4
+    testImplementation libs.powermockEasymock
+    testImplementation libs.mockitoCore
+    testImplementation libs.httpclient
+
+    testRuntimeOnly libs.slf4jlog4j
+  }
+
+  javadoc {
+    enabled = false
+  }
+
+  tasks.create(name: "copyDependantLibs", type: Copy) {
+    from (configurations.testRuntimeClasspath) {
+      include('slf4j-log4j12*')
+      include('log4j*jar')
+    }
+    from (configurations.runtimeClasspath) {
+      exclude('kafka-clients*')
+      exclude('connect-*')
+    }
+    into "$buildDir/dependant-libs"
+    duplicatesStrategy 'exclude'
+  }
+
+  jar {
+    dependsOn copyDependantLibs
+  }
+
+  task genConnectConfigDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'org.apache.kafka.connect.runtime.distributed.DistributedConfig'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "connect_config.html").newOutputStream()
+  }
+
+  task genSinkConnectorConfigDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'org.apache.kafka.connect.runtime.SinkConnectorConfig'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "sink_connector_config.html").newOutputStream()
+  }
+
+  task genSourceConnectorConfigDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'org.apache.kafka.connect.runtime.SourceConnectorConfig'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "source_connector_config.html").newOutputStream()
+  }
+
+  task genConnectTransformationDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'org.apache.kafka.connect.tools.TransformationDoc'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "connect_transforms.html").newOutputStream()
+  }
+
+  task genConnectPredicateDocs(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'org.apache.kafka.connect.tools.PredicateDoc'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "connect_predicates.html").newOutputStream()
+  }
+
+  task genConnectMetricsDocs(type: JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath
+    main = 'org.apache.kafka.connect.runtime.ConnectMetrics'
+    if( !generatedDocsDir.exists() ) { generatedDocsDir.mkdirs() }
+    standardOutput = new File(generatedDocsDir, "connect_metrics.html").newOutputStream()
+  }
+
+}
+
+project(':connect:file') {
+  archivesBaseName = "connect-file"
+
+  dependencies {
+    implementation project(':connect:api')
+    implementation libs.slf4jApi
+
+    testImplementation libs.easymock
+    testImplementation libs.junitJupiter
+
+    testRuntimeOnly libs.slf4jlog4j
+//    testImplementation project(':clients').sourceSets.test.output
+  }
+
+  javadoc {
+    enabled = false
+  }
+
+  tasks.create(name: "copyDependantLibs", type: Copy) {
+    from (configurations.testRuntimeClasspath) {
+      include('slf4j-log4j12*')
+      include('log4j*jar')
+    }
+    from (configurations.runtimeClasspath) {
+      exclude('kafka-clients*')
+      exclude('connect-*')
+    }
+    into "$buildDir/dependant-libs"
+    duplicatesStrategy 'exclude'
+  }
+
+  jar {
+    dependsOn copyDependantLibs
+  }
+}
+
+project(':connect:basic-auth-extension') {
+  archivesBaseName = "connect-basic-auth-extension"
+
+  dependencies {
+    implementation project(':connect:api')
+    implementation libs.slf4jApi
+    implementation libs.jaxrsApi
+
+    testImplementation libs.bcpkix
+    testImplementation libs.easymock
+    testImplementation libs.junitJupiter
+//    testImplementation project(':clients').sourceSets.test.output
+
+    testRuntimeOnly libs.slf4jlog4j
+    testRuntimeOnly libs.jerseyContainerServlet
+  }
+
+  javadoc {
+    enabled = false
+  }
+
+  tasks.create(name: "copyDependantLibs", type: Copy) {
+    from (configurations.testRuntimeClasspath) {
+      include('slf4j-log4j12*')
+      include('log4j*jar')
+    }
+    from (configurations.runtimeClasspath) {
+      exclude('kafka-clients*')
+      exclude('connect-*')
+    }
+    into "$buildDir/dependant-libs"
+    duplicatesStrategy 'exclude'
+  }
+
+  jar {
+    dependsOn copyDependantLibs
+  }
+}
+
+project(':connect:mirror') {
+  archivesBaseName = "connect-mirror"
+
+  dependencies {
+    implementation project(':connect:api')
+    implementation project(':connect:runtime')
+    implementation project(':connect:mirror-client')
+//    implementation project(':clients')
+
+    implementation libs.argparse4j
+    implementation libs.jacksonAnnotations
+    implementation libs.slf4jApi
+
+    testImplementation libs.junitJupiter
+    testImplementation libs.mockitoCore
+//    testImplementation project(':clients').sourceSets.test.output
+    testImplementation project(':connect:runtime').sourceSets.test.output
+    testImplementation project(':core')
+    testImplementation project(':core').sourceSets.test.output
+
+    testRuntimeOnly project(':connect:runtime')
+    testRuntimeOnly libs.slf4jlog4j
+    testRuntimeOnly libs.bcpkix
+  }
+
+  javadoc {
+    enabled = false
+  }
+
+  tasks.create(name: "copyDependantLibs", type: Copy) {
+    from (configurations.testRuntimeClasspath) {
+      include('slf4j-log4j12*')
+      include('log4j*jar')
+    }
+    from (configurations.runtimeClasspath) {
+      exclude('kafka-clients*')
+      exclude('connect-*')
+    }
+    into "$buildDir/dependant-libs"
+    duplicatesStrategy 'exclude'
+  }
+
+  jar {
+    dependsOn copyDependantLibs
+  }
+}
+
+project(':connect:mirror-client') {
+  archivesBaseName = "connect-mirror-client"
+
+  dependencies {
+//    implementation project(':clients')
+    implementation libs.slf4jApi
+
+    testImplementation libs.junitJupiter
+//    testImplementation project(':clients').sourceSets.test.output
+
+    testRuntimeOnly libs.slf4jlog4j
+  }
+
+  javadoc {
+    enabled = true
+  }
+
+  tasks.create(name: "copyDependantLibs", type: Copy) {
+    from (configurations.testRuntimeClasspath) {
+      include('slf4j-log4j12*')
+      include('log4j*jar')
+    }
+    from (configurations.runtimeClasspath) {
+      exclude('kafka-clients*')
+      exclude('connect-*')
+    }
+    into "$buildDir/dependant-libs"
+    duplicatesStrategy 'exclude'
+  }
+
+  jar {
+    dependsOn copyDependantLibs
+  }
+}
+
+task aggregatedJavadoc(type: Javadoc, dependsOn: compileJava) {
+  def projectsWithJavadoc = subprojects.findAll { it.javadoc.enabled }
+  source = projectsWithJavadoc.collect { it.sourceSets.main.allJava }
+  classpath = files(projectsWithJavadoc.collect { it.sourceSets.main.compileClasspath })
+  includes = projectsWithJavadoc.collectMany { it.javadoc.getIncludes() }
+  excludes = projectsWithJavadoc.collectMany { it.javadoc.getExcludes() }
+
+  options.charSet = 'UTF-8'
+  options.docEncoding = 'UTF-8'
+  options.encoding = 'UTF-8'
+  // Turn off doclint for now, see https://blog.joda.org/2014/02/turning-off-doclint-in-jdk-8-javadoc.html for rationale
+  options.addStringOption('Xdoclint:none', '-quiet')
+
+  // The URL structure was changed to include the locale after Java 8
+  if (JavaVersion.current().isJava11Compatible())
+    options.links "https://docs.oracle.com/en/java/javase/${JavaVersion.current().majorVersion}/docs/api/"
+  else
+    options.links "https://docs.oracle.com/javase/8/docs/api/"
+}

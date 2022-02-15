@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FileUtils;
 import org.gradle.testkit.runner.BuildResult;
@@ -50,8 +51,8 @@ public class KafkaProjectWithMavenPluginFunctionalTest {
         final File publishDirectory = tempDir.newFolder("publishDirectory");
         System.setProperty("AProxDeployUrl", "file://" + publishDirectory.toString());
 
-        final File kafka = tempDir.newFolder("kafka");
-        TestUtils.copyDirectory("kafka", kafka);
+        final File kafka = tempDir.newFolder("kafka2");
+        TestUtils.copyDirectory("kafka2", kafka);
         assertThat(kafka.toPath().resolve("build.gradle")).exists();
 
         final BuildResult buildResult = TestUtils.createGradleRunner()
@@ -71,5 +72,47 @@ public class KafkaProjectWithMavenPluginFunctionalTest {
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
         assertThat(FileUtils.readFileToString(repoPathToPom, Charset.defaultCharset()))
                 .contains("artifactId>connect-transforms");
+    }
+
+    @Test
+    public void verifyForceOverride() throws IOException, URISyntaxException {
+        // this makes gradle use the set property as maven local directory
+        // we do this in order to avoid polluting the maven local and also be absolutely sure
+        // that no prior invocations affect the execution
+        final File m2Directory = tempDir.newFolder(".m2");
+        System.setProperty("maven.repo.local", m2Directory.getAbsolutePath());
+
+        final File publishDirectory = tempDir.newFolder("publishDirectory");
+        System.setProperty("AProxDeployUrl", "file://" + publishDirectory.toString());
+
+        final File kafka = tempDir.newFolder("kafka3");
+        TestUtils.copyDirectory("kafka3", kafka);
+        assertThat(kafka.toPath().resolve("build.gradle")).exists();
+
+        final BuildResult buildResult = TestUtils.createGradleRunner()
+                .withProjectDir(kafka)
+                .withGradleVersion("7.2")
+                //.withDebug(true)
+                .withArguments("--info", "-PskipSigning=true", "-PscalaVersion=2.12", "-PscalaOptimizerMode=inline"
+                        + "-scala",
+                        "assemble", "releaseRedHatZip", "uploadArchives", "-x", "test")
+                .withPluginClasspath()
+                .forwardOutput()
+                .build();
+        assertThat(buildResult.task(":assemble").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
+
+        File pathToZip = new File(kafka, "core/build/distributions/kafka_2.13-3.0.0.redhat-00009.zip");
+        assertThat(pathToZip.toPath()).isRegularFile().isReadable();
+
+        try (final ZipFile zipFile = new ZipFile(pathToZip)) {
+            assertThat(zipFile.stream().filter(
+                    f -> f.getName().endsWith("jar") && !f.getName().replaceAll(
+                            "^.*/",
+                            "").contains(
+                                    "redhat"))
+                    .count()).isEqualTo(0);
+        }
+        assertTrue(systemOutRule.getLog().contains("Replacing force override of org.javassist:javassist:3.27.0-GA "
+                + "with org.javassist:javassist:3.27.0.GA-redhat-00001"));
     }
 }

@@ -1,0 +1,54 @@
+plugins {
+    id 'org.jboss.gm.analyzer'
+}
+
+allprojects {
+    group = 'org.acme'
+
+    apply plugin: 'java'
+    apply plugin: 'org.jboss.gm.analyzer'
+}
+
+// Ensure every project has access to Maven Central.
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
+
+dependencies {
+    implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.68.Final'
+    implementation group: 'io.netty', name: 'netty-codec', version: '4.1.68.Final'
+}
+
+
+project(':subproject1') {
+    dependencies {
+        implementation group: 'org.springframework', name: 'spring-context', version: '5.1.6.RELEASE'
+        implementation group: 'org.hibernate', name: 'hibernate-core', version: '5.4.2.Final'
+        implementation gradleApi() // dependency of type DefaultSelfResolvingDependency
+        testImplementation group: 'junit', name: 'junit', version: '4.12'
+
+        implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.68.Final'
+    }
+}
+
+project(':subproject1:subproject11') {
+    dependencies {
+        implementation group: 'org.springframework', name: 'spring-context', version: '5.1.6.RELEASE'
+        testImplementation group: 'junit', name: 'junit', version: '4.12'
+    }
+}
+
+project(':subproject2') {
+    dependencies {
+        implementation group: 'org.jboss.resteasy', name: 'resteasy-jaxrs', version: '3.6.3.SP1'
+        implementation group: 'com.google.inject', name: 'guice', version: '4.2.2'
+        implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
+        implementation project(':subproject1')
+        testImplementation group: 'junit', name: 'junit', version: '4.12'
+
+        implementation group: 'io.netty', name: 'netty', version: '3.7.0.Final'
+    }
+}

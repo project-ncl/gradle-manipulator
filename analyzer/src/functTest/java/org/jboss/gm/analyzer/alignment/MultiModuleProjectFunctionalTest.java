@@ -1,7 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URISyntaxException;

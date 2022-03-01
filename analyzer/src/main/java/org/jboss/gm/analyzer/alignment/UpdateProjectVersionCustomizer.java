@@ -21,40 +21,33 @@ import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.logging.GMLogger;
 
 /**
- * {@link org.jboss.gm.analyzer.alignment.AlignmentService.ResponseCustomizer} that changes the project version
+ * {@link AlignmentService.Manipulator} that changes the project version
  *
  * The heavy lifting is actually done by {@link org.commonjava.maven.ext.core.impl.VersionCalculator}
  */
-public class UpdateProjectVersionCustomizer implements AlignmentService.ResponseCustomizer {
-
+public class UpdateProjectVersionCustomizer implements AlignmentService.Manipulator {
     private final VersioningState state;
     private final ManipulationCache cache;
-    private final Project root;
+    private final Project project;
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
     private final GradleVersionCalculator vc = new GradleVersionCalculator();
 
-    UpdateProjectVersionCustomizer(Set<Project> projects, Configuration configuration) {
-
-        if (projects.isEmpty()) {
-            throw new ManipulationUncheckedException("No projects found");
-        }
-
-        Project rootProject = projects.stream().findAny().get().getRootProject();
+    public UpdateProjectVersionCustomizer(Configuration configuration, Project rootProject) {
+        this.cache = ManipulationCache.getCache(rootProject);
+        state = new VersioningState(configuration.getProperties());
 
         if (DefaultProject.DEFAULT_VERSION.equals(rootProject.getVersion())) {
-            root = projects.stream().filter(f -> !DefaultProject.DEFAULT_VERSION.equals(f.getVersion())).findFirst()
+            project = rootProject.getAllprojects().stream().filter(f -> !DefaultProject.DEFAULT_VERSION.equals(f.getVersion()))
+                    .findFirst()
                     .orElseThrow(() -> new ManipulationUncheckedException("Unable to find suitable project version"));
         } else {
-            root = rootProject;
+            project = rootProject;
         }
-        cache = ManipulationCache.getCache(root);
 
         logger.info("Creating versioning state with {} and {}", configuration.versionIncrementalSuffix(),
                 configuration.versionIncrementalSuffixPadding());
-
-        state = new VersioningState(configuration.getProperties());
     }
 
     @Override
@@ -63,13 +56,12 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Response
     }
 
     @Override
-    public Response customize(Response response) throws ManipulationException {
+    public void customize(Response response) throws ManipulationException {
 
         vc.translationMap = response.getTranslationMap();
         response.setNewProjectVersion(
-                vc.calculate(root.getGroup().toString(), root.getName(), root.getVersion().toString(), state));
-
-        return response;
+                vc.calculate(project.getGroup().toString(), project.getName(), project.getVersion().toString(),
+                        state));
     }
 
     private class GradleVersionCalculator extends VersionCalculator {
@@ -90,9 +82,9 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Response
             final Set<String> result = new HashSet<>();
 
             // If there is an existing manipulation file, also use this as potential candidates.
-            File m = new File(root.getRootDir(), ManipulationIO.MANIPULATION_FILE_NAME);
+            File m = new File(project.getRootDir(), ManipulationIO.MANIPULATION_FILE_NAME);
             if (m.exists()) {
-                result.add(ManipulationIO.readManipulationModel(root.getRootDir()).getVersion());
+                result.add(ManipulationIO.readManipulationModel(project.getRootDir()).getVersion());
             }
             logger.debug("Adding project version candidates from cache {}",
                     cache.getProjectVersionRefs(state.isPreserveSnapshot()));

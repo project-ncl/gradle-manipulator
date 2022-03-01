@@ -39,7 +39,7 @@ allprojects {
 
 fun reportsForHumans() = !(System.getenv()["CI"]?.toBoolean() ?: props.bool("CI"))
 
-val lastEditYear = 2020 // TODO: by extra(lastEditYear("$rootDir/LICENSE"))
+val lastEditYear = 2020
 
 val enableCheckerframework by props()
 val skipCheckstyle by props()
@@ -60,8 +60,6 @@ val jacocoEnabled by extra {
 }
 
 ide {
-    // TODO: set copyright to PostgreSQL Global Development Group
-    // copyrightToAsf()
     ideaInstructionsUri =
         uri("https://github.com/pgjdbc/pgjdbc")
     doNotDetectFrameworks("android", "jruby")
@@ -338,7 +336,6 @@ allprojects {
         (sourceSets) {
             "main" {
                 resources {
-                    // TODO: remove when LICENSE is removed (it is used by Maven build for now)
                     exclude("src/main/resources/META-INF/LICENSE")
                 }
             }

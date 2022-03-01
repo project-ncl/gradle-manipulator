@@ -1,17 +1,18 @@
 package org.jboss.gm.analyzer.alignment;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.gradle.api.Project;
 
 /**
  * Used by {@link org.jboss.gm.analyzer.alignment.AlignmentTask} in order to perform the alignment.
@@ -83,12 +84,12 @@ public interface AlignmentService {
         private final Map<ProjectVersionRef, String> translationMap;
 
         /**
-         * The override map.
+         * The override map scoped by project
          *
-         * @param overrideMap the override map
+         * @param dependencyOverrides the override map
          * @return the override map
          */
-        private Map<ProjectRef, String> overrideMap;
+        private Map<Project, Map<ProjectRef, String>> dependencyOverrides = new LinkedHashMap<>();
 
         /**
          * The new project version.
@@ -107,11 +108,11 @@ public interface AlignmentService {
             this.translationMap = translationMap;
         }
 
-        String getAlignedVersionOfGav(ProjectVersionRef gav) {
-            final Optional<ProjectRef> projectRef = matchingProjectRef(gav);
+        String getAlignedVersionOfGav(Project project, ProjectVersionRef gav) {
+            final Optional<ProjectRef> projectRef = matchingProjectRef(project, gav);
 
             if (projectRef.isPresent()) {
-                return overrideMap.get(projectRef.get());
+                return dependencyOverrides.get(project).get(projectRef.get());
             }
             if (translationMap == null) {
                 throw new ManipulationUncheckedException("Translation map has not been initialised");
@@ -119,36 +120,10 @@ public interface AlignmentService {
             return translationMap.get(gav);
         }
 
-        private Optional<ProjectRef> matchingProjectRef(ProjectRef gav) {
-            return overrideMap == null ? Optional.empty()
-                    : overrideMap.keySet().stream().filter(p -> p.matches(gav)).findFirst();
-        }
-    }
-
-    /**
-     * Meant to change {@link org.jboss.gm.analyzer.alignment.AlignmentService.Request} before it is handed to
-     * the {@link org.jboss.gm.analyzer.alignment.AlignmentService}
-     *
-     * @see org.jboss.gm.analyzer.alignment.DependencyExclusionCustomizer
-     */
-    interface RequestCustomizer {
-        /**
-         * Changes the given request before it is handed to the alignment service.
-         *
-         * @param request the request
-         * @return the modified request
-         */
-        Request customize(Request request);
-
-        /**
-         * {@link Integer#MIN_VALUE Integer.MIN_VALUE} is the max order. This means that if we have two services, and we
-         * want the first one to be invoked before the second, we would give the first one a value for order that is
-         * smaller than that of the second one (for example 0 and 10, respectively).
-         *
-         * @return the order
-         */
-        default int order() {
-            return 0;
+        private Optional<ProjectRef> matchingProjectRef(Project project, ProjectRef gav) {
+            return dependencyOverrides == null ? Optional.empty()
+                    : dependencyOverrides.get(project) == null ? Optional.empty()
+                            : dependencyOverrides.get(project).keySet().stream().filter(p -> p.matches(gav)).findFirst();
         }
     }
 
@@ -159,15 +134,14 @@ public interface AlignmentService {
      * @see org.jboss.gm.analyzer.alignment.DependencyOverrideCustomizer
      * @see org.jboss.gm.analyzer.alignment.UpdateProjectVersionCustomizer
      */
-    interface ResponseCustomizer {
+    interface Manipulator {
         /**
          * Changes the response after it is returned by the alignment service.
          *
          * @param response the resulting aligned dependencies from the dependency analyzer
-         * @return the resulting aligned dependencies from the dependency analyzer
          * @throws ManipulationException if an error occurs looking up the versions
          */
-        Response customize(Response response) throws ManipulationException;
+        void customize(Response response) throws ManipulationException;
 
         /**
          * {@link Integer#MIN_VALUE Integer.MIN_VALUE} is the max order. This means that if we have two services, and we

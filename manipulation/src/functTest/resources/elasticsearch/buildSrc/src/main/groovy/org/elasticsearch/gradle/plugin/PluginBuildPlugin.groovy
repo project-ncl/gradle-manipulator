@@ -126,7 +126,7 @@ public class PluginBuildPlugin extends BuildPlugin {
             from { project.plugins.hasPlugin(ShadowPlugin) ? project.shadowJar : project.jar }
             from project.configurations.runtime - project.configurations.compileOnly
             // extra files for the plugin to go into the zip
-            from('src/main/packaging') // TODO: move all config/bin/_size/etc into packaging
+            from('src/main/packaging')
             from('src/main') {
                 include 'config/**'
                 include 'bin/**'

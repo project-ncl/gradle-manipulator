@@ -279,7 +279,6 @@ gradle.projectsEvaluated {
         Project upstreamProject = dependencyToProject(dep)
         if (upstreamProject != null) {
           if (project.path == upstreamProject.path) {
-            // TODO: distribution integ tests depend on themselves (!), fix that
             return
           }
         }
@@ -300,8 +299,6 @@ wrapper {
         wrapper.getPropertiesFile() << "distributionSha256Sum=${sha256Sum}\n"
         println "Added checksum to wrapper properties"
         // Update build-tools to reflect the Gradle upgrade
-        // TODO: we can remove this once we have tests to make sure older versions work.
-        // project(':build-tools').file('src/main/resources/minimumGradleVersion').text = gradleVersion
         println "Updated minimum Gradle Version"
     }
 }

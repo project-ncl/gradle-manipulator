@@ -2,9 +2,13 @@ package org.jboss.gm.analyzer.alignment.util;
 
 import java.util.function.Predicate;
 
+import lombok.Getter;
+
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.gradle.api.InvalidUserDataException;
+import org.gradle.api.logging.Logger;
+import org.jboss.gm.common.logging.GMLogger;
 
 /**
  * Utility class that is meant to parse properties like {@code dependencyOverride} or {@code dependencyExclusion}.
@@ -13,6 +17,8 @@ import org.gradle.api.InvalidUserDataException;
  * https://release-engineering.github.io/pom-manipulation-ext/guide/dep-manip.html.
  */
 public final class DependencyPropertyParser {
+    private static final Logger logger = GMLogger.getLogger(DependencyPropertyParser.class);
+
     /**
      * Parses the given property key such as {@code dependencyOverride} or {@code dependencyExclusion}.
      *
@@ -37,6 +43,8 @@ public final class DependencyPropertyParser {
                     "Possible missing wildcard. Property '" + key
                             + "' is not a properly formatted key since it is not properly split by '@' and '*");
         }
+
+        logger.warn("### DepPropParse : {} and {}", artifactAndModule[0], artifactAndModule[1]);
 
         return new ResultImpl(SimpleProjectRef.parse(artifactAndModule[0]), createMatchesModulePredicate(artifactAndModule[1]));
     }
@@ -70,6 +78,7 @@ public final class DependencyPropertyParser {
         boolean matchesModule(ProjectRef projectRef);
     }
 
+    @Getter
     private static class ResultImpl implements Result {
         private final ProjectRef dependency;
         private final Predicate<ProjectRef> matchesModulePredicate;

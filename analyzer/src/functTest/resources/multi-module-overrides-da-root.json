@@ -1,0 +1,32 @@
+[
+  {
+    "bestMatchVersion": "5.1.6.RELEASE-redhat-00005",
+    "version": "5.1.6.RELEASE",
+    "groupId": "org.springframework",
+    "artifactId": "spring-context"
+  },
+  {
+    "bestMatchVersion": "5.1.6.RELEASE-redhat-00005",
+    "version": "5.1.6.RELEASE",
+    "groupId": "org.springframework",
+    "artifactId": "spring-context"
+  },
+  {
+    "bestMatchVersion": "5.4.2.Final-redhat-00001",
+    "version": "5.4.2.Final",
+    "groupId": "org.hibernate",
+    "artifactId": "hibernate-core"
+  },
+  {
+    "bestMatchVersion": "3.6.3.SP1-redhat-00001",
+    "version": "3.6.3.SP1",
+    "groupId": "org.jboss.resteasy",
+    "artifactId": "resteasy-jaxrs"
+  },
+  {
+    "bestMatchVersion": "4.12.0.redhat-00001",
+    "version" : "4.12",
+    "groupId" : "junit",
+    "artifactId" : "junit"
+  }
+]

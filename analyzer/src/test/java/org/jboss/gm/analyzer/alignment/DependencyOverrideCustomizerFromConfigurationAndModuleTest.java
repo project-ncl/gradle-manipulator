@@ -3,6 +3,7 @@ package org.jboss.gm.analyzer.alignment;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,9 +37,11 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
 
+    private Set<Project> projects;
+
     @Before
     public final void before() throws IOException {
-        final File simpleProjectRoot = tempDir.newFolder("simple-project");
+        final File simpleProjectRoot = tempDir.newFolder("test");
         System.setProperty("ignoreUnresolvableDependencies", "true");
         Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
         p.setVersion(PROJECT.getVersionString());
@@ -48,16 +51,15 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
         projects.add(p);
     }
 
-    private Set<Project> projects;
-
     @Test
     public void noDependencyOverrideProperty() {
         final Configuration configuration = ConfigFactory.create(Configuration.class);
 
-        final AlignmentService.ResponseCustomizer sut = DependencyOverrideCustomizer.fromConfigurationForModule(configuration,
-                projects);
+        AlignmentService.Response response = new AlignmentService.Response(Collections.emptyMap());
+        DependencyOverrideCustomizer dc = new DependencyOverrideCustomizer(configuration, projects);
+        dc.customize(response);
 
-        assertThat(sut).isSameAs(null);
+        assertThat(response.getDependencyOverrides()).isEmpty();
     }
 
     @Test(expected = InvalidUserDataException.class)
@@ -65,7 +67,8 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
         System.setProperty("dependencyOverride.org.acme", "");
         final Configuration configuration = ConfigFactory.create(Configuration.class);
 
-        DependencyOverrideCustomizer.fromConfigurationForModule(configuration, projects);
+        new DependencyOverrideCustomizer(configuration, projects)
+                .customize(new AlignmentService.Response(Collections.emptyMap()));
     }
 
     @Test
@@ -98,8 +101,7 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
 
-        final AlignmentService.ResponseCustomizer sut = DependencyOverrideCustomizer.fromConfigurationForModule(configuration,
-                projects);
+        final AlignmentService.Manipulator sut = new DependencyOverrideCustomizer(configuration, projects);
         final Map<ProjectVersionRef, String> translationMap = new HashMap<>();
         final List<ProjectVersionRef> gavs = Arrays.asList(hibernateCoreGav, hibernateValidatorGav, undertowGav, jacksonCoreGav,
                 jacksonMapperGav,
@@ -111,16 +113,19 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
                 translationMap);
         originalResp.setNewProjectVersion(PROJECT.getVersionString());
 
-        final AlignmentService.Response finalResp = sut.customize(originalResp);
+        sut.customize(originalResp);
 
-        assertThat(finalResp).isNotNull().satisfies(r -> {
+        final Project project = projects.stream().findFirst().get();
+
+        assertThat(originalResp).isNotNull().satisfies(r -> {
             assertThat(r.getNewProjectVersion()).isEqualTo(PROJECT.getVersionString());
-            assertThat(r.getAlignedVersionOfGav(hibernateCoreGav)).isEqualTo("5.3.7.Final-redhat-00001");
-            assertThat(r.getAlignedVersionOfGav(hibernateValidatorGav)).isEqualTo(hibernateValidatorGav.getVersionString());
-            assertThat(r.getAlignedVersionOfGav(undertowGav)).isEqualTo(undertowGav.getVersionString());
-            assertThat(r.getAlignedVersionOfGav(jacksonCoreGav)).isEqualTo("2.9.5-redhat-00001");
-            assertThat(r.getAlignedVersionOfGav(mockitoGav)).isEqualTo("2.27.0-redhat-00002");
-            assertThat(r.getAlignedVersionOfGav(wiremockGav)).isEqualTo(wiremockGav.getVersionString());
+            assertThat(r.getAlignedVersionOfGav(project, hibernateCoreGav)).isEqualTo("5.3.7.Final-redhat-00001");
+            assertThat(r.getAlignedVersionOfGav(project, hibernateValidatorGav))
+                    .isEqualTo(hibernateValidatorGav.getVersionString());
+            assertThat(r.getAlignedVersionOfGav(project, undertowGav)).isEqualTo(undertowGav.getVersionString());
+            assertThat(r.getAlignedVersionOfGav(project, jacksonCoreGav)).isEqualTo("2.9.5-redhat-00001");
+            assertThat(r.getAlignedVersionOfGav(project, mockitoGav)).isEqualTo("2.27.0-redhat-00002");
+            assertThat(r.getAlignedVersionOfGav(project, wiremockGav)).isEqualTo(wiremockGav.getVersionString());
         });
     }
 }

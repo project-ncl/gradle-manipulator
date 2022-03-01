@@ -275,14 +275,27 @@ public class AlignmentTask extends DefaultTask {
         final List<ProjectVersionRef> allDeps = cache.getDependencies().values().stream()
                 .flatMap(m -> m.values().stream()).collect(Collectors.toList());
 
-        final AlignmentService alignmentService = AlignmentServiceFactory
-                .getAlignmentService(configuration, cache.getDependencies().keySet());
+        final AlignmentService alignmentService = AlignerFactory
+                .getAlignmentService(configuration);
+        final List<AlignmentService.Manipulator> manipulators = AlignerFactory.getManipulators(configuration, rootProject);
 
         final Response alignmentResponse = alignmentService.align(
                 new AlignmentService.Request(cache.getProjectVersionRefs(configuration.versionSuffixSnapshot()),
                         allDeps));
+        logger.warn("### alignment response is {} and overrideMap {} ", alignmentResponse.getTranslationMap(),
+                alignmentResponse.getDependencyOverrides());
+
+        // Apply the current manipulators (DependencyOverride and UpdateProjectVersion)
+        // While they do support order, It's not hugely important given we only have two
+        // currently.
+        for (AlignmentService.Manipulator manipulator : manipulators) {
+            manipulator.customize(alignmentResponse);
+            logger.warn("### Resulting new version is {} (old version is {})", alignmentResponse.getNewProjectVersion());
+
+        }
 
         final String newVersion = alignmentResponse.getNewProjectVersion();
+        logger.warn("### Resulting new version is {} (old version is {})", newVersion, rootProject.getVersion());
 
         // While we've completed processing (sub)projects the current one is not going to be the root; so
         // explicitly retrieve it and set its version.
@@ -303,18 +316,32 @@ public class AlignmentTask extends DefaultTask {
             throw new ManipulationUncheckedException("Unable to locate a suitable original version");
         }
 
+        // Map of project : <PVR(Original) : PVR<Replacement>>
         final Map<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = cache
                 .getDependencies();
+        logger.warn("### ProjDeps is {} ", projectDependencies);
         // Iterate through all modules and set their version
-        projectDependencies.forEach((key, value) -> {
-            final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(key);
+        projectDependencies.forEach((project, value) -> {
+            final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project);
+
+            logger.warn("### Examining project deps for {} with {} in module {} and {}", project, value,
+                    correspondingModule,
+                    correspondingModule.getAlignedDependencies());
+
             if (configuration.versionModificationEnabled()) {
                 logger.info("Updating sub-project {} (path: {}) from version {} to {}",
                         correspondingModule, correspondingModule.getProjectPathName(), value, newVersion);
                 correspondingModule.setVersion(newVersion);
             }
+
+            // What exactly does this do?!
             updateModuleDynamicDependencies(correspondingModule, value);
-            updateModuleDependencies(correspondingModule, value, alignmentResponse);
+
+            logger.warn("### After dynamic and now aligned deps are {}", correspondingModule.getAlignedDependencies());
+
+            // Probably here is where we need to apply the dependencyOverride customiser
+            // Need to ensure we have the module and project
+            updateModuleDependencies(project, correspondingModule, value, alignmentResponse);
         });
 
         // artifactId / rootProject.getName
@@ -357,7 +384,7 @@ public class AlignmentTask extends DefaultTask {
         // files.
         updateAllExtraGradleFilesWithGmeRepos();
 
-        logger.info("For project script is {}  and build file {}", rootProject.getBuildscript(), rootProject.getBuildFile());
+        logger.info("For project script is {} and build file {}", rootProject.getBuildscript(), rootProject.getBuildFile());
         logger.info("For project {}", rootProject.getBuildscript().getSourceFile());
         writeGmeMarkerFile(configuration, rootProject.getBuildFile());
         writeGmeConfigMarkerFile(rootProject.getBuildFile());
@@ -658,20 +685,23 @@ public class AlignmentTask extends DefaultTask {
     /**
      * This does the actual substitution replacing the dependencies with aligned version if it exists
      *
+     * @param project
      * @param correspondingModule the module we are working on
      * @param allModuleDependencies the collection of dependencies
      * @param alignmentResponse the response which (possibly) contains overrides and DA information
      */
-    private void updateModuleDependencies(ManipulationModel correspondingModule,
-            Map<RelaxedProjectVersionRef, ProjectVersionRef> allModuleDependencies, Response alignmentResponse) {
+    private void updateModuleDependencies(Project project, ManipulationModel correspondingModule,
+            Map<RelaxedProjectVersionRef, ProjectVersionRef> allModuleDependencies,
+            Response alignmentResponse) {
 
-        allModuleDependencies.forEach((d, p) -> {
-            final String newDependencyVersion = alignmentResponse.getAlignedVersionOfGav(p);
+        allModuleDependencies.forEach((d, projectVersionRef) -> {
+            final String newDependencyVersion = alignmentResponse.getAlignedVersionOfGav(project, projectVersionRef);
             if (!StringUtils.isEmpty(newDependencyVersion)) {
                 logger.debug("In module {} with GAV {} found a replacement version of {}",
-                        correspondingModule.getProjectPathName(), p, newDependencyVersion);
+                        correspondingModule.getProjectPathName(), projectVersionRef, newDependencyVersion);
 
-                final ProjectVersionRef newVersion = ProjectVersionFactory.withNewVersion(p, newDependencyVersion);
+                final ProjectVersionRef newVersion = ProjectVersionFactory.withNewVersion(projectVersionRef,
+                        newDependencyVersion);
                 // we need to make sure that dynamic dependencies are stored with their original key
                 // in order for the manipulation plugin to be able to look them up properly
                 correspondingModule.getAlignedDependencies().put(d.toString(), newVersion);

@@ -659,7 +659,6 @@ class BuildPlugin implements Plugin<Project> {
                 options.encoding = 'UTF-8'
                 options.incremental = true
 
-                // TODO: use native Gradle support for --release when available (cf. https://github.com/gradle/gradle/issues/2510)
                 options.compilerArgs << '--release' << targetCompatibilityVersion.majorVersion
             }
             // also apply release flag to groovy, which is used in build-tools
@@ -728,7 +727,6 @@ class BuildPlugin implements Plugin<Project> {
                 // this doFirst is added before the info plugin, therefore it will run
                 // after the doFirst added by the info plugin, and we can override attributes
                 jarTask.manifest.attributes(
-                        // TODO: remove using the short hash
                         'Change': ((String)project.gitRevision).substring(0, 7),
                         'X-Compile-Elasticsearch-Version': VersionProperties.elasticsearch.replace("-SNAPSHOT", ""),
                         'X-Compile-Lucene-Version': VersionProperties.lucene,

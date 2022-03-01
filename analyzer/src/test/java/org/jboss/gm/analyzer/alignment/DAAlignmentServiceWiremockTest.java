@@ -1,5 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -13,11 +14,14 @@ import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.RestException;
+import org.gradle.api.Project;
+import org.gradle.testfixtures.ProjectBuilder;
 import org.jboss.gm.common.Configuration;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
@@ -39,6 +43,9 @@ public class DAAlignmentServiceWiremockTest {
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(PORT);
 
+    @Rule
+    public TemporaryFolder tempDir = new TemporaryFolder();
+
     @Before
     public void setup() throws IOException, URISyntaxException {
         stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
@@ -54,7 +61,8 @@ public class DAAlignmentServiceWiremockTest {
     }
 
     @Test
-    public void alignmentWorksAsExpected() throws RestException {
+    public void alignmentWorksAsExpected()
+            throws RestException, IOException {
         System.setProperty(Configuration.DA, String.format("http://localhost:%d/da/rest/v-1", PORT));
         final Configuration configuration = ConfigFactory.create(Configuration.class);
 
@@ -70,11 +78,16 @@ public class DAAlignmentServiceWiremockTest {
                         undertowGav,
                         mockitoGav).collect(Collectors.toList())));
 
+        final File simpleProjectRoot = tempDir.newFolder("dummy");
+        final Project project = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
+        project.setVersion("1.0.0");
+        project.setGroup("org.acme");
+
         assertThat(response).isNotNull().satisfies(r -> {
             assertThat(r.getNewProjectVersion()).isNull();
-            assertThat(r.getAlignedVersionOfGav(hibernateGav)).isEqualTo("5.3.7.Final-redhat-00001");
-            assertThat(r.getAlignedVersionOfGav(undertowGav)).isEqualTo("2.0.15.Final-redhat-00001");
-            assertThat(r.getAlignedVersionOfGav(mockitoGav)).isNull();
+            assertThat(r.getAlignedVersionOfGav(project, hibernateGav)).isEqualTo("5.3.7.Final-redhat-00001");
+            assertThat(r.getAlignedVersionOfGav(project, undertowGav)).isEqualTo("2.0.15.Final-redhat-00001");
+            assertThat(r.getAlignedVersionOfGav(project, mockitoGav)).isNull();
         });
     }
 

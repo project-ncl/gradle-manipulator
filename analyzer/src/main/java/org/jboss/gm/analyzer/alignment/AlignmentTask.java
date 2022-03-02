@@ -289,12 +289,10 @@ public class AlignmentTask extends DefaultTask {
                         allDeps));
 
         // Apply the current manipulators (DependencyOverride and UpdateProjectVersion)
-        // While they do support order, It's not hugely important given we only have two
+        // While they do support order, it's not hugely important given we only have two
         // currently.
         for (AlignmentService.Manipulator manipulator : manipulators) {
             manipulator.customize(alignmentResponse);
-            logger.warn("### Resulting new version is {} (old version is {})", alignmentResponse.getNewProjectVersion());
-
         }
 
         final String newVersion = alignmentResponse.getNewProjectVersion();

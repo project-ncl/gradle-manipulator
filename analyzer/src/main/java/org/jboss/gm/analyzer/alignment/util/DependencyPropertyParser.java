@@ -49,7 +49,7 @@ public class DependencyPropertyParser {
         }
 
         final ProjectRef moduleGA = SimpleProjectRef.parse(moduleValue);
-        return (p) -> p.matches(moduleGA);
+        return moduleGA::matches;
     }
 
     /**

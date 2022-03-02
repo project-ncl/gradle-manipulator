@@ -61,7 +61,8 @@ public class MultiModuleProjectWithOverridesFunctionalTest
 
     @SuppressWarnings("ConstantConditions")
     private final Map<String, String> dependencyOverrides = Stream
-            .of(Pair.of("dependencyOverride.junit:*@org.acme:subproject2", ""),
+            .of(
+                    Pair.of("dependencyOverride.junit:*@org.acme:subproject2", ""),
                     Pair.of("dependencyOverride.org.apache.commons:*@org.acme.subproject:*", "3.12.0.redhat-00002"),
                     Pair.of("dependencyOverride.io.netty:netty-*@*", "4.1.72.Final-redhat-00001"))
             .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
@@ -157,6 +158,7 @@ public class MultiModuleProjectWithOverridesFunctionalTest
                         .extracting("artifactId", "versionString")
                         .containsOnly(
                                 tuple("junit", "4.12.0.redhat-00001"),
+                                tuple("commons-lang3", "3.12.0.redhat-00002"),
                                 tuple("spring-context", "5.1.6.RELEASE-redhat-00005"));
             });
         });
@@ -252,6 +254,11 @@ public class MultiModuleProjectWithOverridesFunctionalTest
                         + "              \"groupId\" : \"junit\",%n"
                         + "              \"artifactId\" : \"junit\",%n"
                         + "              \"version\" : \"4.12.0.redhat-00001\"%n"
+                        + "            },%n"
+                        + "            \"org.apache.commons:commons-lang3:3.8.1\" : {%n"
+                        + "              \"groupId\" : \"org.apache.commons\",%n"
+                        + "              \"artifactId\" : \"commons-lang3\",%n"
+                        + "              \"version\" : \"3.12.0.redhat-00002\"%n"
                         + "            },%n"
                         + "            \"org.springframework:spring-context:5.1.6.RELEASE\" : {%n"
                         + "              \"groupId\" : \"org.springframework\",%n"

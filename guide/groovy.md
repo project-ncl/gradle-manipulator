@@ -61,43 +61,15 @@ made. The table below provides a description of the invocation stages available 
 
 The following API is made available:
 
-
-| Method | Description |
-| -------|:------------|
-| [Project](https://docs.gradle.org/current/javadoc/org/gradle/api/Project.html) getProject() | Return the root Project. <br/><i>Only valid in InvocationStage.LAST</i> |
-| [ManipulationModel](https://github.com/project-ncl/gradle-manipulator/blob/master/common/src/main/java/org/jboss/gm/common/model/ManipulationModel.java) getModel() | Return the current ManipulationModel. <br/><i>Only valid in InvocationStage.LAST</i> |
-
-<table bgcolor="#ffff00">
-<tr>
-<td>
-    <b>NOTE</b> : From version 1.4 the following extra API is available:
-</td>
-</tr>
-</table>
-
-| [Properties](https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html) getUserProperties() | Get the user properties. |
-| [File](https://docs.oracle.com/javase/7/docs/api/java/io/File.html) getBaseDir() | Get the working directory (the execution root). |
-| [InvocationStage](https://github.com/release-engineering/pom-manipulation-ext/blob/master/core/src/main/java/org/commonjava/maven/ext/core/groovy/InvocationStage.java) getInvocationStage() | Return the current stage of the groovy manipulation. |
-
-<table bgcolor="#ffff00">
-<tr>
-<td>
-    <b>NOTE</b> : From version 2.1 the following extra API is available:
-</td>
-</tr>
-</table>
-
-| [Logger](https://www.javadoc.io/doc/org.slf4j/slf4j-api/1.7.30/org/slf4j/Logger.html) getLogger() | Get the Logger. |
-
-<table bgcolor="#ffff00">
-<tr>
-<td>
-    <b>NOTE</b> : From version 2.7 the following extra API is available:
-</td>
-</tr>
-</table>
-
-| [Translator](https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-io/latest/org/commonjava/maven/ext/io/rest/Translator.html) getRESTAPI() | Get the REST Version Translator. |
+| Method | Description                           | Since | Valid in Stage |
+| -------|:--------------------------------------|:------|:------------------|
+| [Project](https://docs.gradle.org/current/javadoc/org/gradle/api/Project.html) getProject() | Return the root Project.              | 1.0   | `LAST`            |
+| [ManipulationModel](https://github.com/project-ncl/gradle-manipulator/blob/master/common/src/main/java/org/jboss/gm/common/model/ManipulationModel.java) getModel() | Return the current ManipulationModel. | 1.0 | `LAST`            |
+| [Properties](https://docs.oracle.com/javase/7/docs/api/java/util/Properties.html) getUserProperties() | Get the user properties. | 1.4 | `ALL`             |
+| [File](https://docs.oracle.com/javase/7/docs/api/java/io/File.html) getBaseDir() | Get the working directory (the execution root). | 1.4 | `ALL`             |
+| [InvocationStage](https://github.com/release-engineering/pom-manipulation-ext/blob/master/core/src/main/java/org/commonjava/maven/ext/core/groovy/InvocationStage.java) getInvocationStage() | Return the current stage of the groovy manipulation. | 1.4 | `ALL`             |
+| [Logger](https://www.javadoc.io/doc/org.slf4j/slf4j-api/1.7.30/org/slf4j/Logger.html) getLogger() | Get the Logger. | 2.1 | `ALL`             |
+| [Translator](https://www.javadoc.io/doc/org.commonjava.maven.ext/pom-manipulation-io/latest/org/commonjava/maven/ext/io/rest/Translator.html) getRESTAPI() | Get the REST Version Translator. | 2.1 |  `ALL` |
 
 When running as `FIRST`, Gradle has not parsed and created the Project which means the `getModel`/`getProject` calls are not available. However, it is possible to amend the Gradle scripts directly on disk which will then be read as part of the following alignment process.
 

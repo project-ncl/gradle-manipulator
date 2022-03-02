@@ -20,6 +20,7 @@ allprojects {
 dependencies {
     implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.68.Final'
     implementation group: 'io.netty', name: 'netty-codec', version: '4.1.68.Final'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
 }
 
 
@@ -35,9 +36,11 @@ project(':subproject1') {
 }
 
 project(':subproject1:subproject11') {
+    group = 'org.acme.subproject'
     dependencies {
         implementation group: 'org.springframework', name: 'spring-context', version: '5.1.6.RELEASE'
         testImplementation group: 'junit', name: 'junit', version: '4.12'
+        implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
     }
 }
 

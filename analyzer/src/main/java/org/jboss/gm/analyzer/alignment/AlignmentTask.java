@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.beanutils.ContextClassLoaderLocal;
@@ -71,6 +72,7 @@ import org.jboss.gm.common.versioning.DynamicVersionParser;
 import org.jboss.gm.common.versioning.ProjectVersionFactory;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
 
+import static java.util.Comparator.comparingInt;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.gradle.api.Project.DEFAULT_VERSION;
@@ -273,17 +275,18 @@ public class AlignmentTask extends DefaultTask {
         logger.info("Completed scanning {} projects; now processing for exclusions/REST/overrides...",
                 cache.getDependencies().size());
         final List<ProjectVersionRef> allDeps = cache.getDependencies().values().stream()
-                .flatMap(m -> m.values().stream()).collect(Collectors.toList());
+                .flatMap(m -> m.values().stream()).sorted().distinct().collect(Collectors.toList());
 
-        final AlignmentService alignmentService = AlignerFactory
-                .getAlignmentService(configuration);
-        final List<AlignmentService.Manipulator> manipulators = AlignerFactory.getManipulators(configuration, rootProject);
+        final AlignmentService alignmentService = new DAAlignmentService(configuration);
+        final List<AlignmentService.Manipulator> manipulators = Stream
+                .of(new UpdateProjectVersionCustomizer(configuration, rootProject),
+                        new DependencyOverrideCustomizer(configuration, rootProject.getAllprojects()))
+                .sorted(comparingInt(AlignmentService.Manipulator::order))
+                .collect(Collectors.toList());
 
         final Response alignmentResponse = alignmentService.align(
                 new AlignmentService.Request(cache.getProjectVersionRefs(configuration.versionSuffixSnapshot()),
                         allDeps));
-        logger.warn("### alignment response is {} and overrideMap {} ", alignmentResponse.getTranslationMap(),
-                alignmentResponse.getDependencyOverrides());
 
         // Apply the current manipulators (DependencyOverride and UpdateProjectVersion)
         // While they do support order, It's not hugely important given we only have two
@@ -295,7 +298,6 @@ public class AlignmentTask extends DefaultTask {
         }
 
         final String newVersion = alignmentResponse.getNewProjectVersion();
-        logger.warn("### Resulting new version is {} (old version is {})", newVersion, rootProject.getVersion());
 
         // While we've completed processing (sub)projects the current one is not going to be the root; so
         // explicitly retrieve it and set its version.
@@ -316,31 +318,21 @@ public class AlignmentTask extends DefaultTask {
             throw new ManipulationUncheckedException("Unable to locate a suitable original version");
         }
 
-        // Map of project : <PVR(Original) : PVR<Replacement>>
+        // Map of Project : <PVR(Original) : PVR<Replacement>>
         final Map<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>> projectDependencies = cache
                 .getDependencies();
-        logger.warn("### ProjDeps is {} ", projectDependencies);
+
         // Iterate through all modules and set their version
         projectDependencies.forEach((project, value) -> {
             final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project);
-
-            logger.warn("### Examining project deps for {} with {} in module {} and {}", project, value,
-                    correspondingModule,
-                    correspondingModule.getAlignedDependencies());
-
             if (configuration.versionModificationEnabled()) {
                 logger.info("Updating sub-project {} (path: {}) from version {} to {}",
-                        correspondingModule, correspondingModule.getProjectPathName(), value, newVersion);
+                        correspondingModule, correspondingModule.getProjectPathName(), originalVersion.get().getVersion(),
+                        newVersion);
                 correspondingModule.setVersion(newVersion);
             }
 
-            // What exactly does this do?!
             updateModuleDynamicDependencies(correspondingModule, value);
-
-            logger.warn("### After dynamic and now aligned deps are {}", correspondingModule.getAlignedDependencies());
-
-            // Probably here is where we need to apply the dependencyOverride customiser
-            // Need to ensure we have the module and project
             updateModuleDependencies(project, correspondingModule, value, alignmentResponse);
         });
 
@@ -524,7 +516,7 @@ public class AlignmentTask extends DefaultTask {
         project.getConfigurations().all(configuration -> {
             if (configuration.isCanBeResolved()) {
 
-                logger.debug("Examining configuration {}", configuration.getName());
+                logger.trace("Examining configuration {}", configuration.getName());
 
                 // using getAllDependencies here instead of getDependencies because the latter
                 // was returning an empty array for the root project of SpringLikeLayoutFunctionalTest
@@ -685,7 +677,7 @@ public class AlignmentTask extends DefaultTask {
     /**
      * This does the actual substitution replacing the dependencies with aligned version if it exists
      *
-     * @param project
+     * @param project the project we are updating
      * @param correspondingModule the module we are working on
      * @param allModuleDependencies the collection of dependencies
      * @param alignmentResponse the response which (possibly) contains overrides and DA information

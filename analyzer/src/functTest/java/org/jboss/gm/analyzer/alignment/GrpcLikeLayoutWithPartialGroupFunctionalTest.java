@@ -69,7 +69,7 @@ public class GrpcLikeLayoutWithPartialGroupFunctionalTest
     public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException, ManipulationException {
 
         final File projectRoot = tempDir.newFolder("grpc-like-layout-with-partial-group");
-        final Map<String, String> props = Collections.singletonMap("dependencyExclusion.io.netty:*@*",
+        final Map<String, String> props = Collections.singletonMap("dependencyOverride.io.netty:*@*",
                 "4.1.42.Final-redhat-00001");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), props);
 

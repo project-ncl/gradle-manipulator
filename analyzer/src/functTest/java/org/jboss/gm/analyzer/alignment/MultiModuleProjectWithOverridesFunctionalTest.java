@@ -51,14 +51,20 @@ public class MultiModuleProjectWithOverridesFunctionalTest
         extends AbstractWiremockTest {
 
     @Rule
-    // TODO: Remove unmute
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog(); // .muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
 
     @Rule
-    public TemporaryFolder tempDir = new TemporaryFolder();
+    public final TemporaryFolder tempDir = new TemporaryFolder();
+
+    @SuppressWarnings("ConstantConditions")
+    private final Map<String, String> dependencyOverrides = Stream
+            .of(Pair.of("dependencyOverride.junit:*@org.acme:subproject2", ""),
+                    Pair.of("dependencyOverride.org.apache.commons:*@org.acme.subproject:*", "3.12.0.redhat-00002"),
+                    Pair.of("dependencyOverride.io.netty:netty-*@*", "4.1.72.Final-redhat-00001"))
+            .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
 
     @Before
     public void setup() throws IOException, URISyntaxException {
@@ -78,7 +84,7 @@ public class MultiModuleProjectWithOverridesFunctionalTest
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("multi-module-da-root-project.json"))));
+                        .withBody(readSampleDAResponse("multi-module-overrides-da-root-project.json"))));
     }
 
     @Test
@@ -89,16 +95,17 @@ public class MultiModuleProjectWithOverridesFunctionalTest
         System.setProperty("reportTxtOutputFile", Configuration.REPORT_JSON_OUTPUT_FILE
                 .replaceFirst("\\.json$", ".txt"));
 
-        @SuppressWarnings("ConstantConditions")
-        Map<String, String> dependencyOverrides = Stream
-                .of(Pair.of("dependencyOverride.junit:*@org.acme:subproject2", ""),
-                        Pair.of("dependencyOverride.io.netty:netty-*@*", "4.1.72.Final-redhat-00001"))
-                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
-
         final File projectRoot = tempDir.newFolder("multi-module-for-overrides");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(),
                 dependencyOverrides);
 
+        // Ensure we have only passed unique GAV to the REST API.
+        assertThat(systemOutRule.getLog()).contains(
+                "Passing 9 GAVs into the REST client api [com.google.inject:guice:4.2.2, io.netty:netty:3.7.0.Final, "
+                        + "io.netty:netty-buffer:4.1.68.Final, io.netty:netty-codec:4.1.68.Final, junit:junit:4.12, org.apache.commons:commons-lang3:3.8.1, "
+                        + "org.hibernate:hibernate-core:5.4.2.Final, org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1, org.springframework:spring-context:5.1.6.RELEASE]");
+        assertThat(systemOutRule.getLog()).contains("Updating sub-project org.acme:subproject1:null (path: "
+                + "subproject1) from version 1.1.2 to 1.1.2.redhat-00005");
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
         assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
@@ -180,11 +187,6 @@ public class MultiModuleProjectWithOverridesFunctionalTest
     public void verifyManipulationJSON() throws IOException, URISyntaxException {
         final Path projectRoot = tempDir.newFolder("multi-module-for-overrides").toPath();
         assertThat(projectRoot).isDirectory();
-        @SuppressWarnings("ConstantConditions")
-        Map<String, String> dependencyOverrides = Stream
-                .of(Pair.of("dependencyOverride.junit:*@org.acme:subproject2", ""),
-                        Pair.of("dependencyOverride.io.netty:netty-*@*", "4.1.72.Final-redhat-00001"))
-                .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot.toFile(),
                 projectRoot.getFileName().toString(), dependencyOverrides);
         assertThat(alignmentModel).isNotNull();
@@ -241,7 +243,7 @@ public class MultiModuleProjectWithOverridesFunctionalTest
                         + "      },%n"
                         + "      \"children\" : {%n"
                         + "        \"subproject11\" : {%n"
-                        + "          \"group\" : \"org.acme\",%n"
+                        + "          \"group\" : \"org.acme.subproject\",%n"
                         + "          \"name\" : \"subproject11\",%n"
                         + "          \"projectPathName\" : \"subproject11\",%n"
                         + "          \"version\" : \"1.1.2.redhat-00005\",%n"

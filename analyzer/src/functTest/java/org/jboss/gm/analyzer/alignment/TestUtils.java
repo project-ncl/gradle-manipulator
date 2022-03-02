@@ -33,8 +33,6 @@ public final class TestUtils {
     private TestUtils() {
     }
 
-    //TODO use a builder for these parameters
-
     static TestManipulationModel align(File projectRoot, String projectDirName) throws IOException, URISyntaxException {
         return align(projectRoot, projectDirName, new HashMap<>());
     }

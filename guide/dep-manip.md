@@ -68,24 +68,47 @@ with more to be added in the future. The lookup REST endpoint should follow:
 </tr>
 </table>
 
+##### REST Timeouts and retries
+
+In case of a 504 response from DA, by default the operations will be retried after a waiting period of 30 seconds. This value can be optionally configured with `-DrestRetryDuration=<...>`, expressed in seconds.
+
+The underlying HTTP client library responsible for calling the REST endpoints is set by default with a socket timeout of 10 minutes, and a connection timeout of 30 seconds. The values can be optionally configured respectively with `-DrestSocketTimeout=<...>` and `-DrestConnectionTimeout=<...>`, expressed in seconds.
+
+##### REST Headers
+
+You can add custom HTTP headers to your REST calls by setting a property named `restHeaders`. HTTP headers must be comma-separated and each non-empty name-value pair must be colon-separated.
+
+For example:
+
+    -DrestHeaders=log-user-id:102,log-request-context:061294ff-088,log-process-context:,log-expires:,log-tmp:
+
 ### Disabling Dependency Manipulation
 
-If the parameter `-DdependencySource=NONE` is set then this will disable communication with the REST source which effectively disables manipulation. Note that the version will still be changed - although, if there is no preceeding `manipulation.json` it will always get a `-00001` suffix.
+If the parameter `-DdependencySource=NONE` is set then this will disable communication with the REST source which effectively disables manipulation. Note that the version will still be changed - although, if there is no preexisting `manipulation.json` it will always get a `-00001` suffix.
 
 ### Exclusions and Overrides
 
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : Previously <i>dependencyExclusion</i> was also available providing functionality
+that was also available via <i>dependencyOverride</i>. As of GME 3.3 this has been removed.
+</td>
+</tr>
+</table>
 
 In a multi-module build it is considered good practice to coordinate dependency version among the modules using dependency management.
 In other words, if modules `A` and `B` both use dependency `X`, both modules should use the same version of dependency `X`.
 Therefore, the default behaviour of this extension is to use a single set of dependency versions applied to all modules.
 
-It is possible to flexibly override or exclude a dependency globally or on a per module basis. The property starts with `dependencyExclusion.` and has the following format:
+It is possible to flexibly override or exclude a dependency globally or on a per module basis. The property starts with `dependencyOverride.` and has the following format:
 
-    gradle generateAlignmentMetadata -DdependencyExclusion.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=[version] | ,+[group:artifact]...
+    gradle generateAlignmentMetadata -DdependencyOverride.[groupId]:[artifactId]@[moduleGroupId]:[moduleArtifactId]=[version] | ,+[group:artifact]...
 
 
-**Note:** Multiple exclusions may be added using multiple instances of `-DdependencyExclusion...`.
+**Note:** Multiple exclusions may be added using multiple instances of `-DdependencyOverride...`.
 
+**Note** Wildcards for `artifactId` are supported e.g. `-DdependencyOverride.org.apache.commons:*@org.acme.subproject:*=1.0.0.rebuild-2`
 
 #### Global Version Override
 

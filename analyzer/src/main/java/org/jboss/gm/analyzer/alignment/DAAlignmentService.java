@@ -69,7 +69,7 @@ public class DAAlignmentService implements AlignmentService {
         final LogLevel originalLevel = FilteringCustomLogger.getContext().getLevel();
         final List<ProjectVersionRef> vParams = request.getDependencies();
 
-        logger.debug("Passing {} GAVs into the REST client api {}", vParams.size(), vParams);
+        logger.info("Passing {} GAVs into the REST client api {}", vParams.size(), vParams);
 
         final Map<ProjectVersionRef, String> vMap;
         try {

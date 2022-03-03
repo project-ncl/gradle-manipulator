@@ -2,19 +2,21 @@ package org.jboss.gm.analyzer.alignment.util;
 
 import java.util.function.Predicate;
 
+import lombok.experimental.UtilityClass;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.gradle.api.InvalidUserDataException;
 
 /**
- * Utility class that is meant to parse properties like {@code dependencyOverride} or {@code dependencyExclusion}.
+ * Utility class that is meant to parse properties like {@code dependencyOverride}
  * <p>
  * See section "Exclusions and Overrides" of
  * https://release-engineering.github.io/pom-manipulation-ext/guide/dep-manip.html.
  */
-public final class DependencyPropertyParser {
+@UtilityClass
+public class DependencyPropertyParser {
     /**
-     * Parses the given property key such as {@code dependencyOverride} or {@code dependencyExclusion}.
+     * Parses the given property key such as {@code dependencyOverride}
      *
      * @param key the property key
      * @return the result containing the dependency
@@ -47,7 +49,7 @@ public final class DependencyPropertyParser {
         }
 
         final ProjectRef moduleGA = SimpleProjectRef.parse(moduleValue);
-        return (p) -> p.matches(moduleGA);
+        return moduleGA::matches;
     }
 
     /**

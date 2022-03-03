@@ -10,8 +10,8 @@ import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.core.util.PropertiesUtils;
 import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
+import org.jboss.gm.analyzer.alignment.AlignmentService.Manipulator;
 import org.jboss.gm.analyzer.alignment.AlignmentService.Response;
-import org.jboss.gm.analyzer.alignment.AlignmentService.ResponseCustomizer;
 import org.jboss.gm.analyzer.alignment.util.DependencyPropertyParser;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
@@ -20,57 +20,41 @@ import org.jboss.gm.common.utils.ProjectUtils;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
- * {@link ResponseCustomizer} that changes the versions of aligned dependencies.
+ * {@link Manipulator} that changes the versions of aligned dependencies.
  * <p>
- * The implementation is very simple and takes Map as a constructor argument and uses the map keys to check if a
- * dependency matches. If so, the map's value is used as the new version.
+ * The implementation stores the configuration and current projects and uses those
+ * parsing out the dependencyOverride to check if a dependency matches.
+ * If so, the map's value is used as the new version (which may be empty,
+ * functioning as an exclusion)
  */
-// TODO: figure out if we need to worry about order
-public class DependencyOverrideCustomizer implements ResponseCustomizer {
+public class DependencyOverrideCustomizer implements Manipulator {
 
-    private static final Logger logger = GMLogger.getLogger(DependencyOverrideCustomizer.class);
+    public static final String DEPENDENCY_OVERRIDE = "dependencyOverride.";
 
-    private final Map<ProjectRef, String> overrideMap;
+    private final Logger logger = GMLogger.getLogger(DependencyOverrideCustomizer.class);
 
-    /**
-     * Creates a new dependency override customizer with the given override map.
-     *
-     * @param overrideMap the map to use to check if a dependency matches
-     */
-    public DependencyOverrideCustomizer(Map<ProjectRef, String> overrideMap) {
-        this.overrideMap = overrideMap;
+    private final Set<Project> projects;
+    private final Configuration configuration;
+
+    public DependencyOverrideCustomizer(Configuration configuration, Set<Project> projects) {
+        this.configuration = configuration;
+        this.projects = projects;
     }
 
     @Override
-    public Response customize(Response response) {
-
-        response.setOverrideMap(overrideMap);
-
-        return response;
-    }
-
-    /**
-     * This is created by the {@link AlignmentServiceFactory} when creating the request/response customizers.
-     *
-     * @param configuration the Configuration object
-     * @param projects the collection of projects
-     * @return an initiated ResponseCustomizer
-     */
-    public static ResponseCustomizer fromConfigurationForModule(Configuration configuration,
-            Set<Project> projects) {
-
-        DependencyOverrideCustomizer result = null;
-        final Map<ProjectRef, String> overrideMap = new LinkedHashMap<>();
+    public void customize(Response response) {
+        final Map<Project, Map<ProjectRef, String>> dependencyOverrides = new LinkedHashMap<>();
         final Map<String, String> prefixed = PropertiesUtils.getPropertiesByPrefix(configuration.getProperties(),
-                "dependencyOverride.");
+                DEPENDENCY_OVERRIDE);
 
         if (!prefixed.isEmpty()) {
             for (Map.Entry<String, String> entry : prefixed.entrySet()) {
                 final String key = entry.getKey();
-                final String value = entry.getValue();
+                final String overrideVersion = entry.getValue();
                 final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
 
                 for (Project project : projects) {
+                    Map<ProjectRef, String> overrideMap = dependencyOverrides.getOrDefault(project, new LinkedHashMap<>());
                     String group = ProjectUtils.getRealGroupId(project);
                     if (isNotEmpty(project.getVersion().toString()) &&
                             isNotEmpty(group) &&
@@ -78,21 +62,17 @@ public class DependencyOverrideCustomizer implements ResponseCustomizer {
                         final ProjectVersionRef projectRef = new SimpleProjectVersionRef(group,
                                 project.getName(), project.getVersion().toString());
                         if (keyParseResult.matchesModule(projectRef)) {
-                            final String overrideVersion = value;
-                            logger.debug("Overriding dependency {} in module {} with version {}",
+                            logger.debug("Overriding dependency {} in module {} with version '{}'",
                                     keyParseResult.getDependency(), projectRef, overrideVersion);
                             overrideMap.put(keyParseResult.getDependency(), overrideVersion);
                         }
                     }
+                    dependencyOverrides.put(project, overrideMap);
                 }
             }
         }
 
-        if (!overrideMap.isEmpty()) {
-            logger.debug("Returning overrideMap of {}", overrideMap);
-            result = new DependencyOverrideCustomizer(overrideMap);
-        }
-        // If null is returned this is filtered out in AlignmentServiceFactory::geResponseCustomizer with the filter
-        return result;
+        logger.debug("Setting overrideMap to {}", dependencyOverrides);
+        response.setDependencyOverrides(dependencyOverrides);
     }
 }

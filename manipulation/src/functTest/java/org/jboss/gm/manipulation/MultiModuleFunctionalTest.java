@@ -44,7 +44,6 @@ public class MultiModuleFunctionalTest {
 
         assertThat(buildResult.task(":" + "generatePomFileForMainPublication").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 
-        // TODO: fix version assertions when plugin is implemented
         assertRootPom(multiModuleRoot, alignment);
         assertSubproject1Pom(multiModuleRoot, alignment);
         assertSubproject2Pom(multiModuleRoot, alignment);

@@ -134,7 +134,7 @@ public class ManipulationCache {
 
     /**
      * As well as storing the GAV, at this point when the GAV is available the project group is now defined.
-     * Therefore update the model with the correct groupId.
+     * Therefore, update the model with the correct groupId.
      *
      * @param project the current Project instance
      * @param gav the GAV to store.

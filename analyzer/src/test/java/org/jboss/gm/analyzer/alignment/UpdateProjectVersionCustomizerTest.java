@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -45,13 +44,12 @@ public class UpdateProjectVersionCustomizerTest {
         final Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
         p.setVersion("1");
         p.setGroup("org");
-        final Set<Project> projects = Collections.singleton(p);
         final Configuration configuration = ConfigFactory.create(Configuration.class);
-        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final Response customizedReq = sut.customize(originalResp);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(configuration, p);
+        sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull();
-        assertThat(customizedReq.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002");
+        assertThat(originalResp).isNotNull();
+        assertThat(originalResp.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002");
         assertThat(configuration.versionOverride()).isEqualTo("1.1.0.redhat-00002");
     }
 
@@ -65,13 +63,12 @@ public class UpdateProjectVersionCustomizerTest {
         final Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
         p.setVersion("1.1-SNAPSHOT");
         p.setGroup("org");
-        final Set<Project> projects = Collections.singleton(p);
         final Configuration configuration = ConfigFactory.create(Configuration.class);
-        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final Response customizedReq = sut.customize(originalResp);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(configuration, p);
+        sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull();
-        assertThat(customizedReq.getNewProjectVersion()).isEqualTo("1.1.0.foobar-00001");
+        assertThat(originalResp).isNotNull();
+        assertThat(originalResp.getNewProjectVersion()).isEqualTo("1.1.0.foobar-00001");
         assertThat(configuration.versionIncrementalSuffix()).isEqualTo("foobar");
     }
 
@@ -85,14 +82,13 @@ public class UpdateProjectVersionCustomizerTest {
         final Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
         p.setVersion("1");
         p.setGroup("org");
-        final Set<Project> projects = Collections.singleton(p);
         final Configuration configuration = ConfigFactory.create(Configuration.class);
-        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final Response customizedReq = sut.customize(originalResp);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(configuration, p);
+        sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull();
+        assertThat(originalResp).isNotNull();
         assertThat(configuration.versionSuffix()).isEqualTo("redhat-00002");
-        assertThat(customizedReq.getNewProjectVersion()).isEqualTo("1.0.0.redhat-00002");
+        assertThat(originalResp.getNewProjectVersion()).isEqualTo("1.0.0.redhat-00002");
     }
 
     @Test
@@ -106,13 +102,12 @@ public class UpdateProjectVersionCustomizerTest {
         final Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
         p.setVersion("1");
         p.setGroup("org");
-        final Set<Project> projects = Collections.singleton(p);
         final Configuration configuration = ConfigFactory.create(Configuration.class);
-        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final Response customizedReq = sut.customize(originalResp);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(configuration, p);
+        sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull();
-        assertThat(customizedReq.getNewProjectVersion()).isEqualTo("1.Beta1");
+        assertThat(originalResp).isNotNull();
+        assertThat(originalResp.getNewProjectVersion()).isEqualTo("1.Beta1");
         assertThat(configuration.versionOsgi()).isFalse();
         assertThat(configuration.versionSuffix()).isEqualTo("Beta1");
     }
@@ -127,13 +122,12 @@ public class UpdateProjectVersionCustomizerTest {
         final Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
         p.setVersion("1.1-SNAPSHOT");
         p.setGroup("org");
-        final Set<Project> projects = Collections.singleton(p);
         final Configuration configuration = ConfigFactory.create(Configuration.class);
-        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final Response customizedReq = sut.customize(originalResp);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(configuration, p);
+        sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull();
-        assertThat(customizedReq.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001");
+        assertThat(originalResp).isNotNull();
+        assertThat(originalResp.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001");
         assertThat(configuration.versionSuffixAlternatives()).isEqualTo("foobar,redhat");
     }
 
@@ -147,12 +141,11 @@ public class UpdateProjectVersionCustomizerTest {
         final Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
         p.setVersion("1.0.0");
         p.setGroup("org");
-        final Set<Project> projects = Collections.singleton(p);
         final Configuration configuration = ConfigFactory.create(Configuration.class);
-        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final Response customizedReq = sut.customize(originalResp);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(configuration, p);
+        sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull()
+        assertThat(originalResp).isNotNull()
                 .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.0.0.redhat-00001"));
     }
 
@@ -166,12 +159,11 @@ public class UpdateProjectVersionCustomizerTest {
         final Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
         p.setVersion("1.1");
         p.setGroup("org");
-        final Set<Project> projects = Collections.singleton(p);
         final Configuration configuration = ConfigFactory.create(Configuration.class);
-        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final Response customizedReq = sut.customize(originalResp);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(configuration, p);
+        sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull()
+        assertThat(originalResp).isNotNull()
                 .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001"));
     }
 
@@ -187,12 +179,11 @@ public class UpdateProjectVersionCustomizerTest {
         final Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
         p.setVersion("1.1");
         p.setGroup("org");
-        final Set<Project> projects = Collections.singleton(p);
         final Configuration configuration = ConfigFactory.create(Configuration.class);
-        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final Response customizedReq = sut.customize(originalResp);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(configuration, p);
+        sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull()
+        assertThat(originalResp).isNotNull()
                 .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-001"));
     }
 
@@ -209,15 +200,14 @@ public class UpdateProjectVersionCustomizerTest {
         final Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
         p.setVersion(pvr.getVersionString());
         p.setGroup("org");
-        final Set<Project> projects = Collections.singleton(p);
         final ManipulationCache cache = ManipulationCache.getCache(p);
         cache.addGAV(null, pvr);
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
-        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final Response customizedReq = sut.customize(originalResp);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(configuration, p);
+        sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull()
+        assertThat(originalResp).isNotNull()
                 .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002"));
     }
 
@@ -232,12 +222,11 @@ public class UpdateProjectVersionCustomizerTest {
         final Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
         p.setVersion("1.1-SNAPSHOT");
         p.setGroup("org");
-        final Set<Project> projects = Collections.singleton(p);
         final Configuration configuration = ConfigFactory.create(Configuration.class);
-        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final Response customizedReq = sut.customize(originalResp);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(configuration, p);
+        sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull()
+        assertThat(originalResp).isNotNull()
                 .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001-SNAPSHOT"));
         assertThat(configuration.versionSuffixSnapshot()).isTrue();
     }
@@ -252,12 +241,11 @@ public class UpdateProjectVersionCustomizerTest {
         final Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
         p.setVersion("1.1-SNAPSHOT");
         p.setGroup("org");
-        final Set<Project> projects = Collections.singleton(p);
         final Configuration configuration = ConfigFactory.create(Configuration.class);
-        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final Response customizedReq = sut.customize(originalResp);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(configuration, p);
+        sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull()
+        assertThat(originalResp).isNotNull()
                 .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001"));
         assertThat(configuration.versionSuffixSnapshot()).isFalse();
     }
@@ -275,15 +263,14 @@ public class UpdateProjectVersionCustomizerTest {
         final Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
         p.setVersion("1.1-SNAPSHOT");
         p.setGroup("org");
-        final Set<Project> projects = Collections.singleton(p);
         final ManipulationCache cache = ManipulationCache.getCache(p);
         cache.addGAV(p, rg);
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
-        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final Response customizedReq = sut.customize(originalResp);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(configuration, p);
+        sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull()
+        assertThat(originalResp).isNotNull()
                 .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002-SNAPSHOT"));
     }
 
@@ -299,15 +286,14 @@ public class UpdateProjectVersionCustomizerTest {
         final Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
         p.setVersion("1.1-SNAPSHOT");
         p.setGroup("org");
-        final Set<Project> projects = Collections.singleton(p);
         final ManipulationCache cache = ManipulationCache.getCache(p);
         cache.addGAV(p, new SimpleProjectVersionRef(p.getGroup().toString(), p.getName(), p.getVersion().toString()));
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
-        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(projects, configuration);
-        final Response customizedReq = sut.customize(originalResp);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(configuration, p);
+        sut.customize(originalResp);
 
-        assertThat(customizedReq).isNotNull()
+        assertThat(originalResp).isNotNull()
                 .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002"));
     }
 }

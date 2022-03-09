@@ -8,7 +8,7 @@ sourceCompatibility = 1.8
 repositories {
     mavenCentral()
     maven {
-        url 'https://maven.repository.redhat.com/techpreview/all'
+        url 'https://maven.repository.redhat.com/ga/'
     }
 }
 

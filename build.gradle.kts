@@ -164,9 +164,6 @@ tasks.getByName("checkoutMergeFromReleaseBranch") {
 
 allprojects {
     repositories {
-        maven {
-            url = uri("https://maven-central-eu.storage-download.googleapis.com/maven2")
-        }
         mavenCentral()
         mavenLocal()
         maven {
@@ -176,7 +173,7 @@ allprojects {
             url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
         }
         maven {
-            url = uri("https://maven.repository.redhat.com/techpreview/all")
+            url = uri("https://maven.repository.redhat.com/ga/")
         }
     }
     apply(plugin = "idea")

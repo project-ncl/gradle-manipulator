@@ -1,0 +1,2 @@
+# Dummy similar to what gradle writes when --write-locks is enabled
+org.apache.commons:commons-lang3:3.8=classpath

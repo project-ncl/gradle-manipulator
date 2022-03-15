@@ -31,6 +31,7 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assume.assumeTrue;
 
 public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest {
@@ -75,6 +76,9 @@ public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest 
 
         final File gitDir = new File(projectRoot, "dotgit");
         Files.move(gitDir.toPath(), projectRoot.toPath().resolve(".git"));
+
+        assertTrue(new File(projectRoot, "gradle/dependency-locks/compileClasspath.lockfile").exists());
+
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), false);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
@@ -105,6 +109,11 @@ public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest 
                         "org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1");
             });
         });
+
+        assertFalse(new File(projectRoot, "gradle/dependency-locks/compileClasspath.lockfile").exists());
+        assertTrue(new File(projectRoot, "gradle/dependency-locks/compileClasspath.lockfile.unused").exists());
+        assertFalse(new File(projectRoot, "gradle.lockfile").exists());
+        assertTrue(new File(projectRoot, "gradle.lockfile.unused").exists());
 
         // make sure the project name was added
         assertEquals("rootProject.name='undertow'",

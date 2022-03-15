@@ -21,7 +21,8 @@ public class LockFileIOTest {
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Test
-    public void readNonExistingFileShouldReturnEmptySet() {
+    public void readNonExistingFileShouldReturnEmptySet()
+            throws IOException {
         assertThat(LockFileIO.allProjectVersionRefsFromLockfiles(Paths.get("/lol"))).isEmpty();
     }
 
@@ -42,7 +43,8 @@ public class LockFileIOTest {
     }
 
     @Test
-    public void renameNonExistingFileShouldNotResultInAnError() {
+    public void renameNonExistingFileShouldNotResultInAnError()
+            throws IOException {
         LockFileIO.renameAllLockFiles(Paths.get("/lol"));
     }
 

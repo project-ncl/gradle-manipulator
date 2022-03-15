@@ -1,7 +1,6 @@
 # Dummy similar to what gradle writes when --write-locks is enabled
 io.undertow:undertow-core:2.0.21.Final
-org.apache.commons:commons-lang3:3.8
-org.hdrhistogram:HdrHistogram:2.1.10
+org.hdrhistogram:HdrHistogram:2.1.10=compileClasspath,classpath
 # there are more transitives added by gradle, we only add one in order to not distract
 com.google.guava:guava:25.1-android
 org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1

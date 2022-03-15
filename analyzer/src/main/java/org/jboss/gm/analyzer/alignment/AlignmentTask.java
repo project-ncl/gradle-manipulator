@@ -187,6 +187,7 @@ public class AlignmentTask extends DefaultTask {
 
         // If processing the root project _and_ we have a Maven publication configured then verify artifactId / groupId.
         Project rootProject = project.getRootProject();
+
         if (project.equals(rootProject)) {
             logger.debug("Processing root project in directory {}", root);
             PublishingExtension extension = rootProject.getExtensions().findByType(PublishingExtension.class);
@@ -220,7 +221,8 @@ public class AlignmentTask extends DefaultTask {
 
         try {
             final Set<ProjectVersionRef> lockFileDeps = LockFileIO
-                    .allProjectVersionRefsFromLockfiles(LockFileIO.getLocksRootPath(project));
+                    .allProjectVersionRefsFromLockfiles(project.getRootDir().toPath());
+
             final Map<RelaxedProjectVersionRef, ProjectVersionRef> dependencies = processAnyExistingManipulationFile(
                     project,
                     getDependencies(project, configuration, lockFileDeps));
@@ -251,10 +253,6 @@ public class AlignmentTask extends DefaultTask {
             } else {
                 logger.debug("Still have {} projects to scan", cache.getProjectCounterRemaining());
             }
-
-            // this needs to happen for each project, not just the last one
-            LockFileIO.renameAllLockFiles(LockFileIO.getLocksRootPath(project));
-
         } catch (ManipulationException | IOException e) {
             throw new ManipulationUncheckedException(e);
         }
@@ -380,6 +378,10 @@ public class AlignmentTask extends DefaultTask {
         writeGmeConfigMarkerFile(rootProject.getBuildFile());
         writeGmeReposMarkerFile();
         writeRepositorySettingsFile(cache.getRepositories());
+
+        // this needs to happen for each project, not just the last one
+        LockFileIO.renameAllLockFiles(rootProject.getRootDir().toPath());
+
         final Set<ProjectVersionRef> nonAligned = new LinkedHashSet<>();
         processAlignmentReport(rootProject, configuration, cache, nonAligned);
     }
@@ -609,6 +611,7 @@ public class AlignmentTask extends DefaultTask {
 
                     String version = dep.getModuleVersion(); // this is the resolved version from gradle
                     // if the dependency is present in any of the lockfiles, then we use that version
+
                     for (ProjectVersionRef lockFileDep : lockFileDeps) {
                         if (lockFileDep.getGroupId().equals(dep.getModuleGroup())
                                 && lockFileDep.getArtifactId().equals(dep.getModuleName())) {

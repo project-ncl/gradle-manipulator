@@ -105,6 +105,9 @@ public class PluginUtils {
 
                     // Remove the plugin
                     boolean removed = lines.removeIf(i -> i.contains(plugin));
+                    // This handles the scenario, often in Kotlin build files where the plugin may be just
+                    // its name i.e. signing without any quotes or brackets
+                    removed |= lines.removeIf(i -> i.contains(plugin.replace("\"", "")) && !i.contains("{"));
 
                     // Remove any task references.
                     // TODO: Handle if the task reference spans multiple lines

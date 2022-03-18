@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,14 +25,16 @@ import org.gradle.internal.Pair;
 import org.slf4j.Logger;
 
 public class PluginUtils {
-    private static final Map<String, Pair<String, Set<String>>> SUPPORTED_PLUGINS = new HashMap<>();
+    private static final Map<String, Pair<String, Set<String>>> SUPPORTED_PLUGINS = new LinkedHashMap<>();
 
     public static final String SEMANTIC_BUILD_VERSIONING = "net.vivin.gradle-semantic-build-versioning";
 
     static {
+        // Pair left is tasks, right is configuration
         SUPPORTED_PLUGINS.put("com.github.ben-manes.versions", Pair.of("dependencyUpdates", Collections.emptySet()));
         SUPPORTED_PLUGINS.put("com.github.burrunan.s3-build-cache", Pair.of("buildCache", Collections.emptySet()));
-        SUPPORTED_PLUGINS.put("de.marcphilipp.nexus-publish", Pair.of("nexusPublishing", Collections.emptySet()));
+        SUPPORTED_PLUGINS.put("de.marcphilipp.nexus-publish",
+                Pair.of("nexusPublishing", Collections.singleton("publishToSonatype")));
         SUPPORTED_PLUGINS.put("gradle-enterprise", Pair.of("gradleEnterprise", Collections.emptySet()));
         SUPPORTED_PLUGINS.put("io.codearte.nexus-staging",
                 Pair.of("nexusStaging", Stream.of("closeRepository", "releaseRepository", "closeAndReleaseRepository").collect(
@@ -66,8 +68,8 @@ public class PluginUtils {
         // As the configuration block is named the same as the plugin we differentiate via the
         // potential quoting mechanism to avoid problems when parsing the file to remove the plugins
         if (plugins.remove("signing")) {
-            plugins.add("'signing'");
             plugins.add("\"signing\"");
+            plugins.add("'signing'");
         }
 
         Collection<File> files = new HashSet<>();

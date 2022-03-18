@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -217,7 +218,7 @@ public class PluginUtilsTest {
                 + "if (true) { }\n",
                 Charset.defaultCharset());
 
-        HashSet<String> plugins = new HashSet<>();
+        HashSet<String> plugins = new LinkedHashSet<>();
         plugins.add("com.github.burrunan.s3-build-cache");
         plugins.add("gradle-enterprise");
         PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
@@ -283,7 +284,7 @@ public class PluginUtilsTest {
                 Charset.defaultCharset());
 
         // Avoid singleton as the set is manipulated within the method
-        PluginUtils.pluginRemoval(logger, target.getParentFile(), new HashSet<>(Collections.singleton("ALL")));
+        PluginUtils.pluginRemoval(logger, target.getParentFile(), new LinkedHashSet<>(Collections.singleton("ALL")));
 
         assertTrue(systemOutRule.getLog()
                 .contains("Removed instances of plugin gradle-enterprise with configuration block of gradleEnterprise from"));
@@ -330,7 +331,7 @@ public class PluginUtilsTest {
                 + "}\n", Charset.defaultCharset());
 
         // Avoid singleton as the set is manipulated within the method
-        PluginUtils.pluginRemoval(logger, target.getParentFile(), new HashSet<>(Collections.singleton("ALL")));
+        PluginUtils.pluginRemoval(logger, target.getParentFile(), new LinkedHashSet<>(Collections.singleton("ALL")));
 
         assertTrue(systemOutRule.getLog()
                 .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
@@ -344,45 +345,56 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle.kts");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
-                "plugins {\n" + "  `maven-publish`\n" + "  signing\n" + "\n" + "  id(\"otel.japicmp-conventions\")\n"
-                        + "}\n" + "\n" + "publishing {\n" + "  publications {\n"
-                        + "    register<MavenPublication>(\"mavenPublication\") {\n"
-                        + "      val release = findProperty(\"otel.release\")\n" + "      if (release != null) {\n"
-                        + "        val versionParts = version.split('-').toMutableList()\n"
-                        + "        versionParts[0] += \"-$release\"\n"
-                        + "        version = versionParts.joinToString(\"-\")\n" + "      }\n"
-                        + "      groupId = \"io.opentelemetry\"\n" + "      afterEvaluate {\n"
-                        + "        // not available until evaluated.\n" + "        artifactId = base.archivesName.get()\n"
-                        + "        pom.description.set(project.description)\n" + "      }\n" + "\n"
-                        + "      plugins.withId(\"java-platform\") {\n" + "        from(components[\"javaPlatform\"])\n"
-                        + "      }\n" + "      plugins.withId(\"java-library\") {\n"
-                        + "        from(components[\"java\"])\n" + "      }\n" + "\n" + "      versionMapping {\n"
-                        + "        allVariants {\n" + "          fromResolutionResult()\n" + "        }\n" + "      }\n"
-                        + "\n" + "      pom {\n" + "        name.set(\"OpenTelemetry Java\")\n"
-                        + "        url.set(\"https://github.com/open-telemetry/opentelemetry-java\")\n" + "\n"
-                        + "        licenses {\n" + "          license {\n"
-                        + "            name.set(\"The Apache License, Version 2.0\")\n"
-                        + "            url.set(\"http://www.apache.org/licenses/LICENSE-2.0.txt\")\n" + "          }\n"
-                        + "        }\n" + "\n" + "        developers {\n" + "          developer {\n"
-                        + "            id.set(\"opentelemetry\")\n" + "            name.set(\"OpenTelemetry\")\n"
-                        + "            url.set(\"https://github.com/open-telemetry/community\")\n" + "          }\n"
-                        + "        }\n" + "\n" + "        scm {\n"
-                        + "          connection.set(\"scm:git:git@github.com:open-telemetry/opentelemetry-java.git\")\n"
-                        + "          developerConnection.set(\"scm:git:git@github.com:open-telemetry/opentelemetry-java.git\")\n"
-                        + "          url.set(\"git@github.com:open-telemetry/opentelemetry-java.git\")\n" + "        }\n"
-                        + "      }\n" + "    }\n" + "  }\n" + "}\n" + "if (System.getenv(\"CI\") != null) {\n"
-                        + "  signing {\n"
-                        + "    useInMemoryPgpKeys(System.getenv(\"GPG_PRIVATE_KEY\"), System.getenv(\"GPG_PASSWORD\"))\n"
-                        + "    sign(publishing.publications[\"mavenPublication\"])\n" + "  }\n" + "}\n\n",
+        org.apache.commons.io.FileUtils.writeStringToFile(target, "plugins {\n" + "  `maven-publish`\n" + "  signing\n"
+                + "\n" + "  id(\"otel.japicmp-conventions\")\n" + "}\n" + "\n"
+                + "publishing {\n" + "  publications {\n"
+                + "    register<MavenPublication>(\"mavenPublication\") {\n"
+                + "      val release = findProperty(\"otel.release\")\n" + "      if (release != null) {\n"
+                + "        val versionParts = version.split('-').toMutableList()\n"
+                + "        versionParts[0] += \"-$release\"\n" + "        version = versionParts.joinToString(\"-\")\n"
+                + "      }\n" + "      groupId = \"io.opentelemetry\"\n" + "      afterEvaluate {\n"
+                + "        // not available until evaluated.\n" + "        artifactId = base.archivesName.get()\n"
+                + "        pom.description.set(project.description)\n" + "      }\n"
+                + "\n"
+                + "      plugins.withId(\"java-platform\") {\n" + "        from(components[\"javaPlatform\"])\n"
+                + "      }\n" + "      plugins.withId(\"java-library\") {\n"
+                + "        from(components[\"java\"])\n"
+                + "      }\n" + "\n" + "      versionMapping {\n" + "        allVariants {\n"
+                + "          fromResolutionResult()\n" + "        }\n" + "      }\n"
+                + "\n" + "      pom {\n"
+                + "        name.set(\"OpenTelemetry Java\")\n"
+                + "        url.set(\"https://github.com/open-telemetry/opentelemetry-java\")\n"
+                + "\n"
+                + "        licenses {\n" + "          license {\n"
+                + "            name.set(\"The Apache License, Version 2.0\")\n"
+                + "            url.set(\"http://www.apache.org/licenses/LICENSE-2.0.txt\")\n"
+                + "          }\n"
+                + "        }\n" + "\n" + "        developers {\n" + "          developer {\n"
+                + "            id.set(\"opentelemetry\")\n" + "            name.set(\"OpenTelemetry\")\n"
+                + "            url.set(\"https://github.com/open-telemetry/community\")\n"
+                + "          }\n" + "        }\n"
+                + "\n" + "        scm {\n"
+                + "          connection.set(\"scm:git:git@github.com:open-telemetry/opentelemetry-java.git\")\n"
+                + "          developerConnection.set(\"scm:git:git@github.com:open-telemetry/opentelemetry-java.git\")\n"
+                + "          url.set(\"git@github.com:open-telemetry/opentelemetry-java.git\")\n"
+                + "        }\n"
+                + "      }\n" + "    }\n" + "  }\n" + "}\n" + "\n" + "afterEvaluate {\n"
+                + "  val publishToSonatype by tasks.getting\n" + "  val release by rootProject.tasks.existing\n"
+                + "  release.configure {\n" + "    finalizedBy(publishToSonatype)\n"
+                + "  }\n" + "}\n" + "\n"
+                + "if (System.getenv(\"CI\") != null) {\n" + "  signing {\n"
+                + "    useInMemoryPgpKeys(System.getenv(\"GPG_PRIVATE_KEY\"), System.getenv(\"GPG_PASSWORD\"))\n"
+                + "    sign(publishing.publications[\"mavenPublication\"])\n"
+                + "  }\n" + "}\n",
                 Charset.defaultCharset());
 
         // Avoid singleton as the set is manipulated within the method
-        PluginUtils.pluginRemoval(logger, target.getParentFile(), new HashSet<>(Collections.singleton("ALL")));
+        PluginUtils.pluginRemoval(logger, target.getParentFile(), new LinkedHashSet<>(Collections.singleton("ALL")));
 
         assertTrue(systemOutRule.getLog()
                 .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
 
+        assertFalse(FileUtils.readFileToString(target, Charset.defaultCharset()).contains("publishToSonatype"));
         assertTrue(FileUtils.readFileToString(target, Charset.defaultCharset()).contains("  id(\"otel.japicmp-conventions\")\n"
                 + "}\n" + "\n"
                 + "publishing {\n"

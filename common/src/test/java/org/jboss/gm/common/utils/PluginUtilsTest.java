@@ -450,6 +450,40 @@ public class PluginUtilsTest {
     }
 
     @Test
+    public void testRemoval7()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("build.gradle.kts");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "plugins {\n" + "  `maven-publish`\n" + "  signing\n" + "}\n"
+                        + "// Sign only if we have a key to do so\n"
+                        + "val signingKey: String? = System.getenv(\"GPG_PRIVATE_KEY\")\n"
+                        + "// Stub out entire signing block off of CI since Gradle provides no way of lazy configuration of\n"
+                        + "// signing tasks.\n"
+                        + "if (System.getenv(\"CI\") != null && signingKey != null) {\n"
+                        + "  signing {\n"
+                        + "    useInMemoryPgpKeys(signingKey, System.getenv(\"GPG_PASSWORD\"))\n"
+                        + "    sign(publishing.publications[\"maven\"])\n" + "  }\n"
+                        + "}\n",
+                Charset.defaultCharset());
+
+        // Avoid singleton as the set is manipulated within the method
+        PluginUtils.pluginRemoval(logger, target.getParentFile(),
+                new LinkedHashSet<>(Collections.singleton("signing")));
+
+        assertTrue(systemOutRule.getLog()
+                .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
+
+        assertTrue(FileUtils.readFileToString(target, Charset.defaultCharset()).contains("plugins {\n"
+                + "  `maven-publish`\n"
+                + "}\n"
+                + "// Sign only if we have a key to do so\n"
+                + "val signingKey: String? = System.getenv(\"GPG_PRIVATE_KEY\")\n"
+                + "if (System.getenv(\"CI\") != null && signingKey != null) {\n"
+                + "}\n"));
+    }
+
+    @Test
     public void testCheckForSemanticPlugin1()
             throws IOException, ManipulationException {
 

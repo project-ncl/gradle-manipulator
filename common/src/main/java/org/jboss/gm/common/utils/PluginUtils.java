@@ -109,7 +109,8 @@ public class PluginUtils {
                     boolean removed = lines.removeIf(i -> i.contains(plugin));
                     // This handles the scenario, often in Kotlin build files where the plugin may be just
                     // its name i.e. signing without any quotes or brackets
-                    removed |= lines.removeIf(i -> i.contains(plugin.replace("\"", "")) && !i.contains("{"));
+                    removed |= lines.removeIf(i -> i.matches(".*\\s+" +
+                            plugin.replace("\"", "") + "(\\s|\\n|$)+.*") && !i.contains("{"));
 
                     // Remove any task references.
                     // TODO: Handle if the task reference spans multiple lines
@@ -119,12 +120,12 @@ public class PluginUtils {
 
                     // Remove any configuration block
                     String content = String.join(eol, lines);
-                    Matcher m = Pattern.compile("(^|\\s)+" + configTask).matcher(content);
+                    Matcher m = Pattern.compile("(^|\\s)+" + configTask + "(\\s|\\n|$)+").matcher(content);
                     int startIndex = m.find() ? m.start() : -1;
 
                     // If there is a configuration block...
                     if (startIndex != -1) {
-                        int endIndex = startIndex;
+                        int endIndex = m.end();
                         int bracketCount = 1;
                         boolean inComment = false;
                         // Find the first opening bracket of the configuration block

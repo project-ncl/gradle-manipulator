@@ -2,6 +2,7 @@ package org.jboss.gm.common;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -42,7 +43,7 @@ public class ManipulationCache {
      * and is used to make sure that the result of alignment is only written once (by the last alignment task to be
      * performed).
      */
-    private final Set<String> projectCounter = new HashSet<>();
+    private final Set<String> projectCounter = Collections.synchronizedSet(new HashSet<>());
 
     /**
      * Root model.

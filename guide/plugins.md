@@ -22,6 +22,7 @@ The current supported list of plugins are:
 | `de.marcphilipp.nexus-publish` | `nexusPublishing`  | |
 | `gradle-enterprise` | `gradleEnterprise`  | |
 | `io.codearte.nexus-staging` | `nexusStaging`  | `closeRepository`, `releaseRepository`, `closeAndReleaseRepository` |
+| `io.github.gradle-nexus.publish-plugin` | `nexusPublishing`  | |
 | `signing` | `signing`  | |
 | `net.vivin.gradle-semantic-build-versioning` | `preRelease` | |
 

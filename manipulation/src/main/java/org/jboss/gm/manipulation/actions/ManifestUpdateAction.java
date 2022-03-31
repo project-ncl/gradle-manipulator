@@ -66,7 +66,7 @@ public class ManifestUpdateAction implements Action<Project> {
     @Override
     public void execute(Project project) {
 
-        project.getTasks().withType(Jar.class, j -> {
+        project.getTasks().withType(Jar.class).configureEach(j -> {
 
             @SuppressWarnings("UnstableApiUsage")
             Manifest manifest = j.getManifest();
@@ -82,7 +82,8 @@ public class ManifestUpdateAction implements Action<Project> {
                 Class<?> osgi = Class.forName("org.gradle.api.plugins.osgi.OsgiManifest");
                 if (osgi.isInstance(manifest)) {
                     logger.debug("Detected OsgiManifest");
-                    MethodUtils.invokeExactMethod(osgi.cast(manifest), "setVersion", alignmentModel.getVersion());
+                    MethodUtils.invokeExactMethod(osgi.cast(manifest), "setVersion",
+                            alignmentModel.getVersion());
                 }
             } catch (ClassNotFoundException e) {
                 // TODO: Sanity check on Gradle version?
@@ -94,21 +95,22 @@ public class ManifestUpdateAction implements Action<Project> {
             for (String e : manifestOverwriteValues) {
                 if (manifest.getAttributes().containsKey(e)) {
                     logger.warn("For task {}, overriding {} value {} with {}", j.getName(), e,
-                            manifest.getAttributes().get(e),
-                            alignmentModel.getVersion());
+                            manifest.getAttributes().get(e), alignmentModel.getVersion());
                 }
                 manifest.getAttributes().put(e, alignmentModel.getVersion());
             }
             for (String e : manifestOptionalNameValues) {
                 if (!manifest.getAttributes().containsKey(e)) {
-                    logger.info("For task {}, adding {} value with {}", j.getName(), e, alignmentModel.getName());
+                    logger.info("For task {}, adding {} value with {}", j.getName(), e,
+                            alignmentModel.getName());
                     manifest.getAttributes().put(e, alignmentModel.getName());
                 }
             }
             if (isNotEmpty(alignmentModel.getGroup())) {
                 for (String e : manifestOptionalGroupValues) {
                     if (!manifest.getAttributes().containsKey(e)) {
-                        logger.info("For task {}, adding {} value with {}", j.getName(), e, alignmentModel.getGroup());
+                        logger.info("For task {}, adding {} value with {}", j.getName(), e,
+                                alignmentModel.getGroup());
                         manifest.getAttributes().put(e, alignmentModel.getGroup());
                     }
                 }
@@ -117,8 +119,7 @@ public class ManifestUpdateAction implements Action<Project> {
             String exportPackage = "Export-Package";
             if (manifest.getAttributes().containsKey(exportPackage)) {
                 logger.info("For task {}, updating Export-Package version {} to {}", j.getName(),
-                        alignmentModel.getOriginalVersion(),
-                        alignmentModel.getVersion());
+                        alignmentModel.getOriginalVersion(), alignmentModel.getVersion());
                 manifest.getAttributes()
                         .put(exportPackage, (manifest.getAttributes().get(exportPackage).toString()).replaceAll(
                                 "version=\"?" + alignmentModel.getOriginalVersion() + "\"?",

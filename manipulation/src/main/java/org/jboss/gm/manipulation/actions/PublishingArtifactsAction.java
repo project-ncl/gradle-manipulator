@@ -2,6 +2,7 @@ package org.jboss.gm.manipulation.actions;
 
 import org.gradle.api.Action;
 import org.gradle.api.Project;
+import org.gradle.api.UnknownDomainObjectException;
 import org.gradle.api.component.SoftwareComponent;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.publish.PublishingExtension;
@@ -33,14 +34,15 @@ public class PublishingArtifactsAction implements Action<Project> {
 
     @Override
     public void execute(Project project) {
-        SoftwareComponent javaComponent = project.getComponents().findByName("java");
-        if (javaComponent != null) {
-            project.getExtensions().configure(PublishingExtension.class,
-                    publishingExtension -> publishingExtension.publications(publications -> {
-                        publications.create("mavenJava", MavenPublication.class,
-                                mavenPublication -> mavenPublication.from(javaComponent));
-                    }));
-        } else {
+        try {
+            SoftwareComponent javaComponent = (SoftwareComponent) project.getComponents().named("java");
+            project.getExtensions()
+                    .configure(PublishingExtension.class,
+                            publishingExtension -> publishingExtension.publications(publications -> {
+                                publications.register("mavenJava", MavenPublication.class,
+                                        mavenPublication -> mavenPublication.from(javaComponent));
+                            }));
+        } catch (UnknownDomainObjectException e) {
             logger.warn("No java component found for project {}, no artifact to publish.", project.getName());
         }
     }

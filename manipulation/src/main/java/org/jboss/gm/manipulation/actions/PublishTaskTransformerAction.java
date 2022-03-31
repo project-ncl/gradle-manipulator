@@ -2,6 +2,7 @@ package org.jboss.gm.manipulation.actions;
 
 import org.gradle.api.Action;
 import org.gradle.api.Project;
+import org.gradle.api.UnknownDomainObjectException;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
@@ -53,7 +54,9 @@ public class PublishTaskTransformerAction
         // GenerateMavenPom tasks need to be postponed until after compileJava task, because that's where artifact
         // resolution is normally triggered and ResolvedDependenciesRepository is filled. If GenerateMavenPom runs
         // before compileJava, we will see empty ResolvedDependenciesRepository here.
-        project.getTasks().withType(GenerateMavenPom.class).all(task -> {
+        project.getTasks().withType(GenerateMavenPom.class).configureEach(task -> {
+            // Not using project.getTasks().named("compileJava").configure as that causes
+            // DefaultTaskContainer#NamedDomainObjectProvider.configure(Action) on task set cannot be executed in the current context.
             if (project.getTasks().findByName("compileJava") != null) {
                 task.dependsOn("compileJava");
             }
@@ -62,18 +65,20 @@ public class PublishTaskTransformerAction
         // If someone has done "generatePomFileForPluginMavenPublication.enabled" while adding
         // java-gradle-plugin rather than configuring the Gradle plugin with "automatedPublishing=false"
         // this can cause issues during publishing. Elasticsearch is one such culprit (fixed on 7.x codebase).
-        project.getTasks().stream().filter(
-                t -> t.getName().startsWith("generatePomFileFor")
-                        && t.getName().endsWith("Publication"))
-                .forEach(t -> {
-                    String generateName = t.getName().replaceAll("generatePomFileFor([a-zA-Z]+)Publication", "$1");
-                    if (!t.getEnabled() && project.getTasks().stream().anyMatch(tt -> tt.getName().contains(generateName))) {
-                        logger.warn("A '{}' (full name: '{}') publication has been added but the POM file generation disabled. "
-                                + "This causes issues with Gradle and should be reviewed. Force enabling it to prevent future errors.",
-                                generateName, t.getName());
-                        t.setEnabled(true);
-                    }
-                });
+        project.getTasks().configureEach(task -> {
+            if (task.getName().startsWith("generatePomFileFor") && task.getName().endsWith("Publication")) {
+                String generateName = task.getName().replaceAll("generatePomFileFor([a-zA-Z]+)Publication", "$1");
+                if (!task.getEnabled() && project.getTasks()
+                        .stream()
+                        .anyMatch(ttt -> ttt.getName().contains(generateName))) {
+                    logger.warn(
+                            "A '{}' (full name: '{}') publication has been added but the POM file generation disabled. "
+                                    + "This causes issues with Gradle and should be reviewed. Force enabling it to prevent future errors.",
+                            generateName, task.getName());
+                    task.setEnabled(true);
+                }
+            }
+        });
 
         project.getExtensions().getByType(PublishingExtension.class).getPublications()
                 .withType(MavenPublication.class)

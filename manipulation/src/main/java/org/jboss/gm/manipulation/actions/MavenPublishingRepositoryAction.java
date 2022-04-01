@@ -51,16 +51,16 @@ public class MavenPublishingRepositoryAction implements Action<Project> {
     public void execute(Project project) {
         AtomicBoolean publishBuildSrc = new AtomicBoolean(false);
 
-        // disable existing publishing tasks but make sure we keep ours
-        project.getTasks().stream()
-                .filter(t -> t.getName().startsWith("publish")
-                        && t.getName().endsWith("Repository")
-                        && !t.getName().contains(REPO_NAME))
-                .forEach(t -> {
-                    logger.info("Disabling publishing task {}", t.getName());
-                    t.setEnabled(false);
-                    publishBuildSrc.set(true);
-                });
+        project.getTasks().configureEach(t -> {
+            // disable existing publishing tasks but make sure we keep ours
+            if (t.getName().startsWith("publish")
+                    && t.getName().endsWith("Repository")
+                    && !t.getName().contains(REPO_NAME)) {
+                logger.info("Disabling publishing task {}", t.getName());
+                t.setEnabled(false);
+                publishBuildSrc.set(true);
+            }
+        });
         RepositoryHandler repos = project.getExtensions().getByType(PublishingExtension.class).getRepositories();
         repos.forEach(repository -> {
             if (!REPO_NAME.equals(repository.getName())) {
@@ -104,7 +104,7 @@ public class MavenPublishingRepositoryAction implements Action<Project> {
                     cred.setValue("Bearer " + config.accessToken());
                 });
                 //noinspection UnstableApiUsage
-                repository.getAuthentication().create("header", HttpHeaderAuthentication.class);
+                repository.getAuthentication().register("header", HttpHeaderAuthentication.class);
             }
         });
     }

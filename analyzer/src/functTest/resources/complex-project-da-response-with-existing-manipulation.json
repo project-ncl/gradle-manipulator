@@ -1,13 +1,13 @@
 [
   {
     "bestMatchVersion": "2.0.21.Final-redhat-00002",
-    "version": "2.0.21.Final",
+    "version": "2.0.21.Final-redhat-00001",
     "groupId": "io.undertow",
     "artifactId": "undertow-core"
   },
   {
-    "bestMatchVersion": "3.8-redhat-00001",
-    "version": "3.8",
+    "bestMatchVersion": "3.8-redhat-00002",
+    "version": "3.8-redhat-00001",
     "groupId": "org.apache.commons",
     "artifactId": "commons-lang3"
   }

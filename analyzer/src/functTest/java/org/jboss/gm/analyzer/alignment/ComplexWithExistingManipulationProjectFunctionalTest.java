@@ -60,8 +60,6 @@ public class ComplexWithExistingManipulationProjectFunctionalTest extends Abstra
     }
 
     @Test
-    // Note : if this test has started failing check the latest version of undertow on
-    // http://central.maven.org/maven2/io/undertow/undertow-core/
     public void ensureAlignmentFileCreated() throws IOException, URISyntaxException, ManipulationException {
         // XXX: Use of publishing.publications.MavenPublication.versionMapping{}
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.2")) >= 0);
@@ -86,13 +84,11 @@ public class ComplexWithExistingManipulationProjectFunctionalTest extends Abstra
                         .containsOnly(
                                 // ensure that the aligned versions as are always used for dynamic and regular dependencies
                                 tuple("undertow-core", "2.0.21.Final-redhat-00002"),
-                                tuple("commons-lang3", "3.8-redhat-00001"),
-                                tuple("HdrHistogram", "2.1.10"));
+                                tuple("commons-lang3", "3.8-redhat-00002"));
 
                 assertThat(root.getAlignedDependencies()).containsOnlyKeys(
                         "org.apache.commons:commons-lang3:latest.release",
-                        "org.hdrhistogram:HdrHistogram:2.+",
-                        "io.undertow:undertow-core:2.0+");
+                        "io.undertow:undertow-core:2.0.21.Final");
             });
         });
     }

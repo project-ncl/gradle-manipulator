@@ -40,7 +40,7 @@ dependencies {
     implementation('com.google.inject:guice:4.2.2')
     implementation('org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1')
 
-    implementation group: 'io.undertow', name: 'undertow-core', version: '2.0+'
+    implementation group: 'io.undertow', name: 'undertow-core', version: '(2.0,2.0.21.Final]'
 }
 
 

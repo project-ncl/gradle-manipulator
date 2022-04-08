@@ -169,3 +169,15 @@ This will prevent any alignment within `org.foo` and all sub-modules within that
 ### Direct/Transitive Dependencies
 
 By default GME will _only_ align direct dependencies and not transitive as well. There are scenarios - such as using the [Shadow Plugin](https://github.com/johnrengelman/shadow) when creating a shaded jar that is may be desirable to align transitive as well. In that case set `overrideTransitive=true`. Note that by default it is **implicitly** set to false, but if the Shadow Plugin is detected and the user has **not** explicitly configured `overrideTransitive` then an exception will be thrown.
+
+### Gradle Lock Files
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : Lock file handling has been significantly improved with GME 3.5.
+</td>
+</tr>
+</table>
+
+[Gradle lock files](https://docs.gradle.org/current/userguide/dependency_locking.html) are supported in GME. The tool will update the lock files with the new aligned versions. A configuration option `lenientLockMode` (default: false) will also adjust any occurences of `dependencyLocking {` to add `lockMode = LockMode.LENIENT` if the option is set to true. This is useful to avoid some lock file issues after alignment.

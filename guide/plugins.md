@@ -23,6 +23,7 @@ The current supported list of plugins are:
 | `gradle-enterprise` | `gradleEnterprise`  | |
 | `io.codearte.nexus-staging` | `nexusStaging`  | `closeRepository`, `releaseRepository`, `closeAndReleaseRepository` |
 | `io.github.gradle-nexus.publish-plugin` | `nexusPublishing`  | |
+| `nebula.publish-verification` | `nebulaPublishVerification`  | |
 | `signing` | `signing`  | |
 | `net.vivin.gradle-semantic-build-versioning` | `preRelease` | |
 

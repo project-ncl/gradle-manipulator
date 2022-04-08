@@ -158,6 +158,10 @@ public interface Configuration extends Accessible, Reloadable {
     @Key("groovyScripts")
     String[] groovyScripts();
 
+    @Key("lenientLockMode")
+    @DefaultValue("false")
+    boolean addLenientLockMode();
+
     @Key("pluginRemoval")
     Set<String> pluginRemoval();
 

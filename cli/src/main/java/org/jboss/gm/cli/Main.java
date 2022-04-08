@@ -329,6 +329,10 @@ public class Main implements Callable<Void> {
             PluginUtils.pluginRemoval(logger, target, Collections.singleton(SEMANTIC_BUILD_VERSIONING));
         }
 
+        if (configuration.addLenientLockMode()) {
+            PluginUtils.addLenientLockMode(logger, target);
+        }
+
         GroovyUtils.runCustomGroovyScript(logger, InvocationStage.FIRST, target, configuration, null, null);
 
         PluginUtils.pluginRemoval(logger, target, configuration.pluginRemoval());

@@ -10,19 +10,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import lombok.experimental.UtilityClass;
 
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.logging.Logger;
+import org.jboss.gm.common.versioning.DynamicVersionParser;
 
 /**
  * Utility class for lock file I/O.
@@ -89,37 +89,39 @@ public class LockFileIO {
         }
 
         for (File lockFile : locksFiles) {
-            Map<ProjectRef, ProjectVersionRef> lockedVersionsMap = readProjectVersionRefLocksOfFile(lockFile)
-                    .stream()
-                    .collect(Collectors.toMap(ProjectRef::asProjectRef,
-                            ProjectVersionRef::asProjectVersionRef));
-            Set<ProjectRef> lockedVersions = lockedVersionsMap.keySet();
+            logger.debug("Examining lockfile {}", lockFile);
 
             try {
                 List<String> lockFileLines = FileUtils.readLines(lockFile, Charset.defaultCharset());
-                alignedDependencies.values().forEach(aligned -> {
-                    ProjectRef versionlessAligned = aligned.asProjectRef();
+                AtomicBoolean modified = new AtomicBoolean(false);
+
+                alignedDependencies.forEach((key, value) -> {
+                    ProjectVersionRef keyProjectVersionRef = SimpleProjectVersionRef.parse(key);
+                    boolean dynamic = DynamicVersionParser.isDynamic(keyProjectVersionRef.getVersionString());
+                    String matcher = key;
                     // Its possible alignedDependencies has a DynamicValue recorded as key but the lockfile has an
-                    // explicit value. Therefore, we have to filter to find a partial match on group:artifact. This
-                    // assumes the lockfile does not have two GA with different V.
-                    Optional<String> result = alignedDependencies.keySet().stream()
-                            .filter(f -> f.contains(versionlessAligned.toString())).findFirst();
-                    if (!result.isPresent()) {
-                        logger.warn("Unable to find a match for {} against {} ", versionlessAligned, alignedDependencies);
-                    } else if (lockedVersions.contains(versionlessAligned)) {
-                        String replacement = alignedDependencies.get(result.get()).toString();
-                        for (int i = 0; i < lockFileLines.size(); i++) {
-                            String line = lockFileLines.get(i);
-                            if (line.contains(versionlessAligned.toString())) {
-                                logger.debug("Found lock file element '{}' to be replaced by {}", line, replacement);
-                                line = line.replaceFirst(versionlessAligned + ":([a-zA-Z0-9.]+)(=.*)*",
-                                        replacement + "$2");
-                                lockFileLines.set(i, line);
-                            }
+                    // explicit value. Therefore, we have to filter to find a partial match on group:artifact.
+                    // One potential issue is that multiple same group:artifact with dynamic versions will
+                    // all end up being replaced.
+                    if (dynamic) {
+                        matcher = keyProjectVersionRef.asProjectRef().toString();
+                    }
+
+                    for (int i = 0; i < lockFileLines.size(); i++) {
+                        String line = lockFileLines.get(i);
+                        if (line.contains(matcher)) {
+                            logger.debug("Found lock file element '{}' to be replaced by {}", line, value);
+                            line = line.replaceFirst(matcher +
+                                    (dynamic ? ":([a-zA-Z0-9.]+)(=.*)*" : "(=.*)*"),
+                                    value + (dynamic ? "$2" : "$1"));
+                            lockFileLines.set(i, line);
+                            modified.set(true);
                         }
                     }
                 });
-                FileUtils.writeLines(lockFile, lockFileLines);
+                if (modified.get()) {
+                    FileUtils.writeLines(lockFile, lockFileLines);
+                }
             } catch (IOException e) {
                 throw new ManipulationUncheckedException(e);
             }

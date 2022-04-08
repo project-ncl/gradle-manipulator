@@ -533,4 +533,47 @@ public class PluginUtilsTest {
         assertTrue(result);
         assertTrue(systemOutRule.getLog().contains("Found Semantic Build Versioning Plugin"));
     }
+
+    @Test
+    public void testLenientLockMode1()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("build.gradle");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "\n" + "buildscript {\n" + "    dependencyLocking {\n"
+                        + "        lockAllConfigurations()\n" + "    }\n" + "\n"
+                        + "    repositories {\n" + "        mavenCentral()\n"
+                        + "        gradlePluginPortal()\n"
+                        + "    }\n",
+                Charset.defaultCharset());
+
+        PluginUtils.addLenientLockMode(logger, target.getParentFile());
+        assertTrue(systemOutRule.getLog().contains("Added LENIENT lockMode"));
+        assertTrue(FileUtils.readFileToString(target, Charset.defaultCharset()).contains("buildscript {\n"
+                + "    dependencyLocking {\n"
+                + " lockMode = LockMode.LENIENT\n"
+                + "        lockAllConfigurations()\n"
+                + "    }\n"));
+    }
+
+    @Test
+    public void testLenientLockMode2()
+            throws IOException, ManipulationException {
+        File target = folder.newFile("build.gradle.kts");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "\n" + "buildscript {\n" + "    dependencyLocking {\n"
+                        + "        lockAllConfigurations()\n" + "    }\n" + "\n"
+                        + "    repositories {\n" + "        mavenCentral()\n"
+                        + "        gradlePluginPortal()\n"
+                        + "    }\n",
+                Charset.defaultCharset());
+
+        PluginUtils.addLenientLockMode(logger, target.getParentFile());
+        assertTrue(systemOutRule.getLog().contains("Added LENIENT lockMode"));
+        assertTrue(FileUtils.readFileToString(target, Charset.defaultCharset()).contains("buildscript {\n"
+                + "    dependencyLocking {\n"
+                + " lockMode.set(LockMode.LENIENT) \n"
+                + "        lockAllConfigurations()\n"
+                + "    }\n"));
+    }
 }

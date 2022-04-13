@@ -11,6 +11,7 @@ public class VersionSelectorTest {
     @Test
     public void testSelector() {
 
+        assertFalse(DynamicVersionParser.isDynamic(""));
         assertFalse(DynamicVersionParser.isDynamic("1.1.Final"));
         assertTrue(DynamicVersionParser.isDynamic("1.1+"));
         assertTrue(DynamicVersionParser.isDynamic("latest.release"));

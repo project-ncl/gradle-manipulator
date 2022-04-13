@@ -7,6 +7,8 @@ import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionP
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionSelector;
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionSelectorScheme;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+
 public class DynamicVersionParser {
 
     private static final VersionSelectorScheme selector = new DefaultVersionSelectorScheme(new DefaultVersionComparator(),
@@ -14,6 +16,9 @@ public class DynamicVersionParser {
 
     public static boolean isDynamic(String version) {
 
+        if (isEmpty(version)) {
+            return false;
+        }
         VersionSelector s = selector.parseSelector(version);
 
         switch (s.getClass().getName()) {

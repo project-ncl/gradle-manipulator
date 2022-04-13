@@ -74,7 +74,6 @@ import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
 
 import static java.util.Comparator.comparingInt;
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.gradle.api.Project.DEFAULT_VERSION;
 import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
 import static org.jboss.gm.common.utils.FileUtils.append;
@@ -221,8 +220,7 @@ public class AlignmentTask extends DefaultTask {
 
         try {
             final Set<ProjectVersionRef> lockFileDeps = LockFileIO
-                    .allProjectVersionRefsFromLockfiles(project.getRootDir().toPath());
-
+                    .allProjectVersionRefsFromLockfiles(project.getProjectDir());
             final Map<RelaxedProjectVersionRef, ProjectVersionRef> dependencies = processAnyExistingManipulationFile(
                     project,
                     getDependencies(project, configuration, lockFileDeps));
@@ -327,10 +325,13 @@ public class AlignmentTask extends DefaultTask {
                         newVersion);
                 correspondingModule.setVersion(newVersion);
             }
-
-            updateModuleDynamicDependencies(correspondingModule, value);
             updateModuleDependencies(project, correspondingModule, value, alignmentResponse);
+            LockFileIO.updateLockfiles(logger, project.getProjectDir(), correspondingModule.getAlignedDependencies());
         });
+        // Now need to update the historical lock file format (if it exists). This is one lockfile
+        // per SCM repository
+        LockFileIO.updateLockfiles(logger, new File(rootProject.getRootDir(), "gradle/dependency-locks"),
+                alignmentModel.getAllAlignedDependencies());
 
         // artifactId / rootProject.getName
         final String artifactId = SettingsFileIO.writeProjectNameIfNeeded(getProject().getRootDir());
@@ -379,9 +380,6 @@ public class AlignmentTask extends DefaultTask {
         writeGmeReposMarkerFile();
         writeRepositorySettingsFile(cache.getRepositories());
 
-        // this needs to happen for each project, not just the last one
-        LockFileIO.renameAllLockFiles(rootProject.getRootDir().toPath());
-
         final Set<ProjectVersionRef> nonAligned = new LinkedHashSet<>();
         processAlignmentReport(rootProject, configuration, cache, nonAligned);
     }
@@ -389,7 +387,7 @@ public class AlignmentTask extends DefaultTask {
     private void processPropertiesForBuildCache(File rootProject) throws IOException {
         File properties = new File(rootProject, "gradle.properties");
         if (properties.exists()) {
-            List<String> lines = org.apache.commons.io.FileUtils.readLines(properties, Charset.defaultCharset());
+            List<String> lines = FileUtils.readLines(properties, Charset.defaultCharset());
             if (lines.removeIf(i -> i.contains("org.gradle.caching"))) {
                 FileUtils.writeLines(properties, lines);
             }
@@ -618,6 +616,7 @@ public class AlignmentTask extends DefaultTask {
                             version = lockFileDep.getVersionString();
                         }
                     }
+
                     ProjectVersionRef pvr = ProjectVersionFactory.withGAV(dep.getModuleGroup(), dep.getModuleName(),
                             version);
 
@@ -663,18 +662,6 @@ public class AlignmentTask extends DefaultTask {
         return unresolvedDependencies;
     }
 
-    private void updateModuleDynamicDependencies(ManipulationModel correspondingModule,
-            Map<RelaxedProjectVersionRef, ProjectVersionRef> allModuleDependencies) {
-
-        allModuleDependencies.forEach((d, p) -> {
-            // we need to make sure that dynamic dependencies are stored with their original key
-            // in order for the manipulation plugin to be able to look them up properly
-            if (isNotBlank(d.getVersionString()) && DynamicVersionParser.isDynamic(d.getVersionString())) {
-                correspondingModule.getAlignedDependencies().put(d.toString(), p);
-            }
-        });
-    }
-
     /**
      * This does the actual substitution replacing the dependencies with aligned version if it exists
      *
@@ -697,6 +684,8 @@ public class AlignmentTask extends DefaultTask {
                         newDependencyVersion);
                 // we need to make sure that dynamic dependencies are stored with their original key
                 // in order for the manipulation plugin to be able to look them up properly
+                logger.debug("Mapping {} to {} (and is dynamic {})", d, newVersion,
+                        DynamicVersionParser.isDynamic(d.getVersionString()));
                 correspondingModule.getAlignedDependencies().put(d.toString(), newVersion);
             }
         });
@@ -829,11 +818,8 @@ public class AlignmentTask extends DefaultTask {
 
             for (Map.Entry<RelaxedProjectVersionRef, ProjectVersionRef> e : allModuleDependenciesEntrySet) {
                 final RelaxedProjectVersionRef d = e.getKey();
-                final ProjectVersionRef p = e.getValue();
                 final ProjectVersionRef newDependencyVersion = correspondingModule.getAlignedDependencies()
                         .get(d.toString());
-                logger.debug("In module {} with GAV {} found a replacement version of {}",
-                        correspondingModule.getProjectPathName(), p, newDependencyVersion);
 
                 if (newDependencyVersion == null) {
                     if (reportNonAligned) {

@@ -31,11 +31,10 @@ allprojects {
 
 
 dependencies {
+    implementation group: 'io.undertow', name: 'undertow-core', version: '2.0.21.Final'
     implementation "org.apache.commons:commons-lang3:latest.release"
     implementation('org.hdrhistogram:HdrHistogram:2.+')
     implementation('com.google.inject:guice:4.2.2')
-
-    implementation group: 'io.undertow', name: 'undertow-core', version: '2.0+'
 }
 
 

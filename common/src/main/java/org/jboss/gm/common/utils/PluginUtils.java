@@ -40,6 +40,7 @@ public class PluginUtils {
                 Pair.of("nexusStaging", Stream.of("closeRepository", "releaseRepository", "closeAndReleaseRepository").collect(
                         Collectors.toSet())));
         SUPPORTED_PLUGINS.put("io.github.gradle-nexus.publish-plugin", Pair.of("nexusPublishing", Collections.emptySet()));
+        SUPPORTED_PLUGINS.put("nebula.publish-verification", Pair.of("nebulaPublishVerification", Collections.emptySet()));
         SUPPORTED_PLUGINS.put("signing", Pair.of("signing", Collections.emptySet()));
         SUPPORTED_PLUGINS.put(SEMANTIC_BUILD_VERSIONING, Pair.of("preRelease", Collections.emptySet()));
     }
@@ -97,13 +98,7 @@ public class PluginUtils {
             for (File buildFile : files) {
                 try {
                     List<String> lines = org.apache.commons.io.FileUtils.readLines(buildFile, Charset.defaultCharset());
-                    String eol;
-                    try {
-                        eol = FileIO.determineEOL(buildFile).value();
-                    } catch (ManipulationException e) {
-                        logger.warn("Unable to determine EOL for {}", buildFile);
-                        eol = "\n";
-                    }
+                    String eol = getEOL(logger, buildFile);
 
                     // Remove the plugin
                     boolean removed = lines.removeIf(i -> i.contains(plugin));
@@ -194,5 +189,56 @@ public class PluginUtils {
             }
         }
         return false;
+    }
+
+    public static void addLenientLockMode(Logger logger, File target)
+            throws ManipulationException {
+        final String depLock = "dependencyLocking {";
+
+        Collection<File> files = new HashSet<>();
+        final Collection<File> gradleFiles = FileUtils.listFiles(target, new WildcardFileFilter("*.gradle"),
+                TrueFileFilter.INSTANCE);
+        final Collection<File> kotlinFiles = FileUtils.listFiles(target, new WildcardFileFilter("*.gradle.kts"),
+                TrueFileFilter.INSTANCE);
+        files.addAll(gradleFiles);
+        files.addAll(kotlinFiles);
+
+        for (File buildFile : files) {
+            boolean removed = false;
+            try {
+                List<String> lines = org.apache.commons.io.FileUtils.readLines(buildFile, Charset.defaultCharset());
+
+                for (int i = 0; i < lines.size(); i++) {
+                    String line = lines.get(i);
+                    if (line.contains(depLock)) {
+                        removed = true;
+                        if (buildFile.toString().endsWith("kts")) {
+                            line = line.replace(depLock, depLock + "\n lockMode.set(LockMode.LENIENT) ");
+                        } else {
+                            line = line.replace(depLock, depLock + "\n lockMode = LockMode.LENIENT");
+                        }
+                        lines.set(i, line);
+                    }
+                }
+                if (removed) {
+                    String content = String.join(getEOL(logger, buildFile), lines);
+                    logger.debug("Added LENIENT lockMode to {}", buildFile);
+                    FileUtils.writeStringToFile(buildFile, content, Charset.defaultCharset());
+                }
+            } catch (IOException e) {
+                throw new ManipulationException("Unable to read build file {}", buildFile, e);
+            }
+        }
+    }
+
+    private static String getEOL(Logger logger, File buildFile) {
+        String eol;
+        try {
+            eol = FileIO.determineEOL(buildFile).value();
+        } catch (ManipulationException e) {
+            logger.warn("Unable to determine EOL for {}", buildFile);
+            eol = "\n";
+        }
+        return eol;
     }
 }

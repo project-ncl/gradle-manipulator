@@ -15,7 +15,8 @@
  */
 package org.jboss.gm.cli;
 
-import org.jboss.gm.common.utils.ManifestUtils;
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.util.ManifestUtils;
 
 import picocli.CommandLine;
 
@@ -27,12 +28,7 @@ public class ManifestVersionProvider
      * @return version information (each string in the array is displayed on a separate line)
      */
     @Override
-    public String[] getVersion() {
-        return new String[] { "Gradle Analyser CLI " + ManifestUtils.getManifestInformation() };
-    }
-
-    @Override
-    public String toString() {
-        return getVersion()[0];
+    public String[] getVersion() throws ManipulationException {
+        return new String[] { "Gradle Analyser CLI " + ManifestUtils.getManifestInformation(Main.class) };
     }
 }

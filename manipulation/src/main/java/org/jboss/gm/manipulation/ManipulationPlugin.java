@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.beanutils.ContextClassLoaderLocal;
+import org.commonjava.maven.ext.common.util.ManifestUtils;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -15,7 +16,6 @@ import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
-import org.jboss.gm.common.utils.ManifestUtils;
 import org.jboss.gm.common.utils.ProjectUtils;
 import org.jboss.gm.manipulation.actions.LegacyMavenPublishingRepositoryAction;
 import org.jboss.gm.manipulation.actions.ManifestUpdateAction;
@@ -48,7 +48,8 @@ public class ManipulationPlugin implements Plugin<Project> {
     public static final String MAVEN_PUBLISH_PLUGIN = "maven-publish";
 
     static {
-        System.out.println("Running Gradle Manipulation Plugin " + ManifestUtils.getManifestInformation());
+        System.out.println(
+                "Running Gradle Manipulation Plugin " + ManifestUtils.getManifestInformation(ManipulationPlugin.class));
     }
 
     private final Logger logger = GMLogger.getLogger(getClass());

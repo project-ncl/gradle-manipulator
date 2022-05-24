@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.util.ManifestUtils;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.gradle.internal.Pair;
 import org.gradle.tooling.BuildException;
@@ -39,7 +40,6 @@ import org.gradle.util.GradleVersion;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.GroovyUtils;
 import org.jboss.gm.common.utils.JavaUtils;
-import org.jboss.gm.common.utils.ManifestUtils;
 import org.jboss.gm.common.utils.PluginUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -225,7 +225,7 @@ public class Main implements Callable<Void> {
             }
 
             logger.info("Executing CLI {} on Gradle project {} with JVM args '{}' and arguments '{}'",
-                    ManifestUtils.getManifestInformation(), target, jvmArgs, currentGradleArgs);
+                    ManifestUtils.getManifestInformation(Main.class), target, jvmArgs, currentGradleArgs);
 
             build.setEnvironmentVariables(envVars);
             build.setJvmArguments(jvmArgs);

@@ -91,23 +91,28 @@ public class ManipulationPlugin implements Plugin<Project> {
         final ManipulationModel correspondingModule = ManipulationIO.readManipulationModel(project.getRootDir())
                 .findCorrespondingChild(project);
 
-        // we need to change the project version early so various tasks that ready early and create other vars based on it
-        // (like the zip tasks) can use the correct version
-        logger.info("Updating project ({}) version {} to {}", project.getProjectDir(), project.getVersion(),
-                correspondingModule.getVersion());
-        project.setVersion(correspondingModule.getVersion());
+        if (!project.getVersion().equals(correspondingModule.getVersion())) {
+            // we need to change the project version early so various tasks that ready early and create other vars based on it
+            // (like the zip tasks) can use the correct version
+            logger.info("Updating project ({}) version {} to {}", project.getProjectDir(), project.getVersion(),
+                    correspondingModule.getVersion());
+            project.setVersion(correspondingModule.getVersion());
+
+            project.afterEvaluate(ignore -> {
+                // This double version set is required - sometimes other plugins seem to override the version we set initially.
+                // We need to set it at the start as other plugins also require it there. Hence this belt and braces approach.
+                if (!correspondingModule.getVersion().equals(project.getVersion())) {
+                    logger.warn("After evaluation, another plugin has reset the version to {}. Resetting to {}",
+                            project.getVersion(), correspondingModule.getVersion());
+                    project.setVersion(correspondingModule.getVersion());
+                }
+            });
+        } else {
+            logger.info("Not updating project ({}) since version ({}) has not changed",
+                    project.getProjectDir(), project.getVersion());
+        }
 
         final ResolvedDependenciesRepository resolvedDependenciesRepository = new ResolvedDependenciesRepository();
-
-        project.afterEvaluate(ignore -> {
-            // This double version set is required - sometimes other plugins seem to override the version we set initially.
-            // We need to set it at the start as other plugins also require it there. Hence this belt and braces approach.
-            if (!correspondingModule.getVersion().equals(project.getVersion())) {
-                logger.warn("After evaluation, another plugin has reset the version to {}. Resetting to {}",
-                        project.getVersion(), correspondingModule.getVersion());
-                project.setVersion(correspondingModule.getVersion());
-            }
-        });
 
         // add actions to manipulate project
         project.afterEvaluate(new OverrideDependenciesAction(correspondingModule, resolvedDependenciesRepository));

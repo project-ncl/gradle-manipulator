@@ -118,12 +118,17 @@ public class ManifestUpdateAction implements Action<Project> {
 
             String exportPackage = "Export-Package";
             if (manifest.getAttributes().containsKey(exportPackage)) {
-                logger.info("For task {}, updating Export-Package version {} to {}", j.getName(),
-                        alignmentModel.getOriginalVersion(), alignmentModel.getVersion());
-                manifest.getAttributes()
-                        .put(exportPackage, (manifest.getAttributes().get(exportPackage).toString()).replaceAll(
-                                "version=\"?" + alignmentModel.getOriginalVersion() + "\"?",
-                                "version=\"" + alignmentModel.getVersion() + '"'));
+                if (!alignmentModel.getOriginalVersion().equals(alignmentModel.getVersion())) {
+                    logger.info("For task {}, updating Export-Package version {} to {}", j.getName(),
+                            alignmentModel.getOriginalVersion(), alignmentModel.getVersion());
+                    manifest.getAttributes()
+                            .put(exportPackage, (manifest.getAttributes().get(exportPackage).toString()).replaceAll(
+                                    "version=\"?" + alignmentModel.getOriginalVersion() + "\"?",
+                                    "version=\"" + alignmentModel.getVersion() + '"'));
+                } else {
+                    logger.info("For task {}, not updating Export-Package since version ({}) has not changed",
+                            j.getName(), alignmentModel.getVersion());
+                }
             }
 
             manifest.getAttributes().put("Build-Jdk", System.getProperty("java.version"));

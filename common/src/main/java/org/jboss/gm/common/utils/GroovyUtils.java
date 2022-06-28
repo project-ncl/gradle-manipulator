@@ -70,6 +70,13 @@ public class GroovyUtils {
 
         for (File scriptFile : groovyFiles) {
             final Binding binding = new Binding();
+            File gradleDir = new File(
+                    Project.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
+            @SuppressWarnings("ConstantConditions")
+            boolean foundIvy = gradleDir.listFiles((d, name) -> name.matches("ivy.*\\.jar")).length > 0;
+            if (targetStage == InvocationStage.LAST && !foundIvy) {
+                logger.warn("Ivy jar not found in Gradle lib directory - @Grab annotations will not work");
+            }
             // We use the current class' classloader so the script has access to this plugin's API and the
             // groovy API.
             final GroovyShell groovyShell = new GroovyShell(logger.getClass().getClassLoader(), binding);

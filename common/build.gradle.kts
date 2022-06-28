@@ -1,6 +1,7 @@
 group = "org.jboss.gm"
 
 dependencies {
+    runtimeOnly("org.apache.ivy:ivy:${project.extra.get("ivyVersion")}")
     compileOnly(localGroovy())
     compileOnly(gradleApi())
 

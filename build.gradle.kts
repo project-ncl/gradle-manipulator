@@ -191,7 +191,7 @@ subprojects {
     extra["commonsBeanVersion"] = "1.9.4"
     extra["commonsVersion"] = "2.6"
     extra["gradleVersion"] = "5.6.4"
-    extra["groovyVersion"] = "3.0.5"
+    extra["groovyVersion"] = "3.0.11"
     extra["jacksonVersion"] = "2.11.2"
     extra["junitVersion"] = "4.13.1"
     extra["logbackVersion"] = "1.2.9"
@@ -200,6 +200,7 @@ subprojects {
     extra["pmeVersion"] = "4.8"
     extra["slf4jVersion"] = "1.7.30"
     extra["systemRulesVersion"] = "1.19.0"
+    extra["ivyVersion"] = "2.5.0"
 
     if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.4")) {
         apply(plugin = "com.diffplug.gradle.spotless")
@@ -344,6 +345,7 @@ subprojects {
                     exclude(dependency("org.aeonbits.owner:.*:.*"))
                     exclude(dependency("org.slf4j:.*:.*"))
                     exclude(dependency("org.apache.maven:.*:.*"))
+                    exclude(dependency("org.apache.ivy:.*:.*"))
                     exclude(dependency("com.konghq:.*:.*"))
                 }
             }

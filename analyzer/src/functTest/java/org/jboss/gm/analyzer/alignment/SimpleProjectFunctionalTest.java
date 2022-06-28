@@ -340,6 +340,92 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
+    public void verifyAlignmentReportJsonVersionModificationDisabled() throws IOException, URISyntaxException {
+        System.setProperty("versionModification", "false");
+        final Path projectRoot = tempDir.newFolder("simple-project").toPath();
+        assertThat(projectRoot).isDirectory();
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot.toFile(),
+                projectRoot.getFileName().toString());
+        assertThat(alignmentModel).isNotNull();
+        final Path buildRoot = projectRoot.resolve("build");
+        assertThat(buildRoot).isDirectory();
+        final Path jsonFile = buildRoot.resolve(Configuration.REPORT_JSON_OUTPUT_FILE);
+        assertThat(jsonFile).isRegularFile().isReadable();
+        final Path textFile = buildRoot.resolve(Configuration.REPORT_JSON_OUTPUT_FILE
+                .replaceFirst("\\.json$", ".txt"));
+        assertThat(textFile).doesNotExist();
+        final PME jsonReport = JSONUtils.fileToJSON(jsonFile.toFile());
+        final String jsonString = FileUtils.readFileToString(jsonFile.toFile(), StandardCharsets.UTF_8);
+        final String expectedJsonString = String.format(
+                "{%n" +
+                        "  \"executionRoot\" : {%n" +
+                        "    \"groupId\" : \"org.acme.gradle\",%n" +
+                        "    \"artifactId\" : \"root\",%n" +
+                        "    \"version\" : \"1.0.1\",%n" +
+                        "    \"originalGAV\" : \"org.acme.gradle:root:1.0.1\"%n" +
+                        "  },%n" +
+                        "  \"modules\" : [ {%n" +
+                        "    \"gav\" : {%n" +
+                        "      \"groupId\" : \"org.acme.gradle\",%n" +
+                        "      \"artifactId\" : \"root\",%n" +
+                        "      \"version\" : \"1.0.1\",%n" +
+                        "      \"originalGAV\" : \"org.acme.gradle:root:1.0.1\"%n" +
+                        "    },%n" +
+                        "    \"dependencies\" : {%n" +
+                        "      \"io.undertow:undertow-core:2.0.15.Final\" : {%n" +
+                        "        \"groupId\" : \"io.undertow\",%n" +
+                        "        \"artifactId\" : \"undertow-core\",%n" +
+                        "        \"version\" : \"2.0.15.Final-redhat-00001\"%n" +
+                        "      },%n" +
+                        "      \"org.hibernate:hibernate-core:5.3.7.Final\" : {%n" +
+                        "        \"groupId\" : \"org.hibernate\",%n" +
+                        "        \"artifactId\" : \"hibernate-core\",%n" +
+                        "        \"version\" : \"5.3.7.Final-redhat-00001\"%n" +
+                        "      },%n" +
+                        "      \"com.yammer.metrics:metrics-core:2.2.0\" : {%n" +
+                        "        \"groupId\" : \"com.yammer.metrics\",%n" +
+                        "        \"artifactId\" : \"metrics-core\",%n" +
+                        "        \"version\" : \"2.2.0-redhat-00001\"%n" +
+                        "      }%n" +
+                        "    }%n" +
+                        "  } ]%n" +
+                        "}");
+        assertThat(jsonString).isEqualTo(expectedJsonString);
+        final GAV gav = new GAV();
+        gav.setPVR(SimpleProjectVersionRef.parse("org.acme.gradle:root:1.0.1"));
+        assertThat(jsonReport.getGav().getGroupId()).isEqualTo(gav.getGroupId());
+        assertThat(jsonReport.getGav().getArtifactId()).isEqualTo(gav.getArtifactId());
+        assertThat(jsonReport.getGav().getVersion()).isEqualTo(gav.getVersion());
+        assertThat(jsonReport.getGav().getOriginalGAV()).isEqualTo("org.acme.gradle:root:1.0.1");
+        final List<ModulesItem> modules = jsonReport.getModules();
+        assertThat(modules).hasSize(1);
+        final ModulesItem module1 = modules.get(0);
+        assertThat(module1.getGav()).isNotNull();
+        assertThat(module1.getGav().getGroupId()).isEqualTo("org.acme.gradle");
+        assertThat(module1.getGav().getArtifactId()).isEqualTo("root");
+        assertThat(module1.getGav().getVersion()).isEqualTo("1.0.1");
+        assertThat(module1.getGav().getOriginalGAV()).isEqualTo("org.acme.gradle:root:1.0.1");
+        assertThat(module1.getDependencies()).hasSize(3)
+                .containsEntry("com.yammer.metrics:metrics-core:2.2.0",
+                        SimpleProjectVersionRef.parse("com.yammer.metrics:metrics-core:2.2.0-redhat-00001"))
+                .containsEntry("io.undertow:undertow-core:2.0.15.Final",
+                        SimpleProjectVersionRef.parse("io.undertow:undertow-core:2.0.15.Final-redhat-00001"))
+                .containsEntry("org.hibernate:hibernate-core:5.3.7.Final",
+                        SimpleProjectVersionRef.parse("org.hibernate:hibernate-core:5.3.7.Final-redhat-00001"));
+        final String expectedTextString = String.format(
+                "------------------- project org.acme.gradle:root (path: :)%n" +
+                        "%n" +
+                        "\tDependencies : org.hibernate:hibernate-core:5.3.7.Final --> org.hibernate:hibernate-core:5.3.7.Final-redhat-00001%n"
+                        +
+                        "\tDependencies : io.undertow:undertow-core:2.0.15.Final --> io.undertow:undertow-core:2.0.15.Final-redhat-00001%n"
+                        +
+                        "\tDependencies : com.yammer.metrics:metrics-core:2.2.0 --> com.yammer.metrics:metrics-core:2.2.0-redhat-00001%n"
+                        +
+                        "%n");
+        assertThat(systemOutRule.getLog()).contains(expectedTextString);
+    }
+
+    @Test
     public void verifyAlignmentReportText() throws IOException, URISyntaxException {
         System.setProperty("reportJSONOutputFile", "");
         final String reportJsonOutputFile = System.getProperty("reportJSONOutputFile");

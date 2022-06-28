@@ -35,6 +35,24 @@ public class UpdateProjectVersionCustomizerTest {
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Test
+    public void testVersionModificationDisabled() throws IOException, ManipulationException {
+        System.setProperty("versionModification", "false");
+
+        final Response originalResp = new Response(Collections.emptyMap());
+        final File simpleProjectRoot = tempDir.newFolder("simple-project");
+        final Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
+        final String version = "1.0.0";
+        p.setVersion(version);
+        p.setGroup("org");
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
+        final UpdateProjectVersionCustomizer sut = new UpdateProjectVersionCustomizer(configuration, p);
+        sut.customize(originalResp);
+
+        assertThat(configuration.versionModificationEnabled()).isFalse();
+        assertThat(originalResp.getNewProjectVersion()).isEqualTo(p.getVersion());
+    }
+
+    @Test
     public void testVersionOverride() throws IOException, ManipulationException {
         System.setProperty("versionOverride", "1.1.0.redhat-00002");
         System.setProperty("ignoreUnresolvableDependencies", "true");

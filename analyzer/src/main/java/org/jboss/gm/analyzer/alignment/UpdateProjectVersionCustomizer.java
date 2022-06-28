@@ -26,8 +26,9 @@ import org.jboss.gm.common.logging.GMLogger;
  * The heavy lifting is actually done by {@link org.commonjava.maven.ext.core.impl.VersionCalculator}
  */
 public class UpdateProjectVersionCustomizer implements AlignmentService.Manipulator {
-    private final VersioningState state;
-    private final ManipulationCache cache;
+    private final Configuration configuration;
+    private VersioningState state;
+    private ManipulationCache cache;
     private final Project project;
 
     private final Logger logger = GMLogger.getLogger(getClass());
@@ -35,8 +36,7 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
     private final GradleVersionCalculator vc = new GradleVersionCalculator();
 
     public UpdateProjectVersionCustomizer(Configuration configuration, Project rootProject) {
-        this.cache = ManipulationCache.getCache(rootProject);
-        state = new VersioningState(configuration.getProperties());
+        this.configuration = configuration;
 
         if (DefaultProject.DEFAULT_VERSION.equals(rootProject.getVersion())) {
             project = rootProject.getAllprojects().stream().filter(f -> !DefaultProject.DEFAULT_VERSION.equals(f.getVersion()))
@@ -45,6 +45,13 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
         } else {
             project = rootProject;
         }
+
+        if (!configuration.versionModificationEnabled()) {
+            return;
+        }
+
+        this.cache = ManipulationCache.getCache(rootProject);
+        state = new VersioningState(configuration.getProperties());
 
         logger.info("Creating versioning state with {} and {}", configuration.versionIncrementalSuffix(),
                 configuration.versionIncrementalSuffixPadding());
@@ -57,11 +64,16 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
 
     @Override
     public void customize(Response response) throws ManipulationException {
-
-        vc.translationMap = response.getTranslationMap();
-        response.setNewProjectVersion(
-                vc.calculate(project.getGroup().toString(), project.getName(), project.getVersion().toString(),
-                        state));
+        if (configuration.versionModificationEnabled()) {
+            vc.translationMap = response.getTranslationMap();
+            response.setNewProjectVersion(
+                    vc.calculate(project.getGroup().toString(), project.getName(), project.getVersion().toString(),
+                            state));
+        } else {
+            response.setNewProjectVersion(project.getVersion().toString());
+            logger.info("Version modification is disabled. Not updating project {}:{} version {}",
+                    project.getGroup(), project.getName(), response.getNewProjectVersion());
+        }
     }
 
     private class GradleVersionCalculator extends VersionCalculator {

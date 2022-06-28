@@ -291,6 +291,20 @@ public class AlignmentTask extends DefaultTask {
             manipulator.customize(alignmentResponse);
         }
 
+        // Even if version modification is disabled, set the original version for consistency in the JSON file.
+        final Optional<Project> optionalOriginalVersion = rootProject.getAllprojects()
+                .stream()
+                .filter(p -> !DEFAULT_VERSION.equals(
+                        p.getVersion().toString()))
+                .findAny();
+        String originalVersion;
+        if (optionalOriginalVersion.isPresent()) {
+            originalVersion = optionalOriginalVersion.get().getVersion().toString();
+            alignmentModel.setOriginalVersion(originalVersion);
+        } else {
+            throw new ManipulationUncheckedException("Unable to locate a suitable original version");
+        }
+
         final String newVersion = alignmentResponse.getNewProjectVersion();
 
         // While we've completed processing (sub)projects the current one is not going to be the root; so
@@ -299,17 +313,9 @@ public class AlignmentTask extends DefaultTask {
             logger.info("Updating model version for {} from {} to {}", rootProject,
                     rootProject.getVersion(), newVersion);
             alignmentModel.setVersion(newVersion);
-        }
-        // Even if version modification is disabled, set the original version for consistency in the JSON file.
-        final Optional<Project> originalVersion = rootProject.getAllprojects()
-                .stream()
-                .filter(p -> !DEFAULT_VERSION.equals(
-                        p.getVersion().toString()))
-                .findAny();
-        if (originalVersion.isPresent()) {
-            alignmentModel.setOriginalVersion(originalVersion.get().getVersion().toString());
         } else {
-            throw new ManipulationUncheckedException("Unable to locate a suitable original version");
+            alignmentModel.setVersion(originalVersion);
+            logger.info("Version modification disabled. Model version is {}", alignmentModel.getVersion());
         }
 
         // Map of Project : <PVR(Original) : PVR<Replacement>>
@@ -320,10 +326,13 @@ public class AlignmentTask extends DefaultTask {
         projectDependencies.forEach((project, value) -> {
             final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project);
             if (configuration.versionModificationEnabled()) {
-                logger.info("Updating sub-project {} (path: {}) from version {} to {}",
-                        correspondingModule, correspondingModule.getProjectPathName(), originalVersion.get().getVersion(),
-                        newVersion);
+                logger.info("Updating sub-project {} (path: {}) from version {} to {}", correspondingModule,
+                        correspondingModule.getProjectPathName(), originalVersion, newVersion);
                 correspondingModule.setVersion(newVersion);
+            } else {
+                correspondingModule.setVersion(originalVersion);
+                logger.info("Version modification disabled. Sub-project {} (path: {}) version is {}",
+                        correspondingModule, correspondingModule.getProjectPathName(), correspondingModule.getVersion());
             }
             updateModuleDependencies(project, correspondingModule, value, alignmentResponse);
             LockFileIO.updateLockfiles(logger, project.getProjectDir(), correspondingModule.getAlignedDependencies());
@@ -592,7 +601,9 @@ public class AlignmentTask extends DefaultTask {
                     target = lenient.getFirstLevelModuleDependencies();
                 } else {
                     target = lenient.getAllModuleDependencies();
-                    logger.debug("Returning all (including transitive) module dependencies for examination...");
+                    logger.debug(
+                            "For {}, returning all (including transitive) module dependencies for examination",
+                            configuration);
                 }
                 target.forEach(dep -> {
                     // skip dependencies on project modules

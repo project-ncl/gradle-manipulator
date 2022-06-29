@@ -47,7 +47,7 @@ jobs:
       # net.linguica.gradle.maven.settings plugin and github's provided maven
       # settings.xml file
       run: rm ~/.m2/settings.xml
-    - uses: gradle/gradle-build-action@v2
+    - uses: gradle/gradle-build-action@v2.1.7
       with:
         gradle-version: ${{ matrix.gradle }}
         arguments: --no-daemon --stacktrace clean build AggregateJacocoReport

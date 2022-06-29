@@ -150,6 +150,7 @@ public class MainTest {
         assertFalse(systemOutRule.getLog().contains(", DdependencyOverride.org.jboss.slf4j:*@*="));
         assertTrue(systemOutRule.getLog().contains("groovyScripts="));
         assertTrue(systemOutRule.getLog().contains("Verification tasks"));
+        assertTrue(systemOutRule.getLog().contains("Executor org.zeroturnaround.exec.ProcessExecutor"));
     }
 
     @Test
@@ -203,13 +204,16 @@ public class MainTest {
             actualVersion.load(reader);
         }
 
+        final URL groovy = Thread.currentThread().getContextClassLoader().getResource("sample.groovy");
         Main m = new Main();
         String[] args = new String[] { "-t", projectRoot.getParentFile().getAbsolutePath(), "generateAlignmentMetadata",
                 "--init-script=" + initFile.getCanonicalPath(),
                 "-DdependencySource=NONE",
                 "-DignoreUnresolvableDependencies=true",
-                "-DdependencyOverride.junit:junit@*=4.10"
+                "-DdependencyOverride.junit:junit@*=4.10",
+                "-DgroovyScripts=" + groovy
         };
+
         int result = m.run(args);
         assertEquals(0, result);
 
@@ -222,6 +226,7 @@ public class MainTest {
         assertTrue(FileUtils.readFileToString(gmeGradle, Charset.defaultCharset())
                 .contains("org.jboss.gm:manipulation:" + actualVersion.getProperty("version")));
         assertTrue(systemOutRule.getLog().contains(ANSIConstants.ESC_START));
+        assertTrue(systemOutRule.getLog().contains("Executor org.zeroturnaround.exec.ProcessExecutor"));
     }
 
     @Test

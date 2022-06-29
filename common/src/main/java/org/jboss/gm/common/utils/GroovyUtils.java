@@ -4,11 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import lombok.experimental.UtilityClass;
 
+import org.codehaus.groovy.control.CompilerConfiguration;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.core.groovy.InvocationPoint;
@@ -70,16 +73,23 @@ public class GroovyUtils {
 
         for (File scriptFile : groovyFiles) {
             final Binding binding = new Binding();
-            File gradleDir = new File(
-                    Project.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
-            @SuppressWarnings("ConstantConditions")
-            boolean foundIvy = gradleDir.listFiles((d, name) -> name.matches("ivy.*\\.jar")).length > 0;
-            if (targetStage == InvocationStage.LAST && !foundIvy) {
-                logger.warn("Ivy jar not found in Gradle lib directory - @Grab annotations will not work");
+            final CompilerConfiguration config = new CompilerConfiguration();
+            if (targetStage == InvocationStage.LAST) {
+                // We have tried variations on the Gradle module classpath and even installing Ivy into
+                // the Gradle wrapper distribution - locatable via
+                //   Distribution d = (Distribution) FieldUtils.readField(connector, "distribution", true);
+                //   FieldUtils.readField(FieldUtils.readField(d, "installedDistribution", true)
+                // but the Gradle classloader appears to cause issues. By disabling the Grab annotation
+                // scanning in LAST phase, at least scripts with FIRST will still run and not cause a
+                // ClassNotFoundException: org.apache.ivy.core.module.descriptor.DependencyDescriptor
+                // when they are scanned for the InvocationStage.
+                Set<String> disabledTransforms = new HashSet<>();
+                disabledTransforms.add("groovy.grape.GrabAnnotationTransformation");
+                config.setDisabledGlobalASTTransformations(disabledTransforms);
             }
             // We use the current class' classloader so the script has access to this plugin's API and the
             // groovy API.
-            final GroovyShell groovyShell = new GroovyShell(logger.getClass().getClassLoader(), binding);
+            final GroovyShell groovyShell = new GroovyShell(logger.getClass().getClassLoader(), binding, config);
             final Script script;
             try {
                 script = groovyShell.parse(scriptFile);

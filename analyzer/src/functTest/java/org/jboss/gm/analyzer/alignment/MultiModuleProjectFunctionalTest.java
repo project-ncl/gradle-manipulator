@@ -24,6 +24,7 @@ import org.commonjava.maven.ext.common.json.PME;
 import org.commonjava.maven.ext.common.util.JSONUtils;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.FileUtils;
@@ -143,10 +144,19 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
             SettingsXpp3Reader settingsXpp3Reader = new SettingsXpp3Reader();
             Settings generatedSettings = settingsXpp3Reader.read(reader);
             List<Repository> repositories = generatedSettings.getProfiles().get(0).getRepositories();
-            assertThat(repositories).extracting("url")
-                    // should not contain duplicate entries
-                    .containsOnly(
-                            "https://repo.maven.apache.org/maven2/");
+
+            if (GradleVersion.current().compareTo(GradleVersion.version("7.4")) <= 0) {
+                assertThat(repositories).extracting("url")
+                        // should not contain duplicate entries
+                        .containsOnly(
+                                "https://repo.maven.apache.org/maven2/");
+            } else {
+                assertThat(repositories).extracting("url")
+                        // should not contain duplicate entries
+                        .containsOnly(
+                                "https://repo.maven.apache.org/maven2/",
+                                "https://plugins.gradle.org/m2");
+            }
         }
 
         // make sure the project name was not changed

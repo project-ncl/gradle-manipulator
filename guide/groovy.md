@@ -127,6 +127,18 @@ newContent = target.text.replaceFirst("classpath \"org.hibernate:hibernate-core:
 target.text = newContent
 ```
 
+#### Grab Annotations
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : Supported from GME 3.6
+</td>
+</tr>
+</table>
+It is possible to use Grab annotations (e.g. `@Grab('org.zeroturnaround:zt-exec:1.10')`) to utilise other API beyond what is already available via GME and Gradle. Note this is **only** supported in `FIRST` phase.
+
+
 ### Developing Groovy Scripts
 
 To make it easier to develop scripts for both GME (this project) and [PME](https://github.com/release-engineering/pom-manipulation-ext) an example project has been set up. The [manipulator-groovy-examples](https://github.com/project-ncl/manipulator-groovy-examples) provides a framework to develop and test such scripts.

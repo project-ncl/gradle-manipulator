@@ -87,7 +87,7 @@ jobs:
                 "username": "${{ secrets.SONATYPE_USERNAME }}",
                 "password": "${{ secrets.SONATYPE_PASSWORD }}"
             }]
-    - uses: gradle/gradle-build-action@v2
+    - uses: gradle/gradle-build-action@v2.1.7
       with:
         arguments: clean build publish AggregateJacocoReport
     - name: Codecov

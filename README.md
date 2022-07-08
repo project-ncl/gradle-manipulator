@@ -1,9 +1,9 @@
 
 # GH-Pages Branch
 
-This branch contains the github pages content for https://github.com/project-ncl/gradle-manipulator and the pages are hosted at https://project-ncl.github.io/gradle-manipulator
+This branch contains the github pages content for [Gradle Manipulator](https://github.com/project-ncl/gradle-manipulator) and the pages are hosted at [GitHub Pages](https://project-ncl.github.io/gradle-manipulator).
 
-It is possible to use Jekyll (https://help.github.com/articles/using-jekyll-with-pages) to preview the changes. Jekyll can be run with `jekyll serve --watch -V`
+It is possible to use [Jekyll](https://help.github.com/articles/using-jekyll-with-pages) to preview the changes. Jekyll can be run with `jekyll serve --watch -V`.
 
 
 ## Slate

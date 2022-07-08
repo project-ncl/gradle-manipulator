@@ -137,7 +137,7 @@ For configuration default, ignoring all unresolved dependencies: [com.redhat:unr
 
 Even though the alignment is successful at this point, the build itself will fail if the dependency remains unresolved.
 
-For more details on Gradle dependencies and configurations see https://docs.gradle.org/current/userguide/declaring_dependencies.html and https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:resolvable-consumable-configs
+For more details on Gradle dependencies and configurations, see [Declaring dependencies](https://docs.gradle.org/current/userguide/declaring_dependencies.html) and [Resolvable and consumable configurations](https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:resolvable-consumable-configs) in the Gradle user manual.
 
 #### Publish Plugin Hook
 

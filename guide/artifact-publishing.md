@@ -11,8 +11,7 @@ The `manipulation` plugin tries to detect a publishing plugin used by a project.
 
 * the legacy `maven` plugin
 * the `maven-publish` plugin
-* the `gradle-nexus` plugin, [here](https://github.com/bmuschko/gradle-nexus-plugin)
-* this is a wrapper around the legacy `maven` plugin
+* the `gradle-nexus` plugin, [here](https://github.com/bmuschko/gradle-nexus-plugin), which is a wrapper around the legacy `maven` plugin
 
 If one of the above plugins is detected, it is configured to support publication of project artifacts in PNC
 environment.

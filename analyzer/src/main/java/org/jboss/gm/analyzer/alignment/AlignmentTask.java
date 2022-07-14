@@ -41,6 +41,7 @@ import org.commonjava.maven.ext.common.json.ModulesItem;
 import org.commonjava.maven.ext.common.json.PME;
 import org.commonjava.maven.ext.common.util.JSONUtils;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
+import org.commonjava.maven.ext.core.state.DependencyState;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
@@ -592,11 +593,13 @@ public class AlignmentTask extends DefaultTask {
                 }
                 Set<ResolvedDependency> target;
                 if (internalConfig.overrideTransitive() == null || !internalConfig.overrideTransitive()) {
+                    // Check for shadow jar configuration.
                     if (internalConfig.overrideTransitive() == null &&
                             project.getPluginManager().hasPlugin("com.github.johnrengelman.shadow")) {
-                        // Check for shadow jar configuration.
-                        throw new ManipulationUncheckedException(
-                                "Shadow plugin (for shading) configured but overrideTransitive has not been explicitly enabled or disabled.");
+                        if (internalConfig.dependencyConfiguration() != DependencyState.DependencyPrecedence.NONE) {
+                            throw new ManipulationUncheckedException(
+                                    "Shadow plugin (for shading) configured but overrideTransitive has not been explicitly enabled or disabled.");
+                        }
                     }
                     target = lenient.getFirstLevelModuleDependencies();
                 } else {

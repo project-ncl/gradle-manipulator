@@ -592,21 +592,20 @@ public class AlignmentTask extends DefaultTask {
                     }
                 }
                 Set<ResolvedDependency> target;
-                if (internalConfig.overrideTransitive() == null || !internalConfig.overrideTransitive()) {
-                    // Check for shadow jar configuration.
-                    if (internalConfig.overrideTransitive() == null &&
-                            project.getPluginManager().hasPlugin("com.github.johnrengelman.shadow")) {
-                        if (internalConfig.dependencyConfiguration() != DependencyState.DependencyPrecedence.NONE) {
-                            throw new ManipulationUncheckedException(
-                                    "Shadow plugin (for shading) configured but overrideTransitive has not been explicitly enabled or disabled.");
-                        }
-                    }
-                    target = lenient.getFirstLevelModuleDependencies();
-                } else {
+                if (internalConfig.overrideTransitive() == Boolean.TRUE) {
                     target = lenient.getAllModuleDependencies();
                     logger.debug(
-                            "For {}, returning all (including transitive) module dependencies for examination",
-                            configuration);
+                        "For {}, returning all (including transitive) module dependencies for examination",
+                        configuration);
+                } else {
+                    // If overrideTransitive has not been set and dependencySource != NONE, then check for the shadow plugin
+                    if (internalConfig.overrideTransitive() == null
+                        && internalConfig.dependencyConfiguration() != DependencyState.DependencyPrecedence.NONE
+                        && project.getPluginManager().hasPlugin("com.github.johnrengelman.shadow")) {
+                        throw new ManipulationUncheckedException(
+                            "Shadow plugin (for shading) configured but overrideTransitive has not been explicitly enabled or disabled.");
+                    }
+                    target = lenient.getFirstLevelModuleDependencies();
                 }
                 target.forEach(dep -> {
                     // skip dependencies on project modules

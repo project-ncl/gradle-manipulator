@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,14 +22,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.util.ManifestUtils;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
-import org.gradle.internal.Pair;
 import org.gradle.tooling.BuildException;
 import org.gradle.tooling.BuildLauncher;
 import org.gradle.tooling.GradleConnectionException;
@@ -36,6 +35,8 @@ import org.gradle.tooling.GradleConnector;
 import org.gradle.tooling.ProjectConnection;
 import org.gradle.tooling.internal.consumer.DefaultGradleConnector;
 import org.gradle.tooling.model.build.BuildEnvironment;
+import org.gradle.tooling.model.build.GradleEnvironment;
+import org.gradle.tooling.model.build.JavaEnvironment;
 import org.gradle.util.GradleVersion;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.GroovyUtils;
@@ -59,6 +60,8 @@ import static org.jboss.gm.common.utils.PluginUtils.SEMANTIC_BUILD_VERSIONING;
         versionProvider = ManifestVersionProvider.class)
 public class Main implements Callable<Void> {
     private static final GradleVersion MIN_GRADLE_VERSION = GradleVersion.version("4.10");
+
+    private static final GradleVersion MIN_GRADLE_VERSION_GRADLE_ISSUE_3117 = GradleVersion.version("5.3");
 
     private final GradleConnector connector = GradleConnector.newConnector();
 
@@ -91,16 +94,7 @@ public class Main implements Callable<Void> {
     @Unmatched
     private List<String> gradleArgs;
 
-    // Partial workaround for https://github.com/gradle/gradle/issues/3117
-    // It may still be necessary on Gradle < 5.3 to do ' LC_ALL=en_US LANG=en_US java -jar '
-    @SuppressWarnings("ConstantConditions")
-    private final Map<String, String> envVars = Stream.of(
-            Pair.of("LC_ALL", "en_US"),
-            Pair.of("LANG", "en_US"),
-            Pair.of("PROMPT", "$"),
-            Pair.of("RPROMPT", ""),
-            // Also add the System PATH so external executables may be found.
-            Pair.of("PATH", System.getenv("PATH"))).collect(Collectors.toMap(Pair::left, Pair::right));
+    private final Map<String, String> envVars = new HashMap<>(System.getenv());
 
     /**
      * This allows the tool to be invoked. The command line parsing allows for:
@@ -133,22 +127,22 @@ public class Main implements Callable<Void> {
         return result;
     }
 
-    private File verifyBuildEnvironment(ProjectConnection connection) throws ManipulationException {
+    private File verifyBuildEnvironment(BuildEnvironment buildEnvironment, GradleVersion version) throws ManipulationException {
         try {
-            BuildEnvironment env = connection.getModel(BuildEnvironment.class);
-            String versionString = env.getGradle().getGradleVersion();
-            GradleVersion version = GradleVersion.version(versionString);
+            JavaEnvironment javaEnvironment = buildEnvironment.getJava();
 
-            logger.info("Gradle version: {}", versionString);
+            logger.info("Gradle version: {}", version.getVersion());
             logger.info("Java home: {}", JavaUtils.getJavaHome());
-            logger.info("JVM arguments: {}", env.getJava().getJvmArguments());
+            logger.info("JVM arguments: {}", javaEnvironment.getJvmArguments());
 
             if (version.compareTo(MIN_GRADLE_VERSION) < 0) {
                 throw new ManipulationException("{} is too old and is unsupported. You need at least {}.", version,
                         MIN_GRADLE_VERSION);
             }
 
-            return env.getJava().getJavaHome();
+            File javaHome = javaEnvironment.getJavaHome();
+
+            return javaHome;
         } catch (GradleConnectionException e) {
             Throwable firstCause = e.getCause();
 
@@ -163,10 +157,10 @@ public class Main implements Callable<Void> {
                         Matcher matcher = pattern.matcher(causeMessage);
 
                         if (matcher.matches()) {
-                            String version = matcher.group("version");
+                            String javaVersion = matcher.group("version");
                             logger.debug("Caught exception processing Gradle API", e);
                             throw new ManipulationException("Java {} is incompatible with Gradle version used to build",
-                                    version);
+                                    javaVersion);
                         }
                     }
                 }
@@ -202,13 +196,18 @@ public class Main implements Callable<Void> {
         }
 
         try (ProjectConnection connection = connector.connect()) {
-            File javaHome = verifyBuildEnvironment(connection);
+            BuildEnvironment buildEnvironment = connection.getModel(BuildEnvironment.class);
+            GradleEnvironment gradleEnvironment = buildEnvironment.getGradle();
+            String versionString = gradleEnvironment.getGradleVersion();
+            GradleVersion gradleVersion = GradleVersion.version(versionString);
+            File javaHome = verifyBuildEnvironment(buildEnvironment, gradleVersion);
 
             if (!JavaUtils.compareJavaHome(javaHome)) {
                 // Gradle handles detecting the location in GRADLE_JAVA_HOME. If it doesn't match
                 // what it has detected that is an internal error but should never happen.
                 logger.info("Java home overridden to: {}", javaHome.getAbsolutePath());
             }
+
             envVars.put("JAVA_HOME", javaHome.getAbsolutePath());
 
             BuildLauncher build = connection.newBuild();
@@ -226,6 +225,17 @@ public class Main implements Callable<Void> {
 
             logger.info("Executing CLI {} on Gradle project {} with JVM args '{}' and arguments '{}'",
                     ManifestUtils.getManifestInformation(Main.class), target, jvmArgs, currentGradleArgs);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Environment variables: {}", envVars.keySet().stream().sorted().collect(Collectors.toList()));
+            }
+
+            if (gradleVersion.compareTo(MIN_GRADLE_VERSION_GRADLE_ISSUE_3117) < 0) {
+                if (envVars.values().stream().anyMatch(s -> !s.chars().allMatch(c -> c < 128))) {
+                    logger.error(
+                            "Non-ASCII characters detected in environment. If build fails, try setting environment variable LC_ALL=en_US. See https://github.com/gradle/gradle/issues/3117.");
+                }
+            }
 
             build.setEnvironmentVariables(envVars);
             build.setJvmArguments(jvmArgs);

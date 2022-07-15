@@ -339,4 +339,16 @@ public class MainTest {
             assertTrue(e.getMessage().contains("Unable to locate target directory"));
         }
     }
+
+    @Test
+    public void testSetEnvironmentVariables() throws Exception {
+        final File projectRoot = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
+        environmentVariables.set("LETTERS", "ÀàÈèÌìÒòÙù");
+
+        Main m = new Main();
+        String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "help" };
+        m.run(args);
+
+        assertThat(systemOutRule.getLog()).contains("LETTERS");
+    }
 }

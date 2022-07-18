@@ -329,8 +329,10 @@ public class AlignmentTask extends DefaultTask {
             if (configuration.versionModificationEnabled()) {
                 logger.info("Updating sub-project {} (path: {}) from version {} to {}", correspondingModule,
                         correspondingModule.getProjectPathName(), originalVersion, newVersion);
+                correspondingModule.setOriginalVersion(originalVersion);
                 correspondingModule.setVersion(newVersion);
             } else {
+                correspondingModule.setOriginalVersion(originalVersion);
                 correspondingModule.setVersion(originalVersion);
                 logger.info("Version modification disabled. Sub-project {} (path: {}) version is {}",
                         correspondingModule, correspondingModule.getProjectPathName(), correspondingModule.getVersion());
@@ -595,15 +597,15 @@ public class AlignmentTask extends DefaultTask {
                 if (internalConfig.overrideTransitive() == Boolean.TRUE) {
                     target = lenient.getAllModuleDependencies();
                     logger.debug(
-                        "For {}, returning all (including transitive) module dependencies for examination",
-                        configuration);
+                            "For {}, returning all (including transitive) module dependencies for examination",
+                            configuration);
                 } else {
                     // If overrideTransitive has not been set and dependencySource != NONE, then check for the shadow plugin
                     if (internalConfig.overrideTransitive() == null
-                        && internalConfig.dependencyConfiguration() != DependencyState.DependencyPrecedence.NONE
-                        && project.getPluginManager().hasPlugin("com.github.johnrengelman.shadow")) {
+                            && internalConfig.dependencyConfiguration() != DependencyState.DependencyPrecedence.NONE
+                            && project.getPluginManager().hasPlugin("com.github.johnrengelman.shadow")) {
                         throw new ManipulationUncheckedException(
-                            "Shadow plugin (for shading) configured but overrideTransitive has not been explicitly enabled or disabled.");
+                                "Shadow plugin (for shading) configured but overrideTransitive has not been explicitly enabled or disabled.");
                     }
                     target = lenient.getFirstLevelModuleDependencies();
                 }

@@ -19,10 +19,15 @@ import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.commonjava.maven.atlas.ident.util.VersionUtils;
+import org.commonjava.maven.atlas.ident.version.InvalidVersionSpecificationException;
+import org.commonjava.maven.atlas.ident.version.VersionSpec;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.FileIO;
 import org.gradle.internal.Pair;
 import org.slf4j.Logger;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 public class PluginUtils {
     private static final Map<String, Pair<String, Set<String>>> SUPPORTED_PLUGINS = new LinkedHashMap<>();
@@ -43,6 +48,35 @@ public class PluginUtils {
         SUPPORTED_PLUGINS.put("nebula.publish-verification", Pair.of("nebulaPublishVerification", Collections.emptySet()));
         SUPPORTED_PLUGINS.put("signing", Pair.of("signing", Collections.emptySet()));
         SUPPORTED_PLUGINS.put(SEMANTIC_BUILD_VERSIONING, Pair.of("preRelease", Collections.emptySet()));
+    }
+
+    public enum DokkaVersion {
+        NONE(null),
+        MINIMUM("0.9.18"),
+        TEN("0.10.0"),
+        POST_ONE("1.4.0");
+
+        final VersionSpec version;
+
+        DokkaVersion(String s) {
+            this.version = s == null ? null : VersionUtils.createSingleVersion(s);
+        }
+
+        public static DokkaVersion parseVersion(String version)
+                throws ManipulationException {
+            VersionSpec v;
+            try {
+                v = VersionUtils.createSingleVersion(version);
+            } catch (InvalidVersionSpecificationException e) {
+                throw new ManipulationException("Unable to parse version: {}", version);
+            }
+            if (MINIMUM.version.compareTo(v) >= 0) {
+                return MINIMUM;
+            } else if (v.compareTo(POST_ONE.version) >= 0) {
+                return POST_ONE;
+            }
+            return TEN;
+        }
     }
 
     /**
@@ -105,7 +139,7 @@ public class PluginUtils {
                     // This handles the scenario, often in Kotlin build files where the plugin may be just
                     // its name i.e. signing without any quotes or brackets
                     removed |= lines.removeIf(i -> i.matches(".*\\s+" +
-                            plugin.replace("\"", "") + "(\\s|\\n|$)+.*") && !i.contains("{"));
+                            plugin.replace("\"", "") + "(\\s|$)+.*") && !i.contains("{"));
 
                     // Remove any task references.
                     // TODO: Handle if the task reference spans multiple lines
@@ -115,7 +149,7 @@ public class PluginUtils {
 
                     // Remove any configuration block
                     String content = String.join(eol, lines);
-                    Matcher m = Pattern.compile("(^|\\s)+" + configTask + "(\\s|\\n|$)+").matcher(content);
+                    Matcher m = Pattern.compile("(^|\\s)+" + configTask + "(\\s|$)+").matcher(content);
                     int startIndex = m.find() ? m.start() : -1;
 
                     // If there is a configuration block...

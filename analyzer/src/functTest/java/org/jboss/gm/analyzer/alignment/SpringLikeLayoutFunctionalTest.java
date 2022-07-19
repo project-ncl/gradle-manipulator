@@ -3,6 +3,7 @@ package org.jboss.gm.analyzer.alignment;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.Collection;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -115,6 +116,15 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
         });
 
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
-    }
 
+        File pluginConfigs = new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS);
+        String pContents = org.apache.commons.io.FileUtils.readFileToString(pluginConfigs, Charset.defaultCharset());
+        assertTrue(systemOutRule.getLog().contains("Replacing Dokka template for version MINIMUM"));
+        assertTrue(pContents.contains("noJdkLink = true"));
+
+        File settings = new File(projectRoot, "settings.gradle");
+        String sContents = org.apache.commons.io.FileUtils.readFileToString(settings, Charset.defaultCharset());
+        assertTrue(systemOutRule.getLog().contains("with Dokka resolutionStrategy information"));
+        assertTrue(sContents.contains("pluginManagement { resolutionStrategy { eachPlugin { if (requested.id.id =="));
+    }
 }

@@ -184,7 +184,7 @@ public class DifferentJVMTest {
 
         File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), AlignmentTask.GME);
         assertTrue(systemOutRule.getLog().contains("Task :generateAlignmentMetadata"));
-        assertTrue(systemOutRule.getLog().matches("(?s).*Environment:.*JAVA_HOME:.*"));
+        assertTrue(systemOutRule.getLog().matches("(?s).*Environment:.*JAVA_HOME=.*"));
 
         System.out.println("Verifying it has injected " + AlignmentTask.GME + " with version "
                 + actualVersion.getProperty("version"));
@@ -241,7 +241,7 @@ public class DifferentJVMTest {
         assertTrue(systemOutRule.getLog().contains("Java home: "));
         assertTrue(systemOutRule.getLog().contains("Java home overridden to: " + JDK8_DIR));
         assertTrue(systemOutRule.getLog().contains("Task :generateAlignmentMetadata"));
-        assertTrue(systemOutRule.getLog().matches("(?s).*Environment.*JAVA_HOME.*jdk8.*"));
+        assertTrue(systemOutRule.getLog().matches("(?s).*Environment:.*JAVA_HOME=.*jdk8.*"));
 
         File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), AlignmentTask.GME);
         System.out.println("Verifying it has injected " + AlignmentTask.GME + " with version "

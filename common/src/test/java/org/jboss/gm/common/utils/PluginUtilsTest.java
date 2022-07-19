@@ -576,4 +576,17 @@ public class PluginUtilsTest {
                 + "        lockAllConfigurations()\n"
                 + "    }\n"));
     }
+
+    @Test
+    public void testParseDokkaVersion() throws ManipulationException {
+        assertEquals(PluginUtils.DokkaVersion.parseVersion("0.9.17"), PluginUtils.DokkaVersion.MINIMUM);
+        assertEquals(PluginUtils.DokkaVersion.parseVersion("0.10.1"), PluginUtils.DokkaVersion.TEN);
+        assertEquals(PluginUtils.DokkaVersion.parseVersion("1.6.0"), PluginUtils.DokkaVersion.POST_ONE);
+    }
+
+    @Test(expected = ManipulationException.class)
+    public void testParseDokkaInvalidVersion()
+            throws ManipulationException {
+        PluginUtils.DokkaVersion.parseVersion("");
+    }
 }

@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
@@ -20,6 +21,8 @@ import org.commonjava.maven.ext.core.impl.Version;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.common.utils.PluginUtils;
+import org.jboss.gm.common.utils.PluginUtils.DokkaVersion;
 import org.jboss.gm.common.utils.ProjectUtils;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
 
@@ -66,6 +69,10 @@ public class ManipulationCache {
 
     @Getter
     private final Map<ArtifactRepository, Path> repositories = new HashMap<>();
+
+    @Getter
+    @Setter
+    private DokkaVersion dokkaVersion = DokkaVersion.NONE;
 
     /**
      * Retrieves the cache given any project. It will access the root project, check if the

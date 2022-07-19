@@ -16,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.logging.GMLogger;
+import org.jboss.gm.common.utils.PluginUtils;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
@@ -76,6 +77,43 @@ public class SettingsFileIO {
         }
         logger.debug("Returning new project name (artifactId) of {}", result);
         return result;
+    }
+
+    /**
+     * If the DokkaVersion is less than or equal to 0.9.18 then this should
+     * inject the appropriate resolutionStrategy into the settings.gradle
+     *
+     * @param rootProject the root directory
+     * @param dokkaVersion the Dokka plugin version
+     * @throws IOException if an error occurs
+     */
+    public void writeDokkaSettings(File rootProject, PluginUtils.DokkaVersion dokkaVersion)
+            throws IOException {
+        if (dokkaVersion != PluginUtils.DokkaVersion.MINIMUM) {
+            return;
+        }
+        for (String s : Arrays.asList("settings.gradle", "settings.gradle.kts")) {
+            File settings = new File(rootProject, s);
+            if (settings.exists()) {
+                String settingsContents = FileUtils.readFileToString(settings, Charset.defaultCharset());
+                logger.info("Updating {} with Dokka resolutionStrategy information", settings);
+
+                if (settingsContents.contains("resolutionStrategy")) {
+                    // Existing strategy so inject another
+                    settingsContents = settingsContents.replaceFirst("(?s)resolutionStrategy(\\s|$)+\\{",
+                            "resolutionStrategy {\n eachPlugin { if (requested.id.id == \"org.jetbrains.dokka\") { useVersion(\"0.9.18\") } }\n");
+                } else if (settingsContents.contains("pluginManagement")) {
+                    // Existing pluginManagement but no strategy so inject that
+                    settingsContents = settingsContents.replaceFirst("(?s)pluginManagement(\\s|$)+\\{",
+                            "pluginManagement {\nresolutionStrategy {\n eachPlugin { if (requested.id.id == \"org.jetbrains.dokka\") { useVersion(\"0.9.18\") } }\n");
+                } else {
+                    // No pluginManagement so inject everything.
+                    settingsContents = "pluginManagement { resolutionStrategy { eachPlugin { if (requested.id.id == \"org.jetbrains.dokka\") { useVersion(\"0.9.18\") } } } }\n"
+                            + settingsContents;
+                }
+                FileUtils.writeStringToFile(settings, settingsContents, Charset.defaultCharset());
+            }
+        }
     }
 
     private String extractProjectNameFromScmUrl(File rootDir) throws IOException {

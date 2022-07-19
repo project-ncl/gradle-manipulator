@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,6 +45,7 @@ import org.commonjava.maven.ext.common.util.JSONUtils;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.commonjava.maven.ext.core.state.DependencyState;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencySet;
@@ -53,7 +56,9 @@ import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
+import org.gradle.api.internal.plugins.DefaultPluginManager;
 import org.gradle.api.logging.Logger;
+import org.gradle.api.plugins.AppliedPlugin;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.tasks.TaskAction;
@@ -68,6 +73,7 @@ import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.GroovyUtils;
+import org.jboss.gm.common.utils.PluginUtils.DokkaVersion;
 import org.jboss.gm.common.utils.ProjectUtils;
 import org.jboss.gm.common.versioning.DynamicVersionParser;
 import org.jboss.gm.common.versioning.ProjectVersionFactory;
@@ -125,6 +131,8 @@ public class AlignmentTask extends DefaultTask {
      * The task name {@code generateAlignmentMetadata}.
      */
     public static final String NAME = "generateAlignmentMetadata";
+
+    private static final String DOKKA = "org.jetbrains.dokka";
 
     private static final ContextClassLoaderLocal<AtomicBoolean> configOutput = new ContextClassLoaderLocal<AtomicBoolean>() {
         @Override
@@ -244,6 +252,23 @@ public class AlignmentTask extends DefaultTask {
 
                 logger.debug("Adding {} to cache for scanning.", current);
                 cache.addGAV(project, current);
+            }
+
+            AppliedPlugin ap = project.getPluginManager().findPlugin(DOKKA);
+            if (ap != null) {
+                logger.debug("Plugin {} has been applied to {}", ap.getId(), project.getName());
+
+                @SuppressWarnings("rawtypes")
+                Plugin p = ((DefaultPluginManager) project.getPluginManager()).getPluginContainer().findPlugin(DOKKA);
+                String path = p.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+                Matcher m = Pattern.compile(".*-([\\d.]+[\\w_]*)\\.jar").matcher(path);
+                if (m.matches()) {
+                    // TODO: What about if multiple Dokka versions are used? Currently NYI.
+                    cache.setDokkaVersion(DokkaVersion.parseVersion(m.group(1)));
+                    logger.debug("Found dokkaVersion {}", cache.getDokkaVersion());
+                } else {
+                    logger.warn("Found plugin {} but unable to parse version from {}", p, path);
+                }
             }
 
             // when the set is empty, we know that this was the last alignment task to execute.
@@ -387,8 +412,9 @@ public class AlignmentTask extends DefaultTask {
 
         logger.info("For project script is {} and build file {}", rootProject.getBuildscript(), rootProject.getBuildFile());
         logger.info("For project {}", rootProject.getBuildscript().getSourceFile());
+        SettingsFileIO.writeDokkaSettings(rootProject.getRootDir(), cache.getDokkaVersion());
         writeGmeMarkerFile(configuration, rootProject.getBuildFile());
-        writeGmeConfigMarkerFile(rootProject.getBuildFile());
+        writeGmePluginConfigMarkerFile(rootProject.getBuildFile(), cache.getDokkaVersion());
         writeGmeReposMarkerFile();
         writeRepositorySettingsFile(cache.getRepositories());
 
@@ -447,11 +473,52 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private void writeGmeConfigMarkerFile(File rootGradle) throws IOException {
+    private void writeGmePluginConfigMarkerFile(File rootGradle, DokkaVersion dokkaVersion) throws IOException {
         File rootDir = getProject().getRootDir();
         File gmePluginConfigsGradle = new File(rootDir, GME_PLUGINCONFIGS);
         Files.copy(getClass().getResourceAsStream('/' + GME_PLUGINCONFIGS), gmePluginConfigsGradle.toPath(),
                 StandardCopyOption.REPLACE_EXISTING);
+
+        // Use DokkaVersion to determine how to replace <DOKKA> in the gme-plugin-configs with
+        // either 0.9.18, 0.10 or 1.4 version
+        if (dokkaVersion != DokkaVersion.NONE) {
+            String gmePluginFile = FileUtils.readFileToString(gmePluginConfigsGradle, Charset.defaultCharset());
+            String replacementStart = "\n"
+                    + "        if (project.getTasks().getNames().stream().any{s -> s.startsWith(\"dokka\")}) {\n";
+            String replacementDokka = "          dokka {\n";
+            String replacementMid = "              // Disable linking to online kotlin-stdlib documentation\n"
+                    + "              noStdlibLink = true\n"
+                    + "              // Disable linking to online JDK documentation\n"
+                    + "              noJdkLink = true\n"
+                    + "              // Disable any user-configured external links.\n"
+                    + "              externalDocumentationLinks.clear()\n"
+                    + "            }\n";
+            String replacementEnd = "        }\n";
+            String replacementConfiguration = "         configuration {\n";
+            switch (dokkaVersion) {
+                case MINIMUM: {
+                    gmePluginFile = gmePluginFile.replace("<DOKKA>",
+                            replacementStart + replacementDokka + replacementMid + replacementEnd);
+                    break;
+                }
+                case TEN: {
+                    gmePluginFile = gmePluginFile.replace("<DOKKA>",
+                            replacementStart + replacementDokka + replacementConfiguration +
+                                    replacementMid + "         }\n" + replacementEnd);
+                    break;
+                }
+                case POST_ONE: {
+                    // Leaving this for now as later versions according to the below have supported proxy settings
+                    // https://github.com/Kotlin/dokka/issues/261
+                    // https://github.com/Kotlin/dokka/issues/213
+                    logger.warn("Dokka for {} is not implemented", dokkaVersion);
+                    break;
+                }
+                // No default as that is NONE
+            }
+            logger.debug("Replacing Dokka template for version {}", dokkaVersion);
+            FileUtils.writeStringToFile(gmePluginConfigsGradle, gmePluginFile, Charset.defaultCharset());
+        }
 
         if (rootGradle.exists()) {
 

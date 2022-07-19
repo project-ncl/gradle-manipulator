@@ -94,6 +94,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
     public void verifyOpenTelemetryKotlin() throws IOException, URISyntaxException, ManipulationException {
         // XXX: Use of pluginManagement.plugins{}
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.6")) >= 0);
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.5")) < 0);
 
         final File projectRoot = tempDir.newFolder("opentelemetry-kotlin");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(),

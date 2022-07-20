@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
@@ -14,9 +16,11 @@ import java.util.jar.JarInputStream;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.gradle.api.logging.Logger;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.util.GradleVersion;
+import org.jboss.gm.common.logging.GMLogger;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
@@ -29,8 +33,10 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 public class ManifestVerificationFunctionalTest {
-    private static final String ARTIFACT_NAME = "mongodb-driver-core-4.1.0.temporary-redhat-00001";
-    private static final Path PATH_IN_REPOSITORY = Paths.get("org/mongodb/mongodb-driver-core/4.1.0.temporary-redhat-00001");
+    private static final Logger logger = GMLogger.getLogger(ManifestVerificationFunctionalTest.class);
+    private static final String ARTIFACT_VERSION = "4.1.0.temporary-redhat-00001";
+    private static final String ARTIFACT_NAME = "mongodb-driver-core-" + ARTIFACT_VERSION;
+    private static final Path PATH_IN_REPOSITORY = Paths.get("org/mongodb/mongodb-driver-core/" + ARTIFACT_VERSION);
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
@@ -221,7 +227,7 @@ public class ManifestVerificationFunctionalTest {
         assertTrue(manifestFile.exists());
 
         try (JarInputStream jarInputStream = new JarInputStream(new FileInputStream(new File(projectRoot,
-                "bson/build/libs/bson-4.1.0.temporary-redhat-00001.jar")))) {
+                "bson/build/libs/bson-" + ARTIFACT_VERSION + ".jar")))) {
             List<String> lines = jarInputStream.getManifest().getMainAttributes()
                     .entrySet()
                     .stream()
@@ -234,11 +240,85 @@ public class ManifestVerificationFunctionalTest {
                     + "Implementation-Title: bson\n"
                     + "Implementation-Vendor-Id: org.mongodb\n"
                     + "Implementation-Vendor: org.mongodb\n"
-                    + "Implementation-Version: 4.1.0.temporary-redhat-00001\n"
+                    + "Implementation-Version: " + ARTIFACT_VERSION + "\n"
                     + "Manifest-Version: 1.0\n"
                     + "Require-Capability: osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(version=1.8))\"\n"
                     + "Specification-Title: bson\n" + "Specification-Vendor: org.mongodb\n"
-                    + "Specification-Version: 4.1.0.temporary-redhat-00001");
+                    + "Specification-Version: " + ARTIFACT_VERSION);
         }
+    }
+
+    @Test
+    public void verifyMongoManifestNoOverwrite() throws IOException, URISyntaxException {
+        // XXX: A problem occurred configuring project ':driver-core'.
+        // XXX: > Configuration <compile> not found.
+        // XXX: See <https://github.com/mfuerstenau/gradle-buildconfig-plugin/issues/30>
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
+
+        final File m2Directory = tempDir.newFolder(".m2");
+        System.setProperty("maven.repo.local", m2Directory.getAbsolutePath());
+
+        final File publishDirectory = tempDir.newFolder("publishDirectory");
+        System.setProperty("AProxDeployUrl", "file://" + publishDirectory.toString());
+
+        final File projectRoot = tempDir.newFolder("mongo-java-driver-no-overwrite");
+        TestUtils.copyDirectory("mongo-java-driver-no-overwrite", projectRoot);
+        assertThat(projectRoot.toPath().resolve("build.gradle")).exists();
+
+        final BuildResult buildResult = TestUtils.createGradleRunner()
+                .withProjectDir(projectRoot)
+                //.withDebug(true)
+                .withArguments("assemble", "publish", "--info")
+                .withPluginClasspath()
+                .forwardOutput()
+                .build();
+
+        assertThat(Objects.requireNonNull(buildResult.task(":driver-core:publish")).getOutcome())
+                .isEqualTo(TaskOutcome.SUCCESS);
+
+        final Path pathToArtifacts = publishDirectory.toPath().resolve(PATH_IN_REPOSITORY);
+        assertThat(systemOutRule.getLog()).contains(
+                "Updating publication artifactId (driver-core) as it is not consistent with archivesBaseName (mongodb-driver-core)");
+
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
+        assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
+
+        final File manifestFile = new File(projectRoot, "driver-core/build/tmp/jar/MANIFEST.MF");
+        assertThat(manifestFile).exists();
+
+        if (logger.isInfoEnabled()) {
+            logger.info("Contents of manifest file {}:{}{}",
+                    projectRoot.toPath().relativize(manifestFile.toPath()), System.lineSeparator(),
+                    FileUtils.readFileToString(manifestFile, StandardCharsets.UTF_8));
+        }
+
+        try (JarInputStream jarInputStream = new JarInputStream(Files.newInputStream(Paths.get(
+                projectRoot.getAbsolutePath(), "driver-core/build/libs/mongodb-driver-core-" + ARTIFACT_VERSION + ".jar")))) {
+            List<String> lines = jarInputStream.getManifest().getMainAttributes()
+                    .entrySet()
+                    .stream()
+                    .map(entry -> entry.getKey() + ": " + entry.getValue())
+                    .sorted(Comparator.naturalOrder())
+                    .collect(Collectors.toList());
+            assertThat(lines).containsSequence(
+                    "Export-Package: com.mongodb.internal.build;version=\"4.1.0\"",
+                    "Implementation-Title: driver-core",
+                    "Implementation-Vendor-Id: org.mongodb",
+                    "Implementation-Vendor: org.mongodb",
+                    "Implementation-Version: " + ARTIFACT_VERSION,
+                    "Manifest-Version: 1.0",
+                    "Require-Capability: osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(version=1.8))\"",
+                    "Specification-Title: driver-core",
+                    "Specification-Vendor: org.mongodb",
+                    "Specification-Version: " + ARTIFACT_VERSION);
+        }
+
+        assertThat(systemOutRule.getLog())
+                .contains(
+                        "For project driver-core, task jar, not overriding value Implementation-Version since version ("
+                                + ARTIFACT_VERSION + ") has not changed")
+                .contains(
+                        "For project driver-core, task jar, not overriding value Specification-Version since version ("
+                                + ARTIFACT_VERSION + ") has not changed");
     }
 }

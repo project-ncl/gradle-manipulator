@@ -83,7 +83,7 @@ public class PublishTaskTransformerAction
         project.getExtensions().getByType(PublishingExtension.class).getPublications()
                 .withType(MavenPublication.class)
                 .configureEach(publication -> {
-                    logger.debug("Applying POM transformer to publication " + publication.getName());
+                    logger.debug("Applying POM transformer to publication {}", publication.getName());
 
                     final String archivesBaseName = ProjectUtils.getArchivesBaseName(project);
                     if (archivesBaseName != null && !publication.getArtifactId().equals(archivesBaseName)) {

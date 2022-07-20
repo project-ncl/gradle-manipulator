@@ -29,11 +29,14 @@ public class GMLogger implements Logger {
 
     static {
         configuration = ConfigCache.getOrCreate(Configuration.class);
-        Logging.getLogger(GMLogger.class).warn((configuration.addLoggingColours() ? ANSI_BRIGHT_YELLOW : "") +
-                "This plugin overrides default logging output for info and debug.\n" +
-                "\tIt sends info output to Lifecycle category\n" +
-                "\tIt sends debug output to info category." +
-                (configuration.addLoggingColours() ? ANSI_RESET : ""));
+        Logger logger = Logging.getLogger(GMLogger.class);
+
+        if (logger.isWarnEnabled()) {
+            logger.warn(
+                    "{}This plugin overrides default logging output for info and debug.\n\tIt sends info output to Lifecycle category\n\tIt sends debug output to info category.{}",
+                    configuration.addLoggingColours() ? ANSI_BRIGHT_YELLOW : "",
+                    configuration.addLoggingColours() ? ANSI_RESET : "");
+        }
     }
 
     private final Logger delegate;

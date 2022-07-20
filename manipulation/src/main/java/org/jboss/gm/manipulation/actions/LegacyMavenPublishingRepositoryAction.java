@@ -58,7 +58,7 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
             logger.info("Creating uploadArchives task");
             uploadArchives = project.getTasks().create("uploadArchives", Upload.class);
         } else {
-            uploadArchives.getRepositories().forEach(r -> logger.info("Disabling repository publishing task " + r.getName()));
+            uploadArchives.getRepositories().forEach(r -> logger.info("Disabling repository publishing task {}", r.getName()));
             uploadArchives.getRepositories().clear();
         }
 

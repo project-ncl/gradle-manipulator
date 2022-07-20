@@ -160,7 +160,7 @@ public class PluginUtils {
                     }
 
                     if (removed) {
-                        logger.debug("Removed instances of plugin {} with configuration block of {} from {}", plugin,
+                        logger.info("Removed instances of plugin {} with configuration block of {} from {}", plugin,
                                 configTask, buildFile);
                         FileUtils.writeStringToFile(buildFile, content, Charset.defaultCharset());
                     }

@@ -1,0 +1,21 @@
+{
+  "group" : "org.mongodb",
+  "name" : "gradle-manipulator",
+  "projectPathName" : "mongo-java-driver",
+  "version" : "4.1.0.temporary-redhat-00001",
+  "originalVersion" : "4.1.0.temporary-redhat-00001",
+  "children" : {
+    "bson" : {
+      "group" : "org.mongodb",
+      "name" : "bson",
+      "projectPathName" : "bson",
+      "version" : "4.1.0.temporary-redhat-00001"
+    },
+    "driver-core" : {
+      "group" : "org.mongodb",
+      "name" : "driver-core",
+      "projectPathName" : "driver-core",
+      "version" : "4.1.0.temporary-redhat-00001"
+    }
+  }
+}

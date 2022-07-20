@@ -1,6 +1,7 @@
 package org.jboss.gm.manipulation.actions;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 
 import org.apache.commons.lang.reflect.MethodUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -66,10 +67,10 @@ public class ManifestUpdateAction implements Action<Project> {
     @Override
     public void execute(Project project) {
 
-        project.getTasks().withType(Jar.class).configureEach(j -> {
+        project.getTasks().withType(Jar.class).configureEach(jar -> {
 
             @SuppressWarnings("UnstableApiUsage")
-            Manifest manifest = j.getManifest();
+            Manifest manifest = jar.getManifest();
 
             if (manifest == null) {
                 logger.debug("Manifest is not defined for project {}", project.getName());
@@ -77,7 +78,7 @@ public class ManifestUpdateAction implements Action<Project> {
             }
 
             try {
-                // This class was removed in Gradle >= 6 so we need to reflectively invoke it to
+                // This class was removed in Gradle >= 6, so we need to reflectively invoke it to
                 // avoid issues when running under later Gradle versions.
                 Class<?> osgi = Class.forName("org.gradle.api.plugins.osgi.OsgiManifest");
                 if (osgi.isInstance(manifest)) {
@@ -92,42 +93,60 @@ public class ManifestUpdateAction implements Action<Project> {
                 throw new ManipulationUncheckedException("Unable to examine OsgiManifest", e);
             }
 
-            for (String e : manifestOverwriteValues) {
-                if (manifest.getAttributes().containsKey(e)) {
-                    logger.warn("For task {}, overriding {} value {} with {}", j.getName(), e,
-                            manifest.getAttributes().get(e), alignmentModel.getVersion());
-                }
-                manifest.getAttributes().put(e, alignmentModel.getVersion());
-            }
-            for (String e : manifestOptionalNameValues) {
-                if (!manifest.getAttributes().containsKey(e)) {
-                    logger.info("For task {}, adding {} value with {}", j.getName(), e,
-                            alignmentModel.getName());
-                    manifest.getAttributes().put(e, alignmentModel.getName());
-                }
-            }
-            if (isNotEmpty(alignmentModel.getGroup())) {
-                for (String e : manifestOptionalGroupValues) {
-                    if (!manifest.getAttributes().containsKey(e)) {
-                        logger.info("For task {}, adding {} value with {}", j.getName(), e,
-                                alignmentModel.getGroup());
-                        manifest.getAttributes().put(e, alignmentModel.getGroup());
+            for (String key : manifestOverwriteValues) {
+                if (manifest.getAttributes().containsKey(key)) {
+                    Object value = manifest.getAttributes().get(key);
+
+                    if (!value.toString().equals(alignmentModel.getVersion())) {
+                        logger.warn("For project {}, task {}, overriding {} value {} with {}", project.getName(),
+                                jar.getName(), key, value, alignmentModel.getVersion());
+                        manifest.getAttributes().put(key, alignmentModel.getVersion());
+                    } else {
+                        logger.info("For project {}, task {}, not overriding value {} since version ({}) has not changed",
+                                project.getName(), jar.getName(), key, alignmentModel.getVersion());
                     }
+                } else {
+                    logger.info("For project {}, task {}, adding {} value with version {}", project.getName(),
+                            jar.getName(), key, alignmentModel.getVersion());
+                    manifest.getAttributes().put(key, alignmentModel.getVersion());
+                }
+            }
+
+            for (String key : manifestOptionalNameValues) {
+                if (!manifest.getAttributes().containsKey(key)) {
+                    logger.info("For project {}, task {}, adding {} value with artifactId {}", project.getName(),
+                            jar.getName(), key, alignmentModel.getName());
+                    manifest.getAttributes().put(key, alignmentModel.getName());
+                }
+            }
+
+            if (isNotEmpty(alignmentModel.getGroup())) {
+                for (String key : manifestOptionalGroupValues) {
+                    if (!manifest.getAttributes().containsKey(key)) {
+                        logger.info("For project {}, task {}, adding {} value with groupId {}", project.getName(),
+                                jar.getName(), key, alignmentModel.getGroup());
+                        manifest.getAttributes().put(key, alignmentModel.getGroup());
+                    }
+                }
+            } else {
+                if (logger.isInfoEnabled()) {
+                    logger.info("For project {}, task {}, not adding {} since groupId is empty", project.getName(),
+                            jar.getName(), Arrays.asList(manifestOptionalGroupValues));
                 }
             }
 
             String exportPackage = "Export-Package";
             if (manifest.getAttributes().containsKey(exportPackage)) {
                 if (!alignmentModel.getOriginalVersion().equals(alignmentModel.getVersion())) {
-                    logger.info("For task {}, updating Export-Package version {} to {}", j.getName(),
-                            alignmentModel.getOriginalVersion(), alignmentModel.getVersion());
+                    logger.info("For project {}, task {}, updating Export-Package version {} to {}", project.getName(),
+                            jar.getName(), alignmentModel.getOriginalVersion(), alignmentModel.getVersion());
                     manifest.getAttributes()
                             .put(exportPackage, (manifest.getAttributes().get(exportPackage).toString()).replaceAll(
                                     "version=\"?" + alignmentModel.getOriginalVersion() + "\"?",
                                     "version=\"" + alignmentModel.getVersion() + '"'));
                 } else {
-                    logger.info("For task {}, not updating Export-Package since version ({}) has not changed",
-                            j.getName(), alignmentModel.getVersion());
+                    logger.info("For project {}, task {}, not updating Export-Package since version ({}) has not changed",
+                            project.getName(), jar.getName(), alignmentModel.getVersion());
                 }
             }
 

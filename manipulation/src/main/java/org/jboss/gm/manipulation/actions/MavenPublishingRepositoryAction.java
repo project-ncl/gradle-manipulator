@@ -15,6 +15,7 @@ import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.jboss.gm.manipulation.ManipulationPlugin.MAVEN_PUBLISH_PLUGIN;
 
 /**
  * Adds a publishing repository specific to PNC environment.
@@ -45,11 +46,38 @@ public class MavenPublishingRepositoryAction implements Action<Project> {
 
     static final String REPO_NAME = "GME";
 
+    private static final String BUILD_SRC = "buildSrc";
+
     private final Logger logger = GMLogger.getLogger(getClass());
 
     @Override
     public void execute(Project project) {
         AtomicBoolean publishBuildSrc = new AtomicBoolean(false);
+
+        if (project.getProjectDir().getName().equals(BUILD_SRC) && !publishBuildSrc.get()) {
+            // Only ignore buildSrc if it doesn't have an existing publishing mechanism.
+            logger.warn(
+                    "Not adding publishing extension to project {} as {} is build-time only and not configured for publishing.",
+                    project, BUILD_SRC);
+            return;
+        }
+
+        if (!project.getPluginManager().hasPlugin(MAVEN_PUBLISH_PLUGIN)) {
+            // This should never happen due to prior checks in ManipulationPlugin
+            throw new ManipulationUncheckedException(
+                    "Cannot configure publishing repository, maven-publish plugin was not detected.");
+        }
+
+        Configuration config = ConfigCache.getOrCreate(Configuration.class);
+
+        if (isEmpty(config.deployUrl())) {
+            logger.warn("Publishing URL was not configured.");
+            return;
+        }
+
+        if (isEmpty(config.accessToken())) {
+            logger.warn("No authentication token was configured.");
+        }
 
         project.getTasks().configureEach(t -> {
             // disable existing publishing tasks but make sure we keep ours
@@ -68,29 +96,6 @@ public class MavenPublishingRepositoryAction implements Action<Project> {
             }
         });
         repos.removeIf(artifactRepository -> !artifactRepository.getName().equals(REPO_NAME));
-
-        if (project.getProjectDir().getName().equals("buildSrc") && !publishBuildSrc.get()) {
-            // Only ignore buildSrc if it doesn't have an existing publishing mechanism.
-            logger.warn(
-                    "Not adding publishing extension to project {} as buildSrc is build-time only and not configured for publishing.",
-                    project);
-            return;
-        } else if (!project.getPluginManager().hasPlugin("maven-publish")) {
-            // This should never happen due to prior checks in ManipulationPlugin
-            throw new ManipulationUncheckedException(
-                    "Cannot configure publishing repository, maven-publish plugin was not detected.");
-        }
-
-        Configuration config = ConfigCache.getOrCreate(Configuration.class);
-
-        if (isEmpty(config.deployUrl())) {
-            logger.warn("Publishing URL was not configured.");
-            return;
-        }
-
-        if (isEmpty(config.accessToken())) {
-            logger.warn("No authentication token was configured.");
-        }
 
         project.getExtensions().getByType(PublishingExtension.class).getRepositories().maven(repository -> {
             // To avoid names like "publishPluginMavenPublicationToManipulator Publishing RepositoryRepository"

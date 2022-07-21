@@ -302,7 +302,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                         "      }%n" +
                         "    }%n" +
                         "  } ]%n" +
-                        "}");
+                        "}%n");
         assertThat(jsonString).isEqualTo(expectedJsonString);
         final GAV gav = new GAV();
         gav.setPVR(SimpleProjectVersionRef.parse("org.acme.gradle:root:1.0.1.redhat-00002"));
@@ -389,7 +389,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                         "      }%n" +
                         "    }%n" +
                         "  } ]%n" +
-                        "}");
+                        "}%n");
         assertThat(jsonString).isEqualTo(expectedJsonString);
         final GAV gav = new GAV();
         gav.setPVR(SimpleProjectVersionRef.parse("org.acme.gradle:root:1.0.1"));

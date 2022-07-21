@@ -943,7 +943,8 @@ public class AlignmentTask extends DefaultTask {
         }
 
         if (!StringUtils.isEmpty(configuration.reportJsonOutputFile())) {
-            writeReport(outputDir, configuration.reportJsonOutputFile(), JSONUtils.jsonToString(jsonReport));
+            writeReport(outputDir, configuration.reportJsonOutputFile(),
+                    JSONUtils.jsonToString(jsonReport) + System.lineSeparator());
         }
     }
 }

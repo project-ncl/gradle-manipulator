@@ -296,7 +296,7 @@ public class MultiModuleProjectWithOverridesFunctionalTest
                         + "      }%n"
                         + "    }%n"
                         + "  }%n"
-                        + "}");
+                        + "}%n");
         assertThat(jsonString).isEqualTo(expectedJsonString);
     }
 }

@@ -51,7 +51,9 @@ public class JavaDataLoaderFunctionalTest {
         assertThat(buildResult.task(":" + "generatePomFileForMavenPublication").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
         final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(projectRoot, alignment,
                 "build/publications/maven/pom-default.xml");
-        assertTrue(systemOutRule.getLog().contains("Unable to find publish parameter for Maven Publish Plugin."));
+        assertThat(systemOutRule.getLog())
+                .contains(
+                        "Unable to find publish parameter in tasks [generatePomFileForMavenPublication] for Maven Publish Plugin for project java-dataloader-like-project");
         assertEquals("1.2.0.redhat-00001", modelAndModule.right.getVersion());
     }
 }

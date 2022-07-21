@@ -79,13 +79,13 @@ public class MavenPublishingRepositoryAction implements Action<Project> {
             logger.warn("No authentication token was configured.");
         }
 
-        project.getTasks().configureEach(t -> {
+        project.getTasks().configureEach(task -> {
             // disable existing publishing tasks but make sure we keep ours
-            if (t.getName().startsWith("publish")
-                    && t.getName().endsWith("Repository")
-                    && !t.getName().contains(REPO_NAME)) {
-                logger.info("Disabling publishing task {}", t.getName());
-                t.setEnabled(false);
+            if (task.getName().startsWith("publish")
+                    && task.getName().endsWith("Repository")
+                    && !task.getName().contains(REPO_NAME)) {
+                logger.info("Disabling publishing task {} for project {}", task.getName(), project.getName());
+                task.setEnabled(false);
                 publishBuildSrc.set(true);
             }
         });

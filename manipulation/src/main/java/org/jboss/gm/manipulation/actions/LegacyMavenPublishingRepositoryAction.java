@@ -52,16 +52,6 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
                     "Legacy 'maven' plugin not detected, skipping publishing repository creation.");
         }
 
-        Upload uploadArchives = project.getTasks().withType(Upload.class).findByName("uploadArchives");
-
-        if (uploadArchives == null) {
-            logger.info("Creating uploadArchives task");
-            uploadArchives = project.getTasks().create("uploadArchives", Upload.class);
-        } else {
-            uploadArchives.getRepositories().forEach(r -> logger.info("Disabling repository publishing task {}", r.getName()));
-            uploadArchives.getRepositories().clear();
-        }
-
         Configuration config = ConfigCache.getOrCreate(Configuration.class);
 
         if (isEmpty(config.deployUrl())) {
@@ -71,6 +61,16 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
 
         if (isEmpty(config.accessToken())) {
             logger.warn("No authentication token was configured.");
+        }
+
+        Upload uploadArchives = project.getTasks().withType(Upload.class).findByName("uploadArchives");
+
+        if (uploadArchives == null) {
+            logger.info("Creating uploadArchives task");
+            uploadArchives = project.getTasks().create("uploadArchives", Upload.class);
+        } else {
+            uploadArchives.getRepositories().forEach(r -> logger.info("Disabling repository publishing task {}", r.getName()));
+            uploadArchives.getRepositories().clear();
         }
 
         // add a maven repository and configure authentication token

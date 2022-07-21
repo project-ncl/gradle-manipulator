@@ -1,6 +1,7 @@
 package org.jboss.gm.manipulation;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.aeonbits.owner.ConfigCache;
@@ -191,10 +192,11 @@ public class ManipulationPlugin implements Plugin<Project> {
                         .afterEvaluate(new UploadTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
                 evaluatedProject.afterEvaluate(new LegacyMavenPublishingRepositoryAction());
 
-                if (project.getGradle().getStartParameter().getTaskNames().stream()
-                        .noneMatch(p -> p.contains("uploadArchives"))) {
-                    logger.error(
-                            "Unable to find uploadArchives parameter for Legacy Maven Plugin.");
+                List<String> taskNames = project.getGradle().getStartParameter().getTaskNames();
+
+                if (taskNames.stream().noneMatch(p -> p.contains("uploadArchives"))) {
+                    logger.error("Unable to find uploadArchives parameter in tasks {} for Legacy Maven Plugin for project {}",
+                            taskNames, evaluatedProject.getName());
                 }
             } else if (MAVEN_PUBLISH_PLUGIN.equals(deployPlugin)) {
                 logger.info("Configuring {} plugin for project {}", deployPlugin, evaluatedProject.getName());
@@ -203,9 +205,11 @@ public class ManipulationPlugin implements Plugin<Project> {
                 evaluatedProject
                         .afterEvaluate(new PublishTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
 
-                if (project.getGradle().getStartParameter().getTaskNames().stream().noneMatch(p -> p.contains("publish"))) {
-                    logger.error(
-                            "Unable to find publish parameter for Maven Publish Plugin.");
+                List<String> taskNames = project.getGradle().getStartParameter().getTaskNames();
+
+                if (taskNames.stream().noneMatch(p -> p.contains("publish"))) {
+                    logger.error("Unable to find publish parameter in tasks {} for Maven Publish Plugin for project {}",
+                            taskNames, evaluatedProject.getName());
                 }
             } else {
                 logger.warn("No publishing plugin was configured for '{}'!", evaluatedProject.getName());

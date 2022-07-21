@@ -63,7 +63,9 @@ public class SimpleProjectWithSpringDMAndMavenPluginsFunctionalTest {
         final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(m2Directory, alignment,
                 "org/acme/root/1.0.1-redhat-00001/root-1.0.1-redhat-00001.pom", true);
         final ManipulationModel module = modelAndModule.getRight();
-        assertTrue(systemOutRule.getLog().contains("Unable to find uploadArchives parameter for Legacy Maven Plugin"));
+        assertThat(systemOutRule.getLog())
+                .contains(
+                        "Unable to find uploadArchives parameter in tasks [install] for Legacy Maven Plugin for project root");
         assertThat(module).isNotNull();
         assertThat(modelAndModule.getLeft())
                 .isNotNull()

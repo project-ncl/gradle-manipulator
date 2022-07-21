@@ -246,7 +246,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                         "      }%n" +
                         "    }%n" +
                         "  } ]%n" +
-                        "}");
+                        "}%n");
         assertThat(jsonString).isEqualTo(expectedJsonString);
         final GAV gav = new GAV();
         gav.setPVR(SimpleProjectVersionRef.parse("org.acme:root:1.1.2.redhat-00005"));

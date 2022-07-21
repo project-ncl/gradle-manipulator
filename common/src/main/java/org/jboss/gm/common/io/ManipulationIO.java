@@ -52,7 +52,7 @@ public final class ManipulationIO {
             FileUtils.writeStringToFile(
                     manipulationFilePath,
                     SerializationUtils.getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(
-                            updatedManipulationModel),
+                            updatedManipulationModel) + System.lineSeparator(),
                     StandardCharsets.UTF_8.name());
         } catch (IOException e) {
             throw new ManipulationException("Unable to write manipulation.json in project root", e);

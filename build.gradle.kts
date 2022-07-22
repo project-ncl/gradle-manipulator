@@ -225,7 +225,7 @@ subprojects {
     if (project.name == "common" || project.name == "cli") {
         apply(plugin = "java-library")
 
-        tasks.withType<Jar> {
+        tasks.withType<Jar>().configureEach {
             manifest {
                 attributes["Built-By"] = System.getProperty("user.name")
                 attributes["Build-Timestamp"] = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(Date())
@@ -241,7 +241,7 @@ subprojects {
         apply(plugin = "java-gradle-plugin")
         apply(plugin = "com.gradle.plugin-publish")
 
-        tasks.withType<ShadowJar> {
+        tasks.withType<ShadowJar>().configureEach {
             dependencies {
                 exclude(dependency("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}"))
             }
@@ -326,7 +326,7 @@ subprojects {
         // Make assemble/build task depend on shadowJar
         tasks["assemble"].dependsOn(tasks["shadowJar"])
 
-        tasks.withType<ShadowJar> {
+        tasks.withType<ShadowJar>().configureEach {
             // ensure that a single jar is built which is the shadowed one
             // Using non-deprecated archiveClassifier.set doesn't seem to work.
             @Suppress("DEPRECATION")

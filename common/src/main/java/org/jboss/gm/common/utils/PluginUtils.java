@@ -27,8 +27,6 @@ import org.commonjava.maven.ext.io.FileIO;
 import org.gradle.internal.Pair;
 import org.slf4j.Logger;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-
 public class PluginUtils {
     private static final Map<String, Pair<String, Set<String>>> SUPPORTED_PLUGINS = new LinkedHashMap<>();
 

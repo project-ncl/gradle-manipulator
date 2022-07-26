@@ -2,7 +2,6 @@ package org.jboss.gm.manipulation.actions;
 
 import org.gradle.api.Action;
 import org.gradle.api.Project;
-import org.gradle.api.UnknownDomainObjectException;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;

@@ -28,7 +28,7 @@ public class ManifestVersionProvider
      * @return version information (each string in the array is displayed on a separate line)
      */
     @Override
-    public String[] getVersion() throws ManipulationException {
+    public String[] getVersion() {
         return new String[] { "Gradle Analyser CLI " + ManifestUtils.getManifestInformation(Main.class) };
     }
 }

@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lombok.experimental.UtilityClass;
 
@@ -71,11 +72,12 @@ public class LockFileIO {
         if (!locksRoot.exists()) {
             return Collections.emptyList();
         }
-        return Files.find(locksRoot.toPath(), 1,
-                (filePath, fileAttr) -> fileAttr.isRegularFile() && filePath.getFileName().toString().endsWith(
-                        (LOCKFILE_EXTENSION)))
-                .map(Path::toFile).collect(
-                        Collectors.toList());
+
+        try (Stream<Path> stream = Files.find(locksRoot.toPath(), 1,
+            (filePath, fileAttr) -> fileAttr.isRegularFile() && filePath.getFileName().toString().endsWith(
+                (LOCKFILE_EXTENSION)))) {
+                    return stream.map(Path::toFile).collect(Collectors.toList());
+        }
     }
 
     public void updateLockfiles(Logger logger, File directory,

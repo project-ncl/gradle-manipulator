@@ -177,10 +177,10 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
             assertThat(am.getChildren().keySet()).hasSize(3).containsExactly("subproject1", "subproject2",
                     "subproject3");
             assertThat(am.findCorrespondingChild("subproject3")).satisfies(subproject3 -> {
-                assertThat(subproject3.getName().equals("special-subproject-number3"));
+                assertThat(subproject3.getName()).isEqualTo("special-subproject-number3");
                 try {
-                    assertEquals(FieldUtils.getDeclaredField(ManipulationModel.class, "projectPathName", true).get(subproject3),
-                            "subproject3");
+                    assertThat(FieldUtils.getDeclaredField(ManipulationModel.class, "projectPathName", true)
+                            .get(subproject3)).isEqualTo("subproject3");
                 } catch (IllegalAccessException e) {
                     fail("Couldn't get field to check.");
                 }

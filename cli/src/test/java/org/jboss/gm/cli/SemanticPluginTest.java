@@ -48,12 +48,13 @@ public class SemanticPluginTest {
             throws Exception {
         final File folder = tempDir.newFolder();
 
-        Git.cloneRepository()
-                .setURI("https://github.com/linkedin/cruise-control.git")
-                .setDirectory(folder)
-                .setBranch("refs/tags/2.5.73")
-                .call();
-        System.out.println("Cloned CruiseControl to " + folder);
+        try (Git ignored = Git.cloneRepository()
+            .setURI("https://github.com/linkedin/cruise-control.git")
+            .setDirectory(folder)
+            .setBranch("refs/tags/2.5.73")
+            .call()) {
+            System.out.println("Cloned CruiseControl to " + folder);
+        }
 
         File props = new File(folder, "gradle.properties");
         File settings = new File(folder, "settings.gradle");

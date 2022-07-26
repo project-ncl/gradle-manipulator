@@ -21,7 +21,6 @@ import org.commonjava.maven.ext.core.impl.Version;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.jboss.gm.common.model.ManipulationModel;
-import org.jboss.gm.common.utils.PluginUtils;
 import org.jboss.gm.common.utils.PluginUtils.DokkaVersion;
 import org.jboss.gm.common.utils.ProjectUtils;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;

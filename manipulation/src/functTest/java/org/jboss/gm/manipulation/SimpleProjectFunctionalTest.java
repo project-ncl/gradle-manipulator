@@ -159,7 +159,7 @@ public class SimpleProjectFunctionalTest {
                 .resolve("root-" + ARTIFACT_VERSION + ".jar")
                 .toFile();
 
-        try (JarInputStream jarStream = new JarInputStream(new FileInputStream(repoPathToJar))) {
+        try (JarInputStream jarStream = new JarInputStream(Files.newInputStream(repoPathToJar.toPath()))) {
             final Manifest manifest = jarStream.getManifest();
             assertThat(manifest.getMainAttributes().getValue("Implementation-Version")).contains(ARTIFACT_VERSION);
         }

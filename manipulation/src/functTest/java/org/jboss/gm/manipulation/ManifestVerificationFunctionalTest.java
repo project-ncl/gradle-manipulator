@@ -156,8 +156,8 @@ public class ManifestVerificationFunctionalTest {
         File manifestFile = new File(projectRoot, "api/build/tmp/jar/MANIFEST.MF");
         assertTrue(manifestFile.exists());
 
-        try (JarInputStream jarInputStream = new JarInputStream(new FileInputStream(new File(projectRoot,
-                "api/build/libs/reactive-streams-1.0.3.temporary-redhat-00001.jar")))) {
+        try (JarInputStream jarInputStream = new JarInputStream(Files.newInputStream(new File(projectRoot,
+                "api/build/libs/reactive-streams-1.0.3.temporary-redhat-00001.jar").toPath()))) {
             List<String> lines = jarInputStream.getManifest().getMainAttributes()
                     .entrySet()
                     .stream()

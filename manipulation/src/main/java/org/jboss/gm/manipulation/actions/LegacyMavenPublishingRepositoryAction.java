@@ -121,7 +121,7 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
             // This is a horrendous hack. We can't find any way of adding HttpHeaderCredentials to the MavenDeployer
             // which is removed above. Equally we can't find any way of ensuring the new publish configuration correctly
             // checks the archivesBaseName value - overriding 'configurablePublishArtifact.setName' is insufficient.
-            // We add it as an action to minimise any side affects.
+            // We add it as an action to minimise any side effects.
             if (abn != null) {
                 logger.warn("Located archivesBaseName override ; forcing project name to {} from {} for correct deployment",
                         abn, project.getName());

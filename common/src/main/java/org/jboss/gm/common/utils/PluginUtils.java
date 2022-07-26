@@ -107,14 +107,6 @@ public class PluginUtils {
             plugins.add("'signing'");
         }
 
-        Collection<File> files = new HashSet<>();
-        final Collection<File> gradleFiles = FileUtils.listFiles(target, new WildcardFileFilter("*.gradle"),
-                TrueFileFilter.INSTANCE);
-        final Collection<File> kotlinFiles = FileUtils.listFiles(target, new WildcardFileFilter("*.gradle.kts"),
-                TrueFileFilter.INSTANCE);
-        files.addAll(gradleFiles);
-        files.addAll(kotlinFiles);
-
         for (String plugin : plugins) {
             Pair<String, Set<String>> pair = SUPPORTED_PLUGINS.get(plugin);
             Set<String> tasks = new HashSet<>();
@@ -128,6 +120,9 @@ public class PluginUtils {
                 configTask = pair.getLeft();
                 tasks = pair.getRight();
             }
+
+            final Collection<File> files = FileUtils.listFiles(target,
+                    new WildcardFileFilter("*.gradle", "*.gradle.kts"), TrueFileFilter.INSTANCE);
 
             for (File buildFile : files) {
                 try {
@@ -228,14 +223,8 @@ public class PluginUtils {
     public static void addLenientLockMode(Logger logger, File target)
             throws ManipulationException {
         final String depLock = "dependencyLocking {";
-
-        Collection<File> files = new HashSet<>();
-        final Collection<File> gradleFiles = FileUtils.listFiles(target, new WildcardFileFilter("*.gradle"),
+        final Collection<File> files = FileUtils.listFiles(target, new WildcardFileFilter("*.gradle", "*.gradle.kts"),
                 TrueFileFilter.INSTANCE);
-        final Collection<File> kotlinFiles = FileUtils.listFiles(target, new WildcardFileFilter("*.gradle.kts"),
-                TrueFileFilter.INSTANCE);
-        files.addAll(gradleFiles);
-        files.addAll(kotlinFiles);
 
         for (File buildFile : files) {
             boolean removed = false;

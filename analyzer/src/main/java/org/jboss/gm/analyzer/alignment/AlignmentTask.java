@@ -283,7 +283,7 @@ public class AlignmentTask extends DefaultTask {
     }
 
     /**
-     * Internal function to complete alignment - REST calls, file modifications etc after all projects are processed.
+     * Internal function to complete alignment - REST calls, file modifications etc. after all projects are processed.
      *
      * @param configuration the current Configuration
      * @param cache the cache object
@@ -611,7 +611,7 @@ public class AlignmentTask extends DefaultTask {
                     if (defaultResolutionStrategy.getConflictResolution() == ConflictResolution.strict) {
                         // failOnVersionConflict() sets this which causes our plugin to crash out. Reset to latest to make an attempt
                         // at continuing. As Gradle creates 'decorated', we can't use reflection to change the value
-                        // back to the default. Therefore, use preferProjectModules as its not eager-fail.
+                        // back to the default. Therefore, use preferProjectModules as it's not eager-fail.
                         logger.warn("Detected use of conflict resolution strategy strict ; resetting to preferProjectModules.");
                         defaultResolutionStrategy.preferProjectModules();
                     }
@@ -713,7 +713,7 @@ public class AlignmentTask extends DefaultTask {
                     }
 
                     RelaxedProjectVersionRef relaxedProjectVersionRef;
-                    // If we haven't found any original dependency, or its' version is empty, we'll default to
+                    // If we haven't found any original dependency, or its version is empty, we'll default to
                     // the current resolved dependency value. This might be possible if the dependency has come from
                     // a lock file or the version comes from a BOM.
                     if (originalDeps.isEmpty() || StringUtils.isBlank(originalDeps.get(0).getVersion())) {

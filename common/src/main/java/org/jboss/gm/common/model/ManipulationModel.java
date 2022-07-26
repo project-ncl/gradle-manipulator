@@ -109,7 +109,7 @@ public class ManipulationModel {
         Optional<AbstractArchiveTask> optionalAbstractArchiveTask = project.getTasks().withType(AbstractArchiveTask.class)
                 .stream().findFirst();
         if (optionalAbstractArchiveTask.isPresent() &&
-        // We should be using getArchiveBaseName but its only available in 5.1 and later.
+        // We should be using getArchiveBaseName but it's only available in 5.1 and later.
         // optionalAbstractArchiveTask.get().getArchiveBaseName().isPresent() &&
         //!optionalAbstractArchiveTask.get().getArchiveBaseName().get().equals(project.getName())) {
                 !isEmpty(optionalAbstractArchiveTask.get().getBaseName()) &&

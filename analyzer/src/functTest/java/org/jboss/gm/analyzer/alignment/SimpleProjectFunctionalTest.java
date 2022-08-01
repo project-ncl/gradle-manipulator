@@ -87,7 +87,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
         assertThat(new File(projectRoot, AlignmentTask.GRADLE + File.separator + AlignmentTask.GME_REPOS)).exists();
         assertThat(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS)).exists();
-        assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot));
         assertEquals(AlignmentTask.INJECT_GME_END,
                 org.jboss.gm.common.utils.FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
@@ -161,7 +161,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
         assertThat(new File(projectRoot, AlignmentTask.GRADLE + '/' + AlignmentTask.GME_REPOS)).exists();
         assertThat(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS)).exists();
-        assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot));
         assertEquals(AlignmentTask.INJECT_GME_END,
                 org.jboss.gm.common.utils.FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
@@ -188,7 +188,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         List<String> lines = FileUtils.readLines(new File(projectRoot, Project.DEFAULT_BUILD_FILE), Charset.defaultCharset());
 
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
-        assertEquals(AlignmentTask.INJECT_GME_START, org.jboss.gm.common.utils.FileUtils.getFirstLine(lines));
+        assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot));
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
             assertThat(am.getName()).isEqualTo("root");
@@ -212,10 +212,10 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
             assertThat(am.getName()).isEqualTo("root");
-            assertThat(am.findCorrespondingChild("root"))
-                    .satisfies(root -> assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00003"));
+            assertThat(am.findCorrespondingChild("root")).satisfies(
+                    root -> assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00003"));
         });
-        assertEquals(AlignmentTask.INJECT_GME_START, org.jboss.gm.common.utils.FileUtils.getFirstLine(lines));
+        assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot));
 
         assertThat(lines).filteredOn(l -> l.startsWith(AlignmentTask.INJECT_GME_START)).hasSize(1);
     }
@@ -239,7 +239,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
         assertThat(new File(projectRoot, AlignmentTask.GRADLE + '/' + AlignmentTask.GME_REPOS)).exists();
         assertThat(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS)).exists();
-        assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot));
         assertEquals(AlignmentTask.INJECT_GME_END,
                 org.jboss.gm.common.utils.FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 

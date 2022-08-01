@@ -109,7 +109,7 @@ public class MultiModuleProjectWithOverridesFunctionalTest
         assertThat(systemOutRule.getLog()).contains("Updating sub-project org.acme:subproject1:null (path: "
                 + "subproject1) from version 1.1.2 to 1.1.2.redhat-00005");
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
-        assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot));
         assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {

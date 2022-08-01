@@ -3,6 +3,8 @@ package org.jboss.gm.analyzer.alignment;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.util.List;
 
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
@@ -78,13 +80,15 @@ public class PGJDBCKotlinFunctionalTest extends AbstractWiremockTest {
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.3")) >= 0);
 
         final File projectRoot = tempDir.newFolder("pgjdbc");
+        final File buildFile = new File(projectRoot, "build.gradle.kts");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertTrue(new File(projectRoot, AlignmentTask.GRADLE + '/' + AlignmentTask.GME_REPOS).exists());
         assertTrue(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS).exists());
-        assertEquals(AlignmentTask.INJECT_GME_START_KOTLIN, TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.INJECT_GME_END_KOTLIN, FileUtils.getLastLine(new File(projectRoot, "build.gradle.kts")));
+        assertEquals(AlignmentTask.INJECT_GME_END_KOTLIN, FileUtils.getLastLine(buildFile));
+        List<String> lines = org.apache.commons.io.FileUtils.readLines(buildFile, Charset.defaultCharset());
+        assertEquals(1, lines.stream().filter(s -> s.contains("buildscript")).count());
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.postgresql");

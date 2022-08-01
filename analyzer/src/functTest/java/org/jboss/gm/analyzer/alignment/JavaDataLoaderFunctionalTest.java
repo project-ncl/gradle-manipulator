@@ -63,7 +63,7 @@ public class JavaDataLoaderFunctionalTest extends AbstractWiremockTest {
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
         assertThat(new File(projectRoot, AlignmentTask.GRADLE + '/' + AlignmentTask.GME_REPOS)).exists();
         assertThat(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS)).exists();
-        assertThat(TestUtils.getLine(projectRoot)).isEqualTo(AlignmentTask.INJECT_GME_START);
+        assertThat(TestUtils.getLine(projectRoot)).isEqualTo(AlignmentTask.INJECT_GME_START + " }");
         assertThat(FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)))
                 .isEqualTo(AlignmentTask.INJECT_GME_END);
         assertThat(systemOutRule.getLog())

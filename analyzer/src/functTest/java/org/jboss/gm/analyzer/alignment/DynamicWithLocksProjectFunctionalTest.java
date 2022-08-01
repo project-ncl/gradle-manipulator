@@ -81,7 +81,6 @@ public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest 
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), false);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
-
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
         assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
@@ -120,7 +119,7 @@ public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest 
         assertTrue(new File(projectRoot, "gradle.lockfile").exists());
 
         // make sure the project name was added
-        assertEquals("rootProject.name='undertow'",
+        assertEquals("rootProject.name=\"undertow\"",
                 FileUtils.getLastLine(new File(projectRoot, "settings.gradle")));
     }
 }

@@ -71,7 +71,7 @@ public class VersionConflictProjectFunctionalTest extends AbstractWiremockTest {
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), map);
 
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
-        assertThat(TestUtils.getLine(projectRoot)).isEqualTo(AlignmentTask.INJECT_GME_START);
+        assertThat(TestUtils.getLine(projectRoot)).isEqualTo(AlignmentTask.INJECT_GME_START + " }");
         assertThat(FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)))
                 .isEqualTo(AlignmentTask.INJECT_GME_END);
 
@@ -123,7 +123,7 @@ public class VersionConflictProjectFunctionalTest extends AbstractWiremockTest {
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), map);
 
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
-        assertThat(TestUtils.getLine(projectRoot)).isEqualTo(AlignmentTask.INJECT_GME_START);
+        assertThat(TestUtils.getLine(projectRoot)).isEqualTo(AlignmentTask.INJECT_GME_START + " }");
         assertThat(FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)))
                 .isEqualTo(AlignmentTask.INJECT_GME_END);
 

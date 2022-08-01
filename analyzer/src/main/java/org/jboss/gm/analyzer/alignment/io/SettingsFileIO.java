@@ -68,7 +68,7 @@ public class SettingsFileIO {
                     try (BufferedWriter writer = new BufferedWriter(new FileWriter(settingsGradle, true))) {
                         // Ensure the marker is on a line by itself.
                         writer.newLine();
-                        writer.write("rootProject.name='" + result + "'");
+                        writer.write("rootProject.name=\"" + result + "\"");
                         writer.newLine();
                         writer.flush();
                     }

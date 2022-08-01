@@ -71,7 +71,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
-        assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot));
         assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
@@ -101,7 +101,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
                 Collections.singletonMap("overrideTransitive", "false"));
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
-        assertEquals(AlignmentTask.INJECT_GME_START_KOTLIN, TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_START_KOTLIN + " }", TestUtils.getLine(projectRoot));
         assertEquals(AlignmentTask.INJECT_GME_END_KOTLIN,
                 FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE + ".kts")));
 

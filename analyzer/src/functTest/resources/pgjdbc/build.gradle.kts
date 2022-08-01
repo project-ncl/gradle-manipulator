@@ -9,6 +9,8 @@ plugins {
     id("org.jboss.gm.analyzer")
 
 }
+buildscript { // Empty block
+}
 
 val String.v: String get() = rootProject.extra["$this.version"] as String
 val buildVersion = "pgjdbc".v

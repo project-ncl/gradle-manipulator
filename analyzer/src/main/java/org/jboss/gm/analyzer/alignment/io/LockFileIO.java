@@ -74,9 +74,9 @@ public class LockFileIO {
         }
 
         try (Stream<Path> stream = Files.find(locksRoot.toPath(), 1,
-            (filePath, fileAttr) -> fileAttr.isRegularFile() && filePath.getFileName().toString().endsWith(
-                (LOCKFILE_EXTENSION)))) {
-                    return stream.map(Path::toFile).collect(Collectors.toList());
+                (filePath, fileAttr) -> fileAttr.isRegularFile() && filePath.getFileName().toString().endsWith(
+                        (LOCKFILE_EXTENSION)))) {
+            return stream.map(Path::toFile).collect(Collectors.toList());
         }
     }
 

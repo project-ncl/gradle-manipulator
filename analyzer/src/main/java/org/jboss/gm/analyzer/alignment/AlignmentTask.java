@@ -97,11 +97,11 @@ public class AlignmentTask extends DefaultTask {
     /**
      * The groovy code to inject the {@link AlignmentTask#GME gme.gradle} build script.
      */
-    public static final String INJECT_GME_START = "buildscript { apply from: \"" + GME + "\" }";
+    public static final String INJECT_GME_START = "buildscript { apply from: \"" + GME + "\"";
     /**
      * The kotlin code to inject the {@link AlignmentTask#GME gme.gradle} build script.
      */
-    public static final String INJECT_GME_START_KOTLIN = "buildscript { project.apply { from(\"" + GME + "\") } }";
+    public static final String INJECT_GME_START_KOTLIN = "buildscript { project.apply { from(\"" + GME + "\") }";
     /**
      * The base filename of the {@code gme-pluginconfigs.gradle} file.
      */
@@ -450,24 +450,19 @@ public class AlignmentTask extends DefaultTask {
         }
 
         if (rootGradle.exists()) {
-
-            List<String> lines = FileUtils.readLines(rootGradle, Charset.defaultCharset());
-            List<String> result = new ArrayList<>();
-
+            String buildScript = FileUtils.readFileToString(rootGradle, Charset.defaultCharset());
             String injectedLine = rootGradle.getName().endsWith(".kts") ? INJECT_GME_START_KOTLIN : INJECT_GME_START;
-            String first = org.jboss.gm.common.utils.FileUtils.getFirstLine(lines);
-            logger.debug("Read first line '{}' from {}", first, rootGradle);
 
-            // Check if the first non-blank line is the gme phrase, otherwise inject it.
-            if (!injectedLine.equals(first.trim())) {
-                result.add(System.lineSeparator());
-                result.add(injectedLine);
-                result.add(System.lineSeparator());
-                result.addAll(lines);
-
-                FileUtils.writeLines(rootGradle, result);
+            if (!buildScript.contains(injectedLine)) {
+                if (buildScript.matches("(?s).*(\\s|^)buildscript(\\s|\\{).*")) {
+                    // Replace existing buildscript with a subsection excluding closing brace
+                    buildScript = buildScript.replaceFirst("(?s)buildscript(\\s|$)+\\{", injectedLine);
+                } else {
+                    buildScript = injectedLine + " }" + System.lineSeparator() + buildScript;
+                }
+                logger.debug("Updating {} with {}", rootGradle, injectedLine);
+                FileUtils.writeStringToFile(rootGradle, buildScript, Charset.defaultCharset());
             }
-
         } else {
             logger.warn("Unable to find build.gradle in {} to modify.", rootDir);
         }
@@ -627,12 +622,16 @@ public class AlignmentTask extends DefaultTask {
                 // analyzer/src/functTest/java/org/jboss/gm/analyzer/alignment/DynamicWithLocksProjectFunctionalTest.java for
                 // an example) first verify if DefaultProjectDependencyConstraint occurs in the list of constraints.
                 LenientConfiguration lenient;
-                if (configuration
-                        .getAllDependencyConstraints().stream()
-                        .noneMatch(AlignmentTask::isDefaultProjectDependencyConstraint)) {
+                //
+                // Some kotlin projects (e.g. wire) have issues calling copyRecursive.
+                if (!project.getBuildFile().getName().endsWith(".kts") &&
+                        configuration
+                                .getAllDependencyConstraints().stream()
+                                .noneMatch(AlignmentTask::isDefaultProjectDependencyConstraint)) {
                     lenient = configuration.copyRecursive().getResolvedConfiguration().getLenientConfiguration();
                 } else {
-                    logger.warn("DefaultProjectDependencyConstraint found ({}), not copying configuration",
+                    logger.debug("Kotlin build or DefaultProjectDependencyConstraint found ({}), not copying "
+                            + "configuration",
                             configuration.getAllDependencyConstraints());
                     lenient = configuration.getResolvedConfiguration().getLenientConfiguration();
                 }

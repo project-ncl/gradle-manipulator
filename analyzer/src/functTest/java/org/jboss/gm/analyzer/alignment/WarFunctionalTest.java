@@ -42,6 +42,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static junit.framework.TestCase.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class WarFunctionalTest extends AbstractWiremockTest {
@@ -117,7 +118,7 @@ public class WarFunctionalTest extends AbstractWiremockTest {
         assertThat(projectRoot.resolve(AlignmentTask.GME)).exists();
         assertThat(projectRoot.resolve(AlignmentTask.GRADLE).resolve(AlignmentTask.GME_REPOS)).exists();
         assertThat(projectRoot.resolve(AlignmentTask.GME_PLUGINCONFIGS)).exists();
-        assertThat(TestUtils.getLine(projectRoot.toFile())).isEqualTo(AlignmentTask.INJECT_GME_START);
+        assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot.toFile()));
         assertThat(FileUtils.getLastLine(projectRoot.resolve(Project.DEFAULT_BUILD_FILE).toFile()))
                 .isEqualTo(AlignmentTask.INJECT_GME_END);
         assertThat(systemOutRule.getLog()).contains("Passing 1 GAVs into the REST client api [" + GAV + "]");

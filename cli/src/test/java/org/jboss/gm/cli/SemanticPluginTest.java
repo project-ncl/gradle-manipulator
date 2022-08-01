@@ -49,10 +49,10 @@ public class SemanticPluginTest {
         final File folder = tempDir.newFolder();
 
         try (Git ignored = Git.cloneRepository()
-            .setURI("https://github.com/linkedin/cruise-control.git")
-            .setDirectory(folder)
-            .setBranch("refs/tags/2.5.73")
-            .call()) {
+                .setURI("https://github.com/linkedin/cruise-control.git")
+                .setDirectory(folder)
+                .setBranch("refs/tags/2.5.73")
+                .call()) {
             System.out.println("Cloned CruiseControl to " + folder);
         }
 

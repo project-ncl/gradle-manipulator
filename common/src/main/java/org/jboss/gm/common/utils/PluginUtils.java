@@ -262,4 +262,14 @@ public class PluginUtils {
         }
         return eol;
     }
+
+    /**
+     * This accessor function allow a Groovy script to retrieve the currently supported
+     * list of plugins that may be removed and alter it dynamically.
+     *
+     * @return a map of supported plugins
+     */
+    public static Map<String, Pair<String, Set<String>>> getSupportedPlugins() {
+        return SUPPORTED_PLUGINS;
+    }
 }

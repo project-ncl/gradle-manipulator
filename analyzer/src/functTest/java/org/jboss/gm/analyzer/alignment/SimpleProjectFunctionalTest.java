@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -185,8 +186,6 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
 
         TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
-        List<String> lines = FileUtils.readLines(new File(projectRoot, Project.DEFAULT_BUILD_FILE), Charset.defaultCharset());
-
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
         assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot));
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
@@ -206,7 +205,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                 .withPluginClasspath()
                 .build();
         alignmentModel = new TestManipulationModel(ManipulationIO.readManipulationModel(projectRoot));
-        lines = FileUtils.readLines(new File(projectRoot, Project.DEFAULT_BUILD_FILE), Charset.defaultCharset());
+        List<String> lines = FileUtils.readLines(new File(projectRoot, Project.DEFAULT_BUILD_FILE), Charset.defaultCharset());
 
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
@@ -504,5 +503,36 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                         "%n");
         assertThat(textString).isEqualTo(expectedTextString);
         assertThat(systemOutRule.getLog()).contains(expectedTextString);
+    }
+
+    @Test
+    public void verifyOverrideHandling() throws IOException, URISyntaxException, ManipulationException {
+        final File projectRoot = tempDir.newFolder("simple-project");
+        FileUtils.copyDirectory(Paths
+                .get(TestUtils.class.getClassLoader().getResource(projectRoot.getName()).toURI()).toFile(), projectRoot);
+        File props = new File(projectRoot, "gradle.properties");
+        FileUtils.writeStringToFile(props,
+                FileUtils.readFileToString(props, Charset.defaultCharset()).replace(
+                        "version=1.0.1", "version=0.1"),
+                Charset.defaultCharset());
+
+        final Map<String, String> gmeProps = Collections.singletonMap("versionOverride", "1.0.1");
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), gmeProps);
+
+        assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
+        assertThat(new File(projectRoot, AlignmentTask.GRADLE + '/' + AlignmentTask.GME_REPOS)).exists();
+        assertThat(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS)).exists();
+        assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_END,
+                org.jboss.gm.common.utils.FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+
+        assertThat(alignmentModel).isNotNull().satisfies(am -> {
+            assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
+            assertThat(am.getName()).isEqualTo("root");
+            assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
+                assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00002");
+                assertThat(root.getName()).isEqualTo("root");
+            });
+        });
     }
 }

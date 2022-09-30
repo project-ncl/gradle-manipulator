@@ -189,7 +189,12 @@ public class AlignmentTask extends DefaultTask {
         String groupId = ProjectUtils.getRealGroupId(project);
         String projectName = project.getName();
 
-        final String currentProjectVersion = project.getVersion().toString();
+        final String currentProjectVersion;
+        if (configuration.versionOverride() != null) {
+            currentProjectVersion = configuration.versionOverride();
+        } else {
+            currentProjectVersion = project.getVersion().toString();
+        }
         logger.info("Starting alignment task for project in directory '{}' with GAV {}:{}:{}",
                 project.getProjectDir().getName(), groupId, projectName, currentProjectVersion);
 

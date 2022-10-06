@@ -69,7 +69,8 @@ public final class TestUtils {
      * Creates a new Gradle runner with the given project root and system properties.
      *
      * @param projectRoot the root project of the build under test
-     * @param systemProps the system properties for the alignment run
+     * @param systemProps the system properties for the alignment run. If the property keys are not
+     *        prefixed with -D or -P then a -D will be automatically added.
      * @return the new Gradle runner
      */
     static GradleRunner createGradleRunner(File projectRoot, Map<String, String> systemProps) {
@@ -79,7 +80,7 @@ public final class TestUtils {
         }
         finalSystemProps.putAll(systemProps);
         final List<String> systemPropsList = finalSystemProps.entrySet().stream()
-                .map(e -> "-D" + e.getKey() + "=" + e.getValue())
+                .map(e -> (e.getKey().startsWith("-") ? e.getKey() : "-D" + e.getKey()) + "=" + e.getValue())
                 .collect(Collectors.toList());
         final List<String> allArguments = new ArrayList<>(systemPropsList.size() + 4);
         allArguments.add("-DgmeFunctionalTest=true"); // Used to indicate for the plugin to reinitialise the configuration.

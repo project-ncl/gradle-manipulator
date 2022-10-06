@@ -178,13 +178,6 @@ public class AlignmentTask extends DefaultTask {
         if (logger.isInfoEnabled() && !configOutput.get().getAndSet(true)) {
             logger.info("Configuration now has properties {}", configuration.dumpCurrentConfig());
         }
-        final String archivesBaseName = ProjectUtils.getArchivesBaseName(project);
-        if (archivesBaseName != null) {
-            logger.warn("Found archivesBaseName override ; resetting project name '{}' to '{}' ", project.getName(),
-                    archivesBaseName);
-            alignmentModel.findCorrespondingChild(project).setName(archivesBaseName);
-            ProjectUtils.updateNameField(project, archivesBaseName);
-        }
 
         String groupId = ProjectUtils.getRealGroupId(project);
         String projectName = project.getName();
@@ -201,6 +194,12 @@ public class AlignmentTask extends DefaultTask {
         // If processing the root project _and_ we have a Maven publication configured then verify artifactId / groupId.
         Project rootProject = project.getRootProject();
 
+        final String archivesBaseName = ProjectUtils.getArchivesBaseName(project);
+        if (archivesBaseName != null) {
+            logger.warn("Found archivesBaseName override ; resetting project name '{}' to '{}' ", project.getName(),
+                    archivesBaseName);
+            projectName = archivesBaseName;
+        }
         if (project.equals(rootProject)) {
             logger.debug("Processing root project in directory {}", root);
             PublishingExtension extension = rootProject.getExtensions().findByType(PublishingExtension.class);
@@ -638,7 +637,7 @@ public class AlignmentTask extends DefaultTask {
                     logger.debug("Kotlin build or DefaultProjectDependencyConstraint found ({}), not copying "
                             + "configuration",
                             configuration.getAllDependencyConstraints());
-                    lenient = configuration.getResolvedConfiguration().getLenientConfiguration();
+                    lenient = configuration.copy().getResolvedConfiguration().getLenientConfiguration();
                 }
 
                 // We don't care about modules of the project being unresolvable at this stage. Had we not excluded them,

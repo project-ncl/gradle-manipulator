@@ -201,6 +201,7 @@ subprojects {
     extra["slf4jVersion"] = "1.7.30"
     extra["systemRulesVersion"] = "1.19.0"
     extra["ivyVersion"] = "2.5.0"
+    extra["jgit"] = "6.3.0.202209071007-r"
 
     if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.4")) {
         apply(plugin = "com.diffplug.gradle.spotless")

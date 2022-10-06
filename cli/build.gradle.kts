@@ -34,7 +34,7 @@ dependencies {
     testImplementation("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
     testImplementation("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
     testImplementation("org.codehaus.plexus:plexus-archiver:4.2.3")
-    testImplementation("org.eclipse.jgit:org.eclipse.jgit:6.0.0.202111291000-r")
+    testImplementation("org.eclipse.jgit:org.eclipse.jgit:${project.extra.get("jgit")}")
 }
 
 tasks {

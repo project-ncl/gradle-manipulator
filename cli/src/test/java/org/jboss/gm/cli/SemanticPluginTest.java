@@ -52,6 +52,7 @@ public class SemanticPluginTest {
                 .setURI("https://github.com/linkedin/cruise-control.git")
                 .setDirectory(folder)
                 .setBranch("refs/tags/2.5.73")
+                .setDepth(1)
                 .call()) {
             System.out.println("Cloned CruiseControl to " + folder);
         }

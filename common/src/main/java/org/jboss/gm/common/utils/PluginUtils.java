@@ -33,12 +33,15 @@ public class PluginUtils {
     public static final String SEMANTIC_BUILD_VERSIONING = "net.vivin.gradle-semantic-build-versioning";
 
     static {
-        // Pair left is tasks, right is configuration
+        // Pair left is configuration, right is tasks
         SUPPORTED_PLUGINS.put("com.github.ben-manes.versions", Pair.of("dependencyUpdates", Collections.emptySet()));
         SUPPORTED_PLUGINS.put("com.github.burrunan.s3-build-cache", Pair.of("buildCache", Collections.emptySet()));
         SUPPORTED_PLUGINS.put("de.marcphilipp.nexus-publish",
                 Pair.of("nexusPublishing", Collections.singleton("publishToSonatype")));
         SUPPORTED_PLUGINS.put("gradle-enterprise", Pair.of("gradleEnterprise", Collections.emptySet()));
+        SUPPORTED_PLUGINS.put("com.gradle.enterprise", Pair.of("gradleEnterprise", Collections.emptySet()));
+        SUPPORTED_PLUGINS.put("com.gradle.common-custom-user-data-gradle-plugin", Pair.of(null,
+                Collections.emptySet()));
         SUPPORTED_PLUGINS.put("io.codearte.nexus-staging",
                 Pair.of("nexusStaging", Stream.of("closeRepository", "releaseRepository", "closeAndReleaseRepository").collect(
                         Collectors.toSet())));
@@ -108,14 +111,14 @@ public class PluginUtils {
         for (String plugin : plugins) {
             Pair<String, Set<String>> pair = SUPPORTED_PLUGINS.get(plugin);
             Set<String> tasks = new HashSet<>();
-            String configTask;
+            String configBlock;
 
             if (plugin.matches(".signing.")) {
-                configTask = "signing";
+                configBlock = "signing";
             } else if (pair == null) {
                 throw new ManipulationException("No support for removing plugin {}", plugin);
             } else {
-                configTask = pair.getLeft();
+                configBlock = pair.getLeft();
                 tasks = pair.getRight();
             }
 
@@ -140,55 +143,58 @@ public class PluginUtils {
                         removed |= lines.removeIf(i -> i.contains(t));
                     }
 
-                    // Remove any configuration block
                     String content = String.join(eol, lines);
-                    Matcher m = Pattern.compile("(^|\\s)+" + configTask + "(\\s|$)+").matcher(content);
-                    int startIndex = m.find() ? m.start() : -1;
 
-                    // If there is a configuration block...
-                    if (startIndex != -1) {
-                        int endIndex = m.end();
-                        int bracketCount = 1;
-                        boolean inComment = false;
-                        // Find the first opening bracket of the configuration block
-                        while (content.charAt(endIndex) != '{') {
-                            endIndex++;
-                        }
-                        // Calculate the end of the configuration block. Start from just after the first bracket
-                        for (int i = ++endIndex; i < content.length() && bracketCount != 0; i++, endIndex++) {
-                            char current = content.charAt(i);
-                            if (inComment) {
-                                // Nest this so we always hit in comment blocks until we are ready
-                                // to exit
-                                if (content.charAt(i + 1) == eol.charAt(0)) {
-                                    inComment = false;
-                                }
-                            } else if (current == '/' && content.charAt(i + 1) == '/') {
-                                inComment = true;
-                            } else if (current == '{') {
-                                bracketCount++;
-                            } else if (current == '}') {
-                                bracketCount--;
+                    if (configBlock != null) {
+                        // Remove any configuration block
+                        Pattern pattern = Pattern.compile("(^|\\s)+" + configBlock + "(\\s|$)+");
+                        Matcher m = pattern.matcher(content);
+
+                        while (m.find()) {
+                            int startIndex = m.start();
+                            int endIndex = m.end();
+                            int bracketCount = 1;
+                            boolean inComment = false;
+                            // Find the first opening bracket of the configuration block
+                            while (content.charAt(endIndex) != '{') {
+                                endIndex++;
                             }
+                            // Calculate the end of the configuration block. Start from just after the first bracket
+                            for (int i = ++endIndex; i < content.length() && bracketCount != 0; i++, endIndex++) {
+                                char current = content.charAt(i);
+                                if (inComment) {
+                                    // Nest this so we always hit in comment blocks until we are ready
+                                    // to exit
+                                    if (content.charAt(i + 1) == eol.charAt(0)) {
+                                        inComment = false;
+                                    }
+                                } else if (current == '/' && content.charAt(i + 1) == '/') {
+                                    inComment = true;
+                                } else if (current == '{') {
+                                    bracketCount++;
+                                } else if (current == '}') {
+                                    bracketCount--;
+                                }
+                            }
+                            if (bracketCount != 0) {
+                                throw new ManipulationException(
+                                        "Unable to locate configuration block {} to remove within {}", configBlock,
+                                        buildFile);
+                            }
+                            logger.debug("Removing plugin configuration block of {}",
+                                    content.substring(startIndex, endIndex));
+                            StringBuilder sb = new StringBuilder(content);
+                            // The string split/join can lose the trailing new line so force append it.
+                            sb.append(eol);
+                            content = sb.delete(startIndex, endIndex).toString();
+                            m = pattern.matcher(content);
+                            removed = true;
                         }
-                        if (bracketCount != 0) {
-                            throw new ManipulationException(
-                                    "Unable to locate configuration block {} to remove within {}",
-                                    configTask, buildFile);
-                        }
-                        logger.debug("Removing plugin configuration block of {}",
-                                content.substring(startIndex, endIndex));
-                        StringBuilder sb = new StringBuilder(content);
-                        // The string split/join can lose the trailing new line so force append it.
-                        sb.append(eol);
-                        content = sb.delete(startIndex, endIndex).toString();
-
-                        removed = true;
                     }
 
                     if (removed) {
                         logger.info("Removed instances of plugin {} with configuration block of {} from {}", plugin,
-                                configTask, buildFile);
+                                configBlock, buildFile);
                         FileUtils.writeStringToFile(buildFile, content, Charset.defaultCharset());
                     }
                 } catch (IOException e) {

@@ -484,6 +484,60 @@ public class PluginUtilsTest {
     }
 
     @Test
+    public void testRemoval8()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("build.gradle.kts");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "pluginManagement {\n" + "  plugins {\n"
+                        + "    id(\"com.bmuschko.docker-remote-api\") version \"7.3.0\"\n"
+                        + "    id(\"com.github.ben-manes.versions\") version \"0.42.0\"\n"
+                        + "    id(\"com.github.jk1.dependency-license-report\") version \"2.1\"\n"
+                        + "    id(\"com.google.cloud.tools.jib\") version \"3.2.1\"\n"
+                        + "    id(\"com.gradle.plugin-publish\") version \"1.0.0\"\n"
+                        + "    id(\"io.github.gradle-nexus.publish-plugin\") version \"1.1.0\"\n"
+                        + "    id(\"org.jetbrains.kotlin.jvm\") version \"1.6.20\"\n"
+                        + "    id(\"org.unbroken-dome.test-sets\") version \"4.0.0\"\n"
+                        + "    id(\"org.xbib.gradle.plugin.jflex\") version \"1.6.0\"\n"
+                        + "    id(\"org.unbroken-dome.xjc\") version \"2.0.0\"\n" + "  }\n" + "\n" + "  repositories {\n"
+                        + "    gradlePluginPortal()\n" + "    mavenCentral()\n" + "  }\n" + "}\n" + "\n" + "plugins {\n"
+                        + "  id(\"com.gradle.enterprise\") version \"3.11.1\"\n"
+                        + "  id(\"com.github.burrunan.s3-build-cache\") version \"1.3\"\n"
+                        + "  id(\"com.gradle.common-custom-user-data-gradle-plugin\") version \"1.8\"\n" + "}\n" + "\n"
+                        + "dependencyResolutionManagement {\n" + "  repositories {\n" + "    mavenCentral()\n"
+                        + "    mavenLocal()\n" + "  }\n" + "}\n" + "\n"
+                        + "val gradleEnterpriseServer = \"https://ge.opentelemetry.io\"\n"
+                        + "val isCI = System.getenv(\"CI\") != null\n"
+                        + "val geAccessKey = System.getenv(\"GRADLE_ENTERPRISE_ACCESS_KEY\") ?: \"\"\n" + "\n"
+                        + "// if GE access key is not given and we are in CI, then we publish to scans.gradle.com\n"
+                        + "val useScansGradleCom = isCI && geAccessKey.isEmpty()\n" + "\n" + "if (useScansGradleCom) {\n"
+                        + "  gradleEnterprise {\n" + "    buildScan {\n"
+                        + "      termsOfServiceUrl = \"https://gradle.com/terms-of-service\"\n"
+                        + "      termsOfServiceAgree = \"yes\"\n" + "      isUploadInBackground = !isCI\n"
+                        + "      publishAlways()\n" + "\n" + "      capture {\n" + "        isTaskInputFiles = true\n"
+                        + "      }\n" + "    }\n" + "  }\n" + "} else {\n" + "  gradleEnterprise {\n"
+                        + "    server = gradleEnterpriseServer\n" + "    buildScan {\n"
+                        + "      isUploadInBackground = !isCI\n" + "\n"
+                        + "      this as com.gradle.enterprise.gradleplugin.internal.extension.BuildScanExtensionWithHiddenFeatures\n"
+                        + "      publishIfAuthenticated()\n" + "      publishAlways()\n" + "\n" + "      capture {\n"
+                        + "        isTaskInputFiles = true\n" + "      }\n" + "\n"
+                        + "      gradle.startParameter.projectProperties[\"testJavaVersion\"]?.let { tag(it) }\n"
+                        + "      gradle.startParameter.projectProperties[\"testJavaVM\"]?.let { tag(it) }\n"
+                        + "      gradle.startParameter.projectProperties[\"smokeTestSuite\"]?.let {\n"
+                        + "        value(\"Smoke test suite\", it)\n" + "      }\n" + "    }\n" + "  }\n" + "}\n" + "\n"
+                        + "val geCacheUsername = System.getenv(\"GE_CACHE_USERNAME\") ?: \"\"\n",
+                Charset.defaultCharset());
+
+        HashSet<String> plugins = new LinkedHashSet<>();
+        plugins.add("com.gradle.common-custom-user-data-gradle-plugin");
+        plugins.add("com.gradle.enterprise");
+        PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
+
+        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        assertFalse(result.contains("gradleEnterprise {"));
+    }
+
+    @Test
     public void testCheckForSemanticPlugin1()
             throws IOException, ManipulationException {
 

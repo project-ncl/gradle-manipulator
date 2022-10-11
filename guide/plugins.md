@@ -15,17 +15,19 @@ a comma separated list. It will examine every `*.gradle` and `*.gradle.kts` in t
 
 The current supported list of plugins are:
 
-| Plugin ID    | Configuration Block | Tasks |
-|------------|---------------------|
-| `com.github.ben-manes.versions` | `dependencyUpdates`  | |
-| `com.github.burrunan.s3-build-cache` | `buildCache`  | |
-| `de.marcphilipp.nexus-publish` | `nexusPublishing`  | |
-| `gradle-enterprise` | `gradleEnterprise`  | |
-| `io.codearte.nexus-staging` | `nexusStaging`  | `closeRepository`, `releaseRepository`, `closeAndReleaseRepository` |
-| `io.github.gradle-nexus.publish-plugin` | `nexusPublishing`  | |
-| `nebula.publish-verification` | `nebulaPublishVerification`  | |
-| `signing` | `signing`  | |
-| `net.vivin.gradle-semantic-build-versioning` | `preRelease` | |
+| Plugin ID                                          | Configuration Block | Tasks |
+|----------------------------------------------------|---------------------|-------|
+| `com.github.ben-manes.versions`                    | `dependencyUpdates`  | |
+| `com.github.burrunan.s3-build-cache`               | `buildCache`  | |
+| `de.marcphilipp.nexus-publish`                     | `nexusPublishing`  | |
+| `gradle-enterprise`                                | `gradleEnterprise`  | |
+| `com.gradle.enterprise`                            | `gradleEnterprise`  | |
+| `com.gradle.common-custom-user-data-gradle-plugin` | | |
+| `io.codearte.nexus-staging`                        | `nexusStaging`  | `closeRepository`, `releaseRepository`, `closeAndReleaseRepository` |
+| `io.github.gradle-nexus.publish-plugin`            | `nexusPublishing`  | |
+| `nebula.publish-verification`                      | `nebulaPublishVerification`  | |
+| `signing`                                          | `signing`  | |
+| `net.vivin.gradle-semantic-build-versioning`       | `preRelease` | |
 
 <table bgcolor="#00ff99">
 <tr>

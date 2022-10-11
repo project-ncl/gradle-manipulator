@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.api.logging.LogLevel;
 import org.jboss.gm.common.rules.LoggingRule;
@@ -27,7 +28,7 @@ public class PluginUtilsTest {
     public final LoggingRule loggingRule = new LoggingRule(LogLevel.DEBUG);
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
@@ -591,9 +592,132 @@ public class PluginUtilsTest {
         PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
 
         String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+
         assertFalse(result.contains("SigningPlugin"));
         assertFalse(result.contains("io.codearte.nexus-staging"));
         assertFalse(result.contains("de.marcphilipp.nexus-publish"));
+        assertEquals(StringUtils.countMatches(result, '{'), StringUtils.countMatches(result, '}'));
+    }
+
+    @Test
+    public void testRemoval10()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("build.gradle.kts");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "        val publishToSonatype by tasks.getting\n"
+                        + "        releaseTask.configure {\n"
+                        + "            finalizedBy(publishToSonatype)\n"
+                        + "        }\n"
+                        + "        rootProject.tasks.named(\"closeAndReleaseRepository\") {\n"
+                        + "            mustRunAfter(publishToSonatype)\n"
+                        + "        }\n" + "\n"
+                        + "        tasks.withType(Sign::class) {\n"
+                        + "            onlyIf { System.getenv(\"CI\") != null }\n"
+                        + "        }\n",
+                Charset.defaultCharset());
+
+        HashSet<String> plugins = new LinkedHashSet<>();
+        plugins.add("ALL");
+        PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
+
+        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        assertFalse(result.contains("closeAndReleaseRepository"));
+    }
+
+    @Test
+    public void testRemoval11()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("build.gradle.kts");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "import com.google.protobuf.gradle.*\n" + "import de.marcphilipp.gradle.nexus.NexusPublishExtension\n\n"
+                        + "    plugins.withId(\"maven-publish\") {\n" + "        plugins.apply(\"signing\")\n" + "\n"
+                        + "        plugins.apply(\"de.marcphilipp.nexus-publish\")\n" + "\n"
+                        + "        configure<PublishingExtension> {\n" + "            publications {\n"
+                        + "                register<MavenPublication>(\"mavenPublication\") {\n"
+                        + "                    val release = findProperty(\"otel.release\")\n"
+                        + "                    if (release != null) {\n"
+                        + "                        val versionParts = version.split('-').toMutableList()\n"
+                        + "                        versionParts[0] += \"-${release}\"\n"
+                        + "                        version = versionParts.joinToString(\"-\")\n" + "                    }\n"
+                        + "                    groupId = \"io.opentelemetry\"\n" + "                    afterEvaluate {\n"
+                        + "                        // not available until evaluated.\n"
+                        + "                        artifactId = the<BasePluginConvention>().archivesBaseName\n"
+                        + "                        pom.description.set(project.description)\n" + "                    }\n"
+                        + "\n" + "                    plugins.withId(\"java-platform\") {\n"
+                        + "                        from(components[\"javaPlatform\"])\n" + "                    }\n"
+                        + "                    plugins.withId(\"java-library\") {\n"
+                        + "                        from(components[\"java\"])\n" + "                    }\n" + "\n"
+                        + "                    versionMapping {\n" + "                        allVariants {\n"
+                        + "                            fromResolutionResult()\n" + "                        }\n"
+                        + "                    }\n" + "\n" + "                    pom {\n"
+                        + "                        name.set(\"OpenTelemetry Java\")\n"
+                        + "                        url.set(\"https://github.com/open-telemetry/opentelemetry-java\")\n"
+                        + "\n" + "                        licenses {\n" + "                            license {\n"
+                        + "                                name.set(\"The Apache License, Version 2.0\")\n"
+                        + "                                url.set(\"http://www.apache.org/licenses/LICENSE-2.0.txt\")\n"
+                        + "                            }\n" + "                        }\n" + "\n"
+                        + "                        developers {\n" + "                            developer {\n"
+                        + "                                id.set(\"opentelemetry\")\n"
+                        + "                                name.set(\"OpenTelemetry\")\n"
+                        + "                                url.set(\"https://github.com/open-telemetry/community\")\n"
+                        + "                            }\n" + "                        }\n" + "\n"
+                        + "                        scm {\n"
+                        + "                            connection.set(\"scm:git:git@github.com:open-telemetry/opentelemetry-java.git\")\n"
+                        + "                            developerConnection.set(\"scm:git:git@github.com:open-telemetry/opentelemetry-java.git\")\n"
+                        + "                            url.set(\"git@github.com:open-telemetry/opentelemetry-java.git\")\n"
+                        + "                        }\n" + "                    }\n" + "                }\n"
+                        + "            }\n" + "        }\n" + "\n" + "        configure<NexusPublishExtension> {\n"
+                        + "            repositories {\n" + "                sonatype()\n" + "            }\n" + "\n"
+                        + "            connectTimeout.set(Duration.ofMinutes(5))\n"
+                        + "            clientTimeout.set(Duration.ofMinutes(5))\n" + "        }\n" + "\n"
+                        + "        val publishToSonatype by tasks.getting\n" + "        releaseTask.configure {\n"
+                        + "            finalizedBy(publishToSonatype)\n" + "        }\n"
+                        + "        rootProject.tasks.named(\"closeAndReleaseRepository\") {\n"
+                        + "            mustRunAfter(publishToSonatype)\n" + "        }\n" + "\n"
+                        + "        tasks.withType(Sign::class) {\n"
+                        + "            onlyIf { System.getenv(\"CI\") != null }\n" + "        }\n" + "\n"
+                        + "        configure<SigningExtension> {\n"
+                        + "            useInMemoryPgpKeys(System.getenv(\"GPG_PRIVATE_KEY\"), System.getenv(\"GPG_PASSWORD\"))\n"
+                        + "            sign(the<PublishingExtension>().publications[\"mavenPublication\"])\n"
+                        + "        }\n",
+                Charset.defaultCharset());
+
+        HashSet<String> plugins = new LinkedHashSet<>();
+        plugins.add("ALL");
+        PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
+
+        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        assertFalse(result.contains("SigningExtension"));
+        assertFalse(result.contains("NexusPublishExtension"));
+    }
+
+    @Test
+    public void testRemoval12()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("build.gradle.kts");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask\n"
+                        + "\n" + "plugins {\n" + "    `java-platform`\n" + "\n"
+                        + "    id(\"com.github.ben-manes.versions\")\n"
+                        + "}\ntasks {\n"
+                        + "    named<DependencyUpdatesTask>(\"dependencyUpdates\") {\n"
+                        + "        revision = \"release\"\n"
+                        + "        checkConstraints = true\n" + "\n"
+                        + "        rejectVersionIf {\n"
+                        + "            isNonStable(candidate.version)\n"
+                        + "        }\n" + "    }\n" + "}",
+                Charset.defaultCharset());
+
+        HashSet<String> plugins = new LinkedHashSet<>();
+        plugins.add("ALL");
+        PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
+
+        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        assertFalse(result.contains("DependencyUpdatesTask"));
+        assertFalse(result.contains("benmanes"));
     }
 
     @Test

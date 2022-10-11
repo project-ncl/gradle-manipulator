@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,41 +30,63 @@ import org.slf4j.Logger;
 import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 public class PluginUtils {
-    private static final Map<String, PluginReference> SUPPORTED_PLUGINS = new LinkedHashMap<>();
+    private static final Map<String, PluginReference> PLUGINS = new LinkedHashMap<>();
 
     public static final String SEMANTIC_BUILD_VERSIONING = "net.vivin.gradle-semantic-build-versioning";
 
     static {
-        // Pair left is configuration, right is tasks
-        SUPPORTED_PLUGINS.put("com.github.ben-manes.versions", new PluginReference("dependencyUpdates", "",
-                Collections.emptySet()));
-        SUPPORTED_PLUGINS.put("com.github.burrunan.s3-build-cache",
-                new PluginReference("buildCache", "", Collections.emptySet()));
-        SUPPORTED_PLUGINS.put("de.marcphilipp.nexus-publish",
-                new PluginReference("nexusPublishing", "", Collections.singleton("publishToSonatype")));
-        SUPPORTED_PLUGINS.put("gradle-enterprise", new PluginReference("gradleEnterprise", "", Collections.emptySet()));
-        SUPPORTED_PLUGINS.put("com.gradle.enterprise", new PluginReference("gradleEnterprise", "", Collections.emptySet()));
-        SUPPORTED_PLUGINS.put("com.gradle.common-custom-user-data-gradle-plugin", new PluginReference("", "",
-                Collections.emptySet()));
-        SUPPORTED_PLUGINS.put("io.codearte.nexus-staging",
+        PLUGINS.put("com.github.ben-manes.versions", new PluginReference("dependencyUpdates",
+                "", Collections.singleton("DependencyUpdatesTask"),
+                "", Collections.singleton("com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask")));
+        PLUGINS.put("com.github.burrunan.s3-build-cache",
+                new PluginReference("buildCache"));
+        PLUGINS.put("de.marcphilipp.nexus-publish",
+                new PluginReference("nexusPublishing", "", Collections.singleton("publishToSonatype"),
+                        "NexusPublishExtension",
+                        Collections.singleton("de.marcphilipp.gradle.nexus.NexusPublishExtension")));
+        PLUGINS.put("gradle-enterprise", new PluginReference("gradleEnterprise"));
+        PLUGINS.put("com.gradle.enterprise", new PluginReference("gradleEnterprise"));
+        PLUGINS.put("com.gradle.common-custom-user-data-gradle-plugin", new PluginReference(""));
+        PLUGINS.put("io.codearte.nexus-staging",
                 new PluginReference("nexusStaging",
                         "",
                         Stream.of("closeRepository", "releaseRepository", "closeAndReleaseRepository").collect(
-                                Collectors.toSet())));
-        SUPPORTED_PLUGINS.put("io.github.gradle-nexus.publish-plugin",
-                new PluginReference("nexusPublishing", "", Collections.emptySet()));
-        SUPPORTED_PLUGINS.put("nebula.publish-verification",
-                new PluginReference("nebulaPublishVerification", "", Collections.emptySet()));
-        SUPPORTED_PLUGINS.put("signing", new PluginReference("signing", "SigningPlugin", Collections.emptySet()));
-        SUPPORTED_PLUGINS.put(SEMANTIC_BUILD_VERSIONING, new PluginReference("preRelease", "", Collections.emptySet()));
+                                Collectors.toSet()),
+                        "",
+                        null));
+        PLUGINS.put("io.github.gradle-nexus.publish-plugin",
+                new PluginReference("nexusPublishing"));
+        PLUGINS.put("nebula.publish-verification",
+                new PluginReference("nebulaPublishVerification"));
+        PLUGINS.put("signing", new PluginReference("signing", "SigningPlugin", null, "", null));
+        PLUGINS.put(SEMANTIC_BUILD_VERSIONING, new PluginReference("preRelease"));
     }
 
+    /**
+     * This class encapsulates the different methods plugins can appear and therefore how they can be removed
+     */
     @Setter
     @RequiredArgsConstructor
     public static class PluginReference {
+
+        public PluginReference(String configBlock) {
+            this.configBlock = configBlock;
+            type = "";
+            tasks = null;
+            configureExtension = "";
+            imports = null;
+        }
+
         private final String configBlock;
+
+        // For finding blocks like plugins.withType...
         private final String type;
+
         private final Set<String> tasks;
+
+        private final String configureExtension;
+
+        private final Set<String> imports;
     }
 
     public enum DokkaVersion {
@@ -115,7 +136,7 @@ public class PluginUtils {
         } else if (plugins.contains("ALL")) {
             // Shortcut to represent removing any/all of the supported plugins
             plugins.clear();
-            plugins.addAll(SUPPORTED_PLUGINS.keySet());
+            plugins.addAll(PLUGINS.keySet());
         }
 
         // As the configuration block is named the same as the plugin we differentiate via the
@@ -126,21 +147,27 @@ public class PluginUtils {
         }
 
         for (String plugin : plugins) {
-            PluginReference pluginReference = SUPPORTED_PLUGINS.get(plugin);
+            PluginReference pluginReference = PLUGINS.get(plugin);
             Set<String> tasks;
             String configBlock;
             String pluginType;
+            String configureExtension;
+            Set<String> pluginImports;
 
             if (plugin.matches(".signing.")) {
                 configBlock = "signing";
                 tasks = Collections.emptySet();
                 pluginType = "SigningPlugin";
+                pluginImports = Collections.emptySet();
+                configureExtension = "SigningExtension";
             } else if (pluginReference == null) {
                 throw new ManipulationException("No support for removing plugin {}", plugin);
             } else {
                 configBlock = pluginReference.configBlock;
-                tasks = pluginReference.tasks;
+                tasks = pluginReference.tasks == null ? Collections.emptySet() : pluginReference.tasks;
                 pluginType = pluginReference.type;
+                pluginImports = pluginReference.imports == null ? Collections.emptySet() : pluginReference.imports;
+                configureExtension = pluginReference.configureExtension;
             }
 
             final Collection<File> files = FileUtils.listFiles(target,
@@ -160,33 +187,60 @@ public class PluginUtils {
                             && !i.contains("{"));
 
                     // Remove any task references.
-                    // TODO: Handle if the task reference spans multiple lines
-                    for (String t : Objects.requireNonNull(tasks)) {
-                        removed |= lines.removeIf(i -> i.contains(t));
+                    for (String t : tasks) {
+                        removed |= lines.removeIf(i -> i.contains(t) && !i.contains("{"));
+                    }
+
+                    // Remove any imports.
+                    for (String pluginImport : pluginImports) {
+                        removed |= lines.removeIf(i -> i.contains("import " + pluginImport));
                     }
 
                     String content = String.join(eol, lines);
+                    StringBuilder contentBuilder;
 
+                    // Remove any configuration block
                     if (isNotEmpty(configBlock)) {
-                        // Remove any configuration block
-                        StringBuilder contentBuilder = new StringBuilder(content);
+                        contentBuilder = new StringBuilder(content);
                         removed |= removeBlock(logger, buildFile, eol, contentBuilder, "(^|\\s)+" + configBlock +
                                 "(\\s|$)+");
                         content = contentBuilder.toString();
                     }
 
+                    // Remove withType blocks
                     if (isNotEmpty(pluginType)) {
-                        StringBuilder contentBuilder = new StringBuilder(content);
+                        contentBuilder = new StringBuilder(content);
                         removed |= removeBlock(logger, buildFile, eol, contentBuilder,
                                 "plugins.withType<" + pluginType + ">");
                         content = contentBuilder.toString();
                     }
 
-                    // This is to remove blocks like plugins.withId("de.marcphilipp.nexus-publish") { ... }
-                    StringBuilder contentBuilder = new StringBuilder(content);
+                    // Remove withId blocks e.g.
+                    // plugins.withId("de.marcphilipp.nexus-publish") { ... }
+                    contentBuilder = new StringBuilder(content);
                     removed |= removeBlock(logger, buildFile, eol, contentBuilder,
                             "plugins.withId\\(\"" + plugin + "\"\\)");
                     content = contentBuilder.toString();
+
+                    // Remove configure extension blocks e.g.
+                    // configure<NexusPublishExtension> {
+                    if (isNotEmpty(configureExtension)) {
+                        contentBuilder = new StringBuilder(content);
+                        removed |= removeBlock(logger, buildFile, eol, contentBuilder,
+                                "configure<" + configureExtension + ">");
+                        content = contentBuilder.toString();
+                    }
+
+                    // Remove any multi-line task references e.g.
+                    // rootProject.tasks.named("closeAndReleaseRepository") {
+                    for (String t : tasks) {
+                        contentBuilder = new StringBuilder(content);
+                        removed |= removeBlock(logger, buildFile, eol, contentBuilder,
+                                "(?m)^.*\\(\"" + t + "\"\\)");
+                        removed |= removeBlock(logger, buildFile, eol, contentBuilder,
+                                "(?m)^.*named<" + t + ">");
+                        content = contentBuilder.toString();
+                    }
 
                     if (removed) {
                         logger.info("Removed instances of plugin {} with configuration block of {} from {}", plugin,
@@ -207,7 +261,7 @@ public class PluginUtils {
      * @return a map of supported plugins
      */
     public static Map<String, PluginReference> getSupportedPlugins() {
-        return SUPPORTED_PLUGINS;
+        return PLUGINS;
     }
 
     public static boolean checkForSemanticBuildVersioning(Logger logger, File target)

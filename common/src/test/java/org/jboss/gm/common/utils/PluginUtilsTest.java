@@ -538,6 +538,65 @@ public class PluginUtilsTest {
     }
 
     @Test
+    public void testRemoval9()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("build.gradle.kts");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "allprojects {\n" + "    group = \"org.postgresql\"\n"
+                        + "    version = buildVersion\n" + "\n"
+                        + "    apply(plugin = \"com.github.vlsi.gradle-extensions\")\n"
+                        + "\n"
+                        + "    plugins.withId(\"de.marcphilipp.nexus-publish\") {\n"
+                        + "        configure<de.marcphilipp.gradle.nexus.NexusPublishExtension> {\n"
+                        + "            clientTimeout.set(java.time.Duration.ofMinutes(15))\n"
+                        + "        }\n" + "    }\n" + "\n"
+                        + "    plugins.withId(\"io.codearte.nexus-staging\") {\n"
+                        + "        configure<io.codearte.gradle.nexus.NexusStagingExtension> {\n"
+                        + "            numberOfRetries = 20 * 60 / 2\n"
+                        + "            delayBetweenRetriesInMillis = 2000\n"
+                        + "        }\n" + "    }\n" + "\n"
+                        + "    repositories {\n"
+                        + "        if (enableMavenLocal) {\n"
+                        + "            mavenLocal()\n" + "        }\n"
+                        + "        mavenCentral()\n" + "    }\n" + "\n"
+                        + "    val javaMainUsed = file(\"src/main/java\").isDirectory\n"
+                        + "\n" + "    plugins.withId(\"java-library\") {\n"
+                        + "        dependencies {\n"
+                        + "            \"implementation\"(platform(project(\":bom\")))\n"
+                        + "        }\n" + "    }\n" + "\n"
+                        + "    val kotlinMainUsed = file(\"src/main/kotlin\").isDirectory\n"
+                        + "\n"
+                        + "    tasks.configureEach<AbstractArchiveTask> {\n"
+                        + "        // Ensure builds are reproducible\n"
+                        + "        isPreserveFileTimestamps = false\n"
+                        + "        isReproducibleFileOrder = true\n"
+                        + "        dirMode = \"775\".toInt(8)\n"
+                        + "        fileMode = \"664\".toInt(8)\n" + "    }\n"
+                        + "\n" + "    plugins.withType<SigningPlugin> {\n"
+                        + "        afterEvaluate {\n"
+                        + "            configure<SigningExtension> {\n"
+                        + "                val release = rootProject.releaseParams.release.get()\n"
+                        + "                // Note it would still try to sign the artifacts,\n"
+                        + "                // however it would fail only when signing a RELEASE version fails\n"
+                        + "                isRequired = release\n"
+                        + "                if (useGpgCmd) {\n"
+                        + "                    useGpgCmd()\n"
+                        + "                }\n" + "            }\n"
+                        + "        }\n" + "    }\n" + "}\n",
+                Charset.defaultCharset());
+
+        HashSet<String> plugins = new LinkedHashSet<>();
+        plugins.add("ALL");
+        PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
+
+        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        assertFalse(result.contains("SigningPlugin"));
+        assertFalse(result.contains("io.codearte.nexus-staging"));
+        assertFalse(result.contains("de.marcphilipp.nexus-publish"));
+    }
+
+    @Test
     public void testCheckForSemanticPlugin1()
             throws IOException, ManipulationException {
 

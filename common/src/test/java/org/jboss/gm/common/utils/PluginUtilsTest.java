@@ -28,7 +28,7 @@ public class PluginUtilsTest {
     public final LoggingRule loggingRule = new LoggingRule(LogLevel.DEBUG);
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
@@ -322,7 +322,14 @@ public class PluginUtilsTest {
                         + "    id 'io.codearte.nexus-staging' version '0.20.0'\n"
                         + "    id \"de.marcphilipp.nexus-publish\" version \"0.2.0\" apply false\n"
                         + "    id 'com.github.ben-manes.versions' version '0.21.0'\n"
-                        + "    id 'net.researchgate.release' version '2.6.0'\n" + "}\n",
+                        + "    id 'net.researchgate.release' version '2.6.0'\n" + "}\n"
+                        + "subprojects {\n"
+                        + "    apply plugin: 'ru.vyarus.animalsniffer'\n"
+                        + "    apply plugin: 'com.github.hierynomus.license'\n"
+                        + "    apply plugin: 'java'\n"
+                        + "    apply plugin: 'maven'\n"
+                        + "    apply plugin: 'checkstyle'\n"
+                        + "    apply plugin: 'de.marcphilipp.nexus-publish'\n",
                 Charset.defaultCharset());
 
         File subfolder = folder.newFolder();
@@ -334,10 +341,13 @@ public class PluginUtilsTest {
         // Avoid singleton as the set is manipulated within the method
         PluginUtils.pluginRemoval(logger, target.getParentFile(), new LinkedHashSet<>(Collections.singleton("ALL")));
 
+        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+
         assertTrue(systemOutRule.getLog()
                 .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
-
-        assertFalse(FileUtils.readFileToString(target, Charset.defaultCharset()).contains("com.github.ben-manes.versions"));
+        assertTrue(systemOutRule.getLog().contains("Replacing nexus-publish apply plugin with maven-publish"));
+        assertTrue(result.contains("apply plugin: \"maven-publish\""));
+        assertFalse(result.contains("com.github.ben-manes.versions"));
         assertTrue(FileUtils.readFileToString(subtarget, Charset.defaultCharset()).trim().isEmpty());
     }
 
@@ -456,13 +466,16 @@ public class PluginUtilsTest {
 
         File target = folder.newFile("build.gradle.kts");
         org.apache.commons.io.FileUtils.writeStringToFile(target,
-                "plugins {\n" + "  `maven-publish`\n" + "  signing\n" + "}\n"
+                "plugins {\n"
+                        + "  `maven-publish`\n"
+                        + "  signing\n"
+                        + "}\n"
                         + "// Sign only if we have a key to do so\n"
                         + "val signingKey: String? = System.getenv(\"GPG_PRIVATE_KEY\")\n"
                         + "// Stub out entire signing block off of CI since Gradle provides no way of lazy configuration of\n"
                         + "// signing tasks.\n"
                         + "if (System.getenv(\"CI\") != null && signingKey != null) {\n"
-                        + "  signing {\n"
+                        + "  signing \n {\n"
                         + "    useInMemoryPgpKeys(signingKey, System.getenv(\"GPG_PASSWORD\"))\n"
                         + "    sign(publishing.publications[\"maven\"])\n" + "  }\n"
                         + "}\n",
@@ -475,11 +488,14 @@ public class PluginUtilsTest {
         assertTrue(systemOutRule.getLog()
                 .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
 
+        System.out.println(FileUtils.readFileToString(target, Charset.defaultCharset()));
         assertTrue(FileUtils.readFileToString(target, Charset.defaultCharset()).contains("plugins {\n"
                 + "  `maven-publish`\n"
-                + "}\n"
+                + "  signing\n" + "}\n"
                 + "// Sign only if we have a key to do so\n"
                 + "val signingKey: String? = System.getenv(\"GPG_PRIVATE_KEY\")\n"
+                + "// Stub out entire signing block off of CI since Gradle provides no way of lazy configuration of\n"
+                + "// signing tasks.\n"
                 + "if (System.getenv(\"CI\") != null && signingKey != null) {\n"
                 + "}\n"));
     }
@@ -716,6 +732,7 @@ public class PluginUtilsTest {
         PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
 
         String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+
         assertFalse(result.contains("DependencyUpdatesTask"));
         assertFalse(result.contains("benmanes"));
     }

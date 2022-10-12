@@ -20,6 +20,7 @@ import lombok.Setter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.util.VersionUtils;
 import org.commonjava.maven.atlas.ident.version.InvalidVersionSpecificationException;
 import org.commonjava.maven.atlas.ident.version.VersionSpec;
@@ -178,12 +179,23 @@ public class PluginUtils {
                     List<String> lines = org.apache.commons.io.FileUtils.readLines(buildFile, Charset.defaultCharset());
                     String eol = getEOL(logger, buildFile);
 
+                    for (int i = 0; i < lines.size(); i++) {
+                        // Special case handling - https://github.com/marcphilipp/nexus-publish-plugin implicitly
+                        // applies the maven-publish plugin so apply it manually to avoid breakages
+                        if (plugin.equals("de.marcphilipp.nexus-publish") &&
+                                lines.get(i).matches("\\s*apply.*" + plugin + ".*")) {
+                            logger.debug("Replacing nexus-publish apply plugin with maven-publish");
+                            if (buildFile.getName().endsWith(".gradle")) {
+                                lines.set(i, "apply plugin: \"maven-publish\"");
+                            } else {
+                                lines.set(i, "apply(plugin = \"maven-publish\")");
+                            }
+                            break;
+                        }
+                    }
                     // Remove the plugin
                     boolean removed = lines.removeIf(i -> i.contains(plugin) && !i.contains("plugins.withId"));
-                    // This handles the scenario, often in Kotlin build files where the plugin may be just
-                    // its name i.e. signing without any quotes or brackets
-                    removed |= lines.removeIf(i -> i.matches(".*\\s+" +
-                            plugin.replace("\"", "") + "(\\s|$)+.*")
+                    removed |= lines.removeIf(i -> i.matches(".*\\s+" + plugin + "(\\s|$)+.*")
                             && !i.contains("{"));
 
                     // Remove any task references.
@@ -202,7 +214,7 @@ public class PluginUtils {
                     // Remove any configuration block
                     if (isNotEmpty(configBlock)) {
                         contentBuilder = new StringBuilder(content);
-                        removed |= removeBlock(logger, buildFile, eol, contentBuilder, "(^|\\s)+" + configBlock +
+                        removed |= removeBlock(logger, buildFile, eol, contentBuilder, "(?m)(^|\\s)+" + configBlock +
                                 "(\\s|$)+");
                         content = contentBuilder.toString();
                     }
@@ -238,7 +250,7 @@ public class PluginUtils {
                         removed |= removeBlock(logger, buildFile, eol, contentBuilder,
                                 "(?m)^.*\\(\"" + t + "\"\\)");
                         removed |= removeBlock(logger, buildFile, eol, contentBuilder,
-                                "(?m)^.*named<" + t + ">");
+                                "(?m)^.*named<" + t + ">.*?\\s");
                         content = contentBuilder.toString();
                     }
 
@@ -342,9 +354,16 @@ public class PluginUtils {
             int bracketCount = 1;
             boolean inComment = false;
             // Find the first opening bracket of the configuration block
-            while (content.charAt(endIndex) != '{') {
+            while (Character.isWhitespace(content.charAt(endIndex)) && content.charAt(endIndex) != '{') {
                 endIndex++;
             }
+            if (content.charAt(endIndex) != '{') {
+                // We couldn't find a configuration block. This might be something embedded in a comment or a Kotlin
+                // plugin enablement e.g.
+                // plugins { signing }
+                continue;
+            }
+
             // Calculate the end of the configuration block. Start from just after the first bracket
             for (int i = ++endIndex; i < content.length() && bracketCount != 0; i++, endIndex++) {
                 char current = content.charAt(i);

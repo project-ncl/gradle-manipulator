@@ -20,7 +20,6 @@ import lombok.Setter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.util.VersionUtils;
 import org.commonjava.maven.atlas.ident.version.InvalidVersionSpecificationException;
 import org.commonjava.maven.atlas.ident.version.VersionSpec;
@@ -47,6 +46,8 @@ public class PluginUtils {
                         Collections.singleton("de.marcphilipp.gradle.nexus.NexusPublishExtension")));
         PLUGINS.put("gradle-enterprise", new PluginReference("gradleEnterprise"));
         PLUGINS.put("com.gradle.enterprise", new PluginReference("gradleEnterprise"));
+        // Following two require Gradle Enterprise plugin so remove these as well.
+        PLUGINS.put("io.spring.ge.conventions", new PluginReference(""));
         PLUGINS.put("com.gradle.common-custom-user-data-gradle-plugin", new PluginReference(""));
         PLUGINS.put("io.codearte.nexus-staging",
                 new PluginReference("nexusStaging",
@@ -80,13 +81,16 @@ public class PluginUtils {
 
         private final String configBlock;
 
-        // For finding blocks like plugins.withType...
+        // For finding blocks like plugins.withType<SigningPlugin>
         private final String type;
 
+        // Tasks this plugin provides
         private final Set<String> tasks;
 
+        // Configuration extension block e.g. configure<NexusPublishExtension>
         private final String configureExtension;
 
+        // Imports that refer to this plugin
         private final Set<String> imports;
     }
 
@@ -141,7 +145,9 @@ public class PluginUtils {
         }
 
         // As the configuration block is named the same as the plugin we differentiate via the
-        // potential quoting mechanism to avoid problems when parsing the file to remove the plugins
+        // potential quoting mechanism to avoid problems when parsing the file to remove the plugins.
+        // This will likely leave in Kotlin build files items like plugins { signing } but that
+        // is harmless and has been seen to be required for e.g. opentelemetry-java-instrumentation
         if (plugins.remove("signing")) {
             plugins.add("\"signing\"");
             plugins.add("'signing'");

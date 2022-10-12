@@ -15,19 +15,21 @@ a comma separated list. It will examine every `*.gradle` and `*.gradle.kts` in t
 
 The current supported list of plugins are:
 
-| Plugin ID                                          | Configuration Block | Tasks |
-|----------------------------------------------------|---------------------|-------|
-| `com.github.ben-manes.versions`                    | `dependencyUpdates`  | |
-| `com.github.burrunan.s3-build-cache`               | `buildCache`  | |
-| `de.marcphilipp.nexus-publish`                     | `nexusPublishing`  | |
-| `gradle-enterprise`                                | `gradleEnterprise`  | |
-| `com.gradle.enterprise`                            | `gradleEnterprise`  | |
-| `com.gradle.common-custom-user-data-gradle-plugin` | | |
-| `io.codearte.nexus-staging`                        | `nexusStaging`  | `closeRepository`, `releaseRepository`, `closeAndReleaseRepository` |
-| `io.github.gradle-nexus.publish-plugin`            | `nexusPublishing`  | |
-| `nebula.publish-verification`                      | `nebulaPublishVerification`  | |
-| `signing`                                          | `signing`  | |
-| `net.vivin.gradle-semantic-build-versioning`       | `preRelease` | |
+| Plugin ID                                           | Configuration Block         | Tasks                                                               |
+|-----------------------------------------------------|-----------------------------|---------------------------------------------------------------------|
+| `com.github.ben-manes.versions`                     | `dependencyUpdates`         | `DependencyUpdatesTask`                                             |
+| `com.github.burrunan.s3-build-cache`                | `buildCache`                |                                                                     |
+| `com.gradle.common-custom-user-data-gradle-plugin`  |                             |                                                                     |
+| `de.marcphilipp.nexus-publish`                      | `nexusPublishing`           |                                                                     |
+| `gradle-enterprise`                                 | `gradleEnterprise`          |                                                                     |
+| `com.gradle.enterprise`                             | `gradleEnterprise`          |                                                                     |
+| `com.gradle.common-custom-user-data-gradle-plugin`  |                             |                                                                     |
+| `io.codearte.nexus-staging`                         | `nexusStaging`              | `closeRepository`, `releaseRepository`, `closeAndReleaseRepository` |
+| `io.github.gradle-nexus.publish-plugin`             | `nexusPublishing`           | `publishToSonatype`                                                 |
+| `io.spring.ge.conventions`                          |                             |                                                                     |
+| `nebula.publish-verification`                       | `nebulaPublishVerification` |                                                                     |
+| `signing`                                           | `signing`                   |                                                                     |
+| `net.vivin.gradle-semantic-build-versioning`        | `preRelease`                |                                                                     |
 
 <table bgcolor="#00ff99">
 <tr>
@@ -64,7 +66,7 @@ Tasks are also removed if they are mentioned within the build scripts. Note that
 publish.finalizedBy closeAndReleaseRepository
 ```
 
-### Gradle Semanatic Build Versioning Plugin
+### Gradle Semantic Build Versioning Plugin
 
 This plugin (see [here](https://github.com/vivin/gradle-semantic-build-versioning)) provides support for
 automatic semantic versioning of builds based off git commit information.

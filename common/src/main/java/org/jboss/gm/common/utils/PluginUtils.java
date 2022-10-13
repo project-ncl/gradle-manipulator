@@ -71,12 +71,14 @@ public class PluginUtils {
             } catch (InvalidVersionSpecificationException e) {
                 throw new ManipulationException("Unable to parse version: {}", version);
             }
-            if (MINIMUM.version.compareTo(v) >= 0) {
-                return MINIMUM;
-            } else if (v.compareTo(POST_ONE.version) >= 0) {
+            if (v.compareTo(POST_ONE.version) >= 0) {
                 return POST_ONE;
+            } else if (v.compareTo(TEN.version) >= 0) {
+                return TEN;
+            } else if (MINIMUM.version.compareTo(v) >= 0) {
+                return MINIMUM;
             }
-            return TEN;
+            return NONE;
         }
     }
 

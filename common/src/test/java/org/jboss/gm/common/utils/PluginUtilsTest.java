@@ -633,7 +633,8 @@ public class PluginUtilsTest {
 
     @Test
     public void testParseDokkaVersion() throws ManipulationException {
-        assertEquals(PluginUtils.DokkaVersion.parseVersion("0.9.17"), PluginUtils.DokkaVersion.MINIMUM);
+        assertEquals(PluginUtils.DokkaVersion.parseVersion("0.9.17"), PluginUtils.DokkaVersion.NONE);
+        assertEquals(PluginUtils.DokkaVersion.parseVersion("0.9.18"), PluginUtils.DokkaVersion.MINIMUM);
         assertEquals(PluginUtils.DokkaVersion.parseVersion("0.10.1"), PluginUtils.DokkaVersion.TEN);
         assertEquals(PluginUtils.DokkaVersion.parseVersion("1.6.0"), PluginUtils.DokkaVersion.POST_ONE);
     }

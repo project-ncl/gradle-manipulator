@@ -738,6 +738,62 @@ public class PluginUtilsTest {
     }
 
     @Test
+    // https://github.com/ben-manes/caffeine/blob/eda7b1084ebfac76a7e60e8915cc16a23267ff53/settings.gradle#L28
+    public void testRemoval13()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("build.gradle.kts");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "// See https://github.com/vlsi/vlsi-release-plugins\n"
+                        + "buildscript {\n" + "  dependencies {\n"
+                        + "    classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.44.0') {\n"
+                        + "      // Gradle ships kotlin-stdlib which is good enough\n"
+                        + "      exclude(group: \"org.jetbrains.kotlin\", module:\"kotlin-stdlib\")\n"
+                        + "    }\n" + "  }\n" + "  repositories {\n"
+                        + "    gradlePluginPortal()\n" + "  }\n" + "}\n" + "\n"
+                        + "plugins {\n"
+                        + "  id \"com.gradle.enterprise\" version \"3.0\"\n"
+                        + "}\n" + "\n" + "rootProject.name = 'caffeine'\n" + "\n"
+                        + "include 'caffeine'\n" + "include 'guava'\n"
+                        + "include 'jcache'\n" + "include 'simulator'\n" + "\n"
+                        + "// Note: we need to verify the checksum for checksum-dependency-plugin itself\n"
+                        + "def expectedSha512 = [\n"
+                        + "  \"18BC69198D8A217BD231A1A35F0A15543236F8F955DC94F49C6C0E438C3EB2B0A522ED4D5218EFE75619013C492EE97071FCE241EB1CA70E563754176DDAA6DD\":\n"
+                        + "    \"gradle-enterprise-gradle-plugin-3.0.jar\",\n"
+                        + "  \"43BC9061DFDECA0C421EDF4A76E380413920E788EF01751C81BDC004BD28761FBD4A3F23EA9146ECEDF10C0F85B7BE9A857E9D489A95476525565152E0314B5B\":\n"
+                        + "    \"bcpg-jdk15on-1.62.jar\",\n"
+                        + "  \"2BA6A5DEC9C8DAC2EB427A65815EB3A9ADAF4D42D476B136F37CD57E6D013BF4E9140394ABEEA81E42FBDB8FC59228C7B85C549ED294123BF898A7D048B3BD95\":\n"
+                        + "    \"bcprov-jdk15on-1.62.jar\",\n"
+                        + "  \"17DAAF511BE98F99007D7C6B3762C9F73ADD99EAB1D222985018B0258EFBE12841BBFB8F213A78AA5300F7A3618ACF252F2EEAD196DF3F8115B9F5ED888FE827\":\n"
+                        + "    \"okhttp-4.1.0.jar\",\n"
+                        + "  \"93E7A41BE44CC17FB500EA5CD84D515204C180AEC934491D11FC6A71DAEA761FB0EECEF865D6FD5C3D88AAF55DCE3C2C424BE5BA5D43BEBF48D05F1FA63FA8A7\":\n"
+                        + "    \"okio-2.2.2.jar\",\n"
+                        + "  \"A86B9B2CBA7BA99860EF2F23555F1E1C1D5CB790B1C47536C32FE7A0FDA48A55694A5457B9F42C60B4725F095B90506324BDE0299F08E9E76B5944FB308375AC\":\n"
+                        + "    \"checksum-dependency-plugin-1.44.0.jar\",\n"
+                        + "]\n" + "\n" + "def sha512(File file) {\n"
+                        + "  def md = java.security.MessageDigest.getInstance('SHA-512')\n"
+                        + "  file.eachByte(8192) { buffer, length ->\n"
+                        + "     md.update(buffer, 0, length)\n" + "  }\n"
+                        + "  new BigInteger(1, md.digest()).toString(16).toUpperCase()\n"
+                        + "}\n"
+                        + "buildScan {\n"
+                        + "  termsOfServiceAgree = 'yes'\n"
+                        + "  termsOfServiceUrl = 'https://gradle.com/terms-of-service'\n" +
+                        "}\n\n",
+                Charset.defaultCharset());
+
+        HashSet<String> plugins = new LinkedHashSet<>();
+        plugins.add("ALL");
+        PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
+
+        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+
+        assertFalse(result.contains("id \"com.gradle.enterprise\" version \"3.0\""));
+        assertTrue(result.contains("gradle-enterprise-gradle-plugin"));
+        assertFalse(result.contains("buildScan"));
+    }
+
+    @Test
     public void testCheckForSemanticPlugin1()
             throws IOException, ManipulationException {
 

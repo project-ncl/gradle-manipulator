@@ -259,9 +259,12 @@ public class AlignmentTask extends DefaultTask {
             }
 
             AppliedPlugin ap = project.getPluginManager().findPlugin(DOKKA);
-            if (ap != null) {
+            if (configuration.dokkaPlugin() && ap != null) {
+                if (project.getPluginManager().findPlugin("com.vanniktech.maven.publish") != null) {
+                    logger.warn("Located https://github.com/vanniktech/gradle-maven-publish-plugin ; this embeds "
+                            + "Dokka plugin and may require manual changes");
+                }
                 logger.debug("Plugin {} has been applied to {}", ap.getId(), project.getName());
-
                 @SuppressWarnings("rawtypes")
                 Plugin p = ((DefaultPluginManager) project.getPluginManager()).getPluginContainer().findPlugin(DOKKA);
                 String path = p.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -269,7 +272,7 @@ public class AlignmentTask extends DefaultTask {
                 if (m.matches()) {
                     // TODO: What about if multiple Dokka versions are used? Currently NYI.
                     cache.setDokkaVersion(DokkaVersion.parseVersion(m.group(1)));
-                    logger.debug("Found dokkaVersion {}", cache.getDokkaVersion());
+                    logger.debug("Found dokkaVersion {} : {}", m.group(1), cache.getDokkaVersion());
                 } else {
                     logger.warn("Found plugin {} but unable to parse version from {}", p, path);
                 }

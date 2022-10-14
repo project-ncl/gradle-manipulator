@@ -165,6 +165,10 @@ public interface Configuration extends Accessible, Reloadable {
     @Key("pluginRemoval")
     Set<String> pluginRemoval();
 
+    @Key("dokkaPlugin")
+    @DefaultValue("true")
+    Boolean dokkaPlugin();
+
     @Key("publishPluginHooks")
     @DefaultValue("elasticsearch.esplugin")
     String[] publishPluginHooks();

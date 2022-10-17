@@ -97,9 +97,9 @@ It is possible to disable this through the configuration key `dokkaPlugin` (defa
 The gradle-maven-publish-plugin implicitly injects other plugins such as the signing and dokka
 plugins. In version 0.8.0 it injects 0.9.17 of the Dokka plugin. Currently GME is not able to change
 this injected version to 0.9.18 (unlike a directly included 0.9.17 version) and therefore this can
-lead to problems with the GME injected ode. It is currently recommended that the version is changed
+lead to problems with the GME injected code. It is currently recommended that the version is changed
 from 0.8.0 to >= 0.9.0 which injects the dokka plugin at version 0.9.18.
 
-#### Publish Plugin Hook
+### Publish Plugin Hook
 
 Certain project builds don't apply the publish plugin directly (be it the legacy or current one); instead they implement their own 'build plugin' (e.g. within `buildSrc`) that itself then applies plugins. This can lead to the situation where this custom plugin is applied and actioned after the GME tooling plugin which therefore does not detect any publishing plugins. It is possible to list those custom plugins as 'hooks' that GME will detect, and attempt to customise the publishing again. It is a comma separated list with a single default entry of `elasticsearch.esplugin`.

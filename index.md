@@ -139,10 +139,6 @@ Even though the alignment is successful at this point, the build itself will fai
 
 For more details on Gradle dependencies and configurations, see [Declaring dependencies](https://docs.gradle.org/current/userguide/declaring_dependencies.html) and [Resolvable and consumable configurations](https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:resolvable-consumable-configs) in the Gradle user manual.
 
-#### Publish Plugin Hook
-
-Certain project builds don't apply the publish plugin directly (be it the legacy or current one); instead they implement their own 'build plugin' (e.g. within `buildSrc`) that itself then applies plugins. This can lead to the situation where this custom plugin is applied and actioned after the GME tooling plugin which therefore does not detect any publishing plugins. It is possible to list those custom plugins as 'hooks' that GME will detect, and attempt to customise the publishing again. It is a comma separated list with a single default entry of `elasticsearch.esplugin`.
-
 ### General Configuration
 
 #### Disabling the Plugins

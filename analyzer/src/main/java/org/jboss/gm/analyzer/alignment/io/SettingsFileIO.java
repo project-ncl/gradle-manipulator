@@ -105,7 +105,7 @@ public class SettingsFileIO {
                 } else if (settingsContents.contains("pluginManagement")) {
                     // Existing pluginManagement but no strategy so inject that
                     settingsContents = settingsContents.replaceFirst("(?s)pluginManagement(\\s|$)+\\{",
-                            "pluginManagement {\nresolutionStrategy {\n eachPlugin { if (requested.id.id == \"org.jetbrains.dokka\") { useVersion(\"0.9.18\") } }\n");
+                            "pluginManagement {\nresolutionStrategy {\n eachPlugin { if (requested.id.id == \"org.jetbrains.dokka\") { useVersion(\"0.9.18\") } } }\n");
                 } else {
                     // No pluginManagement so inject everything.
                     settingsContents = "pluginManagement { resolutionStrategy { eachPlugin { if (requested.id.id == \"org.jetbrains.dokka\") { useVersion(\"0.9.18\") } } } }\n"

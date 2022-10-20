@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.internal.impldep.com.google.api.client.googleapis.testing.TestUtils;
@@ -76,16 +77,18 @@ public class SettingsFileIOTest {
         FileUtils.writeStringToFile(settingsGradle, "rootProject.name = 'reactor'", Charset.defaultCharset());
         SettingsFileIO.writeDokkaSettings(tmpFolder, PluginUtils.DokkaVersion.MINIMUM);
         String result = FileUtils.readFileToString(settingsGradle, Charset.defaultCharset());
+        assertEquals(StringUtils.countMatches(result, "{"), StringUtils.countMatches(result, "}"));
         assertTrue(result.contains("pluginManagement { resolutionStrategy { eachPlugin { if (requested.id.id "));
     }
 
     @Test
-    public void testSettingsNDokka() throws IOException {
+    public void testSettingsNoDokka() throws IOException {
         File tmpFolder = folder.newFolder();
         File settingsGradle = new File(tmpFolder, "settings.gradle");
         FileUtils.writeStringToFile(settingsGradle, "rootProject.name = 'reactor'", Charset.defaultCharset());
         SettingsFileIO.writeDokkaSettings(tmpFolder, PluginUtils.DokkaVersion.NONE);
         String result = FileUtils.readFileToString(settingsGradle, Charset.defaultCharset());
+        assertEquals(StringUtils.countMatches(result, "{"), StringUtils.countMatches(result, "}"));
         assertFalse(result.contains("pluginManagement { resolutionStrategy { eachPlugin { if (requested.id.id "));
     }
 
@@ -100,6 +103,7 @@ public class SettingsFileIOTest {
         assertTrue(result.contains("pluginManagement {\nresolutionStrategy {\n"
                 + " eachPlugin { if (requested.id.id == \"org.jetbrains.dokka\") { useVersion"
                 + "(\"0.9.18\") } }"));
+        assertEquals(StringUtils.countMatches(result, "{"), StringUtils.countMatches(result, "}"));
     }
 
     @Test
@@ -112,6 +116,7 @@ public class SettingsFileIOTest {
                 Charset.defaultCharset());
         SettingsFileIO.writeDokkaSettings(tmpFolder, PluginUtils.DokkaVersion.MINIMUM);
         String result = FileUtils.readFileToString(settingsGradle, Charset.defaultCharset());
+        assertEquals(StringUtils.countMatches(result, "{"), StringUtils.countMatches(result, "}"));
         assertTrue(result.contains("resolutionStrategy {\n"
                 + " eachPlugin { if (requested.id.id == \"org.jetbrains.dokka\") { useVersion"
                 + "(\"0.9.18\") } }"));

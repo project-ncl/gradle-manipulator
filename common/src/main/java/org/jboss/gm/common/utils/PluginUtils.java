@@ -228,7 +228,7 @@ public class PluginUtils {
                     for (String configBlock : configBlocks) {
                         contentBuilder = new StringBuilder(content);
                         removed |= removeBlock(logger, buildFile, eol, contentBuilder,
-                                "(?m)(^|\\s)+" + configBlock + "(\\s|$)+");
+                                "(?m)(^|project\\.|\\s)+" + configBlock + "(\\s|$)+");
                         content = contentBuilder.toString();
                     }
 
@@ -262,6 +262,10 @@ public class PluginUtils {
                         contentBuilder = new StringBuilder(content);
                         removed |= removeBlock(logger, buildFile, eol, contentBuilder,
                                 "(?m)^.*\\(\"" + t + "\"\\)");
+                        // Sometimes tasks can be single quoted e.g.
+                        // tasks.named('closeAndReleaseRepository') {
+                        removed |= removeBlock(logger, buildFile, eol, contentBuilder,
+                                "(?m)^.*\\('" + t + "'\\)");
                         removed |= removeBlock(logger, buildFile, eol, contentBuilder,
                                 "(?m)^.*named<" + t + ">.*?\\s");
                         content = contentBuilder.toString();

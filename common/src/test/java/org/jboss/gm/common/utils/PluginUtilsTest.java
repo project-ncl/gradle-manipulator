@@ -628,6 +628,9 @@ public class PluginUtilsTest {
                         + "        rootProject.tasks.named(\"closeAndReleaseRepository\") {\n"
                         + "            mustRunAfter(publishToSonatype)\n"
                         + "        }\n" + "\n"
+                        + "        rootProject.tasks.named('closeAndReleaseRepository') {\n"
+                        + "            mustRunAfter(publishToSonatype)\n"
+                        + "        }\n" + "\n"
                         + "        tasks.withType(Sign::class) {\n"
                         + "            onlyIf { System.getenv(\"CI\") != null }\n"
                         + "        }\n",
@@ -791,6 +794,54 @@ public class PluginUtilsTest {
         assertFalse(result.contains("id \"com.gradle.enterprise\" version \"3.0\""));
         assertTrue(result.contains("gradle-enterprise-gradle-plugin"));
         assertFalse(result.contains("buildScan"));
+    }
+
+    @Test
+    public void testRemoval14()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("build.gradle.kts");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "plugins {\n"
+                        + "  // This adds tasks to auto close or release nexus staging repos\n"
+                        + "  // see https://github.com/Codearte/gradle-nexus-staging-plugin/\n"
+                        + "  id 'io.codearte.nexus-staging'\n"
+                        + "  //OWASP Security Vulnerability Detection\n"
+                        + "  id 'org.owasp.dependencycheck'\n" + "}\n" + "\n"
+                        + "wrapper {\n"
+                        + "  distributionType = Wrapper.DistributionType.ALL\n"
+                        + "}\n" + "\n" + "allprojects {\n"
+                        + "  version = findProperty('overrideVersion') ?: ehcacheVersion\n"
+                        + "}\n" + "\n" + "if (deployUrl.contains('nexus')) {\n"
+                        + "  //internal terracotta config, shorten url for this plugin to end at local/\n"
+                        + "  project.nexusStaging {\n"
+                        + "    serverUrl = deployUrl.replaceAll(~/local\\/.*$/, \"local/\")\n"
+                        + "    packageGroup = 'Ehcache OS' //internal staging repository name\n"
+                        + "  }\n" + "  ext {\n"
+                        + "    deployUser = tcDeployUser\n"
+                        + "    deployPwd = tcDeployPassword\n" + "  }\n"
+                        + "} else {\n" + "  project.nexusStaging {\n"
+                        + "    packageGroup = 'org.ehcache' //Sonatype staging repository name\n"
+                        + "  }\n" + "  ext {\n"
+                        + "    deployUser = sonatypeUser\n"
+                        + "    deployPwd = sonatypePwd\n" + "  }\n" + "}\n" + "\n"
+                        + "nexusStaging {\n"
+                        + "  username = project.ext.deployUser\n"
+                        + "  password = project.ext.deployPwd\n"
+                        + "  logger.debug(\"Nexus Staging: Using login ${username} and url ${serverUrl}\")\n"
+                        + "  // Sonatype is often very slow in these operations:\n"
+                        + "  delayBetweenRetriesInMillis = (findProperty('delayBetweenRetriesInMillis') ?: '10000') as int\n"
+                        + "  numberOfRetries = (findProperty('numberOfRetries') ?: '100') as int\n"
+                        + "}\n",
+                Charset.defaultCharset());
+
+        HashSet<String> plugins = new LinkedHashSet<>();
+        plugins.add("ALL");
+        PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
+
+        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+
+        assertFalse(result.contains("nexusStaging"));
     }
 
     @Test

@@ -186,6 +186,11 @@ This JSON file may be read as POJO by using the [JSONUtils](https://github.com/r
 class which utilises the [json](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/json)
 package.
 
+### OpenTelemetry Instrumentation
+
+If `OTEL_EXPORTER_OTLP_ENDPOINT` is defined (and optionally `OTEL_SERVICE_NAME`) then OpenTelemetry instrumentation
+will be activated. It will read trace information from the environment as described [here](https://github.com/jenkinsci/opentelemetry-plugin/blob/master/docs/job-traces.md#environment-variables-for-trace-context-propagation-and-integrations) and will propagate the information via headers in any REST calls.
+
 ### Feature Guide
 
 Below are links to more specific information about configuring sets of features in GME:

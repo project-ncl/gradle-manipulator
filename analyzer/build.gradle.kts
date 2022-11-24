@@ -56,7 +56,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core:2.27.0")
     testImplementation("com.github.tomakehurst:wiremock-jre8:2.26.3")
     testImplementation(gradleKotlinDsl())
-    testImplementation("org.eclipse.jgit:org.eclipse.jgit:${project.extra.get("jgit")}")
+    testImplementation("org.eclipse.jgit:org.eclipse.jgit:${project.extra.get("jgitVersion")}")
 }
 
 tasks.withType<Test>().configureEach {

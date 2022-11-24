@@ -140,9 +140,7 @@ public class Main implements Callable<Void> {
                         MIN_GRADLE_VERSION);
             }
 
-            File javaHome = javaEnvironment.getJavaHome();
-
-            return javaHome;
+            return javaEnvironment.getJavaHome();
         } catch (GradleConnectionException e) {
             Throwable firstCause = e.getCause();
 

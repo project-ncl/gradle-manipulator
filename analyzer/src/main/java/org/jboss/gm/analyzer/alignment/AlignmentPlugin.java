@@ -4,12 +4,14 @@ import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.util.ManifestUtils;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.Task;
 import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.logging.FilteringCustomLogger;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.gm.common.utils.OTELUtils;
 
 /**
  * Results in adding a task with name {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME}.
@@ -42,7 +44,14 @@ public class AlignmentPlugin implements Plugin<Project> {
             ConfigCache.getOrCreate(Configuration.class).reload();
         }
 
-        project.getTasks().create(AlignmentTask.NAME, AlignmentTask.class);
+        Task task = project.getTasks().create(AlignmentTask.NAME, AlignmentTask.class);
+        if (project.getRootProject() == project) {
+            task.doFirst(t -> {
+                // Need to delay the OpenTelemetry creation until this task is started to ensure
+                // it is in the same thread local.
+                OTELUtils.startOTel();
+            });
+        }
     }
 
     private ManipulationModel getManipulationModel(Project project) {

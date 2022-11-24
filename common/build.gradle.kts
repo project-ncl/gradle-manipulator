@@ -27,6 +27,8 @@ dependencies {
     runtimeOnly("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
     runtimeOnly("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
 
+    implementation("com.redhat.resilience.otel:opentelemetry-ext-cli-java:${project.extra.get("opentelemetryVersion")}")
+
     // This is to prevent compilation errors in conjunction with Lombok due to use of PME code.
     compileOnly("org.apache.maven:maven-compat:3.5.0")
 

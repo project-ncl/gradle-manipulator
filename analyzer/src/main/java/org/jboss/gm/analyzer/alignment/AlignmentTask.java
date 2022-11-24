@@ -73,6 +73,7 @@ import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.GroovyUtils;
+import org.jboss.gm.common.utils.OTELUtils;
 import org.jboss.gm.common.utils.PluginUtils.DokkaVersion;
 import org.jboss.gm.common.utils.ProjectUtils;
 import org.jboss.gm.common.versioning.DynamicVersionParser;
@@ -280,7 +281,11 @@ public class AlignmentTask extends DefaultTask {
 
             // when the set is empty, we know that this was the last alignment task to execute.
             if (cache.removeProject(project)) {
-                align(configuration, cache, alignmentModel, rootProject);
+                try {
+                    align(configuration, cache, alignmentModel, rootProject);
+                } finally {
+                    OTELUtils.stopOTel();
+                }
             } else {
                 logger.debug("Still have {} projects to scan", cache.getProjectCounterRemaining());
             }

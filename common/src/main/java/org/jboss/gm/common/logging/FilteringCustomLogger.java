@@ -51,7 +51,8 @@ public class FilteringCustomLogger implements OutputEventListener {
     public void onOutput(OutputEvent event) {
         LogEvent logEvent = (LogEvent) event;
         if (ignoreCategories.stream().noneMatch(i -> logEvent.getCategory().startsWith(i))) {
-            if (logEvent.getCategory().startsWith("org.commonjava.maven.ext")) {
+            if (logEvent.getCategory().startsWith("org.commonjava.maven.ext") ||
+                    logEvent.getCategory().startsWith("com.redhat")) {
                 delegate.onOutput(new LogEvent(logEvent.getTimestamp(), logEvent.getCategory(), LogLevel.LIFECYCLE,
                         logEvent.getMessage(), logEvent.getThrowable()));
             } else {

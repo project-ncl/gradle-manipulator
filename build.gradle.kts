@@ -192,16 +192,17 @@ subprojects {
     extra["commonsVersion"] = "2.6"
     extra["gradleVersion"] = "5.6.4"
     extra["groovyVersion"] = "3.0.11"
+    extra["ivyVersion"] = "2.5.0"
     extra["jacksonVersion"] = "2.11.2"
+    extra["jgitVersion"] = "6.3.0.202209071007-r"
     extra["junitVersion"] = "4.13.1"
     extra["logbackVersion"] = "1.2.9"
     extra["mavenVersion"] = "3.5.0"
+    extra["opentelemetryVersion"] = "1.2.0"
     extra["ownerVersion"] = "1.0.12"
-    extra["pmeVersion"] = "4.8"
+    extra["pmeVersion"] = "4.14"
     extra["slf4jVersion"] = "1.7.30"
     extra["systemRulesVersion"] = "1.19.0"
-    extra["ivyVersion"] = "2.5.0"
-    extra["jgit"] = "6.3.0.202209071007-r"
 
     if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.4")) {
         apply(plugin = "com.diffplug.gradle.spotless")
@@ -211,6 +212,7 @@ subprojects {
 
     apply(plugin = "com.adarshr.test-logger")
     apply(plugin = "io.freefair.lombok")
+
 
     extra["lombokVersion"] = extensions.findByType(LombokExtension::class)?.version
 
@@ -340,6 +342,7 @@ subprojects {
                 // Minimise the resulting uber-jars to ensure we don't have massive jars
                 minimize {
                     // Sometimes minimisation takes away too much ... ensure we keep these.
+                    exclude(dependency("io.opentelemetry:.*"))
                     exclude(dependency("com.fasterxml.jackson.core:.*:.*"))
                     exclude(dependency("org.commonjava.maven.ext:.*:.*"))
                     exclude(dependency("org.commonjava.maven.atlas:.*:.*"))

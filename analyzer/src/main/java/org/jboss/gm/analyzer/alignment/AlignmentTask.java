@@ -54,8 +54,6 @@ import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
-import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
-import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
 import org.gradle.api.internal.plugins.DefaultPluginManager;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.plugins.AppliedPlugin;
@@ -611,18 +609,7 @@ public class AlignmentTask extends DefaultTask {
                         .map(ProjectDependency.class::cast)
                         .collect(Collectors.toSet());
 
-                if (configuration.getResolutionStrategy() instanceof DefaultResolutionStrategy) {
-                    DefaultResolutionStrategy defaultResolutionStrategy = (DefaultResolutionStrategy) configuration
-                            .getResolutionStrategy();
-
-                    if (defaultResolutionStrategy.getConflictResolution() == ConflictResolution.strict) {
-                        // failOnVersionConflict() sets this which causes our plugin to crash out. Reset to latest to make an attempt
-                        // at continuing. As Gradle creates 'decorated', we can't use reflection to change the value
-                        // back to the default. Therefore, use preferProjectModules as it's not eager-fail.
-                        logger.warn("Detected use of conflict resolution strategy strict ; resetting to preferProjectModules.");
-                        defaultResolutionStrategy.preferProjectModules();
-                    }
-                }
+                ProjectUtils.updateResolutionStrategy(configuration);
 
                 // If we have dependency constraints we can get a ClassCastException when attempting to copy the configurations.
                 // This is due to an unchecked cast in

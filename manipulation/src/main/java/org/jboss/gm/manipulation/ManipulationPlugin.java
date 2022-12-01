@@ -6,6 +6,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.beanutils.ContextClassLoaderLocal;
+import org.apache.commons.lang.reflect.FieldUtils;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.util.ManifestUtils;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Plugin;
@@ -13,6 +15,7 @@ import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.plugins.MavenPlugin;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
+import org.gradle.plugins.signing.SigningExtension;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.logging.GMLogger;
@@ -118,6 +121,11 @@ public class ManipulationPlugin implements Plugin<Project> {
         // add actions to manipulate project
         project.afterEvaluate(new OverrideDependenciesAction(correspondingModule, resolvedDependenciesRepository));
         project.afterEvaluate(new ManifestUpdateAction(correspondingModule));
+        project.afterEvaluate(p -> p.getConfigurations().all(c -> {
+            if (c.isCanBeResolved()) {
+                ProjectUtils.updateResolutionStrategy(c);
+            }
+        }));
 
         configurePublishingTask(configuration, project, correspondingModule, resolvedDependenciesRepository, "");
 
@@ -213,6 +221,30 @@ public class ManipulationPlugin implements Plugin<Project> {
                 }
             } else {
                 logger.warn("No publishing plugin was configured for '{}'!", evaluatedProject.getName());
+            }
+
+            // If signing is enabled, automatically set it to not required.
+            Object sign = evaluatedProject.getExtensions().findByName("signing");
+            if (sign != null) {
+                SigningExtension signingExtension = ((SigningExtension) sign);
+                boolean required;
+                try {
+                    // In a decorated class it is prefixed/suffixed by '__'.
+                    Object o = FieldUtils.readDeclaredField(signingExtension, "__required__", true);
+                    if (o instanceof Boolean) {
+                        required = (Boolean) o;
+                    } else {
+                        // TODO: Not sure if this can happen?
+                        logger.debug("Retrieve signing type of {}", o);
+                        required = true;
+                    }
+                } catch (IllegalAccessException e) {
+                    throw new ManipulationUncheckedException(e);
+                }
+                if (required) {
+                    logger.warn("Signing was detected as enabled - disabling.");
+                    signingExtension.setRequired(false);
+                }
             }
         });
     }

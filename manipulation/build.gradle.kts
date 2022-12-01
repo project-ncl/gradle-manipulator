@@ -47,6 +47,8 @@ dependencies {
     testImplementation("junit:junit:${project.extra.get("junitVersion")}")
     testImplementation("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
     testImplementation("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
+    testImplementation("org.eclipse.jgit:org.eclipse.jgit:${project.extra.get("jgitVersion")}")
+    testImplementation(project(path = ":common", configuration = "testFixturesCompile"))
 
     // GradleAPI in test compile to get access to org.gradle.internal.Pair
     testImplementation(gradleApi())

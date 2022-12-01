@@ -5,9 +5,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Properties;
 
 import kong.unirest.Unirest;
@@ -15,16 +12,12 @@ import kong.unirest.Unirest;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.SystemUtils;
-import org.codehaus.plexus.archiver.UnArchiver;
-import org.codehaus.plexus.archiver.tar.TarGZipUnArchiver;
-import org.codehaus.plexus.archiver.zip.ZipUnArchiver;
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.console.ConsoleLoggerManager;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.tooling.internal.consumer.ConnectorServices;
 import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.AlignmentPlugin;
 import org.jboss.gm.analyzer.alignment.AlignmentTask;
+import org.jboss.gm.common.JVMTestSetup;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Before;
@@ -39,6 +32,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runners.MethodSorters;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.gm.common.JVMTestSetup.JDK8_DIR;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
@@ -60,14 +54,6 @@ public class DifferentJVMTest {
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
-    private static final Path GRADLE_JDK_HOME = Paths.get(System.getProperty("user.home"), ".gradle", "jdks");
-
-    private static final String JDK8_BASEDIR = "jdk8u272-b10";
-
-    private static final Path JDK8_DIR = GRADLE_JDK_HOME.resolve(JDK8_BASEDIR);
-
-    private static final Path JDK8_BIN_DIR = JDK8_DIR.resolve("bin");
-
     /**
      * This method will, on Linux, download and cache if it doesn't exist a JDK8 installation from AdoptOpenJDK.
      *
@@ -76,56 +62,22 @@ public class DifferentJVMTest {
      */
     @BeforeClass
     public static void setupJVM() throws IOException {
-        String filename = null;
-        UnArchiver ua = null;
-
-        if (SystemUtils.IS_OS_LINUX) {
-            filename = "OpenJDK8U-jdk_x64_linux_hotspot_8u272b10.tar.gz";
-            ua = new TarGZipUnArchiver();
-        } else if (SystemUtils.IS_OS_WINDOWS) {
-            filename = "OpenJDK8U-jdk_x64_windows_hotspot_8u272b10.zip";
-            ua = new ZipUnArchiver();
-        } else {
-            assumeTrue(filename != null && ua != null);
-        }
-
-        if (!Files.exists(JDK8_BIN_DIR)) {
-            Files.createDirectories(JDK8_DIR);
-
-            Path destFile = GRADLE_JDK_HOME.resolve(filename);
-
-            destFile.toFile().deleteOnExit();
-
-            Unirest.get(
-                    "https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u272-b10/" + filename)
-                    .asFile(destFile.toString());
-
-            ((LogEnabled) ua).enableLogging(new ConsoleLoggerManager().getLoggerForComponent("plexus-archiver"));
-            ua.setSourceFile(destFile.toFile());
-            ua.setDestDirectory(GRADLE_JDK_HOME.toFile());
-
-            assertThat(destFile).isRegularFile();
-            assertThat(GRADLE_JDK_HOME).isDirectory();
-
-            ua.extract();
-
-            /*
-             * Reset the configuration in case other tests use Unirest. Otherwise the MainTest which calls
-             * RESTUtils (and eventually Unirest) can fail. This can also be worked around with if the following
-             * is added
-             * tasks.test {
-             *  this.setForkEvery(1)
-             * }
-             * to the CLI build.gradle.kts.
-             */
-            Unirest.config().reset();
-        }
-
-        assertThat(JDK8_BIN_DIR).isDirectory();
+        JVMTestSetup.setupJVM();
     }
 
     @Before
     public void reset() {
+        /*
+         * Reset the configuration in case other tests use Unirest. Otherwise the MainTest which calls
+         * RESTUtils (and eventually Unirest) can fail. This can also be worked around with if the following
+         * is added
+         * tasks.test {
+         *  this.setForkEvery(1)
+         * }
+         * to the CLI build.gradle.kts.
+         */
+        Unirest.config().reset();
+
         // Reset the daemon between tests : https://discuss.gradle.org/t/stopping-gradle-daemon-via-tooling-api/16004/2
         // Under 4.10 the daemon appears to cache Config values which corrupt the tests.
         ConnectorServices.reset();

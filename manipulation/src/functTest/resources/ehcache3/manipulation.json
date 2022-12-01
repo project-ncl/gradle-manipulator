@@ -1,0 +1,730 @@
+{
+  "group" : "org.ehcache",
+  "name" : "ehcache3",
+  "projectPathName" : "ehcache3",
+  "version" : "3.10.2.temporary-redhat-00001",
+  "originalVersion" : "3.10.2",
+  "children" : {
+    "demos" : {
+      "name" : "demos",
+      "projectPathName" : "demos",
+      "version" : "3.10.2.temporary-redhat-00001",
+      "originalVersion" : "3.10.2",
+      "children" : {
+        "00-NoCache" : {
+          "name" : "00-NoCache",
+          "projectPathName" : "00-NoCache",
+          "version" : "3.10.2.temporary-redhat-00001",
+          "originalVersion" : "3.10.2",
+          "alignedDependencies" : {
+            "javax.servlet:javax.servlet-api:3.1.0" : {
+              "groupId" : "javax.servlet",
+              "artifactId" : "javax.servlet-api",
+              "version" : "3.1.0.redhat-1"
+            },
+            "junit:junit:4.13.1" : {
+              "groupId" : "junit",
+              "artifactId" : "junit",
+              "version" : "4.13.1.redhat-00001"
+            },
+            "org.slf4j:slf4j-api:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-api",
+              "version" : "1.7.36.redhat-00002"
+            },
+            "org.slf4j:slf4j-simple:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-simple",
+              "version" : "1.7.36.redhat-00002"
+            }
+          }
+        },
+        "01-CacheAside" : {
+          "name" : "01-CacheAside",
+          "projectPathName" : "01-CacheAside",
+          "version" : "3.10.2.temporary-redhat-00001",
+          "originalVersion" : "3.10.2",
+          "alignedDependencies" : {
+            "javax.servlet:javax.servlet-api:3.1.0" : {
+              "groupId" : "javax.servlet",
+              "artifactId" : "javax.servlet-api",
+              "version" : "3.1.0.redhat-1"
+            },
+            "junit:junit:4.13.1" : {
+              "groupId" : "junit",
+              "artifactId" : "junit",
+              "version" : "4.13.1.redhat-00001"
+            },
+            "org.slf4j:slf4j-api:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-api",
+              "version" : "1.7.36.redhat-00002"
+            },
+            "org.slf4j:slf4j-simple:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-simple",
+              "version" : "1.7.36.redhat-00002"
+            }
+          }
+        }
+      }
+    },
+    "integration-test" : {
+      "name" : "integration-test",
+      "projectPathName" : "integration-test",
+      "version" : "3.10.2.temporary-redhat-00001",
+      "originalVersion" : "3.10.2",
+      "alignedDependencies" : {
+        "javax.cache:cache-api:1.1.0" : {
+          "groupId" : "javax.cache",
+          "artifactId" : "cache-api",
+          "version" : "1.1.0.redhat-1"
+        },
+        "junit:junit:4.13.1" : {
+          "groupId" : "junit",
+          "artifactId" : "junit",
+          "version" : "4.13.1.redhat-00001"
+        },
+        "org.slf4j:slf4j-api:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-api",
+          "version" : "1.7.36.redhat-00002"
+        },
+        "org.slf4j:slf4j-simple:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-simple",
+          "version" : "1.7.36.redhat-00002"
+        }
+      }
+    },
+    "ehcache-transactions" : {
+      "group" : "org.ehcache",
+      "name" : "ehcache-transactions",
+      "projectPathName" : "ehcache-transactions",
+      "version" : "3.10.2.temporary-redhat-00001",
+      "originalVersion" : "3.10.2",
+      "alignedDependencies" : {
+        "jakarta.transaction:jakarta.transaction-api:[2,3)" : {
+          "groupId" : "jakarta.transaction",
+          "artifactId" : "jakarta.transaction-api",
+          "version" : "2.0.0.redhat-00001"
+        },
+        "junit:junit:4.13.1" : {
+          "groupId" : "junit",
+          "artifactId" : "junit",
+          "version" : "4.13.1.redhat-00001"
+        },
+        "org.jboss.logging:jboss-logging:3.1.4.GA" : {
+          "groupId" : "org.jboss.logging",
+          "artifactId" : "jboss-logging",
+          "version" : "3.1.4.GA-redhat-3"
+        },
+        "org.slf4j:slf4j-api:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-api",
+          "version" : "1.7.36.redhat-00002"
+        },
+        "org.slf4j:slf4j-simple:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-simple",
+          "version" : "1.7.36.redhat-00002"
+        }
+      }
+    },
+    "clustered" : {
+      "name" : "clustered",
+      "projectPathName" : "clustered",
+      "version" : "3.10.2.temporary-redhat-00001",
+      "originalVersion" : "3.10.2",
+      "children" : {
+        "server" : {
+          "name" : "server",
+          "projectPathName" : "server",
+          "version" : "3.10.2.temporary-redhat-00001",
+          "originalVersion" : "3.10.2",
+          "children" : {
+            "ehcache-service" : {
+              "group" : "org.ehcache.modules.clustered",
+              "name" : "ehcache-service",
+              "projectPathName" : "ehcache-service",
+              "version" : "3.10.2.temporary-redhat-00001",
+              "originalVersion" : "3.10.2",
+              "alignedDependencies" : {
+                "junit:junit:4.13.1" : {
+                  "groupId" : "junit",
+                  "artifactId" : "junit",
+                  "version" : "4.13.1.redhat-00001"
+                },
+                "org.slf4j:slf4j-api:1.7.36" : {
+                  "groupId" : "org.slf4j",
+                  "artifactId" : "slf4j-api",
+                  "version" : "1.7.36.redhat-00002"
+                },
+                "org.slf4j:slf4j-simple:1.7.36" : {
+                  "groupId" : "org.slf4j",
+                  "artifactId" : "slf4j-simple",
+                  "version" : "1.7.36.redhat-00002"
+                }
+              }
+            },
+            "ehcache-service-api" : {
+              "group" : "org.ehcache.modules.clustered",
+              "name" : "ehcache-service-api",
+              "projectPathName" : "ehcache-service-api",
+              "version" : "3.10.2.temporary-redhat-00001",
+              "originalVersion" : "3.10.2",
+              "alignedDependencies" : {
+                "junit:junit:4.13.1" : {
+                  "groupId" : "junit",
+                  "artifactId" : "junit",
+                  "version" : "4.13.1.redhat-00001"
+                },
+                "org.slf4j:slf4j-api:1.7.36" : {
+                  "groupId" : "org.slf4j",
+                  "artifactId" : "slf4j-api",
+                  "version" : "1.7.36.redhat-00002"
+                },
+                "org.slf4j:slf4j-simple:1.7.36" : {
+                  "groupId" : "org.slf4j",
+                  "artifactId" : "slf4j-simple",
+                  "version" : "1.7.36.redhat-00002"
+                }
+              }
+            },
+            "ehcache-entity" : {
+              "group" : "org.ehcache.modules.clustered",
+              "name" : "ehcache-entity",
+              "projectPathName" : "ehcache-entity",
+              "version" : "3.10.2.temporary-redhat-00001",
+              "originalVersion" : "3.10.2",
+              "alignedDependencies" : {
+                "junit:junit:4.13.1" : {
+                  "groupId" : "junit",
+                  "artifactId" : "junit",
+                  "version" : "4.13.1.redhat-00001"
+                },
+                "org.slf4j:slf4j-api:1.7.36" : {
+                  "groupId" : "org.slf4j",
+                  "artifactId" : "slf4j-api",
+                  "version" : "1.7.36.redhat-00002"
+                },
+                "org.slf4j:slf4j-simple:1.7.36" : {
+                  "groupId" : "org.slf4j",
+                  "artifactId" : "slf4j-simple",
+                  "version" : "1.7.36.redhat-00002"
+                }
+              }
+            }
+          }
+        },
+        "ehcache-client" : {
+          "group" : "org.ehcache.modules.clustered",
+          "name" : "ehcache-client",
+          "projectPathName" : "ehcache-client",
+          "version" : "3.10.2.temporary-redhat-00001",
+          "originalVersion" : "3.10.2",
+          "alignedDependencies" : {
+            "junit:junit:4.13.1" : {
+              "groupId" : "junit",
+              "artifactId" : "junit",
+              "version" : "4.13.1.redhat-00001"
+            },
+            "org.slf4j:slf4j-api:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-api",
+              "version" : "1.7.36.redhat-00002"
+            },
+            "org.slf4j:slf4j-simple:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-simple",
+              "version" : "1.7.36.redhat-00002"
+            }
+          }
+        },
+        "integration-test" : {
+          "name" : "integration-test",
+          "projectPathName" : "integration-test",
+          "version" : "3.10.2.temporary-redhat-00001",
+          "originalVersion" : "3.10.2",
+          "alignedDependencies" : {
+            "com.fasterxml.jackson.core:jackson-databind:2.13.4" : {
+              "groupId" : "com.fasterxml.jackson.core",
+              "artifactId" : "jackson-databind",
+              "version" : "2.13.4.redhat-00004"
+            },
+            "com.fasterxml.jackson:jackson-bom:2.13.4" : {
+              "groupId" : "com.fasterxml.jackson",
+              "artifactId" : "jackson-bom",
+              "version" : "2.13.4.redhat-00004"
+            },
+            "javax.cache:cache-api:1.1.0" : {
+              "groupId" : "javax.cache",
+              "artifactId" : "cache-api",
+              "version" : "1.1.0.redhat-1"
+            },
+            "junit:junit:4.13.1" : {
+              "groupId" : "junit",
+              "artifactId" : "junit",
+              "version" : "4.13.1.redhat-00001"
+            },
+            "org.slf4j:slf4j-api:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-api",
+              "version" : "1.7.36.redhat-00002"
+            },
+            "org.slf4j:slf4j-simple:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-simple",
+              "version" : "1.7.36.redhat-00002"
+            }
+          }
+        },
+        "test-utils" : {
+          "name" : "test-utils",
+          "projectPathName" : "test-utils",
+          "version" : "3.10.2.temporary-redhat-00001",
+          "originalVersion" : "3.10.2",
+          "alignedDependencies" : {
+            "junit:junit:4.13.1" : {
+              "groupId" : "junit",
+              "artifactId" : "junit",
+              "version" : "4.13.1.redhat-00001"
+            },
+            "org.slf4j:slf4j-api:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-api",
+              "version" : "1.7.36.redhat-00002"
+            },
+            "org.slf4j:slf4j-simple:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-simple",
+              "version" : "1.7.36.redhat-00002"
+            }
+          }
+        },
+        "ehcache-clustered" : {
+          "group" : "org.ehcache",
+          "name" : "ehcache-clustered",
+          "projectPathName" : "ehcache-clustered",
+          "version" : "3.10.2.temporary-redhat-00001",
+          "originalVersion" : "3.10.2",
+          "alignedDependencies" : {
+            "org.slf4j:slf4j-api:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-api",
+              "version" : "1.7.36.redhat-00002"
+            }
+          }
+        },
+        "ops-tool" : {
+          "name" : "ops-tool",
+          "projectPathName" : "ops-tool",
+          "version" : "3.10.2.temporary-redhat-00001",
+          "originalVersion" : "3.10.2",
+          "alignedDependencies" : {
+            "junit:junit:4.13.1" : {
+              "groupId" : "junit",
+              "artifactId" : "junit",
+              "version" : "4.13.1.redhat-00001"
+            },
+            "org.slf4j:slf4j-api:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-api",
+              "version" : "1.7.36.redhat-00002"
+            },
+            "org.slf4j:slf4j-simple:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-simple",
+              "version" : "1.7.36.redhat-00002"
+            }
+          }
+        },
+        "ehcache-common-api" : {
+          "group" : "org.ehcache.modules.clustered",
+          "name" : "ehcache-common-api",
+          "projectPathName" : "ehcache-common-api",
+          "version" : "3.10.2.temporary-redhat-00001",
+          "originalVersion" : "3.10.2",
+          "alignedDependencies" : {
+            "junit:junit:4.13.1" : {
+              "groupId" : "junit",
+              "artifactId" : "junit",
+              "version" : "4.13.1.redhat-00001"
+            },
+            "org.slf4j:slf4j-api:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-api",
+              "version" : "1.7.36.redhat-00002"
+            },
+            "org.slf4j:slf4j-simple:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-simple",
+              "version" : "1.7.36.redhat-00002"
+            }
+          }
+        },
+        "osgi-test" : {
+          "name" : "osgi-test",
+          "projectPathName" : "osgi-test",
+          "version" : "3.10.2.temporary-redhat-00001",
+          "originalVersion" : "3.10.2",
+          "alignedDependencies" : {
+            "com.sun.activation:javax.activation:1.2.0" : {
+              "groupId" : "com.sun.activation",
+              "artifactId" : "javax.activation",
+              "version" : "1.2.0.redhat-00001"
+            },
+            "javax.cache:cache-api:1.1.0" : {
+              "groupId" : "javax.cache",
+              "artifactId" : "cache-api",
+              "version" : "1.1.0.redhat-1"
+            },
+            "junit:junit:4.13.1" : {
+              "groupId" : "junit",
+              "artifactId" : "junit",
+              "version" : "4.13.1.redhat-00001"
+            },
+            "org.slf4j:slf4j-api:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-api",
+              "version" : "1.7.36.redhat-00002"
+            },
+            "org.slf4j:slf4j-simple:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-simple",
+              "version" : "1.7.36.redhat-00002"
+            }
+          }
+        },
+        "ehcache-common" : {
+          "group" : "org.ehcache.modules.clustered",
+          "name" : "ehcache-common",
+          "projectPathName" : "ehcache-common",
+          "version" : "3.10.2.temporary-redhat-00001",
+          "originalVersion" : "3.10.2",
+          "alignedDependencies" : {
+            "junit:junit:4.13.1" : {
+              "groupId" : "junit",
+              "artifactId" : "junit",
+              "version" : "4.13.1.redhat-00001"
+            },
+            "org.slf4j:slf4j-api:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-api",
+              "version" : "1.7.36.redhat-00002"
+            },
+            "org.slf4j:slf4j-simple:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-simple",
+              "version" : "1.7.36.redhat-00002"
+            }
+          }
+        }
+      }
+    },
+    "core-spi-test" : {
+      "name" : "core-spi-test",
+      "projectPathName" : "core-spi-test",
+      "version" : "3.10.2.temporary-redhat-00001",
+      "originalVersion" : "3.10.2",
+      "alignedDependencies" : {
+        "junit:junit:4.13.1" : {
+          "groupId" : "junit",
+          "artifactId" : "junit",
+          "version" : "4.13.1.redhat-00001"
+        },
+        "org.slf4j:slf4j-api:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-api",
+          "version" : "1.7.36.redhat-00002"
+        },
+        "org.slf4j:slf4j-simple:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-simple",
+          "version" : "1.7.36.redhat-00002"
+        }
+      }
+    },
+    "osgi-test" : {
+      "name" : "osgi-test",
+      "projectPathName" : "osgi-test",
+      "version" : "3.10.2.temporary-redhat-00001",
+      "originalVersion" : "3.10.2",
+      "alignedDependencies" : {
+        "com.sun.activation:javax.activation:1.2.0" : {
+          "groupId" : "com.sun.activation",
+          "artifactId" : "javax.activation",
+          "version" : "1.2.0.redhat-00001"
+        },
+        "javax.cache:cache-api:1.1.0" : {
+          "groupId" : "javax.cache",
+          "artifactId" : "cache-api",
+          "version" : "1.1.0.redhat-1"
+        },
+        "junit:junit:4.13.1" : {
+          "groupId" : "junit",
+          "artifactId" : "junit",
+          "version" : "4.13.1.redhat-00001"
+        },
+        "org.slf4j:slf4j-api:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-api",
+          "version" : "1.7.36.redhat-00002"
+        },
+        "org.slf4j:slf4j-simple:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-simple",
+          "version" : "1.7.36.redhat-00002"
+        }
+      }
+    },
+    "ehcache-management" : {
+      "group" : "org.ehcache.modules",
+      "name" : "ehcache-management",
+      "projectPathName" : "ehcache-management",
+      "version" : "3.10.2.temporary-redhat-00001",
+      "originalVersion" : "3.10.2",
+      "alignedDependencies" : {
+        "com.fasterxml.jackson.core:jackson-databind:2.13.4" : {
+          "groupId" : "com.fasterxml.jackson.core",
+          "artifactId" : "jackson-databind",
+          "version" : "2.13.4.redhat-00004"
+        },
+        "com.fasterxml.jackson:jackson-bom:2.13.4" : {
+          "groupId" : "com.fasterxml.jackson",
+          "artifactId" : "jackson-bom",
+          "version" : "2.13.4.redhat-00004"
+        },
+        "junit:junit:4.13.1" : {
+          "groupId" : "junit",
+          "artifactId" : "junit",
+          "version" : "4.13.1.redhat-00001"
+        },
+        "org.slf4j:slf4j-api:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-api",
+          "version" : "1.7.36.redhat-00002"
+        },
+        "org.slf4j:slf4j-simple:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-simple",
+          "version" : "1.7.36.redhat-00002"
+        }
+      }
+    },
+    "ehcache" : {
+      "group" : "org.ehcache",
+      "name" : "ehcache",
+      "projectPathName" : "ehcache",
+      "version" : "3.10.2.temporary-redhat-00001",
+      "originalVersion" : "3.10.2",
+      "alignedDependencies" : {
+        "javax.cache:cache-api:1.1.0" : {
+          "groupId" : "javax.cache",
+          "artifactId" : "cache-api",
+          "version" : "1.1.0.redhat-1"
+        },
+        "org.slf4j:slf4j-api:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-api",
+          "version" : "1.7.36.redhat-00002"
+        }
+      }
+    },
+    "ehcache-api" : {
+      "group" : "org.ehcache.modules",
+      "name" : "ehcache-api",
+      "projectPathName" : "ehcache-api",
+      "version" : "3.10.2.temporary-redhat-00001",
+      "originalVersion" : "3.10.2",
+      "alignedDependencies" : {
+        "junit:junit:4.13.1" : {
+          "groupId" : "junit",
+          "artifactId" : "junit",
+          "version" : "4.13.1.redhat-00001"
+        },
+        "org.slf4j:slf4j-api:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-api",
+          "version" : "1.7.36.redhat-00002"
+        },
+        "org.slf4j:slf4j-simple:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-simple",
+          "version" : "1.7.36.redhat-00002"
+        }
+      }
+    },
+    "docs" : {
+      "name" : "docs",
+      "projectPathName" : "docs",
+      "version" : "3.10.2.temporary-redhat-00001",
+      "originalVersion" : "3.10.2"
+    },
+    "ehcache-107" : {
+      "group" : "org.ehcache.modules",
+      "name" : "ehcache-107",
+      "projectPathName" : "ehcache-107",
+      "version" : "3.10.2.temporary-redhat-00001",
+      "originalVersion" : "3.10.2",
+      "alignedDependencies" : {
+        "javax.cache:cache-api:1.1.0" : {
+          "groupId" : "javax.cache",
+          "artifactId" : "cache-api",
+          "version" : "1.1.0.redhat-1"
+        },
+        "junit:junit:4.13.1" : {
+          "groupId" : "junit",
+          "artifactId" : "junit",
+          "version" : "4.13.1.redhat-00001"
+        },
+        "org.slf4j:slf4j-api:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-api",
+          "version" : "1.7.36.redhat-00002"
+        },
+        "org.slf4j:slf4j-simple:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-simple",
+          "version" : "1.7.36.redhat-00002"
+        }
+      }
+    },
+    "ehcache-xml" : {
+      "group" : "org.ehcache.modules",
+      "name" : "ehcache-xml",
+      "projectPathName" : "ehcache-xml",
+      "version" : "3.10.2.temporary-redhat-00001",
+      "originalVersion" : "3.10.2",
+      "alignedDependencies" : {
+        "com.sun.activation:javax.activation:1.2.0" : {
+          "groupId" : "com.sun.activation",
+          "artifactId" : "javax.activation",
+          "version" : "1.2.0.redhat-00001"
+        },
+        "com.sun.xml.bind:jaxb-xjc:2.3.3" : {
+          "groupId" : "com.sun.xml.bind",
+          "artifactId" : "jaxb-xjc",
+          "version" : "2.3.3.redhat-00002"
+        },
+        "jakarta.xml.bind:jakarta.xml.bind-api:[3,4)" : {
+          "groupId" : "jakarta.xml.bind",
+          "artifactId" : "jakarta.xml.bind-api",
+          "version" : "3.0.1.redhat-00001"
+        },
+        "junit:junit:4.13.1" : {
+          "groupId" : "junit",
+          "artifactId" : "junit",
+          "version" : "4.13.1.redhat-00001"
+        },
+        "org.slf4j:slf4j-api:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-api",
+          "version" : "1.7.36.redhat-00002"
+        },
+        "org.slf4j:slf4j-simple:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-simple",
+          "version" : "1.7.36.redhat-00002"
+        }
+      },
+      "children" : {
+        "ehcache-xml-spi" : {
+          "group" : "org.ehcache.modules",
+          "name" : "ehcache-xml-spi",
+          "projectPathName" : "ehcache-xml-spi",
+          "version" : "3.10.2.temporary-redhat-00001",
+          "originalVersion" : "3.10.2",
+          "alignedDependencies" : {
+            "junit:junit:4.13.1" : {
+              "groupId" : "junit",
+              "artifactId" : "junit",
+              "version" : "4.13.1.redhat-00001"
+            },
+            "org.slf4j:slf4j-api:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-api",
+              "version" : "1.7.36.redhat-00002"
+            },
+            "org.slf4j:slf4j-simple:1.7.36" : {
+              "groupId" : "org.slf4j",
+              "artifactId" : "slf4j-simple",
+              "version" : "1.7.36.redhat-00002"
+            }
+          }
+        }
+      }
+    },
+    "spi-tester" : {
+      "name" : "spi-tester",
+      "projectPathName" : "spi-tester",
+      "version" : "3.10.2.temporary-redhat-00001",
+      "originalVersion" : "3.10.2",
+      "alignedDependencies" : {
+        "junit:junit:4.13.1" : {
+          "groupId" : "junit",
+          "artifactId" : "junit",
+          "version" : "4.13.1.redhat-00001"
+        },
+        "org.slf4j:slf4j-api:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-api",
+          "version" : "1.7.36.redhat-00002"
+        },
+        "org.slf4j:slf4j-simple:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-simple",
+          "version" : "1.7.36.redhat-00002"
+        }
+      }
+    },
+    "ehcache-impl" : {
+      "group" : "org.ehcache.modules",
+      "name" : "ehcache-impl",
+      "projectPathName" : "ehcache-impl",
+      "version" : "3.10.2.temporary-redhat-00001",
+      "originalVersion" : "3.10.2",
+      "alignedDependencies" : {
+        "junit:junit:4.13.1" : {
+          "groupId" : "junit",
+          "artifactId" : "junit",
+          "version" : "4.13.1.redhat-00001"
+        },
+        "org.slf4j:slf4j-api:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-api",
+          "version" : "1.7.36.redhat-00002"
+        },
+        "org.slf4j:slf4j-simple:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-simple",
+          "version" : "1.7.36.redhat-00002"
+        }
+      }
+    },
+    "ehcache-core" : {
+      "group" : "org.ehcache.modules",
+      "name" : "ehcache-core",
+      "projectPathName" : "ehcache-core",
+      "version" : "3.10.2.temporary-redhat-00001",
+      "originalVersion" : "3.10.2",
+      "alignedDependencies" : {
+        "junit:junit:4.13.1" : {
+          "groupId" : "junit",
+          "artifactId" : "junit",
+          "version" : "4.13.1.redhat-00001"
+        },
+        "org.slf4j:slf4j-api:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-api",
+          "version" : "1.7.36.redhat-00002"
+        },
+        "org.slf4j:slf4j-simple:1.7.36" : {
+          "groupId" : "org.slf4j",
+          "artifactId" : "slf4j-simple",
+          "version" : "1.7.36.redhat-00002"
+        }
+      }
+    }
+  }
+}

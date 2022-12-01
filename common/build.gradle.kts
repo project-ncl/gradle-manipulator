@@ -32,8 +32,9 @@ dependencies {
     // This is to prevent compilation errors in conjunction with Lombok due to use of PME code.
     compileOnly("org.apache.maven:maven-compat:3.5.0")
 
+    testFixturesCompile("org.codehaus.plexus:plexus-archiver:4.2.3")
+    testFixturesCompile("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
     testImplementation("junit:junit:${project.extra.get("junitVersion")}")
     testImplementation("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
-    testImplementation("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
     testImplementation(gradleApi())
 }

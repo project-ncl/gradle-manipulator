@@ -3,10 +3,12 @@ package org.jboss.gm.analyzer.alignment;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
@@ -31,6 +33,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.Assume.assumeTrue;
 
 public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
@@ -123,6 +126,14 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
             assertThat(am.findCorrespondingChild("bom")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("0.17.0.redhat-00001");
                 assertThat(root.getAlignedDependencies()).isEmpty();
+            });
+            assertThat(am.findCorrespondingChild("dependencyManagement")).satisfies(root -> {
+                assertThat(root.getVersion()).isEqualTo("0.17.0.redhat-00001");
+                final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
+                assertThat(alignedDependencies)
+                        .extracting("artifactId", "versionString")
+                        .containsOnly(
+                                tuple("protobuf-bom", "3.14.0-redhat-00001"));
             });
         });
 

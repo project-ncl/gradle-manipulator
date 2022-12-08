@@ -10,5 +10,11 @@
     "version": "5.1.6.RELEASE",
     "groupId": "org.springframework",
     "artifactId": "spring-context"
+  },
+  {
+    "bestMatchVersion": "3.14.0-redhat-00001",
+    "version": "3.14.0",
+    "groupId": "com.google.protobuf",
+    "artifactId": "protobuf-bom"
   }
 ]

@@ -47,6 +47,10 @@ public class RelaxedProjectVersionRef
         this(dependency.getGroup(), dependency.getName(), dependency.getVersion());
     }
 
+    public RelaxedProjectVersionRef(ProjectVersionRef projectVersionRefDelegate) {
+        this.projectVersionRefDelegate = projectVersionRefDelegate;
+    }
+
     @Override
     public ProjectVersionRef asProjectVersionRef() {
         return projectVersionRefDelegate;

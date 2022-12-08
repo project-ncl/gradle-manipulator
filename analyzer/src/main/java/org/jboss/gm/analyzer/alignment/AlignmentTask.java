@@ -50,10 +50,14 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.artifacts.LenientConfiguration;
+import org.gradle.api.artifacts.ModuleVersionIdentifier;
 import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
+import org.gradle.api.attributes.Attribute;
+import org.gradle.api.attributes.Category;
+import org.gradle.api.internal.artifacts.result.DefaultResolvedDependencyResult;
 import org.gradle.api.internal.plugins.DefaultPluginManager;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.plugins.AppliedPlugin;
@@ -724,9 +728,27 @@ public class AlignmentTask extends DefaultTask {
                         logger.debug("For {}, with original key {}, adding dependency to scan {}", configuration,
                                 relaxedProjectVersionRef, pvr);
                     }
-
                 });
 
+                configuration.getIncoming().getResolutionResult().getAllDependencies().forEach(incomingResult -> {
+                    if (incomingResult instanceof DefaultResolvedDependencyResult) {
+                        ModuleVersionIdentifier mvi = ((DefaultResolvedDependencyResult) incomingResult).getSelected()
+                                .getModuleVersion();
+                        // https://github.com/gradle/gradle/issues/17338
+                        String category = incomingResult.getRequested().getAttributes().getAttribute(
+                                Attribute.of("org.gradle.category", String.class));
+
+                        if (mvi == null) {
+                            logger.warn("No module version for {}", incomingResult);
+                        } else if (Category.ENFORCED_PLATFORM.equals(category) || Category.REGULAR_PLATFORM.equals(category)) {
+                            ProjectVersionRef pvr = ProjectVersionFactory.withGAV(mvi.getGroup(), mvi.getName(),
+                                    mvi.getVersion());
+                            logger.debug("For {}, with category {} adding {} to scan",
+                                    configuration, category, pvr);
+                            depMap.put(new RelaxedProjectVersionRef(pvr), pvr);
+                        }
+                    }
+                });
             } else {
                 logger.trace("Unable to resolve configuration {} for project {}", configuration.getName(), project);
             }

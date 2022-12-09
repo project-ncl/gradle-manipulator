@@ -624,18 +624,20 @@ public class AlignmentTask extends DefaultTask {
                 // analyzer/src/functTest/java/org/jboss/gm/analyzer/alignment/DynamicWithLocksProjectFunctionalTest.java for
                 // an example) first verify if DefaultProjectDependencyConstraint occurs in the list of constraints.
                 LenientConfiguration lenient;
-                //
-                // Some kotlin projects (e.g. wire) have issues calling copyRecursive.
-                if (!project.getBuildFile().getName().endsWith(".kts") &&
-                        configuration
-                                .getAllDependencyConstraints().stream()
-                                .noneMatch(AlignmentTask::isDefaultProjectDependencyConstraint)) {
-                    lenient = configuration.copyRecursive().getResolvedConfiguration().getLenientConfiguration();
+                org.gradle.api.artifacts.Configuration copy;
+
+                // Attempt to call copyRecursive for all types (kotlin/gradle).
+                if (configuration
+                        .getAllDependencyConstraints().stream()
+                        .noneMatch(AlignmentTask::isDefaultProjectDependencyConstraint)) {
+                    copy = configuration.copyRecursive();
+                    lenient = copy.getResolvedConfiguration().getLenientConfiguration();
                 } else {
-                    logger.debug("Kotlin build or DefaultProjectDependencyConstraint found ({}), not copying "
-                            + "configuration",
+                    logger.debug(
+                            "DefaultProjectDependencyConstraint found ({}), not recursively copying configuration",
                             configuration.getAllDependencyConstraints());
-                    lenient = configuration.copy().getResolvedConfiguration().getLenientConfiguration();
+                    copy = configuration.copy();
+                    lenient = copy.getResolvedConfiguration().getLenientConfiguration();
                 }
 
                 // We don't care about modules of the project being unresolvable at this stage. Had we not excluded them,
@@ -729,7 +731,8 @@ public class AlignmentTask extends DefaultTask {
                     }
                 });
 
-                configuration.getIncoming().getResolutionResult().getAllDependencies().forEach(incomingResult -> {
+                // As getResolutionResult may resolve the dependencies perform it on the copy.
+                copy.getIncoming().getResolutionResult().getAllDependencies().forEach(incomingResult -> {
                     if (incomingResult instanceof DefaultResolvedDependencyResult) {
                         ModuleVersionIdentifier mvi = ((DefaultResolvedDependencyResult) incomingResult).getSelected()
                                 .getModuleVersion();
@@ -739,7 +742,7 @@ public class AlignmentTask extends DefaultTask {
 
                         if (mvi == null) {
                             logger.warn("No module version for {}", incomingResult);
-                        // Can't use direct references to Category.ENFORCED_PLATFORM / PLATFORM as that is since 5.3
+                            // Can't use direct references to Category.ENFORCED_PLATFORM / PLATFORM as that is since 5.3
                         } else if ("enforced-platform".equals(category) || "platform".equals(category)) {
                             ProjectVersionRef pvr = ProjectVersionFactory.withGAV(mvi.getGroup(), mvi.getName(),
                                     mvi.getVersion());

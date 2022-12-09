@@ -845,6 +845,46 @@ public class PluginUtilsTest {
     }
 
     @Test
+    public void testRemoval15()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("build.gradle");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "import org.gradle.api.tasks.testing.logging.TestExceptionFormat\n"
+                        + "import org.gradle.api.tasks.testing.logging.TestLogEvent\n" + "\n" + "plugins {\n"
+                        + "    id \"org.jruyi.thrift\" version \"0.4.0\"\n" + "    id \"jacoco\"\n"
+                        + "    id \"com.github.hierynomus.license\" version \"0.15.0\"\n"
+                        + "    id \"com.github.johnrengelman.shadow\" version \"5.0.0\"\n"
+                        + "    id \"net.ltgt.errorprone\" version \"0.0.14\"\n"
+                        + "    id 'ru.vyarus.animalsniffer' version '1.5.0'\n" + "    id 'java-library'\n"
+                        + "    id 'maven-publish'\n"
+                        + "    id 'signing'\n"
+                        + "    id 'io.codearte.nexus-staging' version '0.20.0'\n"
+                        + "    id \"de.marcphilipp.nexus-publish\" version \"0.2.0\" apply false\n"
+                        + "    id 'com.github.ben-manes.versions' version '0.21.0'\n"
+                        + "    id 'net.researchgate.release' version '2.6.0'\n" + "}\n"
+                        + "subprojects {\n"
+                        + "    apply plugin: 'ru.vyarus.animalsniffer'\n"
+                        + "    apply plugin: 'com.github.hierynomus.license'\n"
+                        + "    apply plugin: 'java'\n"
+                        + "    apply plugin: 'maven'\n"
+                        + "    apply plugin: 'checkstyle'\n"
+                        + "    apply plugin: 'de.marcphilipp.nexus-publish'\n",
+                Charset.defaultCharset());
+
+        // Avoid singleton as the set is manipulated within the method
+        PluginUtils.pluginRemoval(logger, target.getParentFile(),
+                new LinkedHashSet<>(Collections.singleton("RECC")));
+
+        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+
+        assertTrue(systemOutRule.getLog().contains("Replacing nexus-publish apply plugin with maven-publish"));
+        assertTrue(result.contains("id 'signing'"));
+        assertTrue(result.contains("apply plugin: \"maven-publish\""));
+        assertFalse(result.contains("com.github.ben-manes.versions"));
+    }
+
+    @Test
     public void testCheckForSemanticPlugin1()
             throws IOException, ManipulationException {
 

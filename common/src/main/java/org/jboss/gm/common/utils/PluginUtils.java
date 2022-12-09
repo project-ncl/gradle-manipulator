@@ -128,7 +128,8 @@ public class PluginUtils {
 
     /**
      * Removes plugins from a target build file.
-     *
+     * <p>
+     * </p>
      * Will automatically examine build.gradle, settings.gradle, build.gradle.kts, settings.gradle.kts
      *
      * @param logger the current logger in use
@@ -145,6 +146,12 @@ public class PluginUtils {
             // Shortcut to represent removing any/all of the supported plugins
             plugins.clear();
             plugins.addAll(PLUGINS.keySet());
+        } else if (plugins.stream().anyMatch(s -> s.matches("REC.*"))) {
+            // Shortcut to represent removing the default selection of the supported plugins
+            // This is equivalent to 'ALL' barring removal of the signing plugin
+            plugins.clear();
+            plugins.addAll(PLUGINS.keySet());
+            plugins.remove("signing");
         }
 
         // As the configuration block is named the same as the plugin we differentiate via the

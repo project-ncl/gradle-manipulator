@@ -1,6 +1,7 @@
 package org.jboss.gm.analyzer.alignment;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,10 +21,10 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence.NONE;
 
 /**
- * An implementation of {@link AlignmentService} that uses the Dependency Analyzer service in order to get the proper
- * aligned versions of dependencies (as well as the version of the project itself).
- *
- * The heavy lifting is done by {@link org.commonjava.maven.ext.io.rest.DefaultTranslator}.
+ * An implementation of {@link AlignmentService} that uses the Dependency Analyzer service
+ * in order to get the proper aligned versions of dependencies (as well as the version
+ * of the project itself). The heavy lifting is done by
+ * {@link org.commonjava.maven.ext.io.rest.DefaultTranslator}.
  */
 public class DAAlignmentService implements AlignmentService {
 
@@ -33,6 +34,8 @@ public class DAAlignmentService implements AlignmentService {
 
     private final DependencyState.DependencyPrecedence dependencySource;
 
+    private final String endpointUrl;
+
     /**
      * Constructs a new Dependency Analyzer service with the given configuration.
      *
@@ -40,8 +43,7 @@ public class DAAlignmentService implements AlignmentService {
      */
     public DAAlignmentService(Configuration configuration) {
         dependencySource = configuration.dependencyConfiguration();
-
-        final String endpointUrl = configuration.daEndpoint();
+        endpointUrl = configuration.daEndpoint();
 
         logger.debug("endpointUrl = {}, dependencySource = {}", endpointUrl, dependencySource);
 
@@ -62,26 +64,29 @@ public class DAAlignmentService implements AlignmentService {
      */
     @Override
     public Response align(AlignmentService.Request request) throws RestException {
-        if (dependencySource == NONE) {
-            logger.warn("No dependencySource configured ; unable to call endpoint");
+        if (isEmpty(endpointUrl)) {
+            logger.warn("No restUrl configured ; unable to call endpoint");
             return new Response(Collections.emptyMap());
         }
         final LogLevel originalLevel = FilteringCustomLogger.getContext().getLevel();
         final List<ProjectVersionRef> vParams = request.getDependencies();
-
-        logger.info("Passing {} GAVs into the REST client api {}", vParams.size(), vParams);
-
         final Map<ProjectVersionRef, String> vMap;
-        try {
-            if (originalLevel == LogLevel.LIFECYCLE) {
-                FilteringCustomLogger.getContext().setLevel(LogLevel.INFO);
-            }
-            vMap = restEndpoint.lookupVersions(vParams);
-        } finally {
-            FilteringCustomLogger.getContext().setLevel(originalLevel);
-        }
-        logger.info("REST Client returned: {}", vMap);
 
+        if (dependencySource == NONE) {
+            logger.warn("No dependencySource configured ; unable pass GAVs into endpoint");
+            vMap = new HashMap<>();
+        } else {
+            logger.info("Passing {} GAVs into the REST client api {}", vParams.size(), vParams);
+            try {
+                if (originalLevel == LogLevel.LIFECYCLE) {
+                    FilteringCustomLogger.getContext().setLevel(LogLevel.INFO);
+                }
+                vMap = restEndpoint.lookupVersions(vParams);
+            } finally {
+                FilteringCustomLogger.getContext().setLevel(originalLevel);
+            }
+            logger.info("REST Client returned: {}", vMap);
+        }
         final Response response = new Response(vMap);
 
         final List<ProjectVersionRef> pParams = request.getProject();

@@ -56,7 +56,6 @@ import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.attributes.Attribute;
-import org.gradle.api.attributes.Category;
 import org.gradle.api.internal.artifacts.result.DefaultResolvedDependencyResult;
 import org.gradle.api.internal.plugins.DefaultPluginManager;
 import org.gradle.api.logging.Logger;
@@ -740,7 +739,8 @@ public class AlignmentTask extends DefaultTask {
 
                         if (mvi == null) {
                             logger.warn("No module version for {}", incomingResult);
-                        } else if (Category.ENFORCED_PLATFORM.equals(category) || Category.REGULAR_PLATFORM.equals(category)) {
+                        // Can't use direct references to Category.ENFORCED_PLATFORM / PLATFORM as that is since 5.3
+                        } else if ("enforced-platform".equals(category) || "platform".equals(category)) {
                             ProjectVersionRef pvr = ProjectVersionFactory.withGAV(mvi.getGroup(), mvi.getName(),
                                     mvi.getVersion());
                             logger.debug("For {}, with category {} adding {} to scan",

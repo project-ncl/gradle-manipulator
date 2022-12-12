@@ -1,6 +1,6 @@
 [
   {
-    "latestVersion": null,
+    "latestVersion": "1.0.0.redhat-00002",
     "version": "1.0.0",
     "groupId": "org.acme",
     "artifactId": "dummy"

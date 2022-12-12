@@ -445,7 +445,7 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private void writeGmeMarkerFile(Configuration configuration, File rootGradle) throws IOException, ManipulationException {
+    private void writeGmeMarkerFile(Configuration configuration, File rootGradle) throws IOException {
         File rootDir = getProject().getRootDir();
         File gmeGradle = new File(rootDir, GME);
         Files.copy(getClass().getResourceAsStream('/' + GME), gmeGradle.toPath(),

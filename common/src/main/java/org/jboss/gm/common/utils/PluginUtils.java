@@ -129,7 +129,6 @@ public class PluginUtils {
     /**
      * Removes plugins from a target build file.
      * <p>
-     * </p>
      * Will automatically examine build.gradle, settings.gradle, build.gradle.kts, settings.gradle.kts
      *
      * @param logger the current logger in use

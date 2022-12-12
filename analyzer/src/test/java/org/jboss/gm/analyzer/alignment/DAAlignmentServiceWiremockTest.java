@@ -12,19 +12,28 @@ import java.util.stream.Stream;
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.core.state.DependencyState;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.RestException;
 import org.gradle.api.Project;
+import org.gradle.api.logging.LogLevel;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
+import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -33,6 +42,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
 
+@RunWith(Parameterized.class)
 public class DAAlignmentServiceWiremockTest {
 
     private static final int PORT = 8089;
@@ -40,11 +50,31 @@ public class DAAlignmentServiceWiremockTest {
     @Rule
     public final TestRule restoreSystemProperties = new RestoreSystemProperties();
 
+    @ClassRule
+    public static WireMockClassRule wireMockRule = new WireMockClassRule(PORT);
+
     @Rule
-    public WireMockRule wireMockRule = new WireMockRule(PORT);
+    public WireMockClassRule instanceRule = wireMockRule;
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
+
+    @Rule
+    public SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
+
+    @Rule
+    public final LoggingRule loggingRule = new LoggingRule(LogLevel.INFO);
+
+    @Parameters
+    public static Object[] data() {
+        return new Object[] {
+                DependencyState.DependencyPrecedence.REST,
+                DependencyState.DependencyPrecedence.NONE,
+        };
+    }
+
+    @Parameter
+    public DependencyState.DependencyPrecedence precedence;
 
     @Before
     public void setup() throws IOException, URISyntaxException {
@@ -64,6 +94,7 @@ public class DAAlignmentServiceWiremockTest {
     public void alignmentWorksAsExpected()
             throws RestException, IOException {
         System.setProperty(Configuration.DA, String.format("http://localhost:%d/da/rest/v-1", PORT));
+        System.setProperty("dependencySource", precedence.toString());
         final Configuration configuration = ConfigFactory.create(Configuration.class);
 
         final DAAlignmentService sut = new DAAlignmentService(configuration);
@@ -84,10 +115,15 @@ public class DAAlignmentServiceWiremockTest {
         project.setGroup("org.acme");
 
         assertThat(response).isNotNull().satisfies(r -> {
-            assertThat(r.getNewProjectVersion()).isNull();
-            assertThat(r.getAlignedVersionOfGav(project, hibernateGav)).isEqualTo("5.3.7.Final-redhat-00001");
-            assertThat(r.getAlignedVersionOfGav(project, undertowGav)).isEqualTo("2.0.15.Final-redhat-00001");
-            assertThat(r.getAlignedVersionOfGav(project, mockitoGav)).isNull();
+            assertThat(r.getNewProjectVersion()).isEqualTo("1.0.0.redhat-00002");
+            if (precedence != DependencyState.DependencyPrecedence.NONE) {
+                assertThat(r.getAlignedVersionOfGav(project, hibernateGav)).isEqualTo("5.3.7.Final-redhat-00001");
+                assertThat(r.getAlignedVersionOfGav(project, undertowGav)).isEqualTo("2.0.15.Final-redhat-00001");
+                assertThat(r.getAlignedVersionOfGav(project, mockitoGav)).isNull();
+            } else {
+                assertThat(systemOutRule.getLog()).contains(
+                        "No dependencySource configured ; unable pass GAVs into endpoint");
+            }
         });
     }
 

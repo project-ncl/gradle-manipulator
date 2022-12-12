@@ -31,15 +31,6 @@ The current supported list of plugins are:
 | `signing`                                           | `signing`                   |                                                                     |
 | `net.vivin.gradle-semantic-build-versioning`        | `preRelease`                |                                                                     |
 
-<table bgcolor="#00ff99">
-<tr>
-<td>
-    A special shortcut of <code>ALL</code> is available to represent removing all supported plugins.
-</td>
-</tr>
-</table>
-
-
 Note that this only supports direct removal of configuration blocks, not using any form of the [task
 avoidance API](https://docs.gradle.org/current/userguide/task_configuration_avoidance.html) For example:
 
@@ -65,6 +56,24 @@ Tasks are also removed if they are mentioned within the build scripts. Note that
 ```
 publish.finalizedBy closeAndReleaseRepository
 ```
+
+#### Shortcuts
+
+Two special shortcuts are available to support removing collections of plugins:
+
+* `ALL` represents removing all supported plugins.
+* `REC` / `RECOMMENDED` represents removing the recommended list. This is currently the same as
+  above but doesn't include the Signing plugin.
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <code>REC</code> is available from version 3.11
+</td>
+</tr>
+</table>
+
+
 
 ### Gradle Semantic Build Versioning Plugin
 

@@ -106,24 +106,10 @@ public class ManipulationModel {
          * </code>
          * then that applies to any Task that has an archive base type.
          */
-        Optional<AbstractArchiveTask> optionalAbstractArchiveTask = project.getTasks().withType(AbstractArchiveTask.class)
-                .stream().findFirst();
-        if (optionalAbstractArchiveTask.isPresent() &&
-        // We should be using getArchiveBaseName but it's only available in 5.1 and later.
-        // optionalAbstractArchiveTask.get().getArchiveBaseName().isPresent() &&
-        //!optionalAbstractArchiveTask.get().getArchiveBaseName().get().equals(project.getName())) {
-                !isEmpty(optionalAbstractArchiveTask.get().getBaseName()) &&
-                !project.getName().equals(optionalAbstractArchiveTask.get().getBaseName())) {
-            getLogger().warn("Updating project name ({}) as it differs to archiveBaseName ({})",
-                    project.getName(), optionalAbstractArchiveTask.get().getBaseName());
-            if (!project.getName().equals(project.getProjectDir().getName())) {
-                getLogger().warn("Different project name ({}) to project directory ({}) ; defaulting to project name.",
-                        project.getName(),
-                        project.getProjectDir().getName());
-            }
-            // Force overwrite the project name to ensure consistency.
-            ProjectUtils.updateNameField(project, optionalAbstractArchiveTask.get().getBaseName());
-            this.name = project.getName();
+        String archiveName = ProjectUtils.getArchivesBaseName(project);
+        if (archiveName != null) {
+            getLogger().warn("For project {} found archiveName: {}", project.getName(), archiveName);
+            this.name = archiveName;
         }
 
         getLogger().debug("Created manipulation model for project ({}) with path {}", name, projectPathName);

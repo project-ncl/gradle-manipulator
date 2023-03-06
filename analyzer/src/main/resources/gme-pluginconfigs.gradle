@@ -4,8 +4,8 @@
  * It is being used for extra configuration for badly behaved plugins
  */
 
-if (!project.hasProperty("gmeAnalyse")) {
-    allprojects {
+allprojects {
+    if (!project.hasProperty("gmeAnalyse") && !project.getState().getExecuted()) {
         afterEvaluate { project ->
             // Make sure that if the dokka task has been configured on the build,
             // we further configure it to not use the network at all

@@ -71,6 +71,8 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
     public void verifyOpenTelemetryGradle() throws IOException, URISyntaxException, ManipulationException {
         // XXX: Use of pluginManagement.plugins{}
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.6")) >= 0);
+        // XXX:  Caused by: org.gradle.api.GradleException: Dependencies can not be declared against the `compileClasspath` configuration.
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.0")) < 0);
 
         final File projectRoot = tempDir.newFolder("opentelemetry");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
@@ -147,6 +149,8 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         // XXX: Kotlin requirements
         System.out.println("### " + GradleVersion.current());
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.5")) >= 0);
+        // XXX:  Caused by: org.gradle.api.GradleException: Dependencies can not be declared against the `compileClasspath` configuration.
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.0")) < 0);
 
         final Map<String, String> map = new HashMap<>();
         map.put("-DoverrideTransitive", "false");

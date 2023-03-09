@@ -78,12 +78,12 @@ configure(javaProjects) { project ->
 
     task sourcesJar(type: Jar) {
         from project.sourceSets.main.allJava
-        classifier = 'sources'
+        archiveClassifier = 'sources'
     }
 
     task javadocJar(type: Jar) {
         from javadoc
-        classifier = 'javadoc'
+        archiveClassifier = 'javadoc'
     }
 
     publishing {
@@ -113,12 +113,12 @@ configure(scalaProjects) { project ->
 
     task sourcesJar(type: Jar) {
         from project.sourceSets.main.allScala
-        classifier = 'sources'
+        archiveClassifier = 'sources'
     }
 
     task scaladocJar(type: Jar) {
         from scaladoc
-        classifier = 'javadoc'
+        archiveClassifier = 'javadoc'
     }
 
     publishing {

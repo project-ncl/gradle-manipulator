@@ -104,14 +104,14 @@ val functionalTest = task<Test>("functionalTest") {
 
 val testJar by tasks.registering(Jar::class) {
     mustRunAfter(tasks["functionalTest"])
-    classifier = "tests"
+    archiveClassifier.set("tests")
     from(sourceSets["functionalTest"].output)
     from(sourceSets["test"].output)
 }
 
 // Publish test source jar so it can be reused by manipulator-groovy-examples.
 val testSourcesJar by tasks.registering(Jar::class) {
-    classifier = "test-sources"
+    archiveClassifier.set("test-sources")
     from(sourceSets["test"].allSource)
     from(sourceSets["functionalTest"].java.srcDirs)
 }

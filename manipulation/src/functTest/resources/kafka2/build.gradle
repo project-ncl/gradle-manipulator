@@ -380,7 +380,7 @@ subprojects {
   }
 
   task srcJar(type: Jar) {
-    classifier = 'sources'
+    archiveClassifier = 'sources'
     from "$rootDir/LICENSE"
     from "$rootDir/NOTICE"
     from sourceSets.main.allSource
@@ -410,14 +410,14 @@ subprojects {
 
   if(!sourceSets.test.allSource.isEmpty()) {
     task testJar(type: Jar) {
-      classifier = 'test'
+      archiveClassifier = 'test'
       from "$rootDir/LICENSE"
       from "$rootDir/NOTICE"
       from sourceSets.test.output
     }
 
     task testSrcJar(type: Jar, dependsOn: testJar) {
-      classifier = 'test-sources'
+      archiveClassifier = 'test-sources'
       from "$rootDir/LICENSE"
       from "$rootDir/NOTICE"
       from sourceSets.test.allSource
@@ -436,7 +436,7 @@ subprojects {
     }
 
     task scaladocJar(type:Jar) {
-      classifier = 'scaladoc'
+      archiveClassifier = 'scaladoc'
       from "$rootDir/LICENSE"
       from "$rootDir/NOTICE"
       from scaladoc.destinationDir

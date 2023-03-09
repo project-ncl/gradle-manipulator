@@ -43,6 +43,8 @@ public class EHCacheProjectFunctionalTest {
     public void ensurePublish()
             throws IOException, URISyntaxException, GitAPIException {
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.1")) >= 0);
+        // XXX: JavaConvention.java fails to compile due to API changes
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.0")) < 0);
 
         final File simpleProjectRoot = tempDir.newFolder("ehcache3");
 

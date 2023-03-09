@@ -42,9 +42,9 @@ task api(type: Javadoc) {
 
 task docsZip(type: Zip, dependsOn: ['api']) {
     group = "Distribution"
-    baseName = "dummy"
-    classifier = "docs"
-    description = "Builds -${classifier} archive containing api and reference " +
+    archiveBaseName = "dummy"
+    archiveClassifier = "docs"
+    description = "Builds -${archiveClassifier} archive containing api and reference " +
             "for deployment at https://docs.spring.io/spring-framework/docs."
 
     from (api) {
@@ -54,12 +54,12 @@ task docsZip(type: Zip, dependsOn: ['api']) {
 
 task distZip(type: Zip, dependsOn: [docsZip]) {
     group = "Distribution"
-    baseName = "dummy"
-    classifier = "dist"
-    description = "Builds -${classifier} archive, containing all jars and docs, " +
+    archiveBaseName = "dummy"
+    archiveClassifier = "dist"
+    description = "Builds -${archiveClassifier} archive, containing all jars and docs, " +
             "suitable for community download page."
 
-    ext.baseDir = "${baseName}-${project.version}";
+    ext.baseDir = "${archiveBaseName}-${project.version}";
 
 
     from(zipTree(docsZip.archivePath)) {

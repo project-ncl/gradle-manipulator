@@ -13,8 +13,8 @@ repositories {
 }
 
 task packageDocs(type: Zip) {
-    archiveName = "docs.zip"
-    destinationDir = file("build")
+    archiveFileName = "docs.zip"
+    destinationDirectory = file("build")
     from "docs"
 }
 

@@ -25,6 +25,7 @@ import org.gradle.api.model.ObjectFactory;
 import org.gradle.internal.Cast;
 import org.gradle.internal.service.ServiceRegistry;
 import org.gradle.testfixtures.ProjectBuilder;
+import org.gradle.util.GradleVersion;
 import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.byteman.contrib.bmunit.BMUnitConfig;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
@@ -40,8 +41,9 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -89,6 +91,9 @@ public class AlignmentTaskEmptyVersionTest {
 
     @Test
     public void testProject() throws Exception {
+        // XXX: Caused by: org.gradle.api.GradleException: Dependencies can not be declared against the `default` configuration.
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.0")) < 0);
+
         final File simpleProjectRoot = tempDir.newFolder("simple-project");
 
         System.setProperty("ignoreUnresolvableDependencies", "true");

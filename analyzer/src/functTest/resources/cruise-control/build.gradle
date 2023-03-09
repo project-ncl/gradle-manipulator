@@ -106,12 +106,12 @@ subprojects {
   apply plugin: 'jacoco'
 
   task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
+    archiveClassifier = 'sources'
     from sourceSets.main.allSource
   }
 
   task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from javadoc.destinationDir
   }
 
@@ -175,8 +175,8 @@ task buildApiWiki(type: Exec) {
 
 task assembleLicenses(type: Zip) {
   dependsOn ':generateLicenseReport'
-  archiveName 'cruise-control-licenses.zip'
-  destinationDir file("$buildDir/licenses")
+  archiveFileName = 'cruise-control-licenses.zip'
+  destinationDirectory = file("$buildDir/licenses")
   from "$buildDir/reports/dependency-license/"
 }
 

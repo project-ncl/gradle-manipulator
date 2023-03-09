@@ -13,7 +13,6 @@ import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
-import org.gradle.api.plugins.MavenPlugin;
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin;
 import org.gradle.plugins.signing.SigningExtension;
 import org.jboss.gm.common.Configuration;
@@ -154,7 +153,14 @@ public class ManipulationPlugin implements Plugin<Project> {
                 // if enforced plugin is not configured in the project, apply it
                 if (LEGACY_MAVEN_PLUGIN.equals(deployPlugin)) {
                     if (!evaluatedProject.getPluginManager().hasPlugin(LEGACY_MAVEN_PLUGIN)) {
-                        evaluatedProject.getPluginManager().apply(MavenPlugin.class);
+                        try {
+                            Class<?> mavenPluginClass = Class.forName("org.gradle.api.plugins.MavenPlugin");
+                            evaluatedProject.getPluginManager().apply(mavenPluginClass);
+                        } catch (ClassNotFoundException e) {
+                            logger.error(
+                                    "For project {}, found {} plugin, but the class org.gradle.api.plugins.MavenPlugin is not available",
+                                    evaluatedProject.getName(), LEGACY_MAVEN_PLUGIN, e);
+                        }
                     }
                 } else if (MAVEN_PUBLISH_PLUGIN.equals(deployPlugin)) {
                     if (!evaluatedProject.getPluginManager().hasPlugin(MAVEN_PUBLISH_PLUGIN)) {

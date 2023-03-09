@@ -39,9 +39,13 @@ plugins {
             id("com.adarshr.test-logger") version "2.1.1"
             id("com.github.johnrengelman.shadow") version "6.1.0"
         }
+        org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.0") -> {
+            id("com.adarshr.test-logger") version "3.2.0"
+            id("com.github.johnrengelman.shadow") version "7.1.2"
+        }
         else -> {
-            id("com.adarshr.test-logger") version "3.0.0"
-            id("com.github.johnrengelman.shadow") version "7.0.0"
+            id("com.adarshr.test-logger") version "3.2.0"
+            id("com.github.johnrengelman.shadow") version "8.1.0"
         }
     }
 
@@ -55,18 +59,25 @@ plugins {
         org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("6.0") -> {
             id("io.freefair.lombok") version "4.1.6" apply false
         }
-        else -> {
+        org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.0") -> {
             id("io.freefair.lombok") version "5.3.3.3" apply false
+        }
+        else -> {
+            id("io.freefair.lombok") version "6.6.3" apply false
         }
     }
 
-    if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.3")) {
+    if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("8.0")) {
+        // XXX: Currently unsupported
+    } else if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("7.0")) {
+        id("org.kordamp.gradle.jacoco") version "0.47.0"
+    } else if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.3")) {
         id("org.kordamp.gradle.jacoco") version "0.46.0"
     }
 }
 
-// XXX: Jacoco plugin only supports Gradle 5.3+; create empty task on older Gradle versions so that build does not fail
-if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.3")) {
+// XXX: Jacoco plugin only supports Gradle [5.3, 8.0); create empty task on those Gradle versions so that build does not fail
+if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.3") || org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("8.0")) {
     tasks.register("AggregateJacocoReport")
 }
 
@@ -213,16 +224,13 @@ subprojects {
     apply(plugin = "com.adarshr.test-logger")
     apply(plugin = "io.freefair.lombok")
 
-
     extra["lombokVersion"] = extensions.findByType(LombokExtension::class)?.version
 
     // XXX: Lombok plugin 3.x < 3.6.1 suffers from <https://github.com/freefair/gradle-plugins/issues/31>
     if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.0")
         || org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.2")) {
-        tasks.getByName("generateLombokConfig") {
-            // Don't generate lombok.config files ( https://docs.freefair.io/gradle-plugins/3.6.6/reference/#_lombok_config_handling )
-            enabled = false
-        }
+        // Don't generate lombok.config files ( https://docs.freefair.io/gradle-plugins/3.6.6/reference/#_lombok_config_handling )
+        tasks.findByName("generateLombokConfig")?.enabled = false
     }
 
     if (project.name == "common" || project.name == "cli") {
@@ -256,12 +264,12 @@ subprojects {
     apply(plugin = "net.linguica.maven-settings")
 
     val sourcesJar by tasks.registering(Jar::class) {
-        classifier = "sources"
+        archiveClassifier.set("sources")
         from(sourceSets["main"].allSource)
     }
 
     val javadocJar by tasks.registering(Jar::class) {
-        classifier = "javadoc"
+        archiveClassifier.set("javadoc")
         from(tasks["javadoc"])
     }
 
@@ -305,7 +313,7 @@ subprojects {
     }
 
     val testFixturesJar by tasks.registering(Jar::class) {
-        classifier = "test-fixtures"
+        archiveClassifier.set("test-fixtures")
         from(sourceSets["testFixtures"].output)
     }
 
@@ -331,9 +339,7 @@ subprojects {
 
         tasks.withType<ShadowJar>().configureEach {
             // ensure that a single jar is built which is the shadowed one
-            // Using non-deprecated archiveClassifier.set doesn't seem to work.
-            @Suppress("DEPRECATION")
-            classifier = ""
+            archiveClassifier.set("")
             // no need to add analyzer.init.gradle in the jar since it will never be used from inside the plugin itself
             exclude("analyzer-init.gradle")
 

@@ -63,6 +63,8 @@ public class VersionConflictProjectFunctionalTest extends AbstractWiremockTest {
     public void validateResolutionStrategy() throws IOException, URISyntaxException, ManipulationException {
         // XXX: Use of pluginManagement.plugins{}
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.6")) >= 0);
+        // XXX: Caused by: org.gradle.api.InvalidUserDataException: You can't map a property that does not exist: propertyName=classifier
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.0")) < 0);
 
         final File projectRoot = tempDir.newFolder("version-conflict");
 
@@ -98,6 +100,8 @@ public class VersionConflictProjectFunctionalTest extends AbstractWiremockTest {
     public void validateTransitiveDisabledAndShadow() throws IOException, URISyntaxException {
         // XXX: Use of pluginManagement.plugins{}
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.6")) >= 0);
+        // XXX: Caused by: org.gradle.api.InvalidUserDataException: You can't map a property that does not exist: propertyName=classifier
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.0")) < 0);
 
         final File projectRoot = tempDir.newFolder("version-conflict");
 
@@ -115,6 +119,8 @@ public class VersionConflictProjectFunctionalTest extends AbstractWiremockTest {
     public void validateTransitiveEnabledAndShadow() throws IOException, URISyntaxException, ManipulationException {
         // XXX: Use of pluginManagement.plugins{}
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.6")) >= 0);
+        // XXX: Caused by: org.gradle.api.InvalidUserDataException: You can't map a property that does not exist: propertyName=classifier
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.0")) < 0);
 
         final File projectRoot = tempDir.newFolder("version-conflict");
 

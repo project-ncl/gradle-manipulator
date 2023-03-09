@@ -17,5 +17,5 @@ dependencies {
 }
 
 war {
-    archiveName 'war-project.war'
+    archiveFileName = 'war-project.war'
 }

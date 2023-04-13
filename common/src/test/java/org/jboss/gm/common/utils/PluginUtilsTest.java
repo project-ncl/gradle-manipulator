@@ -885,6 +885,40 @@ public class PluginUtilsTest {
     }
 
     @Test
+    public void testRemoval16()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("build.gradle");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "\n" + "plugins {\n" + "    `java-platform`\n" + "\n"
+                        + "    id(\"com.github.ben-manes.versions\")\n"
+                        + "}\ntasks {\n"
+                        + "    tasks.named(\"dependencyUpdates\").configure {\n"
+                        + "        revision = \"release\"\n"
+                        + "        checkConstraints = true\n" + "\n"
+                        + "        rejectVersionIf {\n"
+                        + "            isNonStable(candidate.version)\n"
+                        + "        }\n"
+                        + "    }\n"
+                        + "    tasks.named('dependencyUpdates').configure {\n"
+                        + "        revision = \"release\"\n"
+                        + "        checkConstraints = true\n" + "\n"
+                        + "    }\n"
+                        + "}",
+                Charset.defaultCharset());
+
+        HashSet<String> plugins = new LinkedHashSet<>();
+        plugins.add("ALL");
+        PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
+
+        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+
+        System.out.println(result);
+        assertFalse(result.contains("dependencyUpdates"));
+        assertFalse(result.contains("benmanes"));
+    }
+
+    @Test
     public void testCheckForSemanticPlugin1()
             throws IOException, ManipulationException {
 

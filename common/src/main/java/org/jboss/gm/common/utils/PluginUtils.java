@@ -36,7 +36,8 @@ public class PluginUtils {
 
     static {
         PLUGINS.put("com.github.ben-manes.versions", new PluginReference(Collections.singleton("dependencyUpdates"),
-                "", Collections.singleton("DependencyUpdatesTask"),
+                "", Stream.of("dependencyUpdates", "DependencyUpdatesTask").collect(
+                        Collectors.toSet()),
                 "", Collections.singleton("com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask")));
         PLUGINS.put("com.github.burrunan.s3-build-cache", new PluginReference("buildCache"));
         PLUGINS.put("de.marcphilipp.nexus-publish",
@@ -267,11 +268,11 @@ public class PluginUtils {
                     for (String t : tasks) {
                         contentBuilder = new StringBuilder(content);
                         removed |= removeBlock(logger, buildFile, eol, contentBuilder,
-                                "(?m)^.*\\(\"" + t + "\"\\)");
+                                "(?m)^.*\\(\"" + t + "\"\\)(\\.configure|)");
                         // Sometimes tasks can be single quoted e.g.
                         // tasks.named('closeAndReleaseRepository') {
                         removed |= removeBlock(logger, buildFile, eol, contentBuilder,
-                                "(?m)^.*\\('" + t + "'\\)");
+                                "(?m)^.*\\('" + t + "'\\)(\\.configure|)");
                         removed |= removeBlock(logger, buildFile, eol, contentBuilder,
                                 "(?m)^.*named<" + t + ">.*?\\s");
                         content = contentBuilder.toString();

@@ -1,11 +1,16 @@
 package org.jboss.gm.analyzer.alignment;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import org.aeonbits.owner.ConfigCache;
+import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.util.ManifestUtils;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.logging.Logger;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.logging.FilteringCustomLogger;
@@ -45,6 +50,16 @@ public class AlignmentPlugin implements Plugin<Project> {
         }
 
         Task task = project.getTasks().create(AlignmentTask.NAME, AlignmentTask.class);
+        if (GradleVersion.current().compareTo(GradleVersion.version("7.4")) >= 0) {
+            try {
+                Method m = Task.class.getMethod("notCompatibleWithConfigurationCache", String.class);
+                m.invoke(task, "GME is not compatible with configuration cache");
+            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                throw new ManipulationUncheckedException("Unable to set GME as incompatible with configuration caching",
+                        e);
+            }
+        }
+
         if (project.getRootProject() == project) {
             task.doFirst(t -> {
                 // Need to delay the OpenTelemetry creation until this task is started to ensure

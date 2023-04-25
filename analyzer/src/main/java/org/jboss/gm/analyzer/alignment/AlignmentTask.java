@@ -463,18 +463,31 @@ public class AlignmentTask extends DefaultTask {
         }
 
         if (rootGradle.exists()) {
-            String buildScript = FileUtils.readFileToString(rootGradle, Charset.defaultCharset());
+            List<String> buildScript = FileUtils.readLines(rootGradle, Charset.defaultCharset());
             String injectedLine = rootGradle.getName().endsWith(".kts") ? INJECT_GME_START_KOTLIN : INJECT_GME_START;
 
-            if (!buildScript.contains(injectedLine)) {
-                if (buildScript.matches("(?s).*(\\s|^)buildscript(\\s|\\{).*")) {
-                    // Replace existing buildscript with a subsection excluding closing brace
-                    buildScript = buildScript.replaceFirst("(?s)buildscript(\\s|$)+\\{", injectedLine);
-                } else {
-                    buildScript = injectedLine + " }" + System.lineSeparator() + buildScript;
+            if (buildScript.stream().noneMatch(s -> s.contains(injectedLine))) {
+                // Now need to determine whether there is an existing buildscript block. This block may not be first
+                // as there may be comments/imports.
+                boolean existing = false;
+                for (int i = 0; i < buildScript.size(); i++) {
+                    String m = buildScript.get(i);
+                    if (m.matches("(\\s|^)*buildscript\\s*(\\{)*.*") && !m.matches("//.*buildscript")) {
+                        if (!m.contains("{")) {
+                            // The brace is on the next line. Concatenate to make the replacement work.
+                            m = m + buildScript.get(i + 1);
+                            buildScript.remove(i + 1);
+                        }
+                        // Replace existing buildscript with a subsection excluding closing brace
+                        buildScript.set(i, m.replaceFirst("buildscript(\\s)*\\{", injectedLine));
+                        existing = true;
+                    }
+                }
+                if (!existing) {
+                    buildScript.addAll(0, Collections.singletonList(injectedLine + " }"));
                 }
                 logger.debug("Updating {} with {}", rootGradle, injectedLine);
-                FileUtils.writeStringToFile(rootGradle, buildScript, Charset.defaultCharset());
+                FileUtils.writeLines(rootGradle, buildScript);
             }
         } else {
             logger.warn("Unable to find build.gradle in {} to modify.", rootDir);

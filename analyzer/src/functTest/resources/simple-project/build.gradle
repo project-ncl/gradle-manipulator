@@ -1,11 +1,15 @@
+
+import java.util.Map; // Keep this ; part of the test.
+
 plugins {
     // including this plugin directly instead of by an init script, which allows to use the freshly build version
     id 'org.jboss.gm.analyzer'
     id 'java'
 }
 
-sourceCompatibility = 1.8
+// This does not have a buildscript block
 
+sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()

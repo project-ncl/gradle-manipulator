@@ -1,4 +1,6 @@
-buildscript {
+// This is a buildscript block
+buildscript
+{
     repositories {
         maven {
             url = uri("https://oss.sonatype.org/content/repositories/snapshots/")

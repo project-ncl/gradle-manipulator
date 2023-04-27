@@ -19,6 +19,7 @@ import org.aeonbits.owner.Reloadable;
 import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
 import org.commonjava.maven.ext.core.state.RESTState;
 import org.commonjava.maven.ext.io.rest.Translator;
+import org.jboss.gm.common.utils.RESTUtils;
 
 import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
 import static org.aeonbits.owner.Config.LoadType.MERGE;
@@ -138,6 +139,46 @@ public interface Configuration extends Accessible, Reloadable {
     @ConverterClass(RestHeaderParser.class)
     @DefaultValue("")
     Map<String, String> restHeaders();
+
+    /**
+     * This property handles dependency rank global scope.
+     * <p>
+     * Code for more specific rank scopes is handled in RESTUtils (OWNER doesn't feature serialization of prefixed
+     * properties).
+     * {@link RESTUtils.ContextClassLoaderLocalWithConfiguration#initialValue()}
+     *
+     * @return global dependency ranks
+     */
+    @Key(RESTState.REST_GLOBAL_DEPENDENCY_RANKS)
+    String restGlobalDependencyRanks();
+
+    /**
+     * This property handles dependency allow list with global scope.
+     *
+     * Code for more specific rank scopes is handled in RESTUtils (OWNER doesn't feature serialization of prefixed
+     * properties).
+     * {@link RESTUtils.ContextClassLoaderLocalWithConfiguration#initialValue()}
+     *
+     * @return global dependency allow list
+     */
+    @Key(RESTState.REST_GLOBAL_DEPENDENCY_ALLOW_LIST)
+    String restGlobalDependencyAllowList();
+
+    /**
+     * This property handles dependency deny list with global scope.
+     * <p>
+     * Code for more specific rank scopes is handled in RESTUtils (OWNER doesn't feature serialization of prefixed
+     * properties).
+     * {@link RESTUtils.ContextClassLoaderLocalWithConfiguration#initialValue()}
+     *
+     * @return global dependency deny list
+     */
+    @Key(RESTState.REST_GLOBAL_DEPENDENCY_DENY_LIST)
+    String restGlobalDependencyDenyList();
+
+    @DefaultValue(";")
+    @Key(RESTState.REST_DEPENDENCY_RANK_DELIMITER)
+    String restDependencyRankDelimiter();
 
     @Key("ignoreUnresolvableDependencies")
     @DefaultValue("false")

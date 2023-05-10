@@ -85,7 +85,7 @@ jobs:
         verbose: true
 
   snapshot:
-    if: github.repository == 'project-ncl/gradle-manipulator' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.repository == 'project-ncl/gradle-manipulator' && github.event_name == 'push' && ( github.ref == 'refs/heads/main' || github.ref == 'refs/heads/3.15-branch' )
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3

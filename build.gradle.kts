@@ -186,6 +186,9 @@ allprojects {
         maven {
             url = uri("https://maven.repository.redhat.com/ga/")
         }
+        maven {
+            url = uri("https://repository.jboss.org/nexus/content/repositories/snapshots")
+        }
     }
     apply(plugin = "idea")
 }

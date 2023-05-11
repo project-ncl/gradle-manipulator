@@ -186,6 +186,9 @@ allprojects {
         maven {
             url = uri("https://maven.repository.redhat.com/ga/")
         }
+        maven {
+            url = uri("https://repository.jboss.org/nexus/content/repositories/snapshots")
+        }
     }
     apply(plugin = "idea")
 }
@@ -211,7 +214,7 @@ subprojects {
     extra["mavenVersion"] = "3.5.0"
     extra["opentelemetryVersion"] = "1.2.0"
     extra["ownerVersion"] = "1.0.12"
-    extra["pmeVersion"] = "4.14"
+    extra["pmeVersion"] = "4.17-SNAPSHOT"
     extra["slf4jVersion"] = "1.7.30"
     extra["systemRulesVersion"] = "1.19.0"
 

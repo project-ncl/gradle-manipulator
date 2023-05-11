@@ -145,7 +145,6 @@ public interface Configuration extends Accessible, Reloadable {
      * <p>
      * Code for more specific rank scopes is handled in RESTUtils (OWNER doesn't feature serialization of prefixed
      * properties).
-     * {@link RESTUtils.ContextClassLoaderLocalWithConfiguration#initialValue()}
      *
      * @return global dependency ranks
      */
@@ -154,10 +153,9 @@ public interface Configuration extends Accessible, Reloadable {
 
     /**
      * This property handles dependency allow list with global scope.
-     *
+     * <p>
      * Code for more specific rank scopes is handled in RESTUtils (OWNER doesn't feature serialization of prefixed
      * properties).
-     * {@link RESTUtils.ContextClassLoaderLocalWithConfiguration#initialValue()}
      *
      * @return global dependency allow list
      */
@@ -169,7 +167,6 @@ public interface Configuration extends Accessible, Reloadable {
      * <p>
      * Code for more specific rank scopes is handled in RESTUtils (OWNER doesn't feature serialization of prefixed
      * properties).
-     * {@link RESTUtils.ContextClassLoaderLocalWithConfiguration#initialValue()}
      *
      * @return global dependency deny list
      */

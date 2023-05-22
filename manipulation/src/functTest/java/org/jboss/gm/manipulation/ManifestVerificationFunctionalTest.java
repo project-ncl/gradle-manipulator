@@ -1,7 +1,6 @@
 package org.jboss.gm.manipulation;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -123,6 +122,10 @@ public class ManifestVerificationFunctionalTest {
         final String ARTIFACT_NAME = "libthrift-0.13.0.temporary-redhat-00001";
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
+
+        assertThat(systemOutRule.getLog())
+                .contains(
+                        "For project libthrift, task jar, updating Export-Package version 0.13.0-SNAPSHOT to 0.13.0.temporary-redhat-00001 (old version 0.13.0-SNAPSHOT)");
     }
 
     @Test
@@ -226,8 +229,8 @@ public class ManifestVerificationFunctionalTest {
         File manifestFile = new File(projectRoot, "bson/build/tmp/jar/MANIFEST.MF");
         assertTrue(manifestFile.exists());
 
-        try (JarInputStream jarInputStream = new JarInputStream(new FileInputStream(new File(projectRoot,
-                "bson/build/libs/bson-" + ARTIFACT_VERSION + ".jar")))) {
+        try (JarInputStream jarInputStream = new JarInputStream(Files.newInputStream(
+                new File(projectRoot, "bson/build/libs/bson-" + ARTIFACT_VERSION + ".jar").toPath()))) {
             List<String> lines = jarInputStream.getManifest().getMainAttributes()
                     .entrySet()
                     .stream()
@@ -320,5 +323,61 @@ public class ManifestVerificationFunctionalTest {
                 .contains(
                         "For project driver-core, task jar, not overriding value Specification-Version since version ("
                                 + ARTIFACT_VERSION + ") has not changed");
+    }
+
+    @Test
+    public void verifyASMManifest() throws IOException, URISyntaxException {
+        // XXX: java-platform plugin required.
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.2.1")) > 0);
+
+        final File m2Directory = tempDir.newFolder(".m2");
+        System.setProperty("maven.repo.local", m2Directory.getAbsolutePath());
+
+        final File publishDirectory = tempDir.newFolder("publishDirectory");
+        System.setProperty("AProxDeployUrl", "file://" + publishDirectory.toString());
+
+        final File projectRoot = tempDir.newFolder("asm");
+        TestUtils.copyDirectory("asm", projectRoot);
+        assertThat(projectRoot.toPath().resolve("build.gradle")).exists();
+
+        final BuildResult buildResult = TestUtils.createGradleRunner()
+                .withProjectDir(projectRoot)
+                //.withDebug(true)
+                .withArguments("assemble", "publish", "--info")
+                .withPluginClasspath()
+                .forwardOutput()
+                .build();
+
+        assertThat(Objects.requireNonNull(buildResult.task(":asm:publish")).getOutcome())
+                .isEqualTo(TaskOutcome.SUCCESS);
+
+        Path pathToArtifacts = publishDirectory.toPath()
+                .resolve("org/ow2/asm/asm/9.5.0.redhat-00001");
+        assertThat(pathToArtifacts.resolve("asm-9.5.0.redhat-00001.pom")).exists();
+        assertThat(pathToArtifacts.resolve("asm-9.5.0.redhat-00001.jar")).exists();
+
+        File manifestFile = new File(projectRoot, "asm/build/tmp/jar/MANIFEST.MF");
+        assertTrue(manifestFile.exists());
+
+        try (JarInputStream jarInputStream = new JarInputStream(
+                Files.newInputStream(new File(projectRoot, "asm/build/libs/asm-9.5.0.redhat-00001.jar").toPath()))) {
+            List<String> lines = jarInputStream.getManifest().getMainAttributes()
+                    .entrySet()
+                    .stream()
+                    .map(entry -> entry.getKey() + ": " + entry.getValue())
+                    .sorted(Comparator.naturalOrder())
+                    .collect(Collectors.toList());
+            String stringLines = String.join("\n", lines);
+
+            assertThat(stringLines).contains(
+                    "Export-Package: org.objectweb.asm;version=\"9.5.0.redhat-00001\",org.objectweb.asm.signature;version=\"9.5.0.redhat-00001\"\n"
+                            + "Implementation-Title: ASM, a very small and fast Java bytecode manipulation framework\n"
+                            + "Implementation-Vendor-Id: org.ow2.asm\n"
+                            + "Implementation-Vendor: org.ow2.asm\n"
+                            + "Implementation-Version: 9.5.0.redhat-00001\n");
+            assertThat(systemOutRule.getLog())
+                    .contains(
+                            "For project asm, task jar, not updating Export-Package since version (9.5.0.redhat-00001) has not changed");
+        }
     }
 }

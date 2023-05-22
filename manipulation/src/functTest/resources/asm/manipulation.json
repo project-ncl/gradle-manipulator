@@ -1,0 +1,74 @@
+{
+  "group" : "org.ow2.asm",
+  "name" : "root",
+  "projectPathName" : "root",
+  "version" : "9.5.0.redhat-00001",
+  "originalVersion" : "9.5",
+  "children" : {
+    "asm-commons" : {
+      "group" : "org.ow2.asm",
+      "name" : "asm-commons",
+      "projectPathName" : "asm-commons",
+      "version" : "9.5.0.redhat-00001",
+      "originalVersion" : "9.5"
+    },
+    "asm-analysis" : {
+      "group" : "org.ow2.asm",
+      "name" : "asm-analysis",
+      "projectPathName" : "asm-analysis",
+      "version" : "9.5.0.redhat-00001",
+      "originalVersion" : "9.5"
+    },
+    "asm" : {
+      "group" : "org.ow2.asm",
+      "name" : "asm",
+      "projectPathName" : "asm",
+      "version" : "9.5.0.redhat-00001",
+      "originalVersion" : "9.5"
+    },
+    "asm-test" : {
+      "group" : "org.ow2.asm",
+      "name" : "asm-test",
+      "projectPathName" : "asm-test",
+      "version" : "9.5.0.redhat-00001",
+      "originalVersion" : "9.5"
+    },
+    "asm-util" : {
+      "group" : "org.ow2.asm",
+      "name" : "asm-util",
+      "projectPathName" : "asm-util",
+      "version" : "9.5.0.redhat-00001",
+      "originalVersion" : "9.5"
+    },
+    "benchmarks" : {
+      "group" : "org.ow2.asm",
+      "name" : "benchmarks",
+      "projectPathName" : "benchmarks",
+      "version" : "9.5.0.redhat-00001",
+      "originalVersion" : "9.5"
+    },
+    "tools" : {
+      "group" : "org.ow2.asm",
+      "name" : "tools",
+      "projectPathName" : "tools",
+      "version" : "9.5.0.redhat-00001",
+      "originalVersion" : "9.5",
+      "children" : {
+        "retrofitter" : {
+          "group" : "org.ow2.asm",
+          "name" : "retrofitter",
+          "projectPathName" : "retrofitter",
+          "version" : "9.5.0.redhat-00001",
+          "originalVersion" : "9.5"
+        }
+      }
+    },
+    "asm-tree" : {
+      "group" : "org.ow2.asm",
+      "name" : "asm-tree",
+      "projectPathName" : "asm-tree",
+      "version" : "9.5.0.redhat-00001",
+      "originalVersion" : "9.5"
+    }
+  }
+}

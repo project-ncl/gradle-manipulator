@@ -1,0 +1,250 @@
+// ASM: a very small and fast Java bytecode manipulation framework
+// Copyright (c) 2000-2011 INRIA, France Telecom
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions
+// are met:
+// 1. Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+// 2. Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the distribution.
+// 3. Neither the name of the copyright holders nor the names of its
+//    contributors may be used to endorse or promote products derived from
+//    this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+// THE POSSIBILITY OF SUCH DAMAGE.
+
+buildscript {
+  repositories { mavenCentral() }
+  dependencies { classpath 'org.netbeans.tools:sigtest-maven-plugin:1.5' }
+}
+
+plugins {
+    // including this plugin directly instead of by an init script, which allows to use the freshly build version
+    id 'org.jboss.gm.manipulation'
+}
+plugins { id 'com.github.sherter.google-java-format' version '0.9' apply false }
+plugins { id 'me.champeau.jmh' version '0.6.8' apply false }
+plugins { id 'org.sonarqube' version '3.5.0.2730' apply false }
+
+allprojects {
+    apply plugin: 'org.jboss.gm.manipulation'
+}
+
+description = 'ASM, a very small and fast Java bytecode manipulation framework'
+
+apply plugin: 'java-platform'
+dependencies {
+  constraints {
+        api project(':asm')
+  }
+}
+
+allprojects {
+  group = 'org.ow2.asm'
+}
+
+subprojects {
+  repositories { mavenCentral() }
+  apply plugin: 'java-library'
+  apply plugin: 'jacoco'
+  sourceCompatibility = '1.8'
+  targetCompatibility = '1.8'
+  test { useJUnitPlatform() }
+  ext.provides = []  // The provided java packages, e.g. ['org.objectweb.asm']
+  ext.requires = []  // The required Gradle projects, e.g. [':asm-test']
+  ext.transitiveRequires = { ->
+    return requires.collect{project(it)}
+        .collect{it.transitiveRequires().plus(it.provides[0])}.flatten() as Set
+  }
+  ext.transitiveImports = { ->
+    return requires.collect{project(it)}
+        .collect{it.transitiveImports().plus(it.provides)}.flatten() as Set
+  }
+  ext.depends = []   // The external dependencies, e.g. ['junit:junit:4.12']
+  // Some external dependencies (such as Jacoco) depend transitively on ASM, and
+  // without this rule Gradle can mix ASM jars of different versions (e.g.
+  // asm-6.0.jar with the asm-tree.jar built locally).
+  configurations.all { resolutionStrategy { preferProjectModules() } }
+}
+
+// -----------------------------------------------------------------------------
+// Project descriptions
+// -----------------------------------------------------------------------------
+
+project(':asm') {
+  description = parent.description
+  provides = ['org.objectweb.asm', 'org.objectweb.asm.signature']
+}
+
+// -----------------------------------------------------------------------------
+// Project tasks creation and configuration
+// -----------------------------------------------------------------------------
+
+// All projects are checked with googleJavaFormat, Checkstyle and PMD,
+// and tested with :asm-test and JUnit.
+subprojects {
+  apply plugin: 'com.github.sherter.google-java-format'
+  googleJavaFormat.toolVersion = '1.15.0'
+  googleJavaFormat.exclude 'src/resources/java/**/*'
+
+  dependencies {
+    requires.each { projectName -> api project(projectName) }
+    depends.each { artifactName -> api artifactName }
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1',
+        'org.junit.jupiter:junit-jupiter-params:5.9.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
+  }
+
+  // Produce byte-for-byte reproducible archives.
+  tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+    dirMode = 0775
+    fileMode = 0664
+  }
+}
+
+// Configure the projects with a non-empty 'provides' property. They must be
+// checked for code coverage and backward compatibility, retrofited to Java 1.5,
+// and packaged with generated module-info classes.
+configure(subprojects.findAll{it.provides}) {
+
+  jar.manifest.attributes(
+    'Implementation-Title': project.description,
+    'Implementation-Version': "${version}")
+  // Package the project as an OSGi bundle. Exclude the asm-test project (the
+  // DefaultPackage class prevents it from being a proper bundle).
+  if (name != 'asm-test') {
+    def imports = transitiveImports()
+    jar.manifest.attributes(
+      'Bundle-DocURL': 'http://asm.ow2.org',
+      'Bundle-License': 'BSD-3-Clause;link=https://asm.ow2.io/LICENSE.txt',
+      'Bundle-ManifestVersion': 2,
+      'Bundle-Name': provides[0],
+      'Bundle-RequiredExecutionEnvironment': 'J2SE-1.6',
+      'Bundle-SymbolicName': provides[0],
+      'Bundle-Version': "${version}",
+      'Export-Package':
+          provides.collect{"${it};version=\"${version}\""}.join(',') +
+              (imports ? ";uses:=\"${imports.join(',')}\"" : ""))
+    if (imports) {
+      jar.manifest.attributes(
+        'Import-Package':
+            imports.collect{"${it};version=\"${version}\""}.join(','),
+        'Module-Requires':
+            transitiveRequires().collect{"${it};transitive=true"}.join(','))
+    }
+  }
+}
+
+// Configure the root project, and those with a non-empty 'provides' property,
+// to be published in Maven with a POM.
+configure([rootProject] + subprojects.findAll { it.provides }) {
+  apply plugin: 'maven-publish'
+  apply plugin: 'signing'
+  publishing {
+    repositories {
+      maven {
+        def baseUrl = 'https://repository.ow2.org/nexus/'
+        def releasesUrl = baseUrl + 'service/local/staging/deploy/maven2'
+        def snapshotsUrl = baseUrl + 'content/repositories/snapshots'
+        name = 'nexus'
+        url = rootProject.hasProperty('release') ? releasesUrl : snapshotsUrl
+        credentials {
+          username System.env.NEXUS_USER_NAME
+          password System.env.NEXUS_PASSWORD
+        }
+      }
+    }
+    publications {
+      maven(MavenPublication) {
+        def isRoot = project == rootProject
+        artifactId (isRoot ? 'asm-bom' : project.name)
+        from (isRoot ? components.javaPlatform : components.java)
+        pom.withXml {
+          def parent = asNode().appendNode('parent')
+          parent.appendNode('groupId', 'org.ow2')
+          parent.appendNode('artifactId', 'ow2')
+          parent.appendNode('version', '1.5.1')
+        }
+        pom {
+          name = artifactId
+          description = project.description
+          packaging 'jar'
+          inceptionYear = '2000'
+          licenses {
+            license {
+              name = 'BSD-3-Clause'
+              url = 'https://asm.ow2.io/license.html'
+            }
+          }
+          url = 'http://asm.ow2.io/'
+          mailingLists {
+            mailingList {
+              name = 'ASM Users List'
+              subscribe = 'https://mail.ow2.org/wws/subscribe/asm'
+              post = 'asm@objectweb.org'
+              archive = 'https://mail.ow2.org/wws/arc/asm/'
+            }
+            mailingList {
+              name = 'ASM Team List'
+              subscribe = 'https://mail.ow2.org/wws/subscribe/asm-team'
+              post = 'asm-team@objectweb.org'
+              archive = 'https://mail.ow2.org/wws/arc/asm-team/'
+            }
+          }
+          issueManagement {
+            url = 'https://gitlab.ow2.org/asm/asm/issues'
+          }
+          scm {
+            connection = 'scm:git:https://gitlab.ow2.org/asm/asm/'
+            developerConnection = 'scm:git:https://gitlab.ow2.org/asm/asm/'
+            url = 'https://gitlab.ow2.org/asm/asm/'
+          }
+          developers {
+            developer {
+              name = 'Eric Bruneton'
+              id = 'ebruneton'
+              email = 'ebruneton@free.fr'
+              roles = ['Creator', 'Java Developer']
+            }
+            developer {
+              name = 'Eugene Kuleshov'
+              id = 'eu'
+              email = 'eu@javatx.org'
+              roles = ['Java Developer']
+            }
+            developer {
+              name = 'Remi Forax'
+              id = 'forax'
+              email = 'forax@univ-mlv.fr'
+              roles = ['Java Developer']
+            }
+          }
+          organization {
+            name = 'OW2'
+            url = 'http://www.ow2.org/'
+          }
+        }
+      }
+    }
+  }
+  signing {
+    required rootProject.hasProperty('release')
+    sign publishing.publications.maven
+  }
+  tasks.withType(GenerateModuleMetadata) { enabled = false }
+}

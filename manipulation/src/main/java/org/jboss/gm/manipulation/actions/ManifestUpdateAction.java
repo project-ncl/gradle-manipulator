@@ -2,6 +2,8 @@ package org.jboss.gm.manipulation.actions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.reflect.MethodUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -137,16 +139,20 @@ public class ManifestUpdateAction implements Action<Project> {
 
             String exportPackage = "Export-Package";
             if (manifest.getAttributes().containsKey(exportPackage)) {
-                if (!alignmentModel.getOriginalVersion().equals(alignmentModel.getVersion())) {
-                    logger.info("For project {}, task {}, updating Export-Package version {} to {}", project.getName(),
-                            jar.getName(), alignmentModel.getOriginalVersion(), alignmentModel.getVersion());
+                String exportContents = manifest.getAttributes().get(exportPackage).toString();
+                Pattern pattern = Pattern.compile(".*version=\"?([\\w-\\\\.]+)\"?");
+                Matcher matcher = pattern.matcher(exportContents);
+                if (matcher.find() && !alignmentModel.getVersion().equals(matcher.group(1))) {
+                    logger.info("For project {}, task {}, updating Export-Package version {} to {} (old version {})",
+                            project.getName(),
+                            jar.getName(), matcher.group(1), alignmentModel.getVersion(), alignmentModel.getOriginalVersion());
                     manifest.getAttributes()
-                            .put(exportPackage, (manifest.getAttributes().get(exportPackage).toString()).replaceAll(
-                                    "version=\"?" + alignmentModel.getOriginalVersion() + "\"?",
+                            .put(exportPackage, exportContents.replaceAll(
+                                    "version=\"?" + matcher.group(1) + "\"?",
                                     "version=\"" + alignmentModel.getVersion() + '"'));
                 } else {
                     logger.info("For project {}, task {}, not updating Export-Package since version ({}) has not changed",
-                            project.getName(), jar.getName(), alignmentModel.getVersion());
+                            project.getName(), jar.getName(), matcher.group(1));
                 }
             }
 

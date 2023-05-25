@@ -38,9 +38,6 @@ public class SimpleNonJavaProjectFunctionalTest {
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("--info", "publish")
-                .forwardOutput()
-                .withPluginClasspath()
-                //.withDebug(true)
                 .build();
 
         assertThat(buildResult.task(":" + "publish").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);

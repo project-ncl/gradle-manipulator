@@ -16,8 +16,10 @@ import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
@@ -29,6 +31,9 @@ public class SimpleProjectWithSpringDMAndMavenPluginsFunctionalTest {
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
 
     @Test
     public void ensureProperPomGenerated() throws IOException, URISyntaxException, XmlPullParserException {
@@ -48,12 +53,9 @@ public class SimpleProjectWithSpringDMAndMavenPluginsFunctionalTest {
 
         final ManipulationModel alignment = ManipulationIO.readManipulationModel(simpleProjectRoot);
 
-        final BuildResult buildResult = GradleRunner.create()
+        final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("install")
-                //.withDebug(true)
-                .forwardOutput()
-                .withPluginClasspath()
                 .build();
         assertThat(buildResult.task(":install"))
                 .isNotNull()

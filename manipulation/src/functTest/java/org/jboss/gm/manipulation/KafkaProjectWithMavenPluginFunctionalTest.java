@@ -57,10 +57,7 @@ public class KafkaProjectWithMavenPluginFunctionalTest {
 
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(kafka)
-                //.withDebug(true)
                 .withArguments("uploadArchives", "--info")
-                .withPluginClasspath()
-                .forwardOutput()
                 .build();
         assertThat(buildResult.task(":uploadArchives").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 

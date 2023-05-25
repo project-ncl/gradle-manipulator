@@ -147,7 +147,6 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
     @Test
     public void verifyOpenTelemetryJavaInstrumentationKotlin() throws Exception {
         // XXX: Kotlin requirements
-        System.out.println("### " + GradleVersion.current());
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.5")) >= 0);
         // XXX:  Caused by: org.gradle.api.GradleException: Dependencies can not be declared against the `compileClasspath` configuration.
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.0")) < 0);

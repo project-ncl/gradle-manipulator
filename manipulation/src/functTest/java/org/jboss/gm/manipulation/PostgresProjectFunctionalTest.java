@@ -74,9 +74,6 @@ public class PostgresProjectFunctionalTest {
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(projectRoot)
                 .withArguments("publish")
-                .withPluginClasspath()
-                //.withDebug(true)
-                .forwardOutput()
                 .build();
         assertThat(buildResult.task(":postgresql:publish").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 

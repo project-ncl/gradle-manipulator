@@ -4,15 +4,10 @@
 # Gradle work directory
 .gradle
 
-# Build output directies
-/target
-*/target
-*/**/target
+# Build output directories
 /build
 */build
-testdb
 lib/
-lombok.config
 
 # IntelliJ specific files/directories
 out
@@ -22,25 +17,6 @@ out
 *.iml
 atlassian-ide-plugin.xml
 
-# Eclipse specific files/directories
-.classpath
-.project
-.settings
-.metadata
-bin
-
-# NetBeans specific files/directories
-.nbattrs
-
 # Miscellaneous
 *.log
-.clover
 .DS_Store
-
-# JBoss Transactions
-ObjectStore
-
-# Profiler and heap dumps
-*.jps
-*.hprof
-/.nb-gradle/

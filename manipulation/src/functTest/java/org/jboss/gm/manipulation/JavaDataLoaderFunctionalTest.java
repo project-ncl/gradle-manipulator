@@ -43,8 +43,6 @@ public class JavaDataLoaderFunctionalTest {
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(projectRoot)
                 .withArguments("--info", "generatePomFileForMavenPublication")
-                .forwardOutput()
-                .withPluginClasspath()
                 .build();
 
         assertThat(buildResult.task(":" + "generatePomFileForMavenPublication").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);

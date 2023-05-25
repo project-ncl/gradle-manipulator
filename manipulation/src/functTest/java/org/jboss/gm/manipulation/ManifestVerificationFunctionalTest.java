@@ -64,10 +64,7 @@ public class ManifestVerificationFunctionalTest {
 
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(projectRoot)
-                //.withDebug(true)
                 .withArguments("uploadArchives", "--stacktrace", "--info")
-                .withPluginClasspath()
-                .forwardOutput()
                 .build();
 
         assertThat(Objects.requireNonNull(buildResult.task(":uploadArchives")).getOutcome()).isEqualTo(TaskOutcome.SUCCESS);

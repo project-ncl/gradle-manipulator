@@ -72,9 +72,9 @@ public class EHCacheProjectFunctionalTest {
                 .withArguments(
                         "-Dorg.gradle.java.home=" + JDK8_DIR,
                         "--info", "publish", "-x", "test")
-                //.withDebug(true)
-                .forwardOutput()
-                .withPluginClasspath()
+                // While we normally want to run with debug enabled to capture coverage we need to fork to change
+                // the JVM in use.
+                .withDebug(false)
                 .build();
 
         assertThat(

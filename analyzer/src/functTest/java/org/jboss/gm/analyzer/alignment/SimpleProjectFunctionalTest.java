@@ -196,14 +196,8 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         });
 
         // ensure we don't try to apply the manipulation plugin which in all likelihood isn't even available on the classpath
-        System.setProperty("org.gradle.project.gmeAnalyse", "true");
-        GradleRunner.create()
-                .withProjectDir(projectRoot)
-                .withArguments("--stacktrace", "--info", AlignmentTask.NAME)
-                //.withDebug(true)
-                .forwardOutput()
-                .withPluginClasspath()
-                .build();
+        TestUtils.createGradleRunner(projectRoot,
+                Collections.singletonMap("org.gradle.project.gmeAnalyse", "true")).build();
         alignmentModel = new TestManipulationModel(ManipulationIO.readManipulationModel(projectRoot));
         List<String> lines = FileUtils.readLines(new File(projectRoot, Project.DEFAULT_BUILD_FILE), Charset.defaultCharset());
 

@@ -115,12 +115,19 @@ public final class TestUtils {
             jvmArgs.add("-D" + a + '=' + System.getProperty(a));
         }
 
-        jvmArgs.add("-DgmeFunctionalTest=true"); // Used to indicate for the plugin to reinitialise the configuration.
+        // Used to indicate for the plugin to reinitialise the configuration whether in debug mode or not.
+        System.setProperty("gmeFunctionalTest", "true");
+        jvmArgs.add("-DgmeFunctionalTest=true");
 
         System.out.println("Will be using jvm args of " + jvmArgs);
 
         DefaultGradleRunner dgr = (DefaultGradleRunner) GradleRunner.create();
         dgr.withJvmArguments(jvmArgs);
+        // Always run with debug for coverage
+        // https://discuss.gradle.org/t/jacoco-gradle-test-kit-with-java/36603
+        dgr.withDebug(true);
+        dgr.forwardOutput();
+        dgr.withPluginClasspath();
 
         return dgr;
     }

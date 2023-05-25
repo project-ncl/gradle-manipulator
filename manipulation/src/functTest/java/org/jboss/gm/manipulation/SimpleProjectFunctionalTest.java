@@ -74,9 +74,6 @@ public class SimpleProjectFunctionalTest {
         TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("-Dmanipulation.disable=true", "generatePomFileForMainPublication")
-                //.withDebug(true)
-                .forwardOutput()
-                .withPluginClasspath()
                 .build();
 
         assertTrue(systemOutRule.getLog().contains("Gradle Manipulator disabled"));
@@ -95,9 +92,6 @@ public class SimpleProjectFunctionalTest {
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("--info", "generatePomFileForMainPublication")
-                //.withDebug(true)
-                .forwardOutput()
-                .withPluginClasspath()
                 .build();
 
         assertThat(buildResult.task(":" + "generatePomFileForMainPublication").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);

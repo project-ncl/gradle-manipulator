@@ -83,7 +83,9 @@ public final class TestUtils {
                 .map(e -> (e.getKey().startsWith("-") ? e.getKey() : "-D" + e.getKey()) + "=" + e.getValue())
                 .collect(Collectors.toList());
         final List<String> allArguments = new ArrayList<>(systemPropsList.size() + 4);
-        allArguments.add("-DgmeFunctionalTest=true"); // Used to indicate for the plugin to reinitialise the configuration.
+        // Used to indicate for the plugin to reinitialise the configuration whether in debug mode or not.
+        System.setProperty("gmeFunctionalTest", "true");
+        allArguments.add("-DgmeFunctionalTest=true");
         allArguments.add("--stacktrace");
         allArguments.add("--info");
         allArguments.add(AlignmentTask.NAME);
@@ -92,6 +94,8 @@ public final class TestUtils {
         return GradleRunner.create()
                 .withProjectDir(projectRoot)
                 .withArguments(allArguments)
+                // Always run with debug for coverage
+                // https://discuss.gradle.org/t/jacoco-gradle-test-kit-with-java/36603
                 .withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath();

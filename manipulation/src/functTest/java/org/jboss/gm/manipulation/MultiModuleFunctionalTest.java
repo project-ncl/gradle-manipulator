@@ -34,12 +34,9 @@ public class MultiModuleFunctionalTest {
         assertThat(multiModuleRoot.toPath().resolve("build.gradle")).exists();
         final ManipulationModel alignment = ManipulationIO.readManipulationModel(multiModuleRoot);
 
-        final BuildResult buildResult = GradleRunner.create()
+        final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(multiModuleRoot)
                 .withArguments("generatePomFileForMainPublication")
-                //.withDebug(true)
-                .forwardOutput()
-                .withPluginClasspath()
                 .build();
 
         assertThat(buildResult.task(":" + "generatePomFileForMainPublication").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);

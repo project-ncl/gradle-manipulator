@@ -62,10 +62,7 @@ public class ElasticSearchProjectFunctionalTest {
 
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(projectRoot)
-                //.withDebug(true)
                 .withArguments("publish")
-                .withPluginClasspath()
-                .forwardOutput()
                 .build();
         assertThat(buildResult.task(":modules:transport-netty4:publish").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 

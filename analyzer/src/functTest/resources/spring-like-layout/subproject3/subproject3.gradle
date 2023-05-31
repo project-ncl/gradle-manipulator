@@ -11,6 +11,5 @@ dependencies {
     implementation(project(":subproject2"))
     implementation(project(":subproject1"))
     implementation("org.springframework:spring-context:5.1.6.RELEASE")
-    optional("io.netty:netty-buffer")
     testImplementation("io.projectreactor:reactor-test")
 }

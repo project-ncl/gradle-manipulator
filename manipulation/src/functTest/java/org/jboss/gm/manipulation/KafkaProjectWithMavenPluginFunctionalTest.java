@@ -89,12 +89,9 @@ public class KafkaProjectWithMavenPluginFunctionalTest {
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(kafka)
                 .withGradleVersion("7.2")
-                //.withDebug(true)
                 .withArguments("--info", "-PskipSigning=true", "-PscalaVersion=2.12", "-PscalaOptimizerMode=inline"
                         + "-scala",
                         "assemble", "releaseRedHatZip", "uploadArchives", "-x", "test")
-                .withPluginClasspath()
-                .forwardOutput()
                 .build();
         assertThat(buildResult.task(":assemble").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 

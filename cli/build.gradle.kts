@@ -12,9 +12,27 @@ dependencies {
     implementation("org.gradle:gradle-tooling-api:${project.extra.get("gradleVersion")}")
     implementation("info.picocli:picocli:4.0.4")
 
-    implementation("org.commonjava.maven.ext:pom-manipulation-core:${project.extra.get("pmeVersion")}")
-    implementation("org.commonjava.maven.ext:pom-manipulation-io:${project.extra.get("pmeVersion")}")
-    implementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
+    implementation("com.fasterxml.jackson.core:jackson-databind:${project.extra.get("jacksonVersion")}")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:${project.extra.get("jacksonVersion")}")
+    implementation("com.fasterxml.jackson.core:jackson-core:${project.extra.get("jacksonVersion")}")
+
+    implementation("org.commonjava.maven.ext:pom-manipulation-core:${project.extra.get("pmeVersion")}") {
+        exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
+        exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
+        exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
+        }
+
+    implementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}") {
+        exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
+        exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
+        exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
+        }
+
+    implementation("org.commonjava.maven.ext:pom-manipulation-io:${project.extra.get("pmeVersion")}") {
+        exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
+        exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
+        exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
+        }
 
     implementation("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
     implementation("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")

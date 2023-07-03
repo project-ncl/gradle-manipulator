@@ -14,6 +14,7 @@ import org.apache.maven.settings.Repository;
 import org.apache.maven.settings.RepositoryPolicy;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.building.DefaultSettingsBuilder;
+import org.apache.maven.settings.building.DefaultSettingsBuilderFactory;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.io.SettingsIO;
@@ -62,7 +63,7 @@ public final class RepositoryExporter {
         RepositoryExporter repositoryExporter = new RepositoryExporter();
         processRepositories(repositoryExporter, repositories);
 
-        SettingsIO settingsWriter = new SettingsIO(new DefaultSettingsBuilder());
+        SettingsIO settingsWriter = new SettingsIO(new DefaultSettingsBuilderFactory().newInstance());
         logger.debug("Writing repository settings into {}", settingsFile.getAbsolutePath());
         try {
             settingsWriter.write(repositoryExporter.mavenSettings, settingsFile);

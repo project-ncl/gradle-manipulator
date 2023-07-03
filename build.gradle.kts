@@ -202,17 +202,21 @@ subprojects {
     extra["commonsBeanVersion"] = "1.9.4"
     extra["commonsVersion"] = "2.6"
     extra["gradleVersion"] = "5.6.4"
-    extra["groovyVersion"] = "3.0.11"
+    extra["groovyVersion"] = "3.0.17"
     extra["ivyVersion"] = "2.5.0"
-    extra["jacksonVersion"] = "2.11.2"
+    // Note - this *downgrades* Jackson from what is used in PME. This is due to
+    // https://github.com/gradle/gradle/issues/24390
+    // https://github.com/FasterXML/jackson-core/issues/955
+    // This exclusion isn't required on 7.6.1 and above.
+    extra["jacksonVersion"] = "2.14.3"
     extra["jgitVersion"] = "6.3.0.202209071007-r"
     extra["junitVersion"] = "4.13.1"
     extra["logbackVersion"] = "1.2.9"
-    extra["mavenVersion"] = "3.5.0"
+    extra["mavenVersion"] = "3.6.3"
     extra["opentelemetryVersion"] = "1.2.0"
     extra["ownerVersion"] = "1.0.12"
     extra["pmeVersion"] = "4.16"
-    extra["slf4jVersion"] = "1.7.30"
+    extra["slf4jVersion"] = "1.7.36"
     extra["systemRulesVersion"] = "1.19.0"
 
     if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.4")) {

@@ -30,7 +30,11 @@ dependencies {
     implementation("commons-lang:commons-lang:${project.extra.get("commonsVersion")}")
     implementation("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
 
-    implementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
+    implementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}") {
+        exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
+        exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
+        exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
+        }
     implementation("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")
 
     // Owner: Need Java8 dependency which pulls in owner itself.

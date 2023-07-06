@@ -113,8 +113,3 @@ jobs:
     - uses: gradle/gradle-build-action@v2
       with:
         arguments: clean build publish AggregateJacocoReport
-    - name: Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        files: ./build/reports/jacoco/aggregate/jacocoTestReport.xml
-        verbose: true

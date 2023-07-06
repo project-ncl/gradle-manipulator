@@ -48,8 +48,9 @@ public class PluginUtils {
         PLUGINS.put("gradle-enterprise", new PluginReference("gradleEnterprise"));
         PLUGINS.put("com.gradle.enterprise", new PluginReference(Stream.of("gradleEnterprise", "buildScan").collect(
                 Collectors.toSet()), "", null));
-        // Following two require Gradle Enterprise plugin so remove these as well.
+        // Following three require Gradle Enterprise plugin so remove these as well.
         PLUGINS.put("io.spring.ge.conventions", new PluginReference(null));
+        PLUGINS.put("io.spring.gradle-enterprise-conventions", new PluginReference(null));
         PLUGINS.put("com.gradle.common-custom-user-data-gradle-plugin", new PluginReference(null));
         PLUGINS.put("io.codearte.nexus-staging", new PluginReference(Collections.singleton("nexusStaging"), "",
                 Stream.of("closeRepository", "releaseRepository", "closeAndReleaseRepository").collect(

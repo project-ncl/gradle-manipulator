@@ -49,7 +49,7 @@ public class UpdateProjectVersionCustomizerTest {
         sut.customize(originalResp);
 
         assertThat(configuration.versionModificationEnabled()).isFalse();
-        assertThat(originalResp.getNewProjectVersion()).isEqualTo(p.getVersion());
+        assertThat(originalResp.getProjectOverrides().get(p)).isEqualTo(p.getVersion());
     }
 
     @Test
@@ -67,7 +67,7 @@ public class UpdateProjectVersionCustomizerTest {
         sut.customize(originalResp);
 
         assertThat(originalResp).isNotNull();
-        assertThat(originalResp.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002");
+        assertThat(originalResp.getProjectOverrides().get(p)).isEqualTo("1.1.0.redhat-00002");
         assertThat(configuration.versionOverride()).isEqualTo("1.1.0.redhat-00002");
     }
 
@@ -86,7 +86,7 @@ public class UpdateProjectVersionCustomizerTest {
         sut.customize(originalResp);
 
         assertThat(originalResp).isNotNull();
-        assertThat(originalResp.getNewProjectVersion()).isEqualTo("1.1.0.foobar-00001");
+        assertThat(originalResp.getProjectOverrides().get(p)).isEqualTo("1.1.0.foobar-00001");
         assertThat(configuration.versionIncrementalSuffix()).isEqualTo("foobar");
     }
 
@@ -106,7 +106,8 @@ public class UpdateProjectVersionCustomizerTest {
 
         assertThat(originalResp).isNotNull();
         assertThat(configuration.versionSuffix()).isEqualTo("redhat-00002");
-        assertThat(originalResp.getNewProjectVersion()).isEqualTo("1.0.0.redhat-00002");
+        assertThat(originalResp.getProjectOverrides().get(p)).isEqualTo("1.0.0.redhat-00002");
+        assertThat(originalResp.getProjectOverrides().get(p)).isEqualTo("1.0.0.redhat-00002");
     }
 
     @Test
@@ -125,7 +126,7 @@ public class UpdateProjectVersionCustomizerTest {
         sut.customize(originalResp);
 
         assertThat(originalResp).isNotNull();
-        assertThat(originalResp.getNewProjectVersion()).isEqualTo("1.Beta1");
+        assertThat(originalResp.getProjectOverrides().get(p)).isEqualTo("1.Beta1");
         assertThat(configuration.versionOsgi()).isFalse();
         assertThat(configuration.versionSuffix()).isEqualTo("Beta1");
     }
@@ -145,7 +146,7 @@ public class UpdateProjectVersionCustomizerTest {
         sut.customize(originalResp);
 
         assertThat(originalResp).isNotNull();
-        assertThat(originalResp.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001");
+        assertThat(originalResp.getProjectOverrides().get(p)).isEqualTo("1.1.0.redhat-00001");
         assertThat(configuration.versionSuffixAlternatives()).isEqualTo("foobar,redhat");
     }
 
@@ -164,7 +165,7 @@ public class UpdateProjectVersionCustomizerTest {
         sut.customize(originalResp);
 
         assertThat(originalResp).isNotNull()
-                .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.0.0.redhat-00001"));
+                .satisfies(r -> assertThat(r.getProjectOverrides().get(p)).isEqualTo("1.0.0.redhat-00001"));
     }
 
     @Test
@@ -182,7 +183,7 @@ public class UpdateProjectVersionCustomizerTest {
         sut.customize(originalResp);
 
         assertThat(originalResp).isNotNull()
-                .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001"));
+                .satisfies(r -> assertThat(r.getProjectOverrides().get(p)).isEqualTo("1.1.0.redhat-00001"));
     }
 
     @Test
@@ -202,7 +203,7 @@ public class UpdateProjectVersionCustomizerTest {
         sut.customize(originalResp);
 
         assertThat(originalResp).isNotNull()
-                .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-001"));
+                .satisfies(r -> assertThat(r.getProjectOverrides().get(p)).isEqualTo("1.1.0.redhat-001"));
     }
 
     @Test
@@ -226,7 +227,7 @@ public class UpdateProjectVersionCustomizerTest {
         sut.customize(originalResp);
 
         assertThat(originalResp).isNotNull()
-                .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002"));
+                .satisfies(r -> assertThat(r.getProjectOverrides().get(p)).isEqualTo("1.1.0.redhat-00002"));
     }
 
     @Test
@@ -245,7 +246,7 @@ public class UpdateProjectVersionCustomizerTest {
         sut.customize(originalResp);
 
         assertThat(originalResp).isNotNull()
-                .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001-SNAPSHOT"));
+                .satisfies(r -> assertThat(r.getProjectOverrides().get(p)).isEqualTo("1.1.0.redhat-00001-SNAPSHOT"));
         assertThat(configuration.versionSuffixSnapshot()).isTrue();
     }
 
@@ -264,7 +265,7 @@ public class UpdateProjectVersionCustomizerTest {
         sut.customize(originalResp);
 
         assertThat(originalResp).isNotNull()
-                .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00001"));
+                .satisfies(r -> assertThat(r.getProjectOverrides().get(p)).isEqualTo("1.1.0.redhat-00001"));
         assertThat(configuration.versionSuffixSnapshot()).isFalse();
     }
 
@@ -289,7 +290,7 @@ public class UpdateProjectVersionCustomizerTest {
         sut.customize(originalResp);
 
         assertThat(originalResp).isNotNull()
-                .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002-SNAPSHOT"));
+                .satisfies(r -> assertThat(r.getProjectOverrides().get(p)).isEqualTo("1.1.0.redhat-00002-SNAPSHOT"));
     }
 
     @Test
@@ -312,6 +313,6 @@ public class UpdateProjectVersionCustomizerTest {
         sut.customize(originalResp);
 
         assertThat(originalResp).isNotNull()
-                .satisfies(r -> assertThat(r.getNewProjectVersion()).isEqualTo("1.1.0.redhat-00002"));
+                .satisfies(r -> assertThat(r.getProjectOverrides().get(p)).isEqualTo("1.1.0.redhat-00002"));
     }
 }

@@ -21,15 +21,15 @@ import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.logging.GMLogger;
 
 /**
- * {@link AlignmentService.Manipulator} that changes the project version
- *
+ * {@link AlignmentService.Manipulator} that changes the project version.
+ * <br>
  * The heavy lifting is actually done by {@link org.commonjava.maven.ext.core.impl.VersionCalculator}
  */
 public class UpdateProjectVersionCustomizer implements AlignmentService.Manipulator {
     private final Configuration configuration;
     private VersioningState state;
     private ManipulationCache cache;
-    private final Project project;
+    private final Project rootProject;
 
     private final Logger logger = GMLogger.getLogger(getClass());
 
@@ -37,14 +37,7 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
 
     public UpdateProjectVersionCustomizer(Configuration configuration, Project rootProject) {
         this.configuration = configuration;
-
-        if (DefaultProject.DEFAULT_VERSION.equals(rootProject.getVersion())) {
-            project = rootProject.getAllprojects().stream().filter(f -> !DefaultProject.DEFAULT_VERSION.equals(f.getVersion()))
-                    .findFirst()
-                    .orElseThrow(() -> new ManipulationUncheckedException("Unable to find suitable project version"));
-        } else {
-            project = rootProject;
-        }
+        this.rootProject = rootProject;
 
         if (!configuration.versionModificationEnabled()) {
             return;
@@ -64,16 +57,36 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
 
     @Override
     public void customize(Response response) throws ManipulationException {
-        if (configuration.versionModificationEnabled()) {
-            vc.translationMap = response.getTranslationMap();
-            response.setNewProjectVersion(
-                    vc.calculate(project.getGroup().toString(), project.getName(), project.getVersion().toString(),
-                            state));
-        } else {
-            response.setNewProjectVersion(project.getVersion().toString());
-            logger.info("Version modification is disabled. Not updating project {}:{} version {}",
-                    project.getGroup(), project.getName(), response.getNewProjectVersion());
+
+        Map<Project, String> projectsToVersions = response.getProjectOverrides();
+        String[] newVersion = { null }; // Array as used in lambda later.
+
+        // For every module, calculate its version. This allows for the scenario
+        // where a submodule has a different version to the rest of the project.
+        for (Project project : rootProject.getAllprojects()) {
+            if (!DefaultProject.DEFAULT_VERSION.equals(project.getVersion())) {
+                if (configuration.versionModificationEnabled()) {
+                    vc.translationMap = response.getTranslationMap();
+                    String version = vc.calculate(project.getGroup().toString(), project.getName(),
+                            project.getVersion().toString(),
+                            state);
+                    projectsToVersions.put(project, version);
+                    if (newVersion[0] == null) {
+                        newVersion[0] = version;
+                    }
+                } else {
+                    projectsToVersions.put(project, project.getVersion().toString());
+                    logger.info("Version modification is disabled. Not updating project {}:{} version {}",
+                            rootProject.getGroup(),
+                            rootProject.getName(), project.getVersion().toString());
+                }
+            }
         }
+
+        // Set any that are 'unspecified' to the default project version.
+        rootProject.getAllprojects().stream()
+                .filter(f -> DefaultProject.DEFAULT_VERSION.equals(f.getVersion()))
+                .forEach(p -> projectsToVersions.put(p, newVersion[0]));
     }
 
     private class GradleVersionCalculator extends VersionCalculator {
@@ -94,9 +107,9 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
             final Set<String> result = new HashSet<>();
 
             // If there is an existing manipulation file, also use this as potential candidates.
-            File m = new File(project.getRootDir(), ManipulationIO.MANIPULATION_FILE_NAME);
+            File m = new File(rootProject.getRootDir(), ManipulationIO.MANIPULATION_FILE_NAME);
             if (m.exists()) {
-                result.add(ManipulationIO.readManipulationModel(project.getRootDir()).getVersion());
+                result.add(ManipulationIO.readManipulationModel(rootProject.getRootDir()).getVersion());
             }
             logger.debug("Adding project version candidates from cache {}",
                     cache.getProjectVersionRefs(state.isPreserveSnapshot()));

@@ -116,8 +116,11 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
             assertThat(am.getGroup()).isEqualTo("io.opentelemetry");
             assertThat(am.getName()).isEqualTo("opentelemetry-java");
             assertThat(am.getVersion()).isEqualTo("0.17.0.redhat-00001");
+            assertThat(am.getOriginalVersion()).isEqualTo("0.17.0");
 
-            assertThat(am.getChildren().keySet()).hasSize(4).containsExactly("bom", "api", "dependencyManagement", "exporters");
+            assertThat(am.getChildren().keySet()).hasSize(5).containsExactly("bom",
+                    "api", "dependencyManagement", "bom-alpha",
+                    "exporters");
 
             assertThat(am.getChildren().get("bom"))
                     .hasToString("io.opentelemetry:bom:0.17.0.redhat-00001");
@@ -129,6 +132,13 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
                 assertThat(root.getVersion()).isEqualTo("0.17.0.redhat-00001");
                 assertThat(root.getAlignedDependencies()).isEmpty();
             });
+
+            assertThat(am.findCorrespondingChild("bom-alpha")).satisfies(root -> {
+                assertThat(root.getVersion()).isEqualTo("0.17.0.alpha-redhat-00001");
+                assertThat(root.getOriginalVersion()).isEqualTo("0.17.0-alpha");
+                assertThat(root.getAlignedDependencies()).isEmpty();
+            });
+
             assertThat(am.findCorrespondingChild("dependencyManagement")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("0.17.0.redhat-00001");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();

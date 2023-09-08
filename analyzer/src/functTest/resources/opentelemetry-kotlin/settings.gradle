@@ -27,6 +27,7 @@ include ":api:all",
         ":api:context",
         ":api:metrics",
         ":bom",
+        ":bom-alpha",
         ":dependencyManagement",
         ":exporters:jaeger",
         ":exporters:jaeger-thrift"

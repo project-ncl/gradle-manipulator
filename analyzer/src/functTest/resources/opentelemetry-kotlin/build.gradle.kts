@@ -39,9 +39,10 @@ allprojects {
     }
 }
 
+apply(from = "version.gradle.kts")
+
 subprojects {
     group = "io.opentelemetry"
-    version = "0.17.0" // CURRENT_OPEN_TELEMETRY_VERSION
 
     plugins.withId("java") {
         plugins.apply("checkstyle")

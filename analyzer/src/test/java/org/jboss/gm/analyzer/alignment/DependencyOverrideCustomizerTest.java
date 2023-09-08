@@ -70,11 +70,11 @@ public class DependencyOverrideCustomizerTest {
                         put(mockitoGav, mockitoGav.getVersionString() + DEFAULT_SUFFIX);
                     }
                 });
-        originalResp.setNewProjectVersion(newProjectVersion);
+        originalResp.getProjectOverrides().put(project, newProjectVersion);
 
         // here we simply ensure that our original response has been properly setup
         assertThat(originalResp).isNotNull().satisfies(r -> {
-            assertThat(r.getNewProjectVersion()).isEqualTo(newProjectVersion);
+            assertThat(r.getProjectOverrides().get(project)).isEqualTo(newProjectVersion);
             assertThat(r.getAlignedVersionOfGav(project, hibernateGav)).isEqualTo("5.3.7.Final-redhat-00001");
             assertThat(r.getAlignedVersionOfGav(project, undertowGav)).isEqualTo("2.0.15.Final-redhat-00001");
             assertThat(r.getAlignedVersionOfGav(project, mockitoGav)).isEqualTo("2.27.0-redhat-00001");
@@ -83,7 +83,7 @@ public class DependencyOverrideCustomizerTest {
 
         sut.customize(originalResp);
         assertThat(originalResp).isNotNull().satisfies(r -> {
-            assertThat(r.getNewProjectVersion()).isEqualTo(newProjectVersion);
+            assertThat(r.getProjectOverrides().get(project)).isEqualTo(newProjectVersion);
             // make sure the matched dependency's version was changed by the dependency override customizer
             assertThat(r.getAlignedVersionOfGav(project, hibernateGav)).isEqualTo("5.3.10.Final-redhat-00001");
 

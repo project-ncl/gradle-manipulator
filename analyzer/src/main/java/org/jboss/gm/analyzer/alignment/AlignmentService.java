@@ -92,12 +92,12 @@ public interface AlignmentService {
         private Map<Project, Map<ProjectRef, String>> dependencyOverrides = new LinkedHashMap<>();
 
         /**
-         * The new project version.
+         * Mapping of project to new project version.
          *
-         * @param newProjectVersion the new project version
-         * @return the new project version
+         * @param projectOverrides the override map
+         * @return the override map
          */
-        private String newProjectVersion;
+        private Map<Project, String> projectOverrides = new LinkedHashMap<>();
 
         /**
          * Creates a new response from the given translation map.

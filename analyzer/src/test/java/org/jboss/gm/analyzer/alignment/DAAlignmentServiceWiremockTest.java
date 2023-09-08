@@ -60,7 +60,7 @@ public class DAAlignmentServiceWiremockTest {
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
+    public SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public final LoggingRule loggingRule = new LoggingRule(LogLevel.INFO);
@@ -115,7 +115,6 @@ public class DAAlignmentServiceWiremockTest {
         project.setGroup("org.acme");
 
         assertThat(response).isNotNull().satisfies(r -> {
-            assertThat(r.getNewProjectVersion()).isEqualTo("1.0.0.redhat-00002");
             if (precedence != DependencyState.DependencyPrecedence.NONE) {
                 assertThat(r.getAlignedVersionOfGav(project, hibernateGav)).isEqualTo("5.3.7.Final-redhat-00001");
                 assertThat(r.getAlignedVersionOfGav(project, undertowGav)).isEqualTo("2.0.15.Final-redhat-00001");

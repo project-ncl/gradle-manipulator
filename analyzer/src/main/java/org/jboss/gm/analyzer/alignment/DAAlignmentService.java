@@ -112,7 +112,6 @@ public class DAAlignmentService implements AlignmentService {
             logger.info("Retrieving project version {} and returning {}", projectVersion, newProjectVersion);
 
             response.getTranslationMap().putAll(pMap);
-            response.setNewProjectVersion(newProjectVersion);
         }
 
         return response;

@@ -15,6 +15,7 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
+import org.gradle.api.internal.project.DefaultProject;
 import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
@@ -89,12 +90,14 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
             assertThat(am.getGroup()).isEqualTo("org.acme");
             assertThat(am.getName()).isEqualTo("root");
             assertThat(am.getVersion()).isEqualTo("1.1.2.redhat-00004");
+            assertThat(am.getOriginalVersion()).isEqualTo(DefaultProject.DEFAULT_VERSION);
 
             assertThat(am.getChildren().keySet()).hasSize(3).containsExactly("subproject1", "subproject2",
                     "subproject3");
 
             assertThat(am.findCorrespondingChild("subproject1")).satisfies(subproject1 -> {
                 assertThat(subproject1.getVersion()).isEqualTo("1.1.2.redhat-00004");
+                assertThat(subproject1.getOriginalVersion()).isEqualTo("1.1.2");
                 final Collection<ProjectVersionRef> alignedDependencies = subproject1.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
@@ -154,7 +157,7 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
         assertThatExceptionOfType(ManipulationUncheckedException.class)
                 .isThrownBy(() -> TestUtils.align(projectRoot, true))
-                .withMessageContaining("Unable to find suitable project version");
+                .withMessageContaining("Unable to locate a suitable original project version");
     }
 
     @Test

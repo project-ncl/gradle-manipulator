@@ -336,24 +336,21 @@ public class AlignmentTask extends DefaultTask {
                 .filter(p -> !DEFAULT_VERSION.equals(
                         p.getVersion().toString()))
                 .findAny();
-        String originalVersion;
         if (optionalOriginalVersion.isPresent()) {
-            originalVersion = optionalOriginalVersion.get().getVersion().toString();
-            alignmentModel.setOriginalVersion(originalVersion);
+            alignmentModel.setOriginalVersion(optionalOriginalVersion.get().getVersion().toString());
         } else {
-            throw new ManipulationUncheckedException("Unable to locate a suitable original version");
+            throw new ManipulationUncheckedException("Unable to locate a suitable original project version");
         }
-
-        final String newVersion = alignmentResponse.getNewProjectVersion();
 
         // While we've completed processing (sub)projects the current one is not going to be the root; so
         // explicitly retrieve it and set its version.
         if (configuration.versionModificationEnabled()) {
+            String newVersion = alignmentResponse.getProjectOverrides().get(rootProject);
             logger.info("Updating model version for {} from {} to {}", rootProject,
                     rootProject.getVersion(), newVersion);
             alignmentModel.setVersion(newVersion);
         } else {
-            alignmentModel.setVersion(originalVersion);
+            alignmentModel.setVersion(alignmentModel.getOriginalVersion());
             logger.info("Version modification disabled. Model version is {}", alignmentModel.getVersion());
         }
 
@@ -365,13 +362,14 @@ public class AlignmentTask extends DefaultTask {
         projectDependencies.forEach((project, value) -> {
             final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project);
             if (configuration.versionModificationEnabled()) {
+                String newVersion = alignmentResponse.getProjectOverrides().get(project);
                 logger.info("Updating sub-project {} (path: {}) from version {} to {}", correspondingModule,
-                        correspondingModule.getProjectPathName(), originalVersion, newVersion);
-                correspondingModule.setOriginalVersion(originalVersion);
+                        correspondingModule.getProjectPathName(), project.getVersion().toString(), newVersion);
+                correspondingModule.setOriginalVersion(project.getVersion().toString());
                 correspondingModule.setVersion(newVersion);
             } else {
-                correspondingModule.setOriginalVersion(originalVersion);
-                correspondingModule.setVersion(originalVersion);
+                correspondingModule.setOriginalVersion(project.getVersion().toString());
+                correspondingModule.setVersion(project.getVersion().toString());
                 logger.info("Version modification disabled. Sub-project {} (path: {}) version is {}",
                         correspondingModule, correspondingModule.getProjectPathName(), correspondingModule.getVersion());
             }

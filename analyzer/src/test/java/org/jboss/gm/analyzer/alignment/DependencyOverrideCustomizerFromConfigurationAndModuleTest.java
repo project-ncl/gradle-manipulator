@@ -111,14 +111,14 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
 
         final AlignmentService.Response originalResp = new AlignmentService.Response(
                 translationMap);
-        originalResp.setNewProjectVersion(PROJECT.getVersionString());
+        projects.forEach(p -> originalResp.getProjectOverrides().put(p, PROJECT.getVersionString()));
 
         sut.customize(originalResp);
 
         final Project project = projects.stream().findFirst().get();
 
         assertThat(originalResp).isNotNull().satisfies(r -> {
-            assertThat(r.getNewProjectVersion()).isEqualTo(PROJECT.getVersionString());
+            assertThat(r.getProjectOverrides().get(project)).isEqualTo(PROJECT.getVersionString());
             assertThat(r.getAlignedVersionOfGav(project, hibernateCoreGav)).isEqualTo("5.3.7.Final-redhat-00001");
             assertThat(r.getAlignedVersionOfGav(project, hibernateValidatorGav))
                     .isEqualTo(hibernateValidatorGav.getVersionString());

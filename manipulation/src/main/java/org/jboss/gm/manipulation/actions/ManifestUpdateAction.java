@@ -142,17 +142,24 @@ public class ManifestUpdateAction implements Action<Project> {
                 String exportContents = manifest.getAttributes().get(exportPackage).toString();
                 Pattern pattern = Pattern.compile(".*version=\"?([\\w-\\\\.]+)\"?");
                 Matcher matcher = pattern.matcher(exportContents);
-                if (matcher.find() && !alignmentModel.getVersion().equals(matcher.group(1))) {
-                    logger.info("For project {}, task {}, updating Export-Package version {} to {} (old version {})",
-                            project.getName(),
-                            jar.getName(), matcher.group(1), alignmentModel.getVersion(), alignmentModel.getOriginalVersion());
-                    manifest.getAttributes()
-                            .put(exportPackage, exportContents.replaceAll(
-                                    "version=\"?" + matcher.group(1) + "\"?",
-                                    "version=\"" + alignmentModel.getVersion() + '"'));
+                if (matcher.find()) {
+                    if (!alignmentModel.getVersion().equals(matcher.group(1))) {
+                        logger.info(
+                                "For project {}, task {}, updating Export-Package version {} to {} (old version {})",
+                                project.getName(), jar.getName(), matcher.group(1), alignmentModel.getVersion(),
+                                alignmentModel.getOriginalVersion());
+                        manifest.getAttributes()
+                                .put(exportPackage,
+                                        exportContents.replaceAll("version=\"?" + matcher.group(1) + "\"?",
+                                                "version=\"" + alignmentModel.getVersion() + '"'));
+                    } else {
+                        logger.info(
+                                "For project {}, task {}, not updating Export-Package since version ({}) has not changed",
+                                project.getName(), jar.getName(), matcher.group(1));
+                    }
                 } else {
-                    logger.info("For project {}, task {}, not updating Export-Package since version ({}) has not changed",
-                            project.getName(), jar.getName(), matcher.group(1));
+                    logger.warn("For project {}, task {}, not updating Export-Package as unable to match regex in {}",
+                            project.getName(), jar.getName(), exportContents);
                 }
             }
 

@@ -1,6 +1,7 @@
 package org.jboss.gm.analyzer.alignment;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.Collection;
@@ -76,7 +77,8 @@ public class AlignmentTaskEmptyVersionTest {
      * task object.
      */
     @Before
-    public void before() {
+    public void before()
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         final Class<? extends TaskInternal> taskType = Cast.uncheckedCast(DefaultTask.class);
         final ProjectInternal projectInternal = mock(ProjectInternal.class);
         when(projectInternal.getGradle()).thenReturn(mock(GradleInternal.class));
@@ -84,9 +86,14 @@ public class AlignmentTaskEmptyVersionTest {
         //noinspection UnstableApiUsage
         when(projectInternal.getObjects()).thenReturn(mock(ObjectFactory.class));
 
-        //noinspection ConstantConditions
-        AbstractTask.injectIntoNewInstance(projectInternal,
-                TaskIdentity.create("DummyIdentity", taskType, projectInternal), null);
+        if (GradleVersion.current().compareTo(GradleVersion.version("8.0")) < 0) {
+            // In Gradle 8.2. this static method doesn't exist. However, we're only testing this under Gradle 8.0
+            Method method = TaskIdentity.class.getMethod("create", String.class, Class.class, ProjectInternal.class);
+            AbstractTask.injectIntoNewInstance(projectInternal,
+                    (TaskIdentity) method.invoke(null, "DummyIdentity", taskType,
+                            projectInternal),
+                    null);
+        }
     }
 
     @Test

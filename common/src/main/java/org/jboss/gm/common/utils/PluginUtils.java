@@ -36,7 +36,7 @@ public class PluginUtils {
 
     static {
         PLUGINS.put("com.github.ben-manes.versions", new PluginReference(Collections.singleton("dependencyUpdates"),
-                "", Stream.of("dependencyUpdates", "DependencyUpdatesTask").collect(
+                "DependencyUpdatesTask", Stream.of("dependencyUpdates", "DependencyUpdatesTask").collect(
                         Collectors.toSet()),
                 "", Collections.singleton("com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask")));
         PLUGINS.put("com.github.burrunan.s3-build-cache", new PluginReference("buildCache"));
@@ -245,6 +245,8 @@ public class PluginUtils {
                         contentBuilder = new StringBuilder(content);
                         removed |= removeBlock(logger, buildFile, eol, contentBuilder,
                                 "plugins.withType<" + pluginType + ">");
+                        removed |= removeBlock(logger, buildFile, eol, contentBuilder,
+                                "tasks.withType<" + pluginType + ">");
                         content = contentBuilder.toString();
                     }
 

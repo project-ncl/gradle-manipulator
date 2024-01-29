@@ -913,9 +913,60 @@ public class PluginUtilsTest {
 
         String result = FileUtils.readFileToString(target, Charset.defaultCharset());
 
-        System.out.println(result);
         assertFalse(result.contains("dependencyUpdates"));
         assertFalse(result.contains("benmanes"));
+    }
+
+    @Test
+    public void testRemoval17()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("build.gradle");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask\n"
+                        + "\n" + "plugins {\n" + "  `kotlin-dsl`\n"
+                        + "  alias(libs.plugins.versions)\n" + "}\n" + "\n"
+                        + "java.toolchain.languageVersion = JavaLanguageVersion.of(11)\n"
+                        + "\n" + "dependencies {\n"
+                        + "  implementation(libs.bnd)\n"
+                        + "  implementation(libs.guava)\n"
+                        + "  implementation(libs.coveralls)\n"
+                        + "  implementation(libs.sonarqube)\n"
+                        + "  implementation(libs.bundles.jmh)\n"
+                        + "  implementation(libs.bundles.pmd)\n"
+                        + "  implementation(libs.forbiddenApis)\n"
+                        + "  implementation(libs.nexus.publish)\n"
+                        + "  implementation(libs.nullaway.plugin)\n"
+                        + "  implementation(libs.spotbugs.plugin)\n"
+                        + "  implementation(libs.dependency.check)\n"
+                        + "  implementation(libs.errorprone.plugin)\n"
+                        + "  implementation(libs.dependency.versions)\n"
+                        + "  implementation(platform(libs.asm.bom))\n"
+                        + "  implementation(platform(libs.junit5.bom))\n"
+                        + "  implementation(platform(libs.kotlin.bom))\n"
+                        + "  implementation(platform(libs.jackson.bom))\n"
+                        + "  implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))\n"
+                        + "\n"
+                        + "  libs.bundles.constraints.get().forEach { library ->\n"
+                        + "    constraints.add(\"implementation\", library.module.toString())\n"
+                        + "      .version { require(library.version!!) }\n"
+                        + "  }\n" + "}\n" + "\n"
+                        + "tasks.withType<DependencyUpdatesTask> {\n"
+                        + "  val ignoredGroups = listOf(\"org.jetbrains.kotlin\", \"org.gradle.kotlin.kotlin-dsl\")\n"
+                        + "  rejectVersionIf {\n"
+                        + "    (candidate.group in ignoredGroups) && (candidate.version != currentVersion)\n"
+                        + "  }\n" + "}\n",
+                Charset.defaultCharset());
+
+        HashSet<String> plugins = new LinkedHashSet<>();
+        plugins.add("ALL");
+        PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
+
+        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+
+        System.out.println(result);
+        assertFalse(result.contains("update.DependencyUpdatesTask"));
+        assertFalse(result.contains("<DependencyUpdatesTask>"));
     }
 
     @Test

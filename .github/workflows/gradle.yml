@@ -41,7 +41,7 @@ jobs:
         # settings.xml file
         run: rm ~/.m2/settings.xml
       - name: Check Java formatting
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           cache-disabled: true
           gradle-version: 5.6.4
@@ -69,7 +69,7 @@ jobs:
       run: rm ~/.m2/settings.xml
     - name: Fix build for Gradle ${{ matrix.gradle }}
       run: ./gradle/fix-build.sh ${{ matrix.gradle }}
-    - uses: gradle/gradle-build-action@v2
+    - uses: gradle/gradle-build-action@v3
       with:
         gradle-version: ${{ matrix.gradle }}
         arguments: --no-daemon --stacktrace clean build AggregateJacocoReport
@@ -110,6 +110,6 @@ jobs:
                 "username": "${{ secrets.SONATYPE_USERNAME }}",
                 "password": "${{ secrets.SONATYPE_PASSWORD }}"
             }]
-    - uses: gradle/gradle-build-action@v2
+    - uses: gradle/gradle-build-action@v3
       with:
         arguments: clean build publish AggregateJacocoReport

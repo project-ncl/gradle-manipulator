@@ -571,7 +571,7 @@ public class AlignmentTask extends DefaultTask {
                 StandardCopyOption.REPLACE_EXISTING);
     }
 
-    private void updateAllExtraGradleFilesWithGmeRepos() throws IOException, ManipulationException {
+    private void updateAllExtraGradleFilesWithGmeRepos() throws IOException {
         final File rootDir = getProject().getRootDir();
         final File gradleScriptsDirectory = rootDir.toPath().resolve(GRADLE).toFile();
         if (!gradleScriptsDirectory.exists()) {
@@ -582,7 +582,6 @@ public class AlignmentTask extends DefaultTask {
                 DirectoryFileFilter.DIRECTORY);
         for (File extraGradleScript : extraGradleScripts) {
             final List<String> lines = FileUtils.readLines(extraGradleScript, Charset.defaultCharset());
-
             if (!APPLY_GME_REPOS.equals(org.jboss.gm.common.utils.FileUtils.getFirstLine(lines))) {
                 final List<String> result = new ArrayList<>(lines.size() + 2);
                 result.add(APPLY_GME_REPOS);

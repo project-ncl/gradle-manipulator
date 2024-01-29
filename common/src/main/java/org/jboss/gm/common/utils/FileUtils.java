@@ -10,7 +10,6 @@ import lombok.experimental.UtilityClass;
 
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang.StringUtils;
-import org.commonjava.maven.ext.common.ManipulationException;
 import org.slf4j.helpers.MessageFormatter;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -39,16 +38,15 @@ public class FileUtils {
      * Take a collection of lines and returns the first non blank entry.
      *
      * @param lines the collection of string lines
-     * @return the first non blank entry.
-     * @throws ManipulationException if it cannot find a non-blank entry.
+     * @return the first non blank entry or empty string if it can't find one.
      */
-    public static String getFirstLine(List<String> lines) throws ManipulationException {
+    public static String getFirstLine(List<String> lines) {
         for (String line : lines) {
             if (StringUtils.isNotBlank(line)) {
                 return line;
             }
         }
-        throw new ManipulationException("Unable to find a non blank line in the collection");
+        return "";
     }
 
     /**

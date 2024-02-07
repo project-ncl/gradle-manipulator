@@ -59,6 +59,10 @@ public class PluginUtils {
         PLUGINS.put("nebula.publish-verification", new PluginReference("nebulaPublishVerification"));
         PLUGINS.put("signing", new PluginReference(Collections.singleton("signing"), "SigningPlugin", null));
         PLUGINS.put(SEMANTIC_BUILD_VERSIONING, new PluginReference("preRelease"));
+        PLUGINS.put("ru.vyarus.animalsniffer", new PluginReference(Stream.of("animalsniffer").collect(
+                Collectors.toSet()), "",
+                Stream.of("org.codehaus.mojo.signature:", "ru.vyarus:gradle-animalsniffer-plugin")
+                        .collect(Collectors.toSet())));
     }
 
     /**
@@ -141,7 +145,7 @@ public class PluginUtils {
     public static void pluginRemoval(Logger logger, File target, Set<String> plugins)
             throws ManipulationException {
 
-        if (plugins == null || plugins.size() == 0) {
+        if (plugins == null || plugins.isEmpty()) {
             return;
         } else if (plugins.contains("ALL")) {
             // Shortcut to represent removing any/all of the supported plugins

@@ -970,6 +970,46 @@ public class PluginUtilsTest {
     }
 
     @Test
+    public void testRemoval18()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("build.gradle");
+        org.apache.commons.io.FileUtils.writeStringToFile(target,
+                "buildscript {\n" +
+                        "  repositories {\n" +
+                        "    jcenter()\n" +
+                        "    mavenCentral()\n" +
+                        "    maven {\n" +
+                        "        url \"https://plugins.gradle.org/m2/\"\n" +
+                        "    }\n" +
+                        "  }\n" +
+                        "  dependencies {\n" +
+                        "    classpath \"ru.vyarus:gradle-animalsniffer-plugin:1.2.0\"\n" +
+                        "  }\n" +
+                        "}\n" +
+                        "\n" +
+                        "apply plugin: \"ru.vyarus.animalsniffer\"\n" +
+                        "\n" +
+                        "dependencies {\n" +
+                        "    signature \"org.codehaus.mojo.signature:java16:1.1@signature\"\n" +
+                        "}\n" +
+                        "\n" +
+                        "animalsniffer {\n" +
+                        "    annotation = \"io.reactivex.internal.util.SuppressAnimalSniffer\"\n" +
+                        "}",
+                Charset.defaultCharset());
+
+        HashSet<String> plugins = new LinkedHashSet<>();
+        plugins.add("ALL");
+        PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
+
+        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+
+        assertFalse(result.contains("signature"));
+        assertFalse(result.contains("animalsniffer"));
+    }
+
+    @Test
     public void testCheckForSemanticPlugin1()
             throws IOException, ManipulationException {
 

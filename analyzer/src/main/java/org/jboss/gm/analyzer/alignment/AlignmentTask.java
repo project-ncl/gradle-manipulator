@@ -83,6 +83,7 @@ import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
 
 import static java.util.Comparator.comparingInt;
 import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.gradle.api.Project.DEFAULT_VERSION;
 import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
 import static org.jboss.gm.common.utils.FileUtils.append;
@@ -197,7 +198,7 @@ public class AlignmentTask extends DefaultTask {
         Project rootProject = project.getRootProject();
 
         final String archivesBaseName = ProjectUtils.getArchivesBaseName(project);
-        if (archivesBaseName != null) {
+        if (isNotEmpty(archivesBaseName)) {
             logger.warn("Found archivesBaseName override ; resetting project name '{}' to '{}' ", project.getName(),
                     archivesBaseName);
             projectName = archivesBaseName;

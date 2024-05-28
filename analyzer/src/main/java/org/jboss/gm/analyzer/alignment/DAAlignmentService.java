@@ -36,6 +36,8 @@ public class DAAlignmentService implements AlignmentService {
 
     private final String endpointUrl;
 
+    private final boolean versionModification;
+
     /**
      * Constructs a new Dependency Analyzer service with the given configuration.
      *
@@ -44,6 +46,7 @@ public class DAAlignmentService implements AlignmentService {
     public DAAlignmentService(Configuration configuration) {
         dependencySource = configuration.dependencyConfiguration();
         endpointUrl = configuration.daEndpoint();
+        versionModification = configuration.versionModificationEnabled();
 
         logger.debug("endpointUrl = {}, dependencySource = {}", endpointUrl, dependencySource);
 
@@ -91,7 +94,7 @@ public class DAAlignmentService implements AlignmentService {
 
         final List<ProjectVersionRef> pParams = request.getProject();
 
-        if (!pParams.isEmpty()) {
+        if (versionModification && !pParams.isEmpty()) {
             logger.debug("Passing {} project GAVs into the REST client api {}", pParams.size(), pParams);
 
             final Map<ProjectVersionRef, String> pMap;

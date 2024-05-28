@@ -210,13 +210,13 @@ subprojects {
     // This exclusion isn't required on 7.6.1 and above.
     extra["jacksonVersion"] = "2.14.3"
     extra["jgitVersion"] = "6.3.0.202209071007-r"
-    extra["junitVersion"] = "4.13.1"
-    extra["logbackVersion"] = "1.2.9"
+    extra["junitVersion"] = "4.13.2"
+    extra["logbackVersion"] = "1.5.6"
     extra["mavenVersion"] = "3.6.3"
     extra["opentelemetryVersion"] = "1.2.0"
     extra["ownerVersion"] = "1.0.12"
     extra["pmeVersion"] = "4.16"
-    extra["slf4jVersion"] = "1.7.36"
+    extra["slf4jVersion"] = "2.0.13"
     extra["systemRulesVersion"] = "1.19.0"
 
     if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.4")) {

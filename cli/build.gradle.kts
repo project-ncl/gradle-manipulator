@@ -10,7 +10,7 @@ dependencies {
 
     api(project(":common"))
     implementation("org.gradle:gradle-tooling-api:${project.extra.get("gradleVersion")}")
-    implementation("info.picocli:picocli:4.0.4")
+    implementation("info.picocli:picocli:4.6.3")
 
     implementation("com.fasterxml.jackson.core:jackson-databind:${project.extra.get("jacksonVersion")}")
     implementation("com.fasterxml.jackson.core:jackson-annotations:${project.extra.get("jacksonVersion")}")

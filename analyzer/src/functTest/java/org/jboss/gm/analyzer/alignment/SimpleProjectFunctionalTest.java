@@ -108,8 +108,12 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
             });
         });
 
-        //verify that dummy.gradle now includes the gme-repos.gradle injection
-        final File extraGradleFile = projectRoot.toPath().resolve("gradle/dummy.gradle").toFile();
+        //verify that dummy.gradle and another.gradle now includes the gme-repos.gradle injection
+        File extraGradleFile = projectRoot.toPath().resolve("gradle/dummy.gradle").toFile();
+        assertThat(extraGradleFile).exists();
+        assertThat(FileUtils.readLines(extraGradleFile, Charset.defaultCharset()))
+                .filteredOn(l -> l.trim().equals(AlignmentTask.APPLY_GME_REPOS)).hasSize(1);
+        extraGradleFile = projectRoot.toPath().resolve("gradle/subdirectory/another.gradle").toFile();
         assertThat(extraGradleFile).exists();
         assertThat(FileUtils.readLines(extraGradleFile, Charset.defaultCharset()))
                 .filteredOn(l -> l.trim().equals(AlignmentTask.APPLY_GME_REPOS)).hasSize(1);

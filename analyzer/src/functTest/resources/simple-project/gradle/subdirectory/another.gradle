@@ -1,0 +1,9 @@
+// this is used in order to test that gme-repos.gradle gets injected
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'de.thetaphi:forbiddenapis:2.5'
+    }
+}

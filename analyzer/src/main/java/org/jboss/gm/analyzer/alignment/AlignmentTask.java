@@ -128,8 +128,11 @@ public class AlignmentTask extends DefaultTask {
     /**
      * The groovy code to apply the {@link AlignmentTask#GME_REPOS gme-repos.gradle} build script.
      */
-    public static final String APPLY_GME_REPOS = "buildscript { apply from: new File(buildscript.getSourceFile().getParentFile(), \""
-            + GME_REPOS + "\"), to: buildscript }";
+    // Can't use the path of the build script as it may be in a subdirectory. Further it may be included from via
+    // a composite build which alters the root path.
+    public static final String APPLY_GME_REPOS = "buildscript { apply from: new File((gradle.getParent() == null ? gradle : gradle.getParent()).startParameter.getCurrentDir(), \"gradle/"
+            + GME_REPOS
+            + "\"), to: buildscript }";
     /**
      * The task name {@code generateAlignmentMetadata}.
      */

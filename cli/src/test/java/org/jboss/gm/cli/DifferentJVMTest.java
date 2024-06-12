@@ -260,8 +260,7 @@ public class DifferentJVMTest {
                     + "project");
         }
 
-        assertThat(systemErrRule.getLog()).contains(
-                "Build exception but unable to transfer message due to mix of JDK versions. Examine log for problems");
+        assertThat(systemErrRule.getLog()).contains("Build exception. Examine log for problems");
         assertThat(systemOutRule.getLog()).contains("Java home overridden to: " + JDK8_DIR);
     }
 }

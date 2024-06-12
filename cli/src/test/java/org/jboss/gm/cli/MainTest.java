@@ -322,7 +322,6 @@ public class MainTest {
             m.run(args);
             fail("No exception thrown");
         } catch (Exception e) {
-            e.printStackTrace();
             assertTrue(e.getMessage().contains("Pass project root as directory not file"));
         }
     }
@@ -335,7 +334,6 @@ public class MainTest {
             m.run(args);
             fail("No exception thrown");
         } catch (Exception e) {
-            e.printStackTrace();
             assertTrue(e.getMessage().contains("Unable to locate target directory"));
         }
     }
@@ -350,5 +348,16 @@ public class MainTest {
         m.run(args);
 
         assertThat(systemOutRule.getLog()).contains("LETTERS");
+    }
+
+    @Test
+    public void testWipeLock() throws Exception {
+        final File projectRoot = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
+        Main m = new Main();
+        String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().toString(), "help" };
+        m.run(args);
+        assertTrue(systemOutRule.getLog().contains("Found gradle-consistent-versions lock file"));
+        File lockFile = new File(projectRoot.getParentFile(), "versions.lock");
+        assertEquals(0, lockFile.length());
     }
 }

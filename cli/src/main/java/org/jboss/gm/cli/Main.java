@@ -3,6 +3,7 @@ package org.jboss.gm.cli;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -251,8 +252,7 @@ public class Main implements Callable<Void> {
                     cause = cause.getCause();
                 }
                 logger.debug("Hit https://github.com/gradle/gradle/issues/9339 ", e);
-                logger.error(
-                        "Build exception but unable to transfer message due to mix of JDK versions. Examine log for problems");
+                logger.error("Build exception. Examine log for problems");
                 throw new ManipulationException("Problem executing build", cause);
             } else {
                 logger.error("Caught exception running build", e);
@@ -262,12 +262,10 @@ public class Main implements Callable<Void> {
             // Unable to do instanceof comparison due to different classloader
             if ("org.gradle.api.UncheckedIOException".equals(e.getCause().getClass().getName())) {
                 logger.debug("Hit https://github.com/gradle/gradle/issues/9339 ", e);
-                logger.error(
-                        "Build exception but unable to transfer message due to mix of JDK versions. Examine log for problems");
+                logger.error("Build exception. Examine log for problems");
             } else {
                 logger.error("Gradle connection exception", e);
             }
-
             throw new ManipulationException("Problem executing build");
         } catch (RuntimeException e) {
             logger.error("Fatal problem executing build", e);
@@ -342,6 +340,16 @@ public class Main implements Callable<Void> {
         }
 
         GroovyUtils.runCustomGroovyScript(logger, InvocationStage.FIRST, target, configuration, null, null);
+
+        File lockFile = new File(target, "versions.lock");
+        if (lockFile.exists()) {
+            logger.info("Found gradle-consistent-versions lock file {}", lockFile);
+            try {
+                new PrintWriter(lockFile).close();
+            } catch (IOException e) {
+                throw new ManipulationException("Unable to handle versions.lock", e);
+            }
+        }
 
         PluginUtils.pluginRemoval(logger, target, configuration.pluginRemoval());
 

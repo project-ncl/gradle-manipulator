@@ -992,6 +992,7 @@ public class PluginUtilsTest {
                         "\n" +
                         "dependencies {\n" +
                         "    signature \"org.codehaus.mojo.signature:java16:1.1@signature\"\n" +
+                        "    signature libraries.signature.java" +
                         "}\n" +
                         "\n" +
                         "animalsniffer {\n" +

@@ -61,7 +61,7 @@ public class PluginUtils {
         PLUGINS.put(SEMANTIC_BUILD_VERSIONING, new PluginReference("preRelease"));
         PLUGINS.put("ru.vyarus.animalsniffer", new PluginReference(Stream.of("animalsniffer").collect(
                 Collectors.toSet()), "",
-                Stream.of("org.codehaus.mojo.signature:", "ru.vyarus:gradle-animalsniffer-plugin")
+                Stream.of("\\s+signature\\s+[A-Za-z0-9.@:\"]+signature[A-Za-z.\"]+$", "ru.vyarus:gradle-animalsniffer-plugin")
                         .collect(Collectors.toSet())));
     }
 
@@ -225,7 +225,12 @@ public class PluginUtils {
 
                     // Remove any task references.
                     for (String t : tasks) {
-                        removed |= lines.removeIf(i -> i.contains(t) && !i.contains("{"));
+                        // Look for regexp type
+                        if (t.contains("*") || t.contains("+")) {
+                            removed |= lines.removeIf(i -> i.matches(t) && !i.contains("{"));
+                        } else {
+                            removed |= lines.removeIf(i -> i.contains(t) && !i.contains("{"));
+                        }
                     }
 
                     // Remove any imports.

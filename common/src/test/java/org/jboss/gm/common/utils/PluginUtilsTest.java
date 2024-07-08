@@ -992,8 +992,10 @@ public class PluginUtilsTest {
                         "\n" +
                         "dependencies {\n" +
                         "    signature \"org.codehaus.mojo.signature:java16:1.1@signature\"\n" +
+                        "    signature libraries.signature.java\n" +
                         "}\n" +
                         "\n" +
+                        "// @param signature signature string to add\n" +
                         "animalsniffer {\n" +
                         "    annotation = \"io.reactivex.internal.util.SuppressAnimalSniffer\"\n" +
                         "}",
@@ -1005,7 +1007,9 @@ public class PluginUtilsTest {
 
         String result = FileUtils.readFileToString(target, Charset.defaultCharset());
 
-        assertFalse(result.contains("signature"));
+        assertFalse(result.contains("libraries.signature"));
+        assertFalse(result.contains("mojo.signature"));
+        assertTrue(result.contains("signature signature"));
         assertFalse(result.contains("animalsniffer"));
     }
 

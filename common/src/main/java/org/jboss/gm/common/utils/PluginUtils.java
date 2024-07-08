@@ -61,7 +61,7 @@ public class PluginUtils {
         PLUGINS.put(SEMANTIC_BUILD_VERSIONING, new PluginReference("preRelease"));
         PLUGINS.put("ru.vyarus.animalsniffer", new PluginReference(Stream.of("animalsniffer").collect(
                 Collectors.toSet()), "",
-                Stream.of("org.codehaus.mojo.signature:", "ru.vyarus:gradle-animalsniffer-plugin")
+                Stream.of(" signature ", "ru.vyarus:gradle-animalsniffer-plugin")
                         .collect(Collectors.toSet())));
     }
 

@@ -23,7 +23,7 @@ plugins {
     id("com.gradle.plugin-publish") version "0.15.0"
     id("net.linguica.maven-settings") version "0.5"
     id("net.researchgate.release") version "2.8.1"
-    id("org.ajoberstar.grgit") version "4.1.0"
+    id("org.ajoberstar.grgit") version "4.1.1"
 
     when {
         org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.0") -> {

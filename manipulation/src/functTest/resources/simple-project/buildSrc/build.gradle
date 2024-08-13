@@ -3,8 +3,8 @@ plugins {
   id 'java-gradle-plugin'
   id 'groovy'
 
-  id 'nebula.maven-base-publish' version '4.4.4'
-  id 'nebula.maven-scm' version '4.4.4'
+  id 'nebula.maven-base-publish' version '13.0.0'
+  id 'nebula.maven-scm' version '13.0.0'
 }
 
 

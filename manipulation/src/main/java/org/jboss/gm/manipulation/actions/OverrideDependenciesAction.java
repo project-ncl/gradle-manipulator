@@ -4,10 +4,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ExternalModuleDependency;
 import org.gradle.api.artifacts.ModuleVersionSelector;
 import org.gradle.api.internal.artifacts.DefaultModuleVersionSelector;
 import org.gradle.api.logging.Logger;
@@ -78,6 +80,28 @@ public class OverrideDependenciesAction implements Action<Project> {
                     logger.debug("Forced resolution strategy is now {} ", forced);
                     configuration.getResolutionStrategy().setForcedModules(forced.toArray());
                 }
+
+                configuration.getAllDependencies().forEach(d -> {
+                    if (d instanceof org.gradle.api.artifacts.ExternalModuleDependency) {
+                        ExternalModuleDependency externalModuleDependency = (ExternalModuleDependency) d;
+                        if (StringUtils.isNotEmpty(externalModuleDependency.getVersionConstraint().getStrictVersion())) {
+                            logger.debug("Found version constraint of {} for {}",
+                                    externalModuleDependency.getVersionConstraint(), d);
+                            final ProjectVersionRef requestedGAV = withGAV(
+                                    externalModuleDependency.getModule().getGroup(),
+                                    externalModuleDependency.getModule().getName(),
+                                    externalModuleDependency.getVersionConstraint().getStrictVersion());
+                            final ProjectVersionRef aligned = alignedDependencies.get(requestedGAV.toString());
+                            if (aligned != null) {
+                                logger.info("Replacing strictly with forced version for {} with {}", requestedGAV, aligned);
+                                forced.add(
+                                        new DefaultModuleVersionSelector(externalModuleDependency.getModule().getGroup(),
+                                                externalModuleDependency.getModule().getName(), aligned.getVersionString()));
+                            }
+                            configuration.getResolutionStrategy().setForcedModules(forced.toArray());
+                        }
+                    }
+                });
             }
         });
     }

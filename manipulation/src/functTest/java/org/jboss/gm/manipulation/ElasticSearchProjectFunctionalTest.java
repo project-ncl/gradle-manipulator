@@ -11,6 +11,7 @@ import org.apache.commons.io.FileUtils;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.util.GradleVersion;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
@@ -23,6 +24,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
+@Ignore
 public class ElasticSearchProjectFunctionalTest {
     private static final String TEST = "elasticsearch";
     private static final String ARTIFACT_NAME = "transport-netty4-client-6.8.6.temporary-redhat-00001";

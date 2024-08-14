@@ -22,6 +22,7 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 public class SimpleProjectWithMavenPluginFunctionalTest {
@@ -69,6 +70,9 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
 
         final String repoPathToPom = PATH_IN_REPOSITORY.resolve(ARTIFACT_NAME + ".pom").toString();
 
+        assertTrue(systemOutRule.getLog().contains(
+                "Replacing strictly with forced version for ch.qos.logback:logback-classic:1.1.3 with ch.qos.logback:logback-classic:1.1.2"));
+
         // verify installed artifacts
         verifyArtifacts(m2Directory);
         verifyPom(m2Directory, repoPathToPom, alignment);
@@ -89,7 +93,8 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
                         TestUtils.getAlignedTuple(module, "commons-lang3", "3.8.1"),
                         TestUtils.getAlignedTuple(module, "hibernate-core"),
                         TestUtils.getAlignedTuple(module, "undertow-core"),
-                        TestUtils.getAlignedTuple(module, "junit", "4.12"));
+                        TestUtils.getAlignedTuple(module, "junit", "4.12"),
+                        TestUtils.getAlignedTuple(module, "logback-classic", "1.1.2"));
         assertThat(modelAndModule.getLeft().getOrganization().getName()).isEqualTo("JBoss");
         assertThat(modelAndModule.getLeft().getLicenses().get(0).getName()).isEqualTo("Apache License, Version 2.0");
     }

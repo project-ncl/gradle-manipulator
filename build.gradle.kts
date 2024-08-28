@@ -211,7 +211,8 @@ subprojects {
     extra["jacksonVersion"] = "2.14.3"
     extra["jgitVersion"] = "6.3.0.202209071007-r"
     extra["junitVersion"] = "4.13.2"
-    extra["logbackVersion"] = "1.5.6"
+    // Must use 1.3.x series as 1.4.x and above requires JDK11.
+    extra["logbackVersion"] = "1.3.14"
     extra["mavenVersion"] = "3.6.3"
     extra["opentelemetryVersion"] = "1.2.0"
     extra["ownerVersion"] = "1.0.12"

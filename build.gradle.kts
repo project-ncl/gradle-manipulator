@@ -216,7 +216,7 @@ subprojects {
     extra["mavenVersion"] = "3.6.3"
     extra["opentelemetryVersion"] = "1.2.0"
     extra["ownerVersion"] = "1.0.12"
-    extra["pmeVersion"] = "4.16"
+    extra["pmeVersion"] = "4.17"
     extra["slf4jVersion"] = "2.0.13"
     extra["systemRulesVersion"] = "1.19.0"
 

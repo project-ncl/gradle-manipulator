@@ -373,6 +373,11 @@ public class AlignmentTask extends DefaultTask {
             final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project);
             if (configuration.versionModificationEnabled()) {
                 String newVersion = alignmentResponse.getProjectOverrides().get(project);
+                if (newVersion == null) {
+                    logger.error("Using project {} but did not retrieve {}", project, value);
+                    throw new ManipulationUncheckedException(
+                            "Looping on project versions but unable to compare project. Are project comparisons broken?");
+                }
                 logger.info("Updating sub-project {} (path: {}) from version {} to {}", correspondingModule,
                         correspondingModule.getProjectPathName(), project.getVersion().toString(), newVersion);
                 correspondingModule.setOriginalVersion(project.getVersion().toString());

@@ -123,10 +123,10 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
                     "exporters");
 
             assertThat(am.getChildren().get("bom"))
-                    .hasToString("io.opentelemetry:bom:0.17.0.redhat-00001");
+                    .hasToString("io.opentelemetry:opentelemetry-bom:0.17.0.redhat-00001");
             assertThat(am.getChildren().get("api")).hasToString("io.opentelemetry:api:0.17.0.redhat-00001");
             assertThat(am.findCorrespondingChild("exporters").getChildren().get("jaeger"))
-                    .hasToString("io.opentelemetry.exporters:jaeger:0.17.0.redhat-00001");
+                    .hasToString("io.opentelemetry:opentelemetry-exporter-jaeger:0.17.0.redhat-00001");
 
             assertThat(am.findCorrespondingChild("bom")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("0.17.0.redhat-00001");
@@ -150,7 +150,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         });
 
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
-        assertThat(systemOutRule.getLog()).contains("io.opentelemetry.exporters:opentelemetry-exporter-jaeger:0.17.0");
+        assertThat(systemOutRule.getLog()).contains("io.opentelemetry:opentelemetry-exporter-jaeger:0.17.0");
         assertThat(systemOutRule.getLog()).contains("io.opentelemetry:bom:0.17.0");
     }
 
@@ -191,7 +191,8 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
                     "smoke-tests");
 
             assertThat(am.getChildren().get("bom-alpha"))
-                    .hasToString("io.opentelemetry.instrumentation:bom-alpha:1.17.0.redhat-00001");
+                    .hasToString(
+                            "io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.17.0.redhat-00001");
             assertThat(am.findCorrespondingChild("bom-alpha")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("1.17.0.redhat-00001");
                 assertThat(root.getAlignedDependencies()).isEmpty();

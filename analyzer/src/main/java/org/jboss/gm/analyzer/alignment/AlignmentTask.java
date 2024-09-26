@@ -206,33 +206,39 @@ public class AlignmentTask extends DefaultTask {
                     archivesBaseName);
             projectName = archivesBaseName;
         }
-        if (project.equals(rootProject)) {
-            logger.debug("Processing root project in directory {}", root);
-            PublishingExtension extension = rootProject.getExtensions().findByType(PublishingExtension.class);
-            Map<String, MavenPublication> publications = (extension == null ? Collections.emptyMap()
-                    : extension
-                            .getPublications()
-                            .withType(MavenPublication.class)
-                            .getAsMap());
-            if (publications.size() > 1) {
-                logger.error("Multiple publications for a single project. Found {}", publications);
+        // Rather than only doing this block (down to next try) for the root project handle mismatched groupId for
+        // all subprojects as well. However, keep artifactId handling for root only.
+        PublishingExtension extension = project.getExtensions().findByType(PublishingExtension.class);
+        Map<String, MavenPublication> publications = (extension == null ? Collections.emptyMap()
+                : extension
+                        .getPublications()
+                        .withType(MavenPublication.class)
+                        .getAsMap());
+        if (publications.size() > 1) {
+            logger.error("Multiple publications for a single project. Found {}", publications);
+        }
+        Optional<Map.Entry<String, MavenPublication>> entry = publications.entrySet().stream().findFirst();
+        if (entry.isPresent()) {
+            ManipulationModel childModel = alignmentModel.findCorrespondingChild(project);
+            MavenPublication p = entry.get().getValue();
+            if (!project.getGroup().equals(p.getGroupId())) {
+                logger.warn("Mismatched groupId between project {} and publication {} ; resetting to publication.",
+                        project.getGroup(),
+                        p.getGroupId());
+                groupId = p.getGroupId();
+                project.setGroup(p.getGroupId());
+                childModel.setGroup(p.getGroupId());
             }
-            for (MavenPublication p : publications.values()) {
-                if (!rootProject.getGroup().equals(p.getGroupId())) {
-                    logger.warn("Mismatched groupId between project {} and publication {} ; resetting to publication.",
-                            rootProject.getGroup(),
-                            p.getGroupId());
-                    groupId = p.getGroupId();
-                    rootProject.setGroup(p.getGroupId());
-                    alignmentModel.setGroup(p.getGroupId());
-                }
-                if (!rootProject.getName().equals(p.getArtifactId())) {
-                    logger.warn("Mismatched artifactId between project {} and publication {} ; resetting to publication.",
-                            rootProject.getName(),
-                            p.getArtifactId());
-                    projectName = p.getArtifactId();
-                    ProjectUtils.updateNameField(rootProject, p.getArtifactId());
-                    alignmentModel.setName(p.getArtifactId());
+            if (!project.getName().equals(p.getArtifactId())) {
+                logger.warn(
+                        "Mismatched artifactId between project {} and publication {} ; resetting to publication.",
+                        project.getName(),
+                        p.getArtifactId());
+                projectName = p.getArtifactId();
+                childModel.setName(p.getArtifactId());
+                if (project.equals(rootProject)) {
+                    // Only update name field for root project else breaks gradle subproject mapping.
+                    ProjectUtils.updateNameField(project, p.getArtifactId());
                 }
             }
         }

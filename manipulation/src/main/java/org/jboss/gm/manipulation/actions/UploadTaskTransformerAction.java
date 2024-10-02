@@ -77,7 +77,7 @@ public class UploadTaskTransformerAction implements Action<Project> {
             return;
         }
 
-        project.getTasks().withType(uploadClass).all((Task upload) -> {
+        project.getTasks().withType(uploadClass).configureEach((Task upload) -> {
             try {
                 Object repositoryHandler = getRepositoriesMethod.invoke(upload);
                 ((ArtifactRepositoryContainer) repositoryHandler).withType(resolverClass).all(this::execute);

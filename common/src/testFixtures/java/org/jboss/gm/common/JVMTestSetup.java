@@ -26,28 +26,29 @@ public class JVMTestSetup {
 
     public static final Path JDK8_BIN_DIR = JDK8_DIR.resolve("bin");
 
+    public static final String JDK17_BASEDIR = "jdk-17.0.12+7";
+
+    public static final Path JDK17_DIR = GRADLE_JDK_HOME.resolve(JDK17_BASEDIR);
+
+    public static final Path JDK17_BIN_DIR = JDK17_DIR.resolve("bin");
+
     /**
-     * This method will, on Linux, download and cache if it doesn't exist a JDK8 installation from AdoptOpenJDK.
-     *
+     * This method will, on Linux, download and cache if it doesn't exist JDK8 and 17 installations.
+     * <br/>
      * This location ($HOME/.gradle/jdks) was chosen to match https://docs.gradle.org/current/userguide/toolchains.html.
      * It utilises the same directory structure and location thereby matching potential prior downloads.
      */
     public static void setupJVM() throws IOException {
-        String filename = null;
-        UnArchiver ua = null;
+        String filename;
+        UnArchiver ua = new TarGZipUnArchiver();
 
-        if (SystemUtils.IS_OS_LINUX) {
-            filename = "OpenJDK8U-jdk_x64_linux_hotspot_8u272b10.tar.gz";
-            ua = new TarGZipUnArchiver();
-        } else if (SystemUtils.IS_OS_WINDOWS) {
-            filename = "OpenJDK8U-jdk_x64_windows_hotspot_8u272b10.zip";
-            ua = new ZipUnArchiver();
-        } else {
+        if (!SystemUtils.IS_OS_LINUX) {
             throw new ManipulationUncheckedException("Unknown OS");
         }
 
         if (!Files.exists(JDK8_BIN_DIR)) {
             Files.createDirectories(JDK8_DIR);
+            filename = "OpenJDK8U-jdk_x64_linux_hotspot_8u272b10.tar.gz";
 
             Path destFile = GRADLE_JDK_HOME.resolve(filename);
 
@@ -66,7 +67,29 @@ public class JVMTestSetup {
 
             ua.extract();
         }
+        if (!Files.exists(JDK17_BIN_DIR)) {
+            Files.createDirectories(JDK17_DIR);
+            filename = "OpenJDK17U-jdk_x64_linux_hotspot_17.0.12_7.tar.gz";
+
+            Path destFile = GRADLE_JDK_HOME.resolve(filename);
+
+            destFile.toFile().deleteOnExit();
+
+            Unirest.get(
+                    "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/" + filename)
+                    .asFile(destFile.toString());
+
+            ((LogEnabled) ua).enableLogging(new ConsoleLoggerManager().getLoggerForComponent("plexus-archiver"));
+            ua.setSourceFile(destFile.toFile());
+            ua.setDestDirectory(GRADLE_JDK_HOME.toFile());
+
+            assertThat(destFile).isRegularFile();
+            assertThat(GRADLE_JDK_HOME).isDirectory();
+
+            ua.extract();
+        }
 
         assertThat(JDK8_BIN_DIR).isDirectory();
+        assertThat(JDK17_BIN_DIR).isDirectory();
     }
 }

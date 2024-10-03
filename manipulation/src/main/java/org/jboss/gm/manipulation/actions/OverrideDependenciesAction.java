@@ -57,7 +57,7 @@ public class OverrideDependenciesAction implements Action<Project> {
                 // TODO: Can we use reflection to force the state back to unresolved?
                 logger.warn("Configuration {} for {} is not in unresolved state", configuration.getName(), project);
             } else {
-                logger.debug("Adding GME resolver to configuration {} on project {}", configuration.getName(),
+                logger.trace("Adding GME resolver to configuration {} on project {}", configuration.getName(),
                         project.getPath());
                 configuration.getResolutionStrategy().eachDependency(resolver);
 

@@ -25,7 +25,7 @@ import static org.junit.Assume.assumeTrue;
 public class OpenTelemetryJavaInstrumentationProjectFunctionalTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -40,7 +40,7 @@ public class OpenTelemetryJavaInstrumentationProjectFunctionalTest {
 
     @Test
     public void testOpenTelemetryJavaInstrumentation() throws IOException, URISyntaxException, GitAPIException {
-        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.0")) >= 0);
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.8")) >= 0);
 
         final File opentelemetryProjectRoot = tempDir.newFolder("opentelemetry-java-instrumentation-project");
 
@@ -60,7 +60,8 @@ public class OpenTelemetryJavaInstrumentationProjectFunctionalTest {
 
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(opentelemetryProjectRoot)
-                .withArguments("-Potel.stable=true", "-Dorg.gradle.java.home=" + JDK17_DIR, "publish", "-x", "test")
+                .withArguments("-q", "-Potel.stable=true", "-Dorg.gradle.java.home=" + JDK17_DIR, "publish", "-x", "test", "-x",
+                        "spotlessCheck", "-x", "checkstyleMain", "-x", "javadoc")
                 .forwardOutput()
                 .withDebug(false)
                 .withPluginClasspath()

@@ -57,7 +57,7 @@ public class OverrideDependenciesAction implements Action<Project> {
                 // TODO: Can we use reflection to force the state back to unresolved?
                 logger.warn("Configuration {} for {} is not in unresolved state", configuration.getName(), project);
             } else {
-                logger.trace("Adding GME resolver to configuration {} on project {}", configuration.getName(),
+                logger.debug("Adding GME resolver to configuration {} on project {}", configuration.getName(),
                         project.getPath());
                 configuration.getResolutionStrategy().eachDependency(resolver);
 
@@ -82,7 +82,7 @@ public class OverrideDependenciesAction implements Action<Project> {
                     configuration.getResolutionStrategy().setForcedModules(forced.toArray());
                 }
 
-                configuration.getAllDependencies().forEach(d -> {
+                configuration.getDependencies().configureEach(d -> {
                     if (d instanceof org.gradle.api.artifacts.ExternalModuleDependency) {
                         ExternalModuleDependency externalModuleDependency = (ExternalModuleDependency) d;
                         if (StringUtils.isNotEmpty(externalModuleDependency.getVersionConstraint().getStrictVersion())) {

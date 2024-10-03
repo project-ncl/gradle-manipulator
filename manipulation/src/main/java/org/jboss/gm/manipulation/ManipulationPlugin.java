@@ -120,7 +120,7 @@ public class ManipulationPlugin implements Plugin<Project> {
         // add actions to manipulate project
         project.afterEvaluate(new OverrideDependenciesAction(correspondingModule, resolvedDependenciesRepository));
         project.afterEvaluate(new ManifestUpdateAction(correspondingModule));
-        project.afterEvaluate(p -> p.getConfigurations().all(c -> {
+        project.afterEvaluate(p -> p.getConfigurations().configureEach(c -> {
             if (c.isCanBeResolved()) {
                 ProjectUtils.updateResolutionStrategy(c);
             }
@@ -192,21 +192,19 @@ public class ManipulationPlugin implements Plugin<Project> {
             if (LEGACY_MAVEN_PLUGIN.equals(deployPlugin) || LEGACY_MAVEN_PLUGIN_NEXUS.equals(deployPlugin)) {
                 logger.info("Configuring {} plugin for project {}", deployPlugin, evaluatedProject.getName());
 
-                evaluatedProject.afterEvaluate(action -> {
-                    final String archivesBaseName = ProjectUtils.getArchivesBaseName(project);
-                    if (archivesBaseName != null) {
-                        logger.warn(
-                                "Located archivesBaseName override ; forcing project name to '{}' from '{}' for correct usage",
-                                archivesBaseName, project.getName());
-                        ProjectUtils.updateNameField(project, archivesBaseName);
-                    }
-                });
+                final String archivesBaseName = ProjectUtils.getArchivesBaseName(evaluatedProject);
+                if (archivesBaseName != null) {
+                    logger.warn(
+                            "Located archivesBaseName override ; forcing project name to '{}' from '{}' for correct usage",
+                            archivesBaseName, evaluatedProject.getName());
+                    ProjectUtils.updateNameField(evaluatedProject, archivesBaseName);
+                }
 
                 evaluatedProject
                         .afterEvaluate(new UploadTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
                 evaluatedProject.afterEvaluate(new LegacyMavenPublishingRepositoryAction());
 
-                List<String> taskNames = project.getGradle().getStartParameter().getTaskNames();
+                List<String> taskNames = evaluatedProject.getGradle().getStartParameter().getTaskNames();
 
                 if (taskNames.stream().noneMatch(p -> p.contains("uploadArchives"))) {
                     logger.error("Unable to find uploadArchives parameter in tasks {} for Legacy Maven Plugin for project {}",
@@ -219,7 +217,7 @@ public class ManipulationPlugin implements Plugin<Project> {
                 evaluatedProject
                         .afterEvaluate(new PublishTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
 
-                List<String> taskNames = project.getGradle().getStartParameter().getTaskNames();
+                List<String> taskNames = evaluatedProject.getGradle().getStartParameter().getTaskNames();
 
                 if (taskNames.stream().noneMatch(p -> p.contains("publish"))) {
                     logger.error("Unable to find publish parameter in tasks {} for Maven Publish Plugin for project {}",

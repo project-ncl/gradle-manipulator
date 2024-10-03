@@ -90,7 +90,7 @@ public class MavenPublishingRepositoryAction implements Action<Project> {
             }
         });
         RepositoryHandler repos = project.getExtensions().getByType(PublishingExtension.class).getRepositories();
-        repos.forEach(repository -> {
+        repos.configureEach(repository -> {
             if (!REPO_NAME.equals(repository.getName())) {
                 logger.info("Removing publishing repository {}", repository.getName());
             }

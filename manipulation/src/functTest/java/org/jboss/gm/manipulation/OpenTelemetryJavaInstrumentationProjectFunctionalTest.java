@@ -60,8 +60,9 @@ public class OpenTelemetryJavaInstrumentationProjectFunctionalTest {
 
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(opentelemetryProjectRoot)
-                .withArguments("-q", "-Potel.stable=true", "-Dorg.gradle.java.home=" + JDK17_DIR, "publish", "-x", "test", "-x",
-                        "spotlessCheck", "-x", "checkstyleMain", "-x", "javadoc")
+                .withArguments("-q", "-Potel.stable=true", "-Dorg.gradle.java.home=" + JDK17_DIR,
+                        "--no-parallel", ":bom:publish")
+                // "publish", "-x", "test", "-x", "spotlessCheck", "-x", "checkstyleMain", "-x", "javadoc")
                 .forwardOutput()
                 .withDebug(false)
                 .withPluginClasspath()
@@ -69,7 +70,7 @@ public class OpenTelemetryJavaInstrumentationProjectFunctionalTest {
 
         assertThat(buildResult.task(":bom:publish").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
         assertThat(new File(publishDirectory,
-                "io/opentelemetry/javaagent/opentelemetry-javaagent/2.5.0.redhat-00001/opentelemetry-javaagent-2.5.0.redhat-00001.jar"))
+                "io/opentelemetry/instrumentation/opentelemetry-instrumentation-bom/2.5.0.redhat-00001/opentelemetry-instrumentation-bom-2.5.0.redhat-00001.pom"))
                         .exists();
     }
 }

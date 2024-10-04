@@ -32,7 +32,7 @@ The `analyzer` directory contains the gradle plugin that generates metadata info
 the project version.
 
 The latest version of the Analyzer init script can be retrieved from
-https://repo1.maven.org/maven2/org/jboss/gm/analyzer/3.19/analyzer-3.19-init.gradle
+https://repo1.maven.org/maven2/org/jboss/gm/analyzer/3.20/analyzer-3.20-init.gradle
 
 ## Manipulation
 

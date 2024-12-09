@@ -55,7 +55,9 @@ import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.attributes.Attribute;
+import org.gradle.api.internal.GradleInternal;
 import org.gradle.api.internal.artifacts.result.DefaultResolvedDependencyResult;
 import org.gradle.api.internal.plugins.DefaultPluginManager;
 import org.gradle.api.logging.Logger;
@@ -257,6 +259,15 @@ public class AlignmentTask extends DefaultTask {
                     org.jboss.gm.common.utils.FileUtils.relativize(root, project.getProjectDir().toPath())));
             project.getBuildscript().getRepositories().forEach(r -> cache.addRepository(r,
                     org.jboss.gm.common.utils.FileUtils.relativize(root, project.getProjectDir().toPath())));
+            // Complete hack due to
+            //  https://github.com/gradle/gradle/issues/19711
+            //  https://github.com/gradle/gradle/issues/17295
+            //  https://github.com/gradlex-org/jvm-dependency-conflict-resolution/blob/1c25db65e0080ee5dcb9f54bd7db2dda4ca80b6c/src/main/java/org/gradlex/javaecosystem/capabilities/BasePluginApplication.java
+            ((GradleInternal) project.getGradle()).getSettings().getSettings().getPluginManagement().getRepositories().forEach(
+                    r -> {
+                        cache.addRepository(r,
+                                org.jboss.gm.common.utils.FileUtils.relativize(root, project.getProjectDir().toPath()));
+                    });
 
             if (StringUtils.isBlank(groupId) ||
                     DEFAULT_VERSION.equals(currentProjectVersion)) {

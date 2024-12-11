@@ -174,18 +174,11 @@ public class MultiModuleProjectWithOverridesFunctionalTest
             Settings generatedSettings = settingsXpp3Reader.read(reader);
             List<Repository> repositories = generatedSettings.getProfiles().get(0).getRepositories();
 
-            if (GradleVersion.current().compareTo(GradleVersion.version("7.4")) <= 0) {
-                assertThat(repositories).extracting("url")
-                        // should not contain duplicate entries
-                        .containsOnly(
-                                "https://repo.maven.apache.org/maven2/");
-            } else {
-                assertThat(repositories).extracting("url")
-                        // should not contain duplicate entries
-                        .containsOnly(
-                                "https://repo.maven.apache.org/maven2/",
-                                "https://plugins.gradle.org/m2");
-            }
+            assertThat(repositories).extracting("url")
+                    // should not contain duplicate entries
+                    .containsOnly(
+                            "https://repo.maven.apache.org/maven2/",
+                            "https://plugins.gradle.org/m2");
         }
 
         // make sure the project name was not changed

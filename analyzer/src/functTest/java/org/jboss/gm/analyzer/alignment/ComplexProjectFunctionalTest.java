@@ -113,19 +113,11 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
             SettingsXpp3Reader settingsXpp3Reader = new SettingsXpp3Reader();
             Settings generatedSettings = settingsXpp3Reader.read(reader);
             List<Repository> repositories = generatedSettings.getProfiles().get(0).getRepositories();
-
-            if (GradleVersion.current().compareTo(GradleVersion.version("7.4")) <= 0) {
-                assertThat(repositories).extracting("url").containsOnly(
-                        "https://repo.maven.apache.org/maven2/",
-                        "https://oss.sonatype.org/content/repositories/snapshots/",
-                        "https://dl.google.com/dl/android/maven2/");
-            } else {
-                assertThat(repositories).extracting("url").containsOnly(
-                        "https://repo.maven.apache.org/maven2/",
-                        "https://plugins.gradle.org/m2",
-                        "https://oss.sonatype.org/content/repositories/snapshots/",
-                        "https://dl.google.com/dl/android/maven2/");
-            }
+            assertThat(repositories).extracting("url").containsOnly(
+                    "https://repo.maven.apache.org/maven2/",
+                    "https://plugins.gradle.org/m2",
+                    "https://oss.sonatype.org/content/repositories/snapshots/",
+                    "https://dl.google.com/dl/android/maven2/");
         }
     }
 }

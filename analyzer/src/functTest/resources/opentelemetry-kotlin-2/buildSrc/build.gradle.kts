@@ -5,22 +5,22 @@ plugins {
   id("com.diffplug.spotless") version "6.25.0"
 }
 
-if (!hasLauncherForJavaVersion(11)) {
-  throw GradleException(
-    "JDK 17 is required to build and gradle was unable to detect it on the system.  " +
-        "Please install it and see https://docs.gradle.org/current/userguide/toolchains.html#sec:auto_detection " +
-        "for details on how gradle detects java toolchains."
-  )
-}
+// if (!hasLauncherForJavaVersion(11)) {
+//   throw GradleException(
+//     "JDK 17 is required to build and gradle was unable to detect it on the system.  " +
+//         "Please install it and see https://docs.gradle.org/current/userguide/toolchains.html#sec:auto_detection " +
+//         "for details on how gradle detects java toolchains."
+//   )
+// }
 
-fun hasLauncherForJavaVersion(version: Int): Boolean {
-  return try {
-    javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(version) }.get()
-    true
-  } catch (e: Exception) {
-    false
-  }
-}
+// fun hasLauncherForJavaVersion(version: Int): Boolean {
+//   return try {
+//     javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(version) }.get()
+//     true
+//   } catch (e: Exception) {
+//     false
+//   }
+// }
 
 spotless {
   kotlinGradle {
@@ -72,8 +72,8 @@ dependencies {
 
 // We can't apply conventions to this build so include important ones such as the Java compilation
 // target.
-java {
-  toolchain {
-    languageVersion.set(JavaLanguageVersion.of(17))
-  }
-}
+// java {
+//   toolchain {
+//     languageVersion.set(JavaLanguageVersion.of(17))
+//   }
+// }

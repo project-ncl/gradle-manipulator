@@ -139,7 +139,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
                 assertThat(root.getAlignedDependencies()).isEmpty();
             });
 
-            assertThat(am.findCorrespondingChild("dependencyManagement")).satisfies(root -> {
+            assertThat(am.findCorrespondingChild(":api:all")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("0.17.0.redhat-00001");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
                 assertThat(alignedDependencies)

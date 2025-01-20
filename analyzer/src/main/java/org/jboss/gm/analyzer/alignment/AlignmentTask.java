@@ -55,7 +55,6 @@ import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
-import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.attributes.Attribute;
 import org.gradle.api.internal.GradleInternal;
 import org.gradle.api.internal.artifacts.result.DefaultResolvedDependencyResult;
@@ -250,7 +249,7 @@ public class AlignmentTask extends DefaultTask {
                     .allProjectVersionRefsFromLockfiles(project.getProjectDir());
             final Map<RelaxedProjectVersionRef, ProjectVersionRef> dependencies = processAnyExistingManipulationFile(
                     project,
-                    getDependencies(project, configuration, lockFileDeps));
+                    getDependencies(project, cache, configuration, lockFileDeps));
 
             logger.debug("For project {} adding to the cache the dependencies {}", project, dependencies); // TODO: Trace level?
             cache.addDependencies(project, dependencies);
@@ -630,15 +629,68 @@ public class AlignmentTask extends DefaultTask {
         return DEPENDENCY_CONSTRAINT_CLASS != null && DEPENDENCY_CONSTRAINT_CLASS.isInstance(obj);
     }
 
-    private Map<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(Project project, Configuration internalConfig,
+    private Map<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(Project project, ManipulationCache cache,
+            Configuration internalConfig,
             Set<ProjectVersionRef> lockFileDeps) {
+
+        //        if (!constraint) {
+        //            constraint = project.getConfigurations().stream()
+        //                    .anyMatch(config -> //                    try {
+        //                    //                            || Class.forName(
+        //                    //                                "org.gradle.api.internal.artifacts.dependencies.DefaultProjectDependencyConstraint_Decorated")
+        //                    //                                .isInstance(obj)
+        //                    //                    } catch (ClassNotFoundException e) {
+        //                    //                        throw new RuntimeException(e);
+        //                    //                    }
+        //                    config
+        //                            .getAllDependencyConstraints().stream()
+        //                            .anyMatch(AlignmentTask::isDefaultProjectDependencyConstraint));
+        //            //               .anyMatch(AlignmentTask::isDefaultProjectDependencyConstraint));
+        //        }
+        //        logger.warn("### In project {} constraint found {} in class {}", project.getName(), constraint , System.identityHashCode());
 
         final Map<RelaxedProjectVersionRef, ProjectVersionRef> depMap = new LinkedHashMap<>();
         project.getConfigurations().all(configuration -> {
+            logger.warn("### project {} configuration {} canbeConsumed {} canberesolved {} visible {} canbedeclared {}",
+                    project.getName(),
+                    configuration.getName(),
+                    configuration.isCanBeConsumed(),
+                    configuration.isCanBeResolved(),
+                    configuration.isVisible());
+            //                    configuration.isCanBeDeclared());
+
+            // canBeResolved: Indicates that this configuration is intended for resolving a set of dependencies into a dependency graph. A resolvable configuration should not be declarable or consumable.
             if (configuration.isCanBeResolved()) {
 
+                final Boolean anyConstraints = configuration.getAllDependencyConstraints().isEmpty();
+                logger.warn(
+                        "###@@@ For project {} examining configuration {} with consume {} and any constraint {} and defaultproject constraint {} ",
+                        project.getName(),
+                        configuration.getName(), configuration.isCanBeConsumed(), anyConstraints, cache.isConstraints());
                 logger.trace("Examining configuration {}", configuration.getName());
 
+                // https://docs.gradle.org/current/userguide/declaring_configurations.html
+
+                //                if (!configuration.isCanBeConsumed()
+                //                        && (configuration.getName().toLowerCase().endsWith("compileclasspath") ||
+                //                                configuration.getName().toLowerCase().endsWith("runtimeclasspath"))
+                //
+                //                /*&& !configuration.isCanBeDeclared()*/) {
+                //                    logger.warn("Not altering configuration for {} under {}", configuration.getName(), project.getName());
+                //                    return;
+                //
+                //                }
+                //                Boolean classpathConfiguration = false;
+                //                if (
+                //                //constraint
+                //                /*&& GradleVersion.current().compareTo(GradleVersion.version("8.0")) >= 0*/
+                //                //                        && !configuration.isCanBeConsumed()
+                //                (configuration.getName().equalsIgnoreCase("runtimeClasspath") ||
+                //                        configuration.getName().equalsIgnoreCase("compileClasspath"))) {
+                //                    logger.warn("Not altering configuration for {} under {}", configuration.getName(), project.getName());
+                //                    classpathConfiguration = true;
+                //                }
+                //
                 // using getAllDependencies here instead of getDependencies because the latter
                 // was returning an empty array for the root project of SpringLikeLayoutFunctionalTest
                 final DependencySet allDependencies = configuration.getAllDependencies();
@@ -659,13 +711,36 @@ public class AlignmentTask extends DefaultTask {
                 // need to copy the configurations to ensure we resolve all dependencies (See
                 // analyzer/src/functTest/java/org/jboss/gm/analyzer/alignment/DynamicWithLocksProjectFunctionalTest.java for
                 // an example) first verify if DefaultProjectDependencyConstraint occurs in the list of constraints.
+                //
+                // NCLSUP-1188: to avoid "Dependency constraints can not be declared against the `compileClasspath` configuration"
+                // we now avoid recursive copying if constraints are active in any configuration in any subproject.
+                if (!cache.isConstraints()) {
+                    cache.setConstraints(configuration.getAllDependencyConstraints().stream()
+                            .anyMatch(AlignmentTask::isDefaultProjectDependencyConstraint));
+                }
+                logger.warn("### In project {} constraint found {} in class {}", project.getName(), cache.isConstraints(),
+                        System.identityHashCode(AlignmentTask.class));
+
                 LenientConfiguration lenient;
                 org.gradle.api.artifacts.Configuration copy;
 
                 // Attempt to call copyRecursive for all types (kotlin/gradle).
+                //                if (!cache.isConstraints()
                 if (configuration
                         .getAllDependencyConstraints().stream()
                         .noneMatch(AlignmentTask::isDefaultProjectDependencyConstraint)) {
+                    //                if (!constraint) {
+                    //                if (!configuration.isCanBeDeclared() &&
+                    //                    !classpathConfiguration &&
+                    //                    configuration
+                    //                        .getAllDependencyConstraints().stream()
+                    //                        .noneMatch(AlignmentTask::isDefaultProjectDependencyConstraint)) {
+                    //                    !configuration.isCanBeDeclared() &&
+                    //                        !classpathConfiguration &&
+                    //                        configuration
+                    //                                .getAllDependencyConstraints().stream()
+                    //                                .noneMatch(AlignmentTask::isDefaultProjectDependencyConstraint)
+                    //                ) {
                     copy = configuration.copyRecursive();
                     lenient = copy.getResolvedConfiguration().getLenientConfiguration();
                 } else {
@@ -928,6 +1003,7 @@ public class AlignmentTask extends DefaultTask {
                 .getDependencies();
         final Set<Map.Entry<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>>> entrySet = projectDependencies
                 .entrySet();
+        logger.info("### all project dependencies for {}", entrySet);
 
         for (Map.Entry<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>> entry : entrySet) {
             final Project name = entry.getKey();

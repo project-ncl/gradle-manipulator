@@ -74,6 +74,14 @@ public class ManipulationCache {
     private DokkaVersion dokkaVersion = DokkaVersion.NONE;
 
     /**
+     * OpenTelemetry builds utilise constraints but this can affect the entire project leading to
+     * "Dependency constraints can not be declared against the `compileClasspath` configuration"
+     */
+    @Getter
+    @Setter
+    private boolean constraints;
+
+    /**
      * Retrieves the cache given any project. It will access the root project, check if the
      * cache exists and create it if required.
      * <p>

@@ -48,6 +48,7 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.DependencyConstraintSet;
 import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.artifacts.LenientConfiguration;
 import org.gradle.api.artifacts.ModuleVersionIdentifier;
@@ -635,26 +636,10 @@ public class AlignmentTask extends DefaultTask {
 
         final Map<RelaxedProjectVersionRef, ProjectVersionRef> depMap = new LinkedHashMap<>();
         project.getConfigurations().all(configuration -> {
-            logger.warn("### project {} configuration {} canbeConsumed {} canberesolved {} visible {} canbedeclared {}",
-                    project.getName(),
-                    configuration.getName(),
-                    configuration.isCanBeConsumed(),
-                    configuration.isCanBeResolved(),
-                    configuration.isVisible());
-
             // canBeResolved: Indicates that this configuration is intended for resolving a set of dependencies into a dependency graph. A resolvable configuration should not be declarable or consumable.
             if (configuration.isCanBeResolved()) {
-                // https://docs.gradle.org/current/userguide/declaring_configurations.html
-                // using getAllDependencies here instead of getDependencies because the latter
-                // was returning an empty array for the root project of SpringLikeLayoutFunctionalTest
-                final DependencySet allDependencies = configuration.getAllDependencies();
-                final Set<ProjectDependency> allProjectDependencies = allDependencies
-                        .stream()
-                        .filter(d -> ProjectDependency.class.isAssignableFrom(d.getClass()))
-                        .map(ProjectDependency.class::cast)
-                        .collect(Collectors.toSet());
 
-                ProjectUtils.updateResolutionStrategy(configuration);
+                logger.trace("Examining configuration {}", configuration.getName());
 
                 // If we have dependency constraints we can get a ClassCastException when attempting to copy the configurations.
                 // This is due to an unchecked cast in
@@ -669,25 +654,42 @@ public class AlignmentTask extends DefaultTask {
                 // NCLSUP-1188: to avoid "Dependency constraints can not be declared against the `compileClasspath` configuration"
                 // we now avoid recursive copying if constraints are active in any configuration in any subproject.
                 if (!cache.isConstraints()) {
-                    logger.info("Found dependency constraints in {}", configuration.getName());
-                    cache.setConstraints(configuration.getAllDependencyConstraints().stream()
-                            .anyMatch(AlignmentTask::isDefaultProjectDependencyConstraint));
+                    DependencyConstraintSet allConstraints = configuration.getAllDependencyConstraints();
+                    // Extremely bizarrely but a simple stream like allConstraints.stream().anyMatch
+                    // fails without a preceding allConstraints.isEmpty call. This alternative also
+                    // appears to work and satisfies lazy configuration handling.
+                    allConstraints.configureEach(c -> {
+                        if (isDefaultProjectDependencyConstraint(c)) {
+                            logger.info("Found dependency constraints in {}", configuration.getName());
+                            cache.setConstraints(true);
+                        }
+                    });
                 }
+
+                // https://docs.gradle.org/current/userguide/declaring_configurations.html
+                // using getAllDependencies here instead of getDependencies because the latter
+                // was returning an empty array for the root project of SpringLikeLayoutFunctionalTest
+                final DependencySet allDependencies = configuration.getAllDependencies();
+                final Set<ProjectDependency> allProjectDependencies = allDependencies
+                        .stream()
+                        .filter(d -> ProjectDependency.class.isAssignableFrom(d.getClass()))
+                        .map(ProjectDependency.class::cast)
+                        .collect(Collectors.toSet());
+
+                ProjectUtils.updateResolutionStrategy(configuration);
 
                 LenientConfiguration lenient;
                 org.gradle.api.artifacts.Configuration copy;
 
                 // Attempt to call copyRecursive for all types (kotlin/gradle).
                 if (!cache.isConstraints()) {
-                    //                if (configuration
-                    //                        .getAllDependencyConstraints().stream()
-                    //                        .noneMatch(AlignmentTask::isDefaultProjectDependencyConstraint)) {
                     logger.debug("Recursively copying configuration for {}", configuration.getName());
                     copy = configuration.copyRecursive();
                     lenient = copy.getResolvedConfiguration().getLenientConfiguration();
                 } else {
                     logger.debug(
-                            "DefaultProjectDependencyConstraint found, not recursively copying configuration");
+                            "DefaultProjectDependencyConstraint found, not recursively copying configuration for {}",
+                            configuration.getName());
                     copy = configuration.copy();
                     lenient = copy.getResolvedConfiguration().getLenientConfiguration();
                 }
@@ -944,7 +946,6 @@ public class AlignmentTask extends DefaultTask {
                 .getDependencies();
         final Set<Map.Entry<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>>> entrySet = projectDependencies
                 .entrySet();
-        logger.info("### all project dependencies for {}", entrySet);
 
         for (Map.Entry<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>> entry : entrySet) {
             final Project name = entry.getKey();

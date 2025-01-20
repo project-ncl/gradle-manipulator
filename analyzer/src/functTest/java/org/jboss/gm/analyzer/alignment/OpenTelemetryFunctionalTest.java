@@ -203,4 +203,68 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         assertThat(systemOutRule.getLog()).contains("Found archivesBaseName override ; resetting project name "
                 + "'benchmark-overhead-jmh' to 'opentelemetry-benchmark-overhead-jmh'");
     }
+
+    @Test
+    public void verifyOpenTelemetryKotlin2() throws IOException, URISyntaxException, ManipulationException {
+        // XXX: Use of pluginManagement.plugins{}
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.5")) >= 0);
+        final Map<String, String> map = new HashMap<>();
+        map.put("-DoverrideTransitive", "false");
+        map.put("-Potel.stable", "true");
+        map.put("-DignoreUnresolvableDependencies", "true");
+
+        final File projectRoot = tempDir.newFolder("opentelemetry-kotlin-2");
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), map);
+
+        assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
+        assertEquals(AlignmentTask.INJECT_GME_START_KOTLIN + " }", TestUtils.getLine(projectRoot));
+        assertEquals(AlignmentTask.INJECT_GME_END_KOTLIN,
+                FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE + ".kts")));
+
+        assertThat(alignmentModel).isNotNull().satisfies(am -> {
+            assertThat(am.getGroup()).isEqualTo("io.opentelemetry");
+            assertThat(am.getName()).isEqualTo("opentelemetry-java");
+            assertThat(am.getVersion()).isEqualTo("1.44.1.redhat-00001");
+            assertThat(am.getOriginalVersion()).isEqualTo("1.44.1");
+
+            assertThat(am.getChildren().keySet()).hasSize(10).containsExactlyInAnyOrder(
+                    "all",
+                    "animal-sniffer-signature",
+                    "api",
+                    "bom",
+                    "bom-alpha",
+                    "context",
+                    "custom-checks",
+                    "dependencyManagement",
+                    "extensions",
+                    "testing-internal");
+
+            assertThat(am.getChildren().get("bom"))
+                    .hasToString("io.opentelemetry:opentelemetry-bom:1.44.1.redhat-00001");
+            assertThat(am.getChildren().get("api")).hasToString("io.opentelemetry:api:1.44.1.redhat-00001");
+
+            assertThat(am.findCorrespondingChild("bom")).satisfies(root -> {
+                assertThat(root.getVersion()).isEqualTo("1.44.1.redhat-00001");
+                assertThat(root.getAlignedDependencies()).isEmpty();
+            });
+
+            assertThat(am.findCorrespondingChild("bom-alpha")).satisfies(root -> {
+                assertThat(root.getVersion()).isEqualTo("1.44.1.alpha-redhat-00001");
+                assertThat(root.getOriginalVersion()).isEqualTo("1.44.1-alpha");
+                assertThat(root.getAlignedDependencies()).isEmpty();
+            });
+
+            assertThat(am.findCorrespondingChild(":api:all")).satisfies(root -> {
+                assertThat(root.getVersion()).isEqualTo("1.44.1.redhat-00001");
+                final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
+                assertThat(alignedDependencies)
+                        .extracting("artifactId", "versionString")
+                        .containsOnly(
+                                tuple("protobuf-bom", "3.25.5-redhat-00001"));
+            });
+        });
+
+        verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
+        assertThat(systemOutRule.getLog()).contains("io.opentelemetry:bom:1.44.1");
+    }
 }

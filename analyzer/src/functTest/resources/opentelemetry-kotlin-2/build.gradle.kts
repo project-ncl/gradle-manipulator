@@ -2,6 +2,8 @@ import java.time.Duration
 
 plugins {
   id("io.github.gradle-nexus.publish-plugin")
+
+  id("org.jboss.gm.analyzer")
 }
 
 apply(from = "version.gradle.kts")
@@ -35,6 +37,8 @@ tasks.register("generateBuildSubstitutions") {
 
 subprojects {
   group = "io.opentelemetry"
+
+  apply(plugin = "org.jboss.gm.analyzer")
 }
 
 tasks {

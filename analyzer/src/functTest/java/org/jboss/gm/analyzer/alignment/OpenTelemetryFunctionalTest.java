@@ -167,7 +167,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         map.put("-DignoreUnresolvableDependencies", "true");
         map.put("-DpluginRemoval", "gradle-enterprise,io.github.gradle-nexus.publish-plugin");
 
-        final File projectRoot = tempDir.newFolder("opentelemetry-kotlin-2");
+        final File projectRoot = tempDir.newFolder("opentelemetry-java-instrumentation");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), map);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());

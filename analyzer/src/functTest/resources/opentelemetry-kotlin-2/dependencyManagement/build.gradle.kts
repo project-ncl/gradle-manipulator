@@ -1,9 +1,5 @@
-import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
-
 plugins {
   `java-platform`
-
-  id("com.github.ben-manes.versions")
 }
 
 data class DependencySet(val group: String, val version: String, val modules: List<String>)
@@ -11,108 +7,82 @@ data class DependencySet(val group: String, val version: String, val modules: Li
 val dependencyVersions = hashMapOf<String, String>()
 rootProject.extra["versions"] = dependencyVersions
 
-// this line is managed by .github/scripts/update-sdk-version.sh
-val otelVersion = "1.17.0"
-
-rootProject.extra["otelVersion"] = otelVersion
-
-// Need both BOM and groovy jars
-val groovyVersion = "4.0.2"
-
-// We don't force libraries we instrument to new versions since we compile and test against specific
-// old baseline versions but we do try to force those libraries' transitive dependencies to new
-// versions where possible so that we don't end up with explosion of dependency versions in
-// Intellij, which causes Intellij to spend lots of time indexing all of those different dependency
-// versions, and makes debugging painful because Intellij has no idea which dependency version's
-// source to use when stepping through code.
-//
-// Sometimes libraries we instrument do require a specific version of a transitive dependency and
-// that can be applied in the specific instrumentation gradle file, e.g.
-// configurations.testRuntimeClasspath.resolutionStrategy.force "com.google.guava:guava:19.0"
-
 val DEPENDENCY_BOMS = listOf(
-  "com.fasterxml.jackson:jackson-bom:2.13.2.20220328",
-  "com.google.guava:guava-bom:31.1-jre",
-  "org.apache.groovy:groovy-bom:${groovyVersion}",
-  "io.opentelemetry:opentelemetry-bom:${otelVersion}",
-  "io.opentelemetry:opentelemetry-bom-alpha:${otelVersion}-alpha",
-  "org.junit:junit-bom:5.8.2",
-  "org.testcontainers:testcontainers-bom:1.17.1",
+  "com.fasterxml.jackson:jackson-bom:2.18.1",
+  "com.google.guava:guava-bom:33.3.1-jre",
+  "com.google.protobuf:protobuf-bom:3.25.5",
+  "com.linecorp.armeria:armeria-bom:1.30.1",
+  "com.squareup.okhttp3:okhttp-bom:4.12.0",
+  "com.squareup.okio:okio-bom:3.9.1", // applies to transitive dependencies of okhttp
+  "io.grpc:grpc-bom:1.68.1",
+  "io.netty:netty-bom:4.1.114.Final",
+  "io.zipkin.brave:brave-bom:6.0.3",
+  "io.zipkin.reporter2:zipkin-reporter-bom:3.4.2",
+  "org.assertj:assertj-bom:3.26.3",
+  "org.junit:junit-bom:5.11.3",
+  "org.testcontainers:testcontainers-bom:1.20.3",
+  "org.snakeyaml:snakeyaml-engine:2.8"
 )
 
-val DEPENDENCY_SETS = listOf(
-  DependencySet(
-    "com.google.auto.service",
-    "1.0.1",
-    listOf("auto-service", "auto-service-annotations")
-  ),
-  DependencySet(
-    "com.google.auto.value",
-    "1.9",
-    listOf("auto-value", "auto-value-annotations")
-  ),
-  DependencySet(
-    "com.google.errorprone",
-    "2.14.0",
-    listOf("error_prone_annotations", "error_prone_core", "error_prone_test_helpers")
-  ),
-  DependencySet(
-    "net.bytebuddy",
-    // When updating, also update conventions/build.gradle.kts
-    "1.12.10",
-    listOf("byte-buddy", "byte-buddy-dep", "byte-buddy-agent", "byte-buddy-gradle-plugin")
-  ),
-  DependencySet(
-    "org.openjdk.jmh",
-    "1.35",
-    listOf("jmh-core", "jmh-generator-bytecode")
-  ),
-  DependencySet(
-    "org.mockito",
-    "4.5.1",
-    listOf("mockito-core", "mockito-junit-jupiter", "mockito-inline")
-  ),
-  DependencySet(
-    "org.slf4j",
-    "1.7.36",
-    listOf("slf4j-api", "slf4j-simple", "log4j-over-slf4j", "jcl-over-slf4j", "jul-to-slf4j")
-  ),
-)
+val autoValueVersion = "1.11.0"
+val errorProneVersion = "2.35.1"
+val jmhVersion = "1.37"
+// Mockito 5.x.x requires Java 11 https://github.com/mockito/mockito/releases/tag/v5.0.0
+val mockitoVersion = "4.11.0"
+val slf4jVersion = "2.0.16"
+val opencensusVersion = "0.31.1"
+val prometheusClientVersion = "0.16.0"
 
-// See the comment above about why we keep this rather large list.
-// There are dependencies included here that appear to have no usages, but are maintained at
-// this top level to help consistently satisfy large numbers of transitive dependencies.
 val DEPENDENCIES = listOf(
-  "ch.qos.logback:logback-classic:1.2.11",
-  "com.github.stefanbirkner:system-lambda:1.2.1",
+  "com.google.auto.value:auto-value:${autoValueVersion}",
+  "com.google.auto.value:auto-value-annotations:${autoValueVersion}",
+  "com.google.errorprone:error_prone_annotations:${errorProneVersion}",
+  "com.google.errorprone:error_prone_core:${errorProneVersion}",
+  "com.google.errorprone:error_prone_test_helpers:${errorProneVersion}",
+  "io.opencensus:opencensus-api:${opencensusVersion}",
+  "io.opencensus:opencensus-impl-core:${opencensusVersion}",
+  "io.opencensus:opencensus-impl:${opencensusVersion}",
+  "io.opencensus:opencensus-exporter-metrics-util:${opencensusVersion}",
+  "io.opencensus:opencensus-contrib-exemplar-util:${opencensusVersion}",
+  "org.openjdk.jmh:jmh-core:${jmhVersion}",
+  "org.openjdk.jmh:jmh-generator-bytecode:${jmhVersion}",
+  "org.openjdk.jmh:jmh-generator-annprocess:${jmhVersion}",
+  "org.mockito:mockito-core:${mockitoVersion}",
+  "org.mockito:mockito-junit-jupiter:${mockitoVersion}",
+  "org.slf4j:slf4j-simple:${slf4jVersion}",
+  "org.slf4j:jul-to-slf4j:${slf4jVersion}",
+  "io.prometheus:prometheus-metrics-shaded-protobuf:1.3.1",
+  "io.prometheus:simpleclient:${prometheusClientVersion}",
+  "io.prometheus:simpleclient_common:${prometheusClientVersion}",
+  "io.prometheus:simpleclient_httpserver:${prometheusClientVersion}",
+  "javax.annotation:javax.annotation-api:1.3.2",
   "com.github.stefanbirkner:system-rules:1.19.0",
-  "uk.org.webcompere:system-stubs-jupiter:2.0.1",
-  "com.uber.nullaway:nullaway:0.9.7",
-  "commons-beanutils:commons-beanutils:1.9.4",
-  "commons-cli:commons-cli:1.5.0",
-  "commons-codec:commons-codec:1.15",
-  "commons-collections:commons-collections:3.2.2",
-  "commons-digester:commons-digester:2.1",
-  "commons-fileupload:commons-fileupload:1.4",
-  "commons-io:commons-io:2.11.0",
-  "commons-lang:commons-lang:2.6",
-  "commons-logging:commons-logging:1.2",
-  "commons-validator:commons-validator:1.7",
-  "io.netty:netty:3.10.6.Final",
-  "io.opentelemetry.proto:opentelemetry-proto:0.17.0-alpha",
-  "org.assertj:assertj-core:3.22.0",
-  "org.awaitility:awaitility:4.2.0",
-  "com.google.code.findbugs:annotations:3.0.1u2",
+  "com.google.api.grpc:proto-google-common-protos:2.48.0",
   "com.google.code.findbugs:jsr305:3.0.2",
-  "org.apache.groovy:groovy:${groovyVersion}",
-  "org.apache.groovy:groovy-json:${groovyVersion}",
-  "org.junit-pioneer:junit-pioneer:1.7.0",
-  "org.objenesis:objenesis:3.2",
-  "org.spockframework:spock-core:2.2-M1-groovy-4.0",
-  "org.spockframework:spock-junit4:2.2-M1-groovy-4.0",
-  "org.scala-lang:scala-library:2.11.12",
-  // Note that this is only referenced as "org.springframework.boot" in build files, not the artifact name.
-  "org.springframework.boot:spring-boot-dependencies:2.7.2"
+  "com.google.guava:guava-beta-checker:1.0",
+  "com.sun.net.httpserver:http:20070405",
+  "com.tngtech.archunit:archunit-junit5:1.3.0",
+  "com.uber.nullaway:nullaway:0.12.1",
+  "edu.berkeley.cs.jqf:jqf-fuzz:1.7", // jqf-fuzz version 1.8+ requires Java 11+
+  "eu.rekawek.toxiproxy:toxiproxy-java:2.1.7",
+  "io.github.netmikey.logunit:logunit-jul:2.0.0",
+  "io.jaegertracing:jaeger-client:1.8.1",
+  "io.opentelemetry.contrib:opentelemetry-aws-xray-propagator:1.39.0-alpha",
+  "io.opentelemetry.semconv:opentelemetry-semconv-incubating:1.28.0-alpha",
+  "io.opentelemetry.proto:opentelemetry-proto:1.3.2-alpha",
+  "io.opentracing:opentracing-api:0.33.0",
+  "io.opentracing:opentracing-noop:0.33.0",
+  "io.prometheus:prometheus-metrics-exporter-httpserver:1.3.3",
+  "junit:junit:4.13.2",
+  "nl.jqno.equalsverifier:equalsverifier:3.17.3",
+  "org.awaitility:awaitility:4.2.2",
+  "org.bouncycastle:bcpkix-jdk15on:1.70",
+  "org.codehaus.mojo:animal-sniffer-annotations:1.24",
+  "org.jctools:jctools-core:4.0.5",
+  "org.junit-pioneer:junit-pioneer:1.9.1",
+  "org.mock-server:mockserver-netty:5.15.0:shaded",
+  "org.skyscreamer:jsonassert:1.5.3",
+  "com.android.tools:desugar_jdk_libs:2.1.3",
 )
 
 javaPlatform {
@@ -126,35 +96,10 @@ dependencies {
     dependencyVersions[split[0]] = split[2]
   }
   constraints {
-    for (set in DEPENDENCY_SETS) {
-      for (module in set.modules) {
-        api("${set.group}:${module}:${set.version}")
-        dependencyVersions[set.group] = set.version
-      }
-    }
     for (dependency in DEPENDENCIES) {
       api(dependency)
       val split = dependency.split(':')
       dependencyVersions[split[0]] = split[2]
-    }
-  }
-}
-
-fun isNonStable(version: String): Boolean {
-  val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
-  val regex = "^[0-9,.v-]+(-r)?$".toRegex()
-  val isGuava = version.endsWith("-jre")
-  val isStable = stableKeyword || regex.matches(version) || isGuava
-  return isStable.not()
-}
-
-tasks {
-  named<DependencyUpdatesTask>("dependencyUpdates") {
-    revision = "release"
-    checkConstraints = true
-
-    rejectVersionIf {
-      isNonStable(candidate.version)
     }
   }
 }

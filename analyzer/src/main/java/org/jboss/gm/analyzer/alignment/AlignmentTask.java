@@ -48,6 +48,7 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.DependencyConstraintSet;
 import org.gradle.api.artifacts.DependencySet;
 import org.gradle.api.artifacts.LenientConfiguration;
 import org.gradle.api.artifacts.ModuleVersionIdentifier;
@@ -55,7 +56,6 @@ import org.gradle.api.artifacts.ProjectDependency;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.UnresolvedDependency;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
-import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.attributes.Attribute;
 import org.gradle.api.internal.GradleInternal;
 import org.gradle.api.internal.artifacts.result.DefaultResolvedDependencyResult;
@@ -250,7 +250,7 @@ public class AlignmentTask extends DefaultTask {
                     .allProjectVersionRefsFromLockfiles(project.getProjectDir());
             final Map<RelaxedProjectVersionRef, ProjectVersionRef> dependencies = processAnyExistingManipulationFile(
                     project,
-                    getDependencies(project, configuration, lockFileDeps));
+                    getDependencies(project, cache, configuration, lockFileDeps));
 
             logger.debug("For project {} adding to the cache the dependencies {}", project, dependencies); // TODO: Trace level?
             cache.addDependencies(project, dependencies);
@@ -630,15 +630,43 @@ public class AlignmentTask extends DefaultTask {
         return DEPENDENCY_CONSTRAINT_CLASS != null && DEPENDENCY_CONSTRAINT_CLASS.isInstance(obj);
     }
 
-    private Map<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(Project project, Configuration internalConfig,
+    private Map<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(Project project, ManipulationCache cache,
+            Configuration internalConfig,
             Set<ProjectVersionRef> lockFileDeps) {
 
         final Map<RelaxedProjectVersionRef, ProjectVersionRef> depMap = new LinkedHashMap<>();
         project.getConfigurations().all(configuration -> {
+            // canBeResolved: Indicates that this configuration is intended for resolving a set of dependencies into a dependency graph. A resolvable configuration should not be declarable or consumable.
             if (configuration.isCanBeResolved()) {
 
                 logger.trace("Examining configuration {}", configuration.getName());
 
+                // If we have dependency constraints we can get a ClassCastException when attempting to copy the configurations.
+                // This is due to an unchecked cast in
+                // org.gradle.api.internal.artifacts.configurations.DefaultConfiguration::createCopy { ...
+                // copiedDependencyConstraints.add(((DefaultDependencyConstraint) dependencyConstraint).copy());
+                // ... }
+                // When our constraint is a DefaultProjectDependencyConstraint this is a problem. Therefore, as we normally
+                // need to copy the configurations to ensure we resolve all dependencies (See
+                // analyzer/src/functTest/java/org/jboss/gm/analyzer/alignment/DynamicWithLocksProjectFunctionalTest.java for
+                // an example) first verify if DefaultProjectDependencyConstraint occurs in the list of constraints.
+                //
+                // NCLSUP-1188: to avoid "Dependency constraints can not be declared against the `compileClasspath` configuration"
+                // we now avoid recursive copying if constraints are active in any configuration in any subproject.
+                if (!cache.isConstraints()) {
+                    DependencyConstraintSet allConstraints = configuration.getAllDependencyConstraints();
+                    // Extremely bizarrely but a simple stream like allConstraints.stream().anyMatch
+                    // fails without a preceding allConstraints.isEmpty call. This alternative also
+                    // appears to work and satisfies lazy configuration handling.
+                    allConstraints.configureEach(c -> {
+                        if (isDefaultProjectDependencyConstraint(c)) {
+                            logger.info("Found dependency constraints in {}", configuration.getName());
+                            cache.setConstraints(true);
+                        }
+                    });
+                }
+
+                // https://docs.gradle.org/current/userguide/declaring_configurations.html
                 // using getAllDependencies here instead of getDependencies because the latter
                 // was returning an empty array for the root project of SpringLikeLayoutFunctionalTest
                 final DependencySet allDependencies = configuration.getAllDependencies();
@@ -650,28 +678,18 @@ public class AlignmentTask extends DefaultTask {
 
                 ProjectUtils.updateResolutionStrategy(configuration);
 
-                // If we have dependency constraints we can get a ClassCastException when attempting to copy the configurations.
-                // This is due to an unchecked cast in
-                // org.gradle.api.internal.artifacts.configurations.DefaultConfiguration::createCopy { ...
-                // copiedDependencyConstraints.add(((DefaultDependencyConstraint) dependencyConstraint).copy());
-                // ... }
-                // When our constraint is a DefaultProjectDependencyConstraint this is a problem. Therefore, as we normally
-                // need to copy the configurations to ensure we resolve all dependencies (See
-                // analyzer/src/functTest/java/org/jboss/gm/analyzer/alignment/DynamicWithLocksProjectFunctionalTest.java for
-                // an example) first verify if DefaultProjectDependencyConstraint occurs in the list of constraints.
                 LenientConfiguration lenient;
                 org.gradle.api.artifacts.Configuration copy;
 
                 // Attempt to call copyRecursive for all types (kotlin/gradle).
-                if (configuration
-                        .getAllDependencyConstraints().stream()
-                        .noneMatch(AlignmentTask::isDefaultProjectDependencyConstraint)) {
+                if (!cache.isConstraints()) {
+                    logger.debug("Recursively copying configuration for {}", configuration.getName());
                     copy = configuration.copyRecursive();
                     lenient = copy.getResolvedConfiguration().getLenientConfiguration();
                 } else {
                     logger.debug(
-                            "DefaultProjectDependencyConstraint found ({}), not recursively copying configuration",
-                            configuration.getAllDependencyConstraints());
+                            "DefaultProjectDependencyConstraint found, not recursively copying configuration for {}",
+                            configuration.getName());
                     copy = configuration.copy();
                     lenient = copy.getResolvedConfiguration().getLenientConfiguration();
                 }

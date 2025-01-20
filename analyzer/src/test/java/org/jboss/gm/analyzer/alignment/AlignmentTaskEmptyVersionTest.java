@@ -32,6 +32,7 @@ import org.jboss.byteman.contrib.bmunit.BMUnitConfig;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.jboss.gm.analyzer.alignment.io.SettingsFileIO;
 import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Before;
 import org.junit.Rule;
@@ -117,11 +118,12 @@ public class AlignmentTaskEmptyVersionTest {
         Configuration config = ConfigFactory.create(Configuration.class);
 
         // As getDependencies is private, use reflection to modify the access control.
-        Method m = at.getClass().getDeclaredMethod("getDependencies", Project.class, Configuration.class, Set.class);
+        Method m = at.getClass().getDeclaredMethod("getDependencies", Project.class, ManipulationCache.class,
+                Configuration.class, Set.class);
         m.setAccessible(true);
         @SuppressWarnings("unchecked")
         Map<Dependency, ProjectVersionRef> result = (Map<Dependency, ProjectVersionRef>) m.invoke(at,
-                new Object[] { p, config, new HashSet<ProjectVersionRef>() });
+                new Object[] { p, ManipulationCache.getCache(p), config, new HashSet<ProjectVersionRef>() });
         Collection<ProjectVersionRef> allDependencies = result.values();
 
         assertEquals(1, allDependencies.size());

@@ -16,5 +16,11 @@
     "version": "3.14.0",
     "groupId": "com.google.protobuf",
     "artifactId": "protobuf-bom"
+  },
+  {
+    "bestMatchVersion": "3.25.5-redhat-00001",
+    "version": "3.25.5",
+    "groupId": "com.google.protobuf",
+    "artifactId": "protobuf-bom"
   }
 ]

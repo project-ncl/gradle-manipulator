@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
@@ -72,6 +73,14 @@ public class ManipulationCache {
     @Getter
     @Setter
     private DokkaVersion dokkaVersion = DokkaVersion.NONE;
+
+    /**
+     * OpenTelemetry builds utilise constraints but this can affect the entire project leading to
+     * "Dependency constraints can not be declared against the `compileClasspath` configuration"
+     */
+    @Getter
+    @Setter
+    private boolean constraints = false;
 
     /**
      * Retrieves the cache given any project. It will access the root project, check if the

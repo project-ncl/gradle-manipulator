@@ -3,7 +3,6 @@ plugins {
   id("otel.publish-conventions")
 
   id("otel.jmh-conventions")
-  id("otel.animalsniffer-conventions")
 }
 
 description = "OpenTelemetry API"

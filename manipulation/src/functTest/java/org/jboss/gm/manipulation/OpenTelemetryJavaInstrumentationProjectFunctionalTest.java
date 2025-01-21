@@ -41,6 +41,8 @@ public class OpenTelemetryJavaInstrumentationProjectFunctionalTest {
     @Test
     public void testOpenTelemetryJavaInstrumentation() throws IOException, URISyntaxException, GitAPIException {
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.8")) >= 0);
+        // Avoid problems with animal-sniffer in later versions.
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.12")) < 0);
 
         final File opentelemetryProjectRoot = tempDir.newFolder("opentelemetry-java-instrumentation-project");
 

@@ -685,14 +685,13 @@ public class AlignmentTask extends DefaultTask {
                 if (!cache.isConstraints()) {
                     logger.debug("Recursively copying configuration for {}", configuration.getName());
                     copy = configuration.copyRecursive();
-                    lenient = copy.getResolvedConfiguration().getLenientConfiguration();
                 } else {
                     logger.debug(
                             "DefaultProjectDependencyConstraint found, not recursively copying configuration for {}",
                             configuration.getName());
                     copy = configuration.copy();
-                    lenient = copy.getResolvedConfiguration().getLenientConfiguration();
                 }
+                lenient = copy.getResolvedConfiguration().getLenientConfiguration();
 
                 // We don't care about modules of the project being unresolvable at this stage. Had we not excluded them,
                 // we would get false negatives

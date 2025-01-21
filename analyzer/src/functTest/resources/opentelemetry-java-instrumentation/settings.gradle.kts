@@ -462,6 +462,6 @@ include(":smoke-tests:images:quarkus")
 // include(":instrumentation:vibur-dbcp-11.0:testing")
 // include(":instrumentation:wicket-8.0:javaagent")
 
-// // benchmark
+// benchmark
 include(":benchmark-overhead-jmh")
 // include(":benchmark-jfr-analyzer")

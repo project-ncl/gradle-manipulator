@@ -6,7 +6,6 @@ plugins {
 
   id("otel.jmh-conventions")
   id("org.jetbrains.kotlin.jvm")
-  id("otel.animalsniffer-conventions")
 }
 
 description = "OpenTelemetry Kotlin Extensions"

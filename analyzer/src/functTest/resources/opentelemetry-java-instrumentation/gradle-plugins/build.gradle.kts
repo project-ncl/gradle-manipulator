@@ -51,7 +51,7 @@ tasks {
 
   withType<JavaCompile>().configureEach {
     with(options) {
-      release.set(8)
+      release.set(11)
     }
   }
 }

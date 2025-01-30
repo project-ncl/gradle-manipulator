@@ -1023,4 +1023,11 @@ public class AlignmentTask extends DefaultTask {
                     JSONUtils.jsonToString(jsonReport) + System.lineSeparator());
         }
     }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        // This should never be called. If it is called with true, the created task defaults to
+        // true so no need to call super.
+        logger.warn("Attempting to disable alignment task in {}; ignoring", getProject().getName());
+    }
 }

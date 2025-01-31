@@ -135,6 +135,8 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
             });
         });
 
+        assertThat(systemOutRule.getLog()).contains("Attempting to disable alignment task in");
+
         // we care about how many calls are made to DA from an implementation perspective which is why we assert
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
 

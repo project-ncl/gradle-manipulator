@@ -17,14 +17,13 @@ allprojects {
 }
 
 project(':subproject1') {
+    project.tasks.configureEach { task -> task.enabled = false }
     dependencies {
         implementation group: 'org.springframework', name: 'spring-context', version: '5.1.6.RELEASE'
         implementation group: 'org.hibernate', name: 'hibernate-core', version: '5.4.2.Final'
         implementation gradleApi() // dependency of type DefaultSelfResolvingDependency
         testImplementation group: 'junit', name: 'junit', version: '4.12'
     }
-
-
 }
 
 project(':subproject1:subproject11') {

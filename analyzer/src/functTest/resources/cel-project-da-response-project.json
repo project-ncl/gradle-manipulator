@@ -1,0 +1,8 @@
+[
+  {
+    "latestVersion": "0.4.5.redhat-00001",
+    "version": "0.4.5",
+    "groupId": "org.projectnessie.cel",
+    "artifactId": "cel-parent"
+  }
+]

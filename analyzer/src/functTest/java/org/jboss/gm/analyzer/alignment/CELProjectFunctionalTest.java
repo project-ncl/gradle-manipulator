@@ -12,6 +12,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.gradle.util.GradleVersion;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
@@ -30,6 +31,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.Assume.assumeTrue;
 
 @RunWith(BMUnitRunner.class)
 public class CELProjectFunctionalTest extends AbstractWiremockTest {
@@ -61,6 +63,8 @@ public class CELProjectFunctionalTest extends AbstractWiremockTest {
     @Test
     public void ensureAlignmentFileCreated()
             throws IOException, URISyntaxException, GitAPIException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.5")) >= 0);
+
         final File projectRoot = tempDir.newFolder();
 
         try (Git ignored = Git.cloneRepository()

@@ -21,9 +21,13 @@ plugins {
     }
 
     id("com.gradle.plugin-publish") version "0.15.0"
-    id("net.linguica.maven-settings") version "0.5"
     id("net.researchgate.release") version "2.8.1"
     id("org.ajoberstar.grgit") version "4.1.1"
+    if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.0")) {
+        // Only supporting publishing when running with Gradle < 8
+        // https://github.com/mark-vieira/gradle-maven-settings-plugin/issues/29
+        id("net.linguica.maven-settings") version "0.5"
+    }
 
     when {
         org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.0") -> {
@@ -68,7 +72,7 @@ plugins {
     }
 
     if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("8.0")) {
-        // XXX: Currently unsupported
+        id("org.kordamp.gradle.jacoco") version "0.54.0"
     } else if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("7.0")) {
         id("org.kordamp.gradle.jacoco") version "0.47.0"
     } else if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.3")) {
@@ -76,8 +80,8 @@ plugins {
     }
 }
 
-// XXX: Jacoco plugin only supports Gradle [5.3, 8.0); create empty task on those Gradle versions so that build does not fail
-if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.3") || org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("8.0")) {
+// XXX: Jacoco plugin only supports Gradle >= 5.3 ; create empty task on those Gradle versions so that build does not fail
+if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.3")) {
     tasks.register("AggregateJacocoReport")
 }
 
@@ -266,7 +270,9 @@ subprojects {
 
     apply(plugin = "signing")
     apply(plugin = "maven-publish")
-    apply(plugin = "net.linguica.maven-settings")
+    if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.0")) {
+        apply(plugin = "net.linguica.maven-settings")
+    }
 
     val sourcesJar by tasks.registering(Jar::class) {
         archiveClassifier.set("sources")

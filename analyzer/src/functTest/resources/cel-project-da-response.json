@@ -1,0 +1,32 @@
+[
+  {
+    "bestMatchVersion": "1.14.18.redhat-00002",
+    "version": "1.14.18",
+    "groupId" : "net.bytebuddy",
+    "artifactId" : "byte-buddy"
+  },
+  {
+    "bestMatchVersion": "9.7.0.redhat-00002",
+    "version": "9.7",
+    "groupId" : "org.ow2.asm",
+    "artifactId" : "asm"
+  },
+  {
+    "bestMatchVersion": "9.7.0.redhat-00002",
+    "version": "9.7",
+    "groupId" : "org.ow2.asm",
+    "artifactId" : "asm-commons"
+  },
+  {
+    "bestMatchVersion": "9.7.0.redhat-00002",
+    "version": "9.7",
+    "groupId" : "org.ow2.asm",
+    "artifactId" : "asm-tree"
+  },
+  {
+    "bestMatchVersion": "1.22.0.redhat-00002",
+    "version": "1.22.0",
+    "groupId" : "org.agrona",
+    "artifactId" : "agrona"
+  }
+]

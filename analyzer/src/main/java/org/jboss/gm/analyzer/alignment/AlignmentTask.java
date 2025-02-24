@@ -65,6 +65,7 @@ import org.gradle.api.plugins.AppliedPlugin;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.MavenPublication;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.AlignmentService.Response;
 import org.jboss.gm.analyzer.alignment.io.LockFileIO;
 import org.jboss.gm.analyzer.alignment.io.RepositoryExporter;
@@ -150,22 +151,26 @@ public class AlignmentTask extends DefaultTask {
     };
 
     /*
-     * While instanceof DefaultProjectDependencyConstraint works at run time under Gradle 4.10, it does not work at
-     * compile time as the class does not exist. Therefore, we need to use Class.forName().isInstance() in place of
-     * instanceof DefaultProjectDependencyConstraint.
+     * While instanceof DefaultDependencyConstraint/DefaultProjectDependencyConstraint works at run time under Gradle 4.10
+     * they do not work at compile time as the class does not exist. Therefore, we need to use Class.forName().isInstance()
+     * in place of instanceof.
      */
+    private static final Class<?> PROJECT_CONSTRAINT_CLASS;
+    private static final String PROJECT_CONSTRAINT_CLASS_NAME = "org.gradle.api.internal.artifacts.dependencies.DefaultProjectDependencyConstraint";
     private static final Class<?> DEPENDENCY_CONSTRAINT_CLASS;
-    private static final String DEPENDENCY_CONSTRAINT_CLASS_NAME = "org.gradle.api.internal.artifacts.dependencies.DefaultProjectDependencyConstraint";
+    private static final String DEPENDENCY_CONSTRAINT_CLASS_NAME = "org.gradle.api.internal.artifacts.dependencies.DefaultDependencyConstraint";
 
     static {
-        Class<?> dependencyConstraintClass;
+        Class<?> projectConstraintClass = null;
+        Class<?> dependencyConstraintClass = null;
 
         try {
-            dependencyConstraintClass = Class.forName(DEPENDENCY_CONSTRAINT_CLASS_NAME);
+            dependencyConstraintClass = Class.forName(DEPENDENCY_CONSTRAINT_CLASS_NAME); // Added in 4.5.0
+            projectConstraintClass = Class.forName(PROJECT_CONSTRAINT_CLASS_NAME); // Added in 5.2.0
         } catch (ClassNotFoundException e) {
-            dependencyConstraintClass = null;
         }
 
+        PROJECT_CONSTRAINT_CLASS = projectConstraintClass;
         DEPENDENCY_CONSTRAINT_CLASS = dependencyConstraintClass;
     }
 
@@ -264,10 +269,8 @@ public class AlignmentTask extends DefaultTask {
             //  https://github.com/gradle/gradle/issues/17295
             //  https://github.com/gradlex-org/jvm-dependency-conflict-resolution/blob/1c25db65e0080ee5dcb9f54bd7db2dda4ca80b6c/src/main/java/org/gradlex/javaecosystem/capabilities/BasePluginApplication.java
             ((GradleInternal) project.getGradle()).getSettings().getSettings().getPluginManagement().getRepositories().forEach(
-                    r -> {
-                        cache.addRepository(r,
-                                org.jboss.gm.common.utils.FileUtils.relativize(root, project.getProjectDir().toPath()));
-                    });
+                    r -> cache.addRepository(r,
+                            org.jboss.gm.common.utils.FileUtils.relativize(root, project.getProjectDir().toPath())));
 
             if (StringUtils.isBlank(groupId) ||
                     DEFAULT_VERSION.equals(currentProjectVersion)) {
@@ -627,7 +630,8 @@ public class AlignmentTask extends DefaultTask {
      * @return true if the given object is an instance of {@code DefaultProjectDependencyConstraint}
      */
     private static boolean isDefaultProjectDependencyConstraint(Object obj) {
-        return DEPENDENCY_CONSTRAINT_CLASS != null && DEPENDENCY_CONSTRAINT_CLASS.isInstance(obj);
+        return (PROJECT_CONSTRAINT_CLASS != null && PROJECT_CONSTRAINT_CLASS.isInstance(obj) ||
+                DEPENDENCY_CONSTRAINT_CLASS != null && DEPENDENCY_CONSTRAINT_CLASS.isInstance(obj));
     }
 
     private Map<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(Project project, ManipulationCache cache,
@@ -635,12 +639,13 @@ public class AlignmentTask extends DefaultTask {
             Set<ProjectVersionRef> lockFileDeps) {
 
         final Map<RelaxedProjectVersionRef, ProjectVersionRef> depMap = new LinkedHashMap<>();
+        // Can't use lazy configuration and configureEach here as this causes:
+        //    NamedDomainObjectContainer#create(String) on configuration container cannot be executed in the current context.
+        // on opentelemetry-java alignment.
         project.getConfigurations().all(configuration -> {
+            //project.getConfigurations().configureEach(configuration -> {
             // canBeResolved: Indicates that this configuration is intended for resolving a set of dependencies into a dependency graph. A resolvable configuration should not be declarable or consumable.
             if (configuration.isCanBeResolved()) {
-
-                logger.trace("Examining configuration {}", configuration.getName());
-
                 // If we have dependency constraints we can get a ClassCastException when attempting to copy the configurations.
                 // This is due to an unchecked cast in
                 // org.gradle.api.internal.artifacts.configurations.DefaultConfiguration::createCopy { ...
@@ -653,13 +658,29 @@ public class AlignmentTask extends DefaultTask {
                 //
                 // NCLSUP-1188: to avoid "Dependency constraints can not be declared against the `compileClasspath` configuration"
                 // we now avoid recursive copying if constraints are active in any configuration in any subproject.
+                // NCLSUP-1233: to avoid the constraints reducing dependencies aligned too much only apply to non-visible configurations.
                 if (!cache.isConstraints()) {
+                    // Can't use configuration.getDependencyConstraints as that doesn't appear to return anything.
                     DependencyConstraintSet allConstraints = configuration.getAllDependencyConstraints();
-                    // Extremely bizarrely but a simple stream like allConstraints.stream().anyMatch
-                    // fails without a preceding allConstraints.isEmpty call. This alternative also
-                    // appears to work and satisfies lazy configuration handling.
                     allConstraints.configureEach(c -> {
-                        if (isDefaultProjectDependencyConstraint(c)) {
+                        logger.debug(
+                                "Found constraint '{}' (class {}) for configuration '{}' with visibility {}",
+                                c.getName(),
+                                c.getClass().getName(),
+                                configuration.getName(),
+                                configuration.isVisible());
+                        boolean allowConstraints = false;
+                        // NCLSUP-1233: While it would be good to relax the constraint restrictions that can't work in
+                        // Gradle versions less than 7.2 (which is where they fixed the issue mentioned above).
+                        // https://github.com/gradle/gradle/issues/17179 / https://github.com/gradle/gradle/pull/17377
+                        if (GradleVersion.current().compareTo(GradleVersion.version("7.2")) < 0) {
+                            allowConstraints = true;
+                        } else if (!configuration.isVisible()
+                                && GradleVersion.current().compareTo(GradleVersion.version("7.2")) >= 0) {
+                            allowConstraints = true;
+                        }
+                        if (allowConstraints &&
+                                isDefaultProjectDependencyConstraint(c)) {
                             logger.info("Found dependency constraints in {}", configuration.getName());
                             cache.setConstraints(true);
                         }

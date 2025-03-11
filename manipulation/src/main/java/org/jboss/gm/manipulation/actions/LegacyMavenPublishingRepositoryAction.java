@@ -8,9 +8,11 @@ import org.gradle.api.credentials.HttpHeaderCredentials;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.Upload;
 import org.gradle.authentication.http.HttpHeaderAuthentication;
+import org.gradle.plugins.signing.SigningExtension;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.utils.ProjectUtils;
+import org.jboss.gm.manipulation.ManipulationPlugin;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.jboss.gm.manipulation.ManipulationPlugin.LEGACY_MAVEN_PLUGIN;
@@ -151,6 +153,7 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
         Upload install = project.getTasks().withType(Upload.class).getByName("install");
         install.setConfiguration(installArchives);
         uploadArchives.setConfiguration(publishArchives);
-    }
 
+        ManipulationPlugin.disableSigning(logger, project);
+    }
 }

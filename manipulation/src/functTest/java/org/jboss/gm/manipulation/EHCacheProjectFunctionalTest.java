@@ -83,6 +83,6 @@ public class EHCacheProjectFunctionalTest {
         assertThat(publishDirectory).exists();
         assertTrue(systemOutRule.getLog()
                 .contains("Detected use of conflict resolution strategy strict"));
-        assertTrue(systemOutRule.getLog().contains("Signing was detected as enabled - disabling"));
+        assertTrue(systemOutRule.getLog().contains("Found signing plugin; disabling"));
     }
 }

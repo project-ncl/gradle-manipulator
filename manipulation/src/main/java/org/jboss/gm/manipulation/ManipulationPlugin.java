@@ -226,30 +226,6 @@ public class ManipulationPlugin implements Plugin<Project> {
             } else {
                 logger.warn("No publishing plugin was configured for '{}'!", evaluatedProject.getName());
             }
-
-            // If signing is enabled, automatically set it to not required.
-            Object sign = evaluatedProject.getExtensions().findByName("signing");
-            if (sign != null) {
-                SigningExtension signingExtension = ((SigningExtension) sign);
-                boolean required;
-                try {
-                    // In a decorated class it is prefixed/suffixed by '__'.
-                    Object o = FieldUtils.readDeclaredField(signingExtension, "__required__", true);
-                    if (o instanceof Boolean) {
-                        required = (Boolean) o;
-                    } else {
-                        // TODO: Not sure if this can happen?
-                        logger.debug("Retrieve signing type of {}", o);
-                        required = true;
-                    }
-                } catch (IllegalAccessException e) {
-                    throw new ManipulationUncheckedException(e);
-                }
-                if (required) {
-                    logger.warn("Signing was detected as enabled - disabling.");
-                    signingExtension.setRequired(false);
-                }
-            }
         });
     }
 
@@ -258,6 +234,23 @@ public class ManipulationPlugin implements Plugin<Project> {
         if (evaluatedProject.getPluginManager().hasPlugin(otherPlugin)) {
             throw new InvalidUserDataException("User configuration enforces " + enforcedPlugin
                     + " but project already uses " + otherPlugin);
+        }
+    }
+
+    // Move the call to disable signing plugin into the publishing task actions to avoid issues
+    // when a publishing plugin that isn't natively configured but a later injection adds publishing
+    // and triggers the signing injection.
+    public static void disableSigning(Logger logger, Project project) {
+        SigningExtension sign = project.getExtensions().findByType(SigningExtension.class);
+        if (sign != null) {
+            // While we can use "project.getGradle().getTaskGraph().whenReady" to avoid
+            // "task graph not ready" issues the required block in the project may be evaluated before
+            // GME then overrides the version so lines like
+            // required { !version.endsWith("SNAPSHOT") && gradle.taskGraph.hasTask("uploadArchives") }
+            // then don't work. Effectively this means we can't use isRequired or task graph so it is
+            // easier to just blindly override the signing plugin and set it to not required all the time.
+            logger.info("Found signing plugin; disabling");
+            sign.setRequired(false);
         }
     }
 }

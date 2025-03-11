@@ -123,6 +123,7 @@ public class ManifestVerificationFunctionalTest {
         assertThat(systemOutRule.getLog())
                 .contains(
                         "For project libthrift, task jar, updating Export-Package version 0.13.0-SNAPSHOT to 0.13.0.temporary-redhat-00001 (old version 0.13.0-SNAPSHOT)");
+        assertTrue(systemOutRule.getLog().contains("Found signing plugin; disabling"));
     }
 
     @Test

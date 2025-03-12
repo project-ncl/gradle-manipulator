@@ -1,0 +1,44 @@
+plugins {
+  id 'base'
+
+  alias(deps.plugins.dependencychecks)
+  alias(deps.plugins.spotless) apply false
+  alias(deps.plugins.benmanes.versions)
+  alias(deps.plugins.forbiddenapis) apply false
+  alias(deps.plugins.jmh) apply false
+  alias(deps.plugins.versionCatalogUpdate) apply false
+  alias(deps.plugins.randomizedtesting) apply false
+
+    // including this plugin directly instead of by an init script, which allows to use the freshly build version
+    id 'org.jboss.gm.manipulation'
+}
+
+rootProject.version = deps.versions.hppcVersion.get()
+ext {
+  fullName = "High Performance Primitive Collections"
+  legal = files('LICENSE.txt')
+  forbiddenApiRulesDir = file("gradle/forbidden-apis")
+}
+
+apply from: file('gradle/java/dependencies.gradle')
+apply from: file('gradle/misc/propertyOrDefault.gradle')
+apply from: file('gradle/validation/check-environment.gradle')
+apply from: file('gradle/validation/forbidden-apis.gradle')
+apply from: file('gradle/validation/spotless.gradle')
+apply from: file('gradle/git/gitinfo.gradle')
+apply from: file('gradle/java/compiler.gradle')
+apply from: file('gradle/java/tests.gradle')
+apply from: file('gradle/java/javadoc.gradle')
+apply from: file('gradle/ide/idea.gradle')
+apply from: file('gradle/publishing/maven.gradle')
+
+allprojects {
+  apply plugin: 'org.jboss.gm.manipulation'
+
+  repositories {
+    mavenCentral()
+  }
+
+  version = rootProject.version
+  group   = "com.carrotsearch"
+}

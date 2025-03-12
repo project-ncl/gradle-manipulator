@@ -1,6 +1,7 @@
 package org.jboss.gm.cli;
 
 import java.io.File;
+import java.util.Collections;
 
 import org.aeonbits.owner.ConfigCache;
 import org.eclipse.jgit.api.Git;
@@ -51,8 +52,10 @@ public class SemanticPluginTest {
         try (Git ignored = Git.cloneRepository()
                 .setURI("https://github.com/linkedin/cruise-control.git")
                 .setDirectory(folder)
-                .setBranch("refs/tags/2.5.73")
+                .setBranch("2.5.73")
+                .setBranchesToClone(Collections.singletonList("refs/tags/2.5.73"))
                 .setDepth(1)
+                .setNoTags()
                 .call()) {
             System.out.println("Cloned CruiseControl to " + folder);
         }
@@ -60,7 +63,7 @@ public class SemanticPluginTest {
         File props = new File(folder, "gradle.properties");
         File settings = new File(folder, "settings.gradle");
 
-        assertThat(linesOf(props)).anyMatch(item -> !item.contains("verson=2.5.73"));
+        assertThat(linesOf(props)).anyMatch(item -> !item.contains("version=2.5.73"));
         assertThat(linesOf(settings)).anyMatch(item -> item.contains(PluginUtils.SEMANTIC_BUILD_VERSIONING));
 
         Main m = new Main();

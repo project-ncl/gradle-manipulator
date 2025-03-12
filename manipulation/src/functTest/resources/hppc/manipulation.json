@@ -1,0 +1,44 @@
+{
+  "group" : "com.carrotsearch",
+  "name" : "hppc-root",
+  "projectPathName" : "hppc-root",
+  "version" : "0.10.0.redhat-00002",
+  "originalVersion" : "0.10.0",
+  "children" : {
+    "hppc-benchmarks" : {
+      "group" : "com.carrotsearch",
+      "name" : "hppc-benchmarks",
+      "projectPathName" : "hppc-benchmarks",
+      "version" : "0.10.0.redhat-00002",
+      "originalVersion" : "0.10.0"
+    },
+    "hppc" : {
+      "group" : "com.carrotsearch",
+      "name" : "hppc",
+      "projectPathName" : "hppc",
+      "version" : "0.10.0.redhat-00002",
+      "originalVersion" : "0.10.0"
+    },
+    "hppc-template-processor" : {
+      "group" : "com.carrotsearch",
+      "name" : "hppc-template-processor",
+      "projectPathName" : "hppc-template-processor",
+      "version" : "0.10.0.redhat-00002",
+      "originalVersion" : "0.10.0"
+    },
+    "hppc-examples" : {
+      "group" : "com.carrotsearch",
+      "name" : "hppc-examples",
+      "projectPathName" : "hppc-examples",
+      "version" : "0.10.0.redhat-00002",
+      "originalVersion" : "0.10.0"
+    },
+    "hppc-template-intrinsics" : {
+      "group" : "com.carrotsearch",
+      "name" : "hppc-template-intrinsics",
+      "projectPathName" : "hppc-template-intrinsics",
+      "version" : "0.10.0.redhat-00002",
+      "originalVersion" : "0.10.0"
+    }
+  }
+}

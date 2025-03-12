@@ -69,6 +69,7 @@ public class KafkaProjectWithMavenPluginFunctionalTest {
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
         assertThat(FileUtils.readFileToString(repoPathToPom, Charset.defaultCharset()))
                 .contains("artifactId>connect-transforms");
+        assertTrue(systemOutRule.getLog().contains("Found signing plugin; disabling"));
     }
 
     @Test

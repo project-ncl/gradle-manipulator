@@ -3,6 +3,7 @@ package org.jboss.gm.manipulation;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collections;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -51,8 +52,10 @@ public class EHCacheProjectFunctionalTest {
         try (Git ignored = Git.cloneRepository()
                 .setURI("https://github.com/ehcache/ehcache3.git")
                 .setDirectory(simpleProjectRoot)
-                .setBranch("refs/tags/v3.10.2")
+                .setBranch("v3.10.2")
+                .setBranchesToClone(Collections.singletonList("refs/tags/v3.10.2"))
                 .setDepth(1)
+                .setNoTags()
                 .call()) {
             System.out.println("Cloned ehcache3 to " + simpleProjectRoot);
         }
@@ -83,6 +86,6 @@ public class EHCacheProjectFunctionalTest {
         assertThat(publishDirectory).exists();
         assertTrue(systemOutRule.getLog()
                 .contains("Detected use of conflict resolution strategy strict"));
-        assertTrue(systemOutRule.getLog().contains("Signing was detected as enabled - disabling"));
+        assertTrue(systemOutRule.getLog().contains("Found signing plugin; disabling"));
     }
 }

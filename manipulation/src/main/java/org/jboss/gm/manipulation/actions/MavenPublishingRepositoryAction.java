@@ -11,8 +11,10 @@ import org.gradle.api.credentials.HttpHeaderCredentials;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.authentication.http.HttpHeaderAuthentication;
+import org.gradle.plugins.signing.SigningExtension;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
+import org.jboss.gm.manipulation.ManipulationPlugin;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.jboss.gm.manipulation.ManipulationPlugin.MAVEN_PUBLISH_PLUGIN;
@@ -112,5 +114,7 @@ public class MavenPublishingRepositoryAction implements Action<Project> {
                 repository.getAuthentication().register("header", HttpHeaderAuthentication.class);
             }
         });
+
+        ManipulationPlugin.disableSigning(logger, project);
     }
 }

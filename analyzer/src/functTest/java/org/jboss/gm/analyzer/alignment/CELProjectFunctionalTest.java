@@ -70,8 +70,10 @@ public class CELProjectFunctionalTest extends AbstractWiremockTest {
         try (Git ignored = Git.cloneRepository()
                 .setURI("https://github.com/projectnessie/cel-java.git")
                 .setDirectory(projectRoot)
-                .setBranch("refs/tags/v0.4.5")
+                .setBranch("v0.4.5")
+                .setBranchesToClone(Collections.singletonList("refs/tags/v0.4.5"))
                 .setDepth(1)
+                .setNoTags()
                 .call()) {
             System.out.println("Cloned CEL-Java to " + projectRoot);
         }

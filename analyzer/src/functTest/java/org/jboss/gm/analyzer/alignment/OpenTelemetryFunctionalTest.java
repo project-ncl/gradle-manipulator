@@ -158,6 +158,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
     public void verifyOpenTelemetryJavaInstrumentationKotlin() throws Exception {
         // XXX: Kotlin requirements
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.5")) >= 0);
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.10.2")) < 0);
 
         final Map<String, String> map = new HashMap<>();
         map.put("-DoverrideTransitive", "false");

@@ -82,8 +82,8 @@ Due to how the Gradle logging system initialises outside of the TestKit, the uni
 #### Gradle Test Runner
 
 The [test runner](https://docs.gradle.org/current/userguide/test_kit.html) may be used for functional testing. Note that it is
-recommended that `withDebug(true)` is **not** used in the manipulator sub-module by default but just enabled as required. This is because debug runs
-in-process which can lead to some strange side effects.
+recommended that `withDebug(false)` is **only** used when e.g. fork is needed to change the JVM in use. This is because debug runs
+in-process which can lead to some strange side effects but is also required for coverage tracking.
 
 To pass specific property / environment variables through the following pattern should be followed (which will also work when
 using single-test debugging):

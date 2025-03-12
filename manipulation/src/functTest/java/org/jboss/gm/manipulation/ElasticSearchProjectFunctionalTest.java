@@ -104,7 +104,6 @@ public class ElasticSearchProjectFunctionalTest {
 
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(projectRoot)
-                //.withDebug(true)
                 .withArguments("publish", "-DpublishPluginHooks=")
                 .withPluginClasspath()
                 .forwardOutput()

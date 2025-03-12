@@ -3,6 +3,7 @@ package org.jboss.gm.manipulation;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collections;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -52,8 +53,10 @@ public class OpenTelemetryJavaInstrumentationProjectFunctionalTest {
         try (Git ignored = Git.cloneRepository()
                 .setURI("https://github.com/open-telemetry/opentelemetry-java-instrumentation.git")
                 .setDirectory(opentelemetryProjectRoot)
-                .setBranch("refs/tags/v2.5.0")
+                .setBranch("v2.5.0")
+                .setBranchesToClone(Collections.singletonList("refs/tags/v2.5.0"))
                 .setDepth(1)
+                .setNoTags()
                 .call()) {
             System.out.println("Cloned opentelemetry-java-instrumentation to " + opentelemetryProjectRoot);
         }

@@ -145,7 +145,6 @@ public class ManifestVerificationFunctionalTest {
 
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(projectRoot)
-                //.withDebug(true)
                 .withArguments("uploadArchives", "--info")
                 .withPluginClasspath()
                 .forwardOutput()
@@ -209,7 +208,6 @@ public class ManifestVerificationFunctionalTest {
 
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(projectRoot)
-                //.withDebug(true)
                 .withArguments("assemble", "publish", "--info")
                 .withPluginClasspath()
                 .forwardOutput()
@@ -268,7 +266,6 @@ public class ManifestVerificationFunctionalTest {
 
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(projectRoot)
-                //.withDebug(true)
                 .withArguments("assemble", "publish", "--info")
                 .withPluginClasspath()
                 .forwardOutput()
@@ -340,7 +337,6 @@ public class ManifestVerificationFunctionalTest {
 
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(projectRoot)
-                //.withDebug(true)
                 .withArguments("assemble", "publish", "--info")
                 .withPluginClasspath()
                 .forwardOutput()

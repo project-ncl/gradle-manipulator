@@ -3,6 +3,7 @@ package org.jboss.gm.manipulation;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Collections;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -42,8 +43,10 @@ public class CarrotSearchHPPCFunctionalTest {
         try (Git ignored = Git.cloneRepository()
                 .setURI("https://github.com/carrotsearch/hppc.git")
                 .setDirectory(hppcProjectRoot)
-                .setBranch("refs/tags/0.10.0")
+                .setBranch("0.10.0")
+                .setBranchesToClone(Collections.singletonList("refs/tags/0.10.0"))
                 .setDepth(1)
+                .setNoTags()
                 .call()) {
             System.out.println("Cloned hppc to " + hppcProjectRoot);
         }
@@ -54,7 +57,6 @@ public class CarrotSearchHPPCFunctionalTest {
                 .withProjectDir(hppcProjectRoot)
                 .withArguments("assemble", "publish")
                 .forwardOutput()
-                .withDebug(false)
                 .withPluginClasspath()
                 .build();
 

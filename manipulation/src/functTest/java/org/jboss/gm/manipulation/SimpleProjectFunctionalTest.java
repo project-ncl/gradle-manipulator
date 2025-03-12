@@ -55,7 +55,6 @@ public class SimpleProjectFunctionalTest {
         TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("generatePomFileForMainPublication")
-                //.withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath()
                 .build();
@@ -118,7 +117,6 @@ public class SimpleProjectFunctionalTest {
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("distZip")
-                //.withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath()
                 .build();
@@ -142,7 +140,6 @@ public class SimpleProjectFunctionalTest {
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(simpleProjectRoot)
                 .withArguments("--info", "publish")
-                //.withDebug(true)
                 .forwardOutput()
                 .withPluginClasspath()
                 .build();
@@ -181,7 +178,6 @@ public class SimpleProjectFunctionalTest {
                 .withArguments("--info", "publish", "-DdeployPlugin=maven-publish")
                 .forwardOutput()
                 .withPluginClasspath()
-                //.withDebug(true)
                 .build();
 
         assertThat(buildResult.task(":" + "publish").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
@@ -203,7 +199,6 @@ public class SimpleProjectFunctionalTest {
                 .withArguments("--info", "publish", "-DdeployPlugin=maven")
                 .forwardOutput()
                 .withPluginClasspath()
-                //.withDebug(true)
                 .build();
     }
 }

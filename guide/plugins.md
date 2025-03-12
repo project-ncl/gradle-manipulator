@@ -63,7 +63,8 @@ Two special shortcuts are available to support removing collections of plugins:
 
 * `ALL` represents removing all supported plugins.
 * `REC` / `RECOMMENDED` represents removing the recommended list. This is currently the same as
-  above but doesn't include the Signing plugin.
+  above but doesn't include the Signing plugin. 
+   * It should **not** be necessary to remove the signing plugin as the Manipulator plugin should implicitly disable it. 
 
 <table bgcolor="#ffff00">
 <tr>

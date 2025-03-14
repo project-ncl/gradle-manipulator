@@ -128,7 +128,8 @@ public class Main implements Callable<Void> {
         return result;
     }
 
-    private File verifyBuildEnvironment(BuildEnvironment buildEnvironment, GradleVersion version) throws ManipulationException {
+    private JavaEnvironment verifyBuildEnvironment(BuildEnvironment buildEnvironment, GradleVersion version)
+            throws ManipulationException {
         try {
             JavaEnvironment javaEnvironment = buildEnvironment.getJava();
 
@@ -141,7 +142,7 @@ public class Main implements Callable<Void> {
                         MIN_GRADLE_VERSION);
             }
 
-            return javaEnvironment.getJavaHome();
+            return javaEnvironment;
         } catch (GradleConnectionException e) {
             Throwable firstCause = e.getCause();
 
@@ -199,7 +200,8 @@ public class Main implements Callable<Void> {
             GradleEnvironment gradleEnvironment = buildEnvironment.getGradle();
             String versionString = gradleEnvironment.getGradleVersion();
             GradleVersion gradleVersion = GradleVersion.version(versionString);
-            File javaHome = verifyBuildEnvironment(buildEnvironment, gradleVersion);
+            JavaEnvironment javaEnvironment = verifyBuildEnvironment(buildEnvironment, gradleVersion);
+            File javaHome = javaEnvironment.getJavaHome();
 
             if (!JavaUtils.compareJavaHome(javaHome)) {
                 // Gradle handles detecting the location in GRADLE_JAVA_HOME. If it doesn't match
@@ -210,16 +212,24 @@ public class Main implements Callable<Void> {
             envVars.put("JAVA_HOME", javaHome.getAbsolutePath());
 
             BuildLauncher build = connection.newBuild();
-            Set<String> jvmArgs = jvmPropertyParams.entrySet().stream()
+            List<String> jvmArgs = jvmPropertyParams.entrySet().stream()
                     .map(entry -> "-D" + entry.getKey() + '=' + entry.getValue())
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
+                    .collect(Collectors.toCollection(ArrayList::new));
             jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments().stream()
-                    .filter(s -> s.startsWith("-Xdebug") || s.startsWith("-Xrunjdwp")).collect(Collectors.toSet()));
+                    .filter(s -> s.startsWith("-Xdebug") || s.startsWith("-Xrunjdwp")).collect(Collectors.toList()));
+
+            // Can't use build.addJvmArguments as it wasn't fixed till 8.13
+            // https://github.com/gradle/gradle/issues/31462
+            // https://github.com/gradle/gradle/issues/25155
+            Collections.addAll(jvmArgs, javaEnvironment.getJvmArguments().toArray(new String[0]));
 
             if (!quiet && colour && StringUtils.isEmpty(System.getenv("NO_COLOR"))) {
                 build.setColorOutput(true);
             } else {
                 jvmArgs.add("-DloggingColours=false");
+            }
+            if (StringUtils.isNotEmpty(System.getenv("JAVA_OPTS"))) {
+                Collections.addAll(jvmArgs, System.getenv("JAVA_OPTS").split("\\s+"));
             }
 
             logger.info("Executing CLI {} on Gradle project {} with JVM args '{}' and arguments '{}'",

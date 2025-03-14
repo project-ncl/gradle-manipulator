@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.tooling.internal.consumer.ConnectorServices;
@@ -144,6 +145,10 @@ public class MainTest {
                 "-DgroovyScripts=" + groovy };
         m.run(args);
 
+        int start = systemOutRule.getLog().indexOf("JVM arguments: [") + 16;
+        int end = systemOutRule.getLog().indexOf(",", start);
+        String jvmArgs = systemOutRule.getLog().substring(start, end);
+        assertTrue(StringUtils.indexOf(systemOutRule.getLog(), jvmArgs, end) > 0);
         assertTrue(systemOutRule.getLog().contains("Running Groovy script on"));
         assertTrue(systemOutRule.getLog().contains("dependencyOverride.org.jboss.slf4j:*@*="));
         assertTrue(systemOutRule.getLog().contains("with JVM args '[-DdependencyOverride.org.jboss.slf4j:*@*="));
@@ -341,13 +346,15 @@ public class MainTest {
     @Test
     public void testSetEnvironmentVariables() throws Exception {
         final File projectRoot = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
-        environmentVariables.set("LETTERS", "ÀàÈèÌìÒòÙù");
+        environmentVariables.set("LETTERS", "ÀàÈèÌìÒòÙù").set("JAVA_OPTS", "-Xmx260m");
 
         Main m = new Main();
         String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "help" };
         m.run(args);
 
         assertThat(systemOutRule.getLog()).contains("LETTERS");
+        // Should be the last in the JVM arg list.
+        assertThat(systemOutRule.getLog()).contains(" -Xmx260m]");
     }
 
     @Test

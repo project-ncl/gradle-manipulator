@@ -104,7 +104,7 @@ public class ProjectUtils {
                 // failOnVersionConflict() sets this which causes our plugin to crash out. Reset to latest to make an attempt
                 // at continuing. As Gradle creates 'decorated', we can't use reflection to change the value
                 // back to the default. Therefore, use preferProjectModules as it's not eager-fail.
-                logger.warn(
+                logger.debug(
                         "Detected use of conflict resolution strategy strict in {}; resetting to preferProjectModules.",
                         configuration.getName());
                 defaultResolutionStrategy.preferProjectModules();

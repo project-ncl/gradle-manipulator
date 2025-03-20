@@ -14,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
+import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.tooling.internal.consumer.ConnectorServices;
 import org.gradle.util.GradleVersion;
@@ -366,5 +367,22 @@ public class MainTest {
         assertTrue(systemOutRule.getLog().contains("Found gradle-consistent-versions lock file"));
         File lockFile = new File(projectRoot.getParentFile(), "versions.lock");
         assertEquals(0, lockFile.length());
+    }
+
+    @Test
+    public void testInvokeBrokenGradle() throws Exception {
+        final File projectRoot = new File(MainTest.class.getClassLoader().getResource("broken-gradle").getPath());
+        Main m = new Main();
+        String[] args = new String[] { "-t", projectRoot.getAbsolutePath(), "generateAlignmentMetadata",
+                "-DdependencySource=NONE",
+                "-DignoreUnresolvableDependencies=true",
+        };
+
+        try {
+            int result = m.run(args);
+            assertEquals(0, result);
+        } catch (ManipulationException e) {
+            assertTrue(e.getMessage().contains("Gradle 8.10 is a known broken version"));
+        }
     }
 }

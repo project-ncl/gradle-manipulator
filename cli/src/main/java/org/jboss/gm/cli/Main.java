@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -63,6 +64,9 @@ public class Main implements Callable<Void> {
     private static final GradleVersion MIN_GRADLE_VERSION = GradleVersion.version("4.10");
 
     private static final GradleVersion MIN_GRADLE_VERSION_GRADLE_ISSUE_3117 = GradleVersion.version("5.3");
+
+    private static final List<GradleVersion> BROKEN_GRADLE_VERSIONS = Arrays.asList(GradleVersion.version("8.10"),
+            GradleVersion.version("8.10.1"));
 
     private final GradleConnector connector = GradleConnector.newConnector();
 
@@ -140,6 +144,10 @@ public class Main implements Callable<Void> {
             if (version.compareTo(MIN_GRADLE_VERSION) < 0) {
                 throw new ManipulationException("{} is too old and is unsupported. You need at least {}.", version,
                         MIN_GRADLE_VERSION);
+            }
+            if (BROKEN_GRADLE_VERSIONS.contains(version)) {
+                logger.error("{} is a known broken version. Update to 8.10.2.", version);
+                throw new ManipulationException("{} is a known broken version. Update to 8.10.2.", version);
             }
 
             return javaEnvironment;

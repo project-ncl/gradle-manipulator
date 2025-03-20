@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+version=1.0
+
+sourceCompatibility = 11
+
+allprojects {
+    group = 'org.acme'
+
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+}
+
+repositories {
+    mavenCentral()
+}

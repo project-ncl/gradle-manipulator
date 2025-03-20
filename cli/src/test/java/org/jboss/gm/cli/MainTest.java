@@ -372,17 +372,32 @@ public class MainTest {
     @Test
     public void testInvokeBrokenGradle() throws Exception {
         final File projectRoot = new File(MainTest.class.getClassLoader().getResource("broken-gradle").getPath());
+        final URL groovy = Thread.currentThread().getContextClassLoader().getResource("fixGradle810.groovy");
+
         Main m = new Main();
-        String[] args = new String[] { "-t", projectRoot.getAbsolutePath(), "generateAlignmentMetadata",
-                "-DdependencySource=NONE",
+        String[] args = new String[] { "-t", projectRoot.getAbsolutePath(), "help",
                 "-DignoreUnresolvableDependencies=true",
         };
 
         try {
-            int result = m.run(args);
-            assertEquals(0, result);
+            m.run(args);
+            fail("No exception thrown");
         } catch (ManipulationException e) {
-            assertTrue(e.getMessage().contains("Gradle 8.10 is a known broken version"));
+            assertTrue(e.getMessage().contains("Gradle 8.10.1 is a known broken version"));
         }
+    }
+
+    @Test
+    public void testFixWithGroovyBrokenGradle() throws Exception {
+        final File projectRoot = new File(MainTest.class.getClassLoader().getResource("broken-gradle").getPath());
+        final URL groovy = Thread.currentThread().getContextClassLoader().getResource("fixGradle810.groovy");
+
+        Main m = new Main();
+        String[] args = new String[] { "-t", projectRoot.getAbsolutePath(), "help",
+                "-DgroovyScripts=" + groovy
+        };
+
+        int result = m.run(args);
+        assertEquals(0, result);
     }
 }

@@ -1,5 +1,7 @@
 package org.jboss.gm.common.utils;
 
+import java.lang.reflect.InvocationTargetException;
+
 import lombok.experimental.UtilityClass;
 
 import org.apache.commons.lang.reflect.FieldUtils;
@@ -10,6 +12,8 @@ import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.plugins.BasePluginConvention;
+import org.gradle.api.provider.Property;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.common.logging.GMLogger;
 
 @UtilityClass
@@ -70,20 +74,43 @@ public class ProjectUtils {
     }
 
     /**
-     * This returns the value of archivesBaseName while not returning its default value of project.name
-     * archiveTask.archiveBaseName defaults to the project.archivesBaseName which defaults to project.name.
+     * This returns the value of archivesName/archivesBaseName while not returning its default value of project.name
+     * It defaults to the project.archivesBaseName which defaults to project.name.
      * References:
-     * https://docs.gradle.org/current/userguide/maven_plugin.html
-     * https://docs.gradle.org/6.8.1/dsl/org.gradle.api.tasks.bundling.AbstractArchiveTask.html
+     * <ul>
+     * <li><a href="https://docs.gradle.org/current/userguide/maven_plugin.html">Maven Plugin</a>
+     * <li><a href=
+     * "https://docs.gradle.org/6.8.1/dsl/org.gradle.api.tasks.bundling.AbstractArchiveTask.html">AbstractArchiveTask</a>
+     * </ul>
      *
      * @param project the current project
      * @return the value for the archivesBaseName or null if not set
      */
     public String getArchivesBaseName(Project project) {
-        if (project.getConvention().findPlugin(BasePluginConvention.class) != null) {
-            String archivesBaseName = project.getConvention().getPlugin(BasePluginConvention.class).getArchivesBaseName();
-            if (!project.getName().equals(archivesBaseName)) {
-                return archivesBaseName;
+        // See https://docs.gradle.org/8.10.1/userguide/upgrading_version_8.html#deprecated_access_to_conventions
+        // The BasePluginExtension was added in 7.1 in https://github.com/gradle/gradle/issues/3425 but the warnings
+        // were not added till 8.1 in https://github.com/gradle/gradle/issues/22908
+        if (GradleVersion.current().compareTo(GradleVersion.version("8.1")) >= 0) {
+            try {
+                Class<?> c = Class.forName("org.gradle.api.plugins.BasePluginExtension");
+                Object extension = project.getExtensions().findByType(c);
+                if (extension != null) {
+                    String value = ((Property<String>) c.getMethod("getArchivesName").invoke(extension)).getOrNull();
+                    if (!project.getName().equals(value)) {
+                        return value;
+                    }
+                }
+            } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                logger.error("Unable to invoke getArchivesName method", e);
+                throw new ManipulationUncheckedException(e);
+            }
+        } else {
+            BasePluginConvention convention = project.getConvention().findPlugin(BasePluginConvention.class);
+            if (convention != null) {
+                String archivesBaseName = convention.getArchivesBaseName();
+                if (!project.getName().equals(archivesBaseName)) {
+                    return archivesBaseName;
+                }
             }
         }
         return null;

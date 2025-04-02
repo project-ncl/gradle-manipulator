@@ -1,8 +1,12 @@
 import org.commonjava.maven.ext.core.groovy.GMEBaseScript
 import org.commonjava.maven.ext.core.groovy.InvocationPoint
 import org.commonjava.maven.ext.core.groovy.InvocationStage
-import org.gradle.internal.util.PropertiesUtils
 import org.jboss.gm.common.groovy.BaseScript
+
+@GrabResolver(name='gradle', root='https://repo.gradle.org/gradle/libs-releases/')
+@Grab("org.gradle:gradle-base-services:6.1.1")
+
+import org.gradle.internal.util.PropertiesUtils
 
 @InvocationPoint(invocationPoint = InvocationStage.FIRST)
 @GMEBaseScript BaseScript gmeScript

@@ -1,0 +1,8 @@
+[
+  {
+    "bestMatchVersion": "4.1.119.Final-redhat-00001",
+    "version": "4.1.119.Final",
+    "groupId" : "io.netty",
+    "artifactId" : "netty-bom"
+  }
+]

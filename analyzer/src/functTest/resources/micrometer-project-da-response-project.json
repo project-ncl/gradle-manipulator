@@ -1,0 +1,8 @@
+[
+  {
+    "latestVersion": "1.14.5.redhat-00001",
+    "version": "1.14.5",
+    "groupId": "io.micrometer",
+    "artifactId": "micrometer-core"
+  }
+]

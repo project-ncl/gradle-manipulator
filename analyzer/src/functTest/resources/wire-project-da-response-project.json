@@ -1,0 +1,8 @@
+[
+  {
+    "latestVersion": "5.1.0.redhat-00001",
+    "version": "5.1.0",
+    "groupId": "com.squareup.wire",
+    "artifactId": "wire"
+  }
+]

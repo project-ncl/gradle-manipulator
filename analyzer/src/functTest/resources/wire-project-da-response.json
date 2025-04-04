@@ -1,0 +1,8 @@
+[
+  {
+    "bestMatchVersion": "2.21.1.redhat-00001",
+    "version": "2.21.1",
+    "groupId" : "com.google.errorprone",
+    "artifactId" : "error_prone_annotations"
+  }
+]

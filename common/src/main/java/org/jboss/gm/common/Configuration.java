@@ -187,6 +187,16 @@ public interface Configuration extends Accessible, Reloadable {
     Boolean overrideTransitive();
 
     /**
+     * If set, disable recursive configuration copying to workaround problems with constraintsg.
+     * "Dependency constraints can not be declared against the `testCompileClasspath` configuration."
+     *
+     * @return boolean
+     */
+    @Key("disableRecursiveConfiguration")
+    @DefaultValue("false")
+    Boolean disableRecursiveConfiguration();
+
+    /**
      * This value is used to represent the dependency configuration. While PME supports
      * BOM and REST configs ; currently within Gradle only REST is supported. If this
      * value is set to "" (or "NONE")

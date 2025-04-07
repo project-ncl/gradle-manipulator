@@ -703,7 +703,7 @@ public class AlignmentTask extends DefaultTask {
                 org.gradle.api.artifacts.Configuration copy;
 
                 // Attempt to call copyRecursive for all types (kotlin/gradle).
-                if (!cache.isConstraints()) {
+                if (!internalConfig.disableRecursiveConfiguration() && !cache.isConstraints()) {
                     logger.debug("Recursively copying configuration for {}", configuration.getName());
                     copy = configuration.copyRecursive();
                 } else {

@@ -45,6 +45,7 @@ import org.commonjava.maven.ext.common.util.JSONUtils;
 import org.commonjava.maven.ext.core.groovy.InvocationStage;
 import org.commonjava.maven.ext.core.state.DependencyState;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
@@ -624,14 +625,14 @@ public class AlignmentTask extends DefaultTask {
     /**
      * Determines whether the specified {@code Object} is assignment-compatible with {@code
      * DefaultProjectDependencyConstraint}. This method performs the dynamic equivalent of {@code instanceof
-     * DefaultProjectDependencyConstraint}.
+     * DefaultProjectDependencyConstraint}. This used to check for DefaultDependencyConstraint but I don't
+     * think this is needed so has been removed.
      *
      * @param obj the object to check
      * @return true if the given object is an instance of {@code DefaultProjectDependencyConstraint}
      */
     private static boolean isDefaultProjectDependencyConstraint(Object obj) {
-        return (PROJECT_CONSTRAINT_CLASS != null && PROJECT_CONSTRAINT_CLASS.isInstance(obj) ||
-                DEPENDENCY_CONSTRAINT_CLASS != null && DEPENDENCY_CONSTRAINT_CLASS.isInstance(obj));
+        return (PROJECT_CONSTRAINT_CLASS != null && PROJECT_CONSTRAINT_CLASS.isInstance(obj));
     }
 
     private Map<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(Project project, ManipulationCache cache,
@@ -643,49 +644,35 @@ public class AlignmentTask extends DefaultTask {
         //    NamedDomainObjectContainer#create(String) on configuration container cannot be executed in the current context.
         // on opentelemetry-java alignment.
         project.getConfigurations().all(configuration -> {
-            //project.getConfigurations().configureEach(configuration -> {
-            // canBeResolved: Indicates that this configuration is intended for resolving a set of dependencies into a dependency graph. A resolvable configuration should not be declarable or consumable.
+
+            logger.info(
+                    "### In project {} looking at configuration {} and resolved {} consumed {} transitive {} visible {} hierarchy {}",
+                    project.getName(),
+                    configuration.getName(), configuration.isCanBeResolved(),
+                    // isResolvable(configuration),
+                    configuration.isCanBeConsumed(),
+                    configuration.isTransitive(),
+                    configuration.isVisible(),
+                    // >= Gradle 8.2
+                    // configuration.isCanBeDeclared(),
+                    //                    ((DefaultConfiguration) configuration).getResolutionStrategy()
+                    //                            .isDependencyLockingEnabled(),
+                    configuration.getExtendsFrom());
+            DependencyConstraintSet allC = configuration.getAllDependencyConstraints();
+            allC.configureEach(c -> {
+                logger.debug(
+                        "@@@@ In project {} found constraint '{}' (class {}) for configuration '{}' and visible {}",
+                        project.getName(),
+                        c.getName(),
+                        c.getClass().getName(),
+                        configuration.getName(),
+                        configuration.isVisible());
+            });
+
+            LenientConfiguration lenient;
+            org.gradle.api.artifacts.Configuration copy;
+
             if (configuration.isCanBeResolved()) {
-                // If we have dependency constraints we can get a ClassCastException when attempting to copy the configurations.
-                // This is due to an unchecked cast in
-                // org.gradle.api.internal.artifacts.configurations.DefaultConfiguration::createCopy { ...
-                // copiedDependencyConstraints.add(((DefaultDependencyConstraint) dependencyConstraint).copy());
-                // ... }
-                // When our constraint is a DefaultProjectDependencyConstraint this is a problem. Therefore, as we normally
-                // need to copy the configurations to ensure we resolve all dependencies (See
-                // analyzer/src/functTest/java/org/jboss/gm/analyzer/alignment/DynamicWithLocksProjectFunctionalTest.java for
-                // an example) first verify if DefaultProjectDependencyConstraint occurs in the list of constraints.
-                //
-                // NCLSUP-1188: to avoid "Dependency constraints can not be declared against the `compileClasspath` configuration"
-                // we now avoid recursive copying if constraints are active in any configuration in any subproject.
-                // NCLSUP-1233: to avoid the constraints reducing dependencies aligned too much only apply to non-visible configurations.
-                if (!cache.isConstraints()) {
-                    // Can't use configuration.getDependencyConstraints as that doesn't appear to return anything.
-                    DependencyConstraintSet allConstraints = configuration.getAllDependencyConstraints();
-                    allConstraints.configureEach(c -> {
-                        logger.debug(
-                                "Found constraint '{}' (class {}) for configuration '{}' with visibility {}",
-                                c.getName(),
-                                c.getClass().getName(),
-                                configuration.getName(),
-                                configuration.isVisible());
-                        boolean allowConstraints = false;
-                        // NCLSUP-1233: While it would be good to relax the constraint restrictions that can't work in
-                        // Gradle versions less than 7.2 (which is where they fixed the issue mentioned above).
-                        // https://github.com/gradle/gradle/issues/17179 / https://github.com/gradle/gradle/pull/17377
-                        if (GradleVersion.current().compareTo(GradleVersion.version("7.2")) < 0) {
-                            allowConstraints = true;
-                        } else if (!configuration.isVisible()
-                                && GradleVersion.current().compareTo(GradleVersion.version("7.2")) >= 0) {
-                            allowConstraints = true;
-                        }
-                        if (allowConstraints &&
-                                isDefaultProjectDependencyConstraint(c)) {
-                            logger.info("Found dependency constraints in {}", configuration.getName());
-                            cache.setConstraints(true);
-                        }
-                    });
-                }
 
                 // https://docs.gradle.org/current/userguide/declaring_configurations.html
                 // using getAllDependencies here instead of getDependencies because the latter
@@ -697,22 +684,93 @@ public class AlignmentTask extends DefaultTask {
                         .map(ProjectDependency.class::cast)
                         .collect(Collectors.toSet());
 
+                // Must be before configuration copying otherwise VersionConflictProjectFunctionalTest fails.
                 ProjectUtils.updateResolutionStrategy(configuration);
 
-                LenientConfiguration lenient;
-                org.gradle.api.artifacts.Configuration copy;
+                if (internalConfig.useLegacyConfigurationCopy()) {
+                    // canBeResolved: Indicates that this configuration is intended for resolving a set of dependencies into a dependency graph. A resolvable configuration should not be declarable or consumable.
+                    // If we have dependency constraints we can get a ClassCastException when attempting to copy the configurations.
+                    // This is due to an unchecked cast in
+                    // org.gradle.api.internal.artifacts.configurations.DefaultConfiguration::createCopy { ...
+                    // copiedDependencyConstraints.add(((DefaultDependencyConstraint) dependencyConstraint).copy());
+                    // ... }
+                    // When our constraint is a DefaultProjectDependencyConstraint this is a problem. Therefore, as we normally
+                    // need to copy the configurations to ensure we resolve all dependencies (See
+                    // analyzer/src/functTest/java/org/jboss/gm/analyzer/alignment/DynamicWithLocksProjectFunctionalTest.java for
+                    // an example) first verify if DefaultProjectDependencyConstraint occurs in the list of constraints.
+                    //
+                    // NCLSUP-1188: to avoid "Dependency constraints can not be declared against the `compileClasspath` configuration"
+                    // we now avoid recursive copying if constraints are active in any configuration in any subproject.
+                    // NCLSUP-1233: to avoid the constraints reducing dependencies aligned too much only apply to non-visible configurations.
+                    if (!cache.isConstraints()) {
+                        // Can't use configuration.getDependencyConstraints as that doesn't appear to return anything.
+                        DependencyConstraintSet allConstraints = configuration.getAllDependencyConstraints();
+                        allConstraints.configureEach(c -> {
+                            logger.debug(
+                                    "In project {} found constraint '{}' (class {}) for configuration '{}' and visible {}",
+                                    project.getName(),
+                                    c.getName(),
+                                    c.getClass().getName(),
+                                    configuration.getName(),
+                                    configuration.isVisible());
+                            boolean allowConstraints = false;
+                            // NCLSUP-1233: While it would be good to relax the constraint restrictions that can't work in
+                            // Gradle versions less than 7.2 (which is where they fixed the issue mentioned above).
+                            // https://github.com/gradle/gradle/issues/17179 / https://github.com/gradle/gradle/pull/17377
+                            if (GradleVersion.current().compareTo(GradleVersion.version("7.2")) < 0) {
+                                allowConstraints = true;
+                            } else if (!configuration.isVisible()
+                                    && GradleVersion.current().compareTo(GradleVersion.version("7.2")) >= 0) {
+                                allowConstraints = true;
+                            }
 
-                // Attempt to call copyRecursive for all types (kotlin/gradle).
-                if (!cache.isConstraints()) {
-                    logger.debug("Recursively copying configuration for {}", configuration.getName());
-                    copy = configuration.copyRecursive();
+                            if (allowConstraints && isDefaultProjectDependencyConstraint(c)) {
+                                logger.info("Found dependency constraints in {}", configuration.getName());
+                                cache.setConstraints(true);
+                            }
+                        });
+                    }
+
+                    // Attempt to call copyRecursive for all types (kotlin/gradle).
+                    if (!cache.isConstraints()) {
+                        logger.debug("In project {} recursively copying configuration for {}", project.getName(),
+                                configuration.getName());
+                        copy = configuration.copyRecursive();
+                        lenient = copy.getResolvedConfiguration().getLenientConfiguration();
+                    } else {
+                        logger.debug(
+                                "DefaultProjectDependencyConstraint found, not recursively copying configuration for {}",
+                                configuration.getName());
+                        copy = configuration.copy();
+                        lenient = copy.getResolvedConfiguration().getLenientConfiguration();
+                    }
                 } else {
-                    logger.debug(
-                            "DefaultProjectDependencyConstraint found, not recursively copying configuration for {}",
-                            configuration.getName());
-                    copy = configuration.copy();
+                    // We try to copy recursive for everything but if it fails we'll create a copy ignoring super-configurations.
+                    // It can fail in bizarre ways due to constraints.
+                    try {
+                        logger.debug("In project {} recursively copying configuration for {}", project.getName(),
+                                configuration.getName());
+                        copy = configuration.copyRecursive();
+                        lenient = copy.getResolvedConfiguration().getLenientConfiguration();
+                    } catch (GradleException e) {
+                        // NCLSUP-1250 - classpath constraints in wire.
+                        // This happens when constraints are active. I have attempted to solve this before using the newly
+                        // added isCanBeDeclared functionality in Gradle 8.2. According to
+                        // https://docs.google.com/document/d/1a2vtM10FiWdTpnY8b2S-q28Cl0xUEVIzAOl3BpOeyng/edit?pli=1&disco=AAAAsiOEGhA&tab=t.0
+                        // it can denote a configuration with a 'list of dependencies'. If its not that (and we already know
+                        // the configuration must be resolvable) then its either consumable ("Exposes artifacts from a project to
+                        // consumers with variant aware dependency resolution") or a legacy configuration type.
+                        //
+                        // However, I've found that while that can help the problematic wire, micrometer, opentelemetry-java,
+                        // opentelemetry-java-instrumentation and cel it breaks other regression tests. Therefore I'm switching
+                        // to this rather ugly fallback.
+                        logger.warn("Failed to copy configuration recursively for {}; falling back to standard copy.",
+                                configuration.getName());
+                        logger.debug("Caught exception copying configuration", e);
+                        copy = configuration.copy();
+                        lenient = copy.getResolvedConfiguration().getLenientConfiguration();
+                    }
                 }
-                lenient = copy.getResolvedConfiguration().getLenientConfiguration();
 
                 // We don't care about modules of the project being unresolvable at this stage. Had we not excluded them,
                 // we would get false negatives

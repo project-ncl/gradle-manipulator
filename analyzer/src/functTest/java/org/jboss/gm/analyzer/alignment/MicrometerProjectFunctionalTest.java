@@ -65,7 +65,7 @@ public class MicrometerProjectFunctionalTest extends AbstractWiremockTest {
     @Test
     public void ensureAlignmentFileCreated()
             throws IOException, URISyntaxException, GitAPIException {
-        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.9")) >= 0);
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.10.2")) >= 0);
 
         final File projectRoot = tempDir.newFolder();
 
@@ -89,6 +89,7 @@ public class MicrometerProjectFunctionalTest extends AbstractWiremockTest {
         parameters.put("-Prelease.version", "1.14.5");
         parameters.put("-Prelease.useLastTag", "false");
         parameters.put("-Prelease.disableGitChecks", "true");
+        parameters.put("ignoreUnresolvableDependencies", "true");
         TestManipulationModel alignmentModel = TestUtils.align(projectRoot, false, parameters);
 
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();

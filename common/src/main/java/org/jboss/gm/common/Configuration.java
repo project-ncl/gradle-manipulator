@@ -174,6 +174,17 @@ public interface Configuration extends Accessible, Reloadable {
     String[] publishPluginHooks();
 
     /**
+     * This should not be required and eventually removed but it allows the legacy constraint handling
+     * and configuration copying to be used.
+     *
+     * @return a boolean denoting whether to use the legacy system
+     */
+    @Deprecated
+    @Key("useLegacyConfigurationCopy")
+    @DefaultValue("false")
+    Boolean useLegacyConfigurationCopy();
+
+    /**
      * Whether to explicitly override all transitive dependencies as well. Defaults to false.
      * <p>
      * This method is purposely <b>not</b> annotated with a <code>DefaultValue</code> so that

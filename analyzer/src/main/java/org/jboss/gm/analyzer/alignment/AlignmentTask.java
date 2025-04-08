@@ -644,35 +644,10 @@ public class AlignmentTask extends DefaultTask {
         //    NamedDomainObjectContainer#create(String) on configuration container cannot be executed in the current context.
         // on opentelemetry-java alignment.
         project.getConfigurations().all(configuration -> {
-
-            logger.info(
-                    "### In project {} looking at configuration {} and resolved {} consumed {} transitive {} visible {} hierarchy {}",
-                    project.getName(),
-                    configuration.getName(), configuration.isCanBeResolved(),
-                    // isResolvable(configuration),
-                    configuration.isCanBeConsumed(),
-                    configuration.isTransitive(),
-                    configuration.isVisible(),
-                    // >= Gradle 8.2
-                    // configuration.isCanBeDeclared(),
-                    //                    ((DefaultConfiguration) configuration).getResolutionStrategy()
-                    //                            .isDependencyLockingEnabled(),
-                    configuration.getExtendsFrom());
-            DependencyConstraintSet allC = configuration.getAllDependencyConstraints();
-            allC.configureEach(c -> {
-                logger.debug(
-                        "@@@@ In project {} found constraint '{}' (class {}) for configuration '{}' and visible {}",
-                        project.getName(),
-                        c.getName(),
-                        c.getClass().getName(),
-                        configuration.getName(),
-                        configuration.isVisible());
-            });
-
-            LenientConfiguration lenient = null;
-            org.gradle.api.artifacts.Configuration copy = null;
-
             if (configuration.isCanBeResolved()) {
+
+                LenientConfiguration lenient = null;
+                org.gradle.api.artifacts.Configuration copy = null;
 
                 // https://docs.gradle.org/current/userguide/declaring_configurations.html
                 // using getAllDependencies here instead of getDependencies because the latter

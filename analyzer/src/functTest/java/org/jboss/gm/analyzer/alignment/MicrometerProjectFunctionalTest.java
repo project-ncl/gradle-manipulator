@@ -14,10 +14,15 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.gradle.testkit.runner.BuildResult;
+import org.gradle.testkit.runner.BuildTask;
+import org.gradle.testkit.runner.GradleRunner;
+import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.util.GradleVersion;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.io.ManipulationIO;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -90,7 +95,18 @@ public class MicrometerProjectFunctionalTest extends AbstractWiremockTest {
         parameters.put("-Prelease.useLastTag", "false");
         parameters.put("-Prelease.disableGitChecks", "true");
         parameters.put("ignoreUnresolvableDependencies", "true");
-        TestManipulationModel alignmentModel = TestUtils.align(projectRoot, false, parameters);
+
+        final GradleRunner runner = TestUtils
+                .createGradleRunner(projectRoot, parameters)
+                .withDebug(false);
+        final BuildResult buildResult = runner.build();
+        final BuildTask task = buildResult.task(":" + AlignmentTask.NAME);
+
+        assertThat(task).isNotNull();
+        assertThat(task.getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
+
+        final TestManipulationModel alignmentModel = new TestManipulationModel(
+                ManipulationIO.readManipulationModel(projectRoot));
 
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
         assertThat(new File(projectRoot, AlignmentTask.GRADLE + File.separator + AlignmentTask.GME_REPOS)).exists();

@@ -669,8 +669,8 @@ public class AlignmentTask extends DefaultTask {
                         configuration.isVisible());
             });
 
-            LenientConfiguration lenient;
-            org.gradle.api.artifacts.Configuration copy;
+            LenientConfiguration lenient = null;
+            org.gradle.api.artifacts.Configuration copy = null;
 
             if (configuration.isCanBeResolved()) {
 
@@ -745,14 +745,37 @@ public class AlignmentTask extends DefaultTask {
                         lenient = copy.getResolvedConfiguration().getLenientConfiguration();
                     }
                 } else {
+                    AtomicBoolean fallbackCopying = new AtomicBoolean(false);
+                    configuration.getAllDependencyConstraints().configureEach(c -> {
+                        // Avoid classcast exceptions in the _same_ module.
+                        if (isDefaultProjectDependencyConstraint(c)) {
+                            logger.debug(
+                                    "In project {} found constraint '{}' (class {}) for configuration '{}'",
+                                    project.getName(),
+                                    c.getName(),
+                                    c.getClass().getName(),
+                                    configuration.getName());
+                            fallbackCopying.set(true);
+                        }
+                    });
+
                     // We try to copy recursive for everything but if it fails we'll create a copy ignoring super-configurations.
                     // It can fail in bizarre ways due to constraints.
-                    try {
-                        logger.debug("In project {} recursively copying configuration for {}", project.getName(),
-                                configuration.getName());
-                        copy = configuration.copyRecursive();
-                        lenient = copy.getResolvedConfiguration().getLenientConfiguration();
-                    } catch (GradleException e) {
+                    if (!fallbackCopying.get()) {
+                        try {
+                            logger.debug("In project {} recursively copying configuration for {}", project.getName(),
+                                    configuration.getName());
+                            copy = configuration.copyRecursive();
+                            lenient = copy.getResolvedConfiguration().getLenientConfiguration();
+                        } catch (GradleException e) {
+                            logger.warn(
+                                    "Failed to copy configuration recursively for {}; falling back to standard copy.",
+                                    configuration.getName());
+                            logger.debug("Caught exception copying configuration", e);
+                            fallbackCopying.set(true);
+                        }
+                    }
+                    if (fallbackCopying.get()) {
                         // NCLSUP-1250 - classpath constraints in wire.
                         // This happens when constraints are active. I have attempted to solve this before using the newly
                         // added isCanBeDeclared functionality in Gradle 8.2. According to
@@ -764,9 +787,6 @@ public class AlignmentTask extends DefaultTask {
                         // However, I've found that while that can help the problematic wire, micrometer, opentelemetry-java,
                         // opentelemetry-java-instrumentation and cel it breaks other regression tests. Therefore I'm switching
                         // to this rather ugly fallback.
-                        logger.warn("Failed to copy configuration recursively for {}; falling back to standard copy.",
-                                configuration.getName());
-                        logger.debug("Caught exception copying configuration", e);
                         copy = configuration.copy();
                         lenient = copy.getResolvedConfiguration().getLenientConfiguration();
                     }

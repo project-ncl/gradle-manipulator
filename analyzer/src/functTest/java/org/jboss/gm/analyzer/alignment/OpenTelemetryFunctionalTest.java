@@ -8,6 +8,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
+import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
@@ -23,6 +27,7 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import org.junit.runner.RunWith;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -36,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.Assume.assumeTrue;
 
+@RunWith(JUnitParamsRunner.class)
 public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
 
     @Rule
@@ -52,6 +58,9 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         stubDACall();
 
         System.setProperty(Configuration.DA, "http://127.0.0.1:" + wireMockRule.port() + "/da/rest/v-1");
+
+        // Spurious caching issues so clear the cache for each test
+        ConfigCache.clear();
     }
 
     private void stubDACall() throws IOException, URISyntaxException {
@@ -68,14 +77,17 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void verifyOpenTelemetryGradle() throws IOException, URISyntaxException, ManipulationException {
+    @Parameters({ "true", "false" })
+    public void verifyOpenTelemetryGradle(boolean useLegacyConfigurationCopy)
+            throws IOException, URISyntaxException, ManipulationException {
         // XXX: Use of pluginManagement.plugins{}
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.6")) >= 0);
         // XXX:  Caused by: org.gradle.api.GradleException: Dependencies can not be declared against the `compileClasspath` configuration.
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.0")) < 0);
 
         final File projectRoot = tempDir.newFolder("opentelemetry");
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(),
+                Collections.singletonMap("-DuseLegacyConfigurationCopy", String.valueOf(useLegacyConfigurationCopy)));
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot));
@@ -98,14 +110,19 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void verifyOpenTelemetryKotlin() throws IOException, URISyntaxException, ManipulationException {
+    @Parameters({ "true", "false" })
+    public void verifyOpenTelemetryKotlin(boolean useLegacyConfigurationCopy)
+            throws IOException, URISyntaxException, ManipulationException {
         // XXX: Use of pluginManagement.plugins{}
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.6")) >= 0);
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.5")) < 0);
 
+        final Map<String, String> map = new HashMap<>();
+        map.put("-DoverrideTransitive", "false");
+        map.put("-DuseLegacyConfigurationCopy", String.valueOf(useLegacyConfigurationCopy));
+
         final File projectRoot = tempDir.newFolder("opentelemetry-kotlin");
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(),
-                Collections.singletonMap("overrideTransitive", "false"));
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), map);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START_KOTLIN + " }", TestUtils.getLine(projectRoot));
@@ -155,7 +172,8 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void verifyOpenTelemetryJavaInstrumentationKotlin() throws Exception {
+    @Parameters({ "true", "false" })
+    public void verifyOpenTelemetryJavaInstrumentationKotlin(boolean useLegacyConfigurationCopy) throws Exception {
         // XXX: Kotlin requirements
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.5")) >= 0);
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.10.2")) < 0);
@@ -165,6 +183,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         map.put("-Potel.stable", "true");
         map.put("-DignoreUnresolvableDependencies", "true");
         map.put("-DpluginRemoval", "gradle-enterprise,io.github.gradle-nexus.publish-plugin");
+        map.put("-DuseLegacyConfigurationCopy", String.valueOf(useLegacyConfigurationCopy));
 
         final File projectRoot = tempDir.newFolder("opentelemetry-java-instrumentation");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), map);
@@ -204,13 +223,16 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void verifyOpenTelemetryKotlin2() throws IOException, URISyntaxException, ManipulationException {
+    @Parameters({ "true", "false" })
+    public void verifyOpenTelemetryKotlin2(boolean useLegacyConfigurationCopy)
+            throws IOException, URISyntaxException, ManipulationException {
         // XXX: Use of pluginManagement.plugins{}
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.5")) >= 0);
         final Map<String, String> map = new HashMap<>();
         map.put("-DoverrideTransitive", "false");
         map.put("-Potel.stable", "true");
         map.put("-DignoreUnresolvableDependencies", "true");
+        map.put("-DuseLegacyConfigurationCopy", String.valueOf(useLegacyConfigurationCopy));
 
         final File projectRoot = tempDir.newFolder("opentelemetry-kotlin-2");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), map);

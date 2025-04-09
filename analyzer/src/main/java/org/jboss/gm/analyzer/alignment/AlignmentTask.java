@@ -644,6 +644,7 @@ public class AlignmentTask extends DefaultTask {
         //    NamedDomainObjectContainer#create(String) on configuration container cannot be executed in the current context.
         // on opentelemetry-java alignment.
         project.getConfigurations().all(configuration -> {
+            // canBeResolved: Indicates that this configuration is intended for resolving a set of dependencies into a dependency graph. A resolvable configuration should not be declarable or consumable.
             if (configuration.isCanBeResolved()) {
 
                 LenientConfiguration lenient = null;
@@ -663,7 +664,6 @@ public class AlignmentTask extends DefaultTask {
                 ProjectUtils.updateResolutionStrategy(configuration);
 
                 if (internalConfig.useLegacyConfigurationCopy()) {
-                    // canBeResolved: Indicates that this configuration is intended for resolving a set of dependencies into a dependency graph. A resolvable configuration should not be declarable or consumable.
                     // If we have dependency constraints we can get a ClassCastException when attempting to copy the configurations.
                     // This is due to an unchecked cast in
                     // org.gradle.api.internal.artifacts.configurations.DefaultConfiguration::createCopy { ...
@@ -682,7 +682,7 @@ public class AlignmentTask extends DefaultTask {
                         DependencyConstraintSet allConstraints = configuration.getAllDependencyConstraints();
                         allConstraints.configureEach(c -> {
                             logger.debug(
-                                    "In project {} found constraint '{}' (class {}) for configuration '{}' and visible {}",
+                                    "In project {} in legacy mode found constraint '{}' (class {}) for configuration '{}' and visible {}",
                                     project.getName(),
                                     c.getName(),
                                     c.getClass().getName(),
@@ -699,7 +699,8 @@ public class AlignmentTask extends DefaultTask {
                                 allowConstraints = true;
                             }
 
-                            if (allowConstraints && isDefaultProjectDependencyConstraint(c)) {
+                            if (allowConstraints && (isDefaultProjectDependencyConstraint(c)
+                                    || c instanceof org.gradle.api.internal.artifacts.dependencies.DefaultDependencyConstraint)) {
                                 logger.info("Found dependency constraints in {}", configuration.getName());
                                 cache.setConstraints(true);
                             }
@@ -708,7 +709,7 @@ public class AlignmentTask extends DefaultTask {
 
                     // Attempt to call copyRecursive for all types (kotlin/gradle).
                     if (!cache.isConstraints()) {
-                        logger.debug("In project {} recursively copying configuration for {}", project.getName(),
+                        logger.debug("In project {} in legacy mode recursively copying configuration for {}", project.getName(),
                                 configuration.getName());
                         copy = configuration.copyRecursive();
                         lenient = copy.getResolvedConfiguration().getLenientConfiguration();
@@ -722,7 +723,7 @@ public class AlignmentTask extends DefaultTask {
                 } else {
                     AtomicBoolean fallbackCopying = new AtomicBoolean(false);
                     configuration.getAllDependencyConstraints().configureEach(c -> {
-                        // Avoid classcast exceptions in the _same_ module.
+                        // Avoid ClassCastException in the _same_ module.
                         if (isDefaultProjectDependencyConstraint(c)) {
                             logger.debug(
                                     "In project {} found constraint '{}' (class {}) for configuration '{}'",

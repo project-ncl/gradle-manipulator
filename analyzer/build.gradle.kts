@@ -77,6 +77,7 @@ dependencies {
     testImplementation("com.github.tomakehurst:wiremock-jre8:2.26.3")
     testImplementation(gradleKotlinDsl())
     testImplementation("org.eclipse.jgit:org.eclipse.jgit:${project.extra.get("jgitVersion")}")
+    testImplementation("pl.pragmatists:JUnitParams:1.1.1")
 }
 
 tasks.withType<Test>().configureEach {

@@ -13,7 +13,6 @@ import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.gradle.util.GradleVersion;
-import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
 import org.junit.Before;
@@ -23,7 +22,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-import org.junit.runner.RunWith;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -33,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.Assume.assumeTrue;
 
-@RunWith(BMUnitRunner.class)
 public class CELProjectFunctionalTest extends AbstractWiremockTest {
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();

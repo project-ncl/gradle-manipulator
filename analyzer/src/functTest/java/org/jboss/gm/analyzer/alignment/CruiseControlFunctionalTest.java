@@ -7,7 +7,6 @@ import java.net.URISyntaxException;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
-import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
 import org.junit.Before;
@@ -17,7 +16,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-import org.junit.runner.RunWith;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -27,7 +25,6 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(BMUnitRunner.class)
 public class CruiseControlFunctionalTest extends AbstractWiremockTest {
 
     @Rule

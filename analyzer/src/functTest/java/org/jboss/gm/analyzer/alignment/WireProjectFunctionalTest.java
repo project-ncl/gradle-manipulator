@@ -19,18 +19,18 @@ import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.util.GradleVersion;
-import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.JVMTestSetup;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-import org.junit.runner.RunWith;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -41,7 +41,6 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.jboss.gm.common.JVMTestSetup.JDK17_DIR;
 import static org.junit.Assume.assumeTrue;
 
-@RunWith(BMUnitRunner.class)
 public class WireProjectFunctionalTest extends AbstractWiremockTest {
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
@@ -51,6 +50,11 @@ public class WireProjectFunctionalTest extends AbstractWiremockTest {
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
+
+    @BeforeClass
+    public static void setupJVM() throws IOException {
+        JVMTestSetup.setupJVM();
+    }
 
     @Before
     public void setup() throws IOException, URISyntaxException {
@@ -72,6 +76,8 @@ public class WireProjectFunctionalTest extends AbstractWiremockTest {
     public void ensureAlignmentFileCreated()
             throws IOException, URISyntaxException, GitAPIException {
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.9")) >= 0);
+        // Swift compilation issues after 8.12
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.13")) < 0);
 
         final File projectRoot = tempDir.newFolder();
 
@@ -94,6 +100,10 @@ public class WireProjectFunctionalTest extends AbstractWiremockTest {
         parameters.put("overrideTransitive", "true");
         parameters.put("org.gradle.java.home", JDK17_DIR.toString());
         parameters.put("ignoreUnresolvableDependencies", "true");
+        parameters.put("kjs", "false");
+        parameters.put("knative", "false");
+        parameters.put("-Pswift", "false");
+        parameters.put("--quiet", "");
 
         final GradleRunner runner = TestUtils
                 .createGradleRunner(projectRoot, parameters)

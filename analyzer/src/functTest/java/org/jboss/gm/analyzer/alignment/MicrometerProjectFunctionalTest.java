@@ -19,7 +19,6 @@ import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.util.GradleVersion;
-import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.io.ManipulationIO;
@@ -30,7 +29,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-import org.junit.runner.RunWith;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -40,7 +38,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.Assume.assumeTrue;
 
-@RunWith(BMUnitRunner.class)
 public class MicrometerProjectFunctionalTest extends AbstractWiremockTest {
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
@@ -89,12 +86,14 @@ public class MicrometerProjectFunctionalTest extends AbstractWiremockTest {
                 .get(TestUtils.class.getClassLoader().getResource("micrometer-project").toURI()).toFile(), projectRoot);
 
         Map<String, String> parameters = new HashMap<>();
-        parameters.put("overrideTransitive", "true");
+        parameters.put("overrideTransitive", "false");
         parameters.put("-Prelease.stage", "final");
         parameters.put("-Prelease.version", "1.14.5");
         parameters.put("-Prelease.useLastTag", "false");
         parameters.put("-Prelease.disableGitChecks", "true");
         parameters.put("ignoreUnresolvableDependencies", "true");
+        parameters.put("--quiet", "");
+        parameters.put("org.gradle.jvmargs", "-Xmx512m");
 
         final GradleRunner runner = TestUtils
                 .createGradleRunner(projectRoot, parameters)

@@ -6,15 +6,22 @@ import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.gradle.testkit.runner.BuildResult;
+import org.gradle.testkit.runner.BuildTask;
+import org.gradle.testkit.runner.GradleRunner;
+import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.io.ManipulationIO;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.Assume.assumeTrue;
 
-public class CELProjectFunctionalTest extends AbstractWiremockTest {
+public class MicrometerProjectFunctionalTest extends AbstractWiremockTest {
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
@@ -47,12 +54,12 @@ public class CELProjectFunctionalTest extends AbstractWiremockTest {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("cel-project-da-response.json"))));
+                        .withBody(readSampleDAResponse("micrometer-project-da-response.json"))));
         stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("cel-project-da-response-project.json"))));
+                        .withBody(readSampleDAResponse("micrometer-project-da-response-project.json"))));
 
         System.setProperty(Configuration.DA, "http://127.0.0.1:" + wireMockRule.port() + "/da/rest/v-1");
     }
@@ -60,48 +67,62 @@ public class CELProjectFunctionalTest extends AbstractWiremockTest {
     @Test
     public void ensureAlignmentFileCreated()
             throws IOException, URISyntaxException, GitAPIException {
-        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.5")) >= 0);
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.10.2")) >= 0);
 
         final File projectRoot = tempDir.newFolder();
 
         try (Git ignored = Git.cloneRepository()
-                .setURI("https://github.com/projectnessie/cel-java.git")
+                .setURI("https://github.com/micrometer-metrics/micrometer.git")
                 .setDirectory(projectRoot)
-                .setBranch("v0.4.5")
-                .setBranchesToClone(Collections.singletonList("refs/tags/v0.4.5"))
+                .setBranch("v1.14.5")
+                .setBranchesToClone(Collections.singletonList("refs/tags/v1.14.5"))
                 .setDepth(1)
                 .setNoTags()
                 .call()) {
-            System.out.println("Cloned CEL-Java to " + projectRoot);
+            System.out.println("Cloned Micrometer to " + projectRoot);
         }
 
         FileUtils.copyDirectory(Paths
-                .get(TestUtils.class.getClassLoader().getResource("cel-java-project").toURI()).toFile(), projectRoot);
+                .get(TestUtils.class.getClassLoader().getResource("micrometer-project").toURI()).toFile(), projectRoot);
 
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, false,
-                Collections.singletonMap("overrideTransitive", "true"));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("overrideTransitive", "false");
+        parameters.put("-Prelease.stage", "final");
+        parameters.put("-Prelease.version", "1.14.5");
+        parameters.put("-Prelease.useLastTag", "false");
+        parameters.put("-Prelease.disableGitChecks", "true");
+        parameters.put("ignoreUnresolvableDependencies", "true");
+        parameters.put("--quiet", "");
+        parameters.put("org.gradle.jvmargs", "-Xmx512m");
+
+        final GradleRunner runner = TestUtils
+                .createGradleRunner(projectRoot, parameters)
+                .withDebug(false);
+        final BuildResult buildResult = runner.build();
+        final BuildTask task = buildResult.task(":" + AlignmentTask.NAME);
+
+        assertThat(task).isNotNull();
+        assertThat(task.getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
+
+        final TestManipulationModel alignmentModel = new TestManipulationModel(
+                ManipulationIO.readManipulationModel(projectRoot));
 
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
         assertThat(new File(projectRoot, AlignmentTask.GRADLE + File.separator + AlignmentTask.GME_REPOS)).exists();
         assertThat(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS)).exists();
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
-            assertThat(am.getOriginalVersion()).isEqualTo("0.4.5");
-            assertThat(am.getVersion()).isEqualTo("0.4.5.redhat-00002");
-            assertThat(am.getGroup()).isEqualTo("org.projectnessie.cel");
-            assertThat(am.getName()).isEqualTo("cel-parent");
-            assertThat(am.findCorrespondingChild(":cel-tools")).satisfies(root -> {
-                assertThat(root.getVersion()).isEqualTo("0.4.5.redhat-00002");
-                assertThat(root.getName()).isEqualTo("cel-tools");
+            assertThat(am.getOriginalVersion()).isEqualTo("1.14.5");
+            assertThat(am.getVersion()).isEqualTo("1.14.5.redhat-00002");
+            assertThat(am.getGroup()).isEqualTo("io.micrometer");
+            assertThat(am.getName()).isEqualTo("micrometer");
+            assertThat(am.findCorrespondingChild(":micrometer-core")).satisfies(root -> {
+                assertThat(root.getVersion()).isEqualTo("1.14.5.redhat-00002");
+                assertThat(root.getName()).isEqualTo("micrometer-core");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
-                        .containsOnly(
-                                tuple("agrona", "1.22.0.redhat-00002"),
-                                tuple("byte-buddy", "1.14.18.redhat-00002"),
-                                tuple("asm-commons", "9.7.0.redhat-00002"),
-                                tuple("asm-tree", "9.7.0.redhat-00002"),
-                                tuple("asm", "9.7.0.redhat-00002"));
+                        .containsOnly(tuple("netty-bom", "4.1.119.Final-redhat-00001"));
             });
         });
     }

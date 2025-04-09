@@ -77,6 +77,9 @@ public class ManipulationCache {
     /**
      * OpenTelemetry builds utilise constraints but this can affect the entire project leading to
      * "Dependency constraints can not be declared against the `compileClasspath` configuration"
+     *
+     * @param constraints whether to denote constraints have been found.
+     * @return if constraints have been found.
      */
     @Getter
     @Setter

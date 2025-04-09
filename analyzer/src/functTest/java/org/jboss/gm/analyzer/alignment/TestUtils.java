@@ -75,8 +75,13 @@ public final class TestUtils {
      */
     static GradleRunner createGradleRunner(File projectRoot, Map<String, String> systemProps) {
         final Map<String, String> finalSystemProps = new LinkedHashMap<>(systemProps.size() + 1);
+        boolean quiet = false;
         if (!systemProps.containsKey("repoRemovalBackup")) {
             finalSystemProps.put("repoRemovalBackup", "settings.xml");
+        }
+        if (systemProps.containsKey("--quiet")) {
+            quiet = true;
+            systemProps.remove("--quiet");
         }
         finalSystemProps.putAll(systemProps);
         final List<String> systemPropsList = finalSystemProps.entrySet().stream()
@@ -87,7 +92,11 @@ public final class TestUtils {
         System.setProperty("gmeFunctionalTest", "true");
         allArguments.add("-DgmeFunctionalTest=true");
         allArguments.add("--stacktrace");
-        allArguments.add("--info");
+        if (quiet) {
+            allArguments.add("--quiet");
+        } else {
+            allArguments.add("--info");
+        }
         allArguments.add(AlignmentTask.NAME);
         allArguments.addAll(systemPropsList);
 

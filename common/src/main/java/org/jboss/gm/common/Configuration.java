@@ -68,6 +68,11 @@ public interface Configuration extends Accessible, Reloadable {
     @DefaultValue("false")
     boolean disableGME();
 
+    @DisableFeature(VARIABLE_EXPANSION)
+    @Key("otel.disable")
+    @DefaultValue("false")
+    boolean disableOTEL();
+
     @Key("deployPlugin")
     String deployPlugin();
 

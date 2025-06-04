@@ -2,8 +2,10 @@ package org.jboss.gm.common.utils;
 
 import lombok.experimental.UtilityClass;
 
+import org.aeonbits.owner.ConfigCache;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.api.logging.Logger;
+import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.FilteringCustomLogger;
 import org.jboss.gm.common.logging.GMLogger;
 
@@ -17,10 +19,11 @@ public class OTELUtils {
     private final LogLevel originalLevel = FilteringCustomLogger.getContext().getLevel();
 
     public void startOTel() {
+        Configuration configuration = ConfigCache.getOrCreate(Configuration.class);
         String endpoint = System.getenv("OTEL_EXPORTER_OTLP_ENDPOINT");
         String service = System.getenv("OTEL_SERVICE_NAME");
 
-        if (endpoint != null) {
+        if (endpoint != null && !configuration.disableOTEL()) {
             if (service == null) {
                 service = "gradle-manipulator";
             }

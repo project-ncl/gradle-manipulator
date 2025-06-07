@@ -47,9 +47,13 @@ plugins {
             id("com.adarshr.test-logger") version "3.2.0"
             id("com.github.johnrengelman.shadow") version "7.1.2"
         }
+        org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.4") -> {
+            id("com.adarshr.test-logger") version "3.2.0"
+            id("com.github.johnrengelman.shadow") version "8.1.1"
+        }
         else -> {
             id("com.adarshr.test-logger") version "3.2.0"
-            id("com.github.johnrengelman.shadow") version "8.1.0"
+            id("com.gradleup.shadow") version "8.3.6"
         }
     }
 
@@ -343,7 +347,11 @@ subprojects {
          * Another great source of information is the configuration of the shadow plugin itself:
          * https://github.com/johnrengelman/shadow/blob/main/build.gradle
          */
-        apply(plugin = "com.github.johnrengelman.shadow")
+        if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.4")) {
+            apply(plugin = "com.github.johnrengelman.shadow")
+        } else {
+            apply(plugin = "com.gradleup.shadow")
+        }
 
         // Make assemble/build task depend on shadowJar
         tasks["assemble"].dependsOn(tasks["shadowJar"])
@@ -370,6 +378,10 @@ subprojects {
                     exclude(dependency("com.konghq:.*:.*"))
                 }
             }
+
+            // When running under Gradle 4.x (regardless of what Gradle version compiled this), the internal kotlin version
+            // clashes with the kotlin version required by okhttp/okio. Therefore relocate the bundled version.
+            relocate("kotlin", "shadow.kotlin")
 
             doFirst {
                 manifest {

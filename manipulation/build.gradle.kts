@@ -120,5 +120,5 @@ tasks.getByName("functionalTest") {
 }
 
 tasks.getByName("publishShadowPublicationToMavenLocal") {
-    dependsOn("publishPluginJavaDocsJar", "publishPluginJar", "jar")
+    dependsOn("publishPluginJavaDocsJar", "publishPluginJar", "shadowJar")
 }

@@ -14,7 +14,10 @@ plugins {
     `maven-publish`
     idea
 
-    if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.4")) {
+    // Note spotless is only active for Gradle >= 6.1
+    if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("6.1")) {
+        id("com.diffplug.spotless") version "7.2.1"
+    } else if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.4")) {
         id("com.diffplug.gradle.spotless") version "4.5.1"
     } else {
         id("com.diffplug.spotless") version "5.14.2"
@@ -462,15 +465,29 @@ subprojects {
         theme = ThemeType.MOCHA
     }
 
+
+    val spotlessConfig by configurations.creating
+    dependencies {
+        spotlessConfig("org.jboss.pnc:ide-config:1.1.0")
+    }
+
     spotless {
         java {
-            importOrderFile("$rootDir/ide-config/eclipse.importorder")
-            eclipse().configFile("$rootDir/ide-config/eclipse-format.xml")
+            // Can't use asFile (from https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.resources/-text-resource/index.html )
+            // as that creates and writes the File immediately ... which is then deleted
+            // by Gradle clean. configProperties was only available from Spotless 7.0 (which requires Gradle >= 6.1)
+            if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("6.1")) {
+                removeUnusedImports()
+                importOrder(resources.text.fromArchiveEntry(spotlessConfig, "java-import-order.txt").asString())
+                eclipse().configXml(resources.text.fromArchiveEntry(spotlessConfig, "java-formatter.xml").asString())
+            }
         }
     }
 
     tasks.withType<JavaCompile>().configureEach {
-        dependsOn("spotlessApply")
+        if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("6.1")) {
+            dependsOn("spotlessApply")
+        }
     }
 
     if (project.name != "cli") {

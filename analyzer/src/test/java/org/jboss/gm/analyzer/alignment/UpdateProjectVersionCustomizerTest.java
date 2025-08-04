@@ -1,10 +1,11 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
-
 import org.aeonbits.owner.ConfigFactory;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
@@ -20,8 +21,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class UpdateProjectVersionCustomizerTest {
 

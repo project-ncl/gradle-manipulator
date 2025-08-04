@@ -9,12 +9,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-
 import lombok.Getter;
 import lombok.Setter;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -177,9 +174,12 @@ public class ManipulationCache {
 
     public List<ProjectVersionRef> getProjectVersionRefs(boolean versionSuffixSnapshot) {
         return projectVersionRefs.stream()
-                .map(e -> !versionSuffixSnapshot
-                        ? new SimpleProjectVersionRef(e.asProjectRef(), Version.removeSnapshot(e.getVersionString()))
-                        : e)
+                .map(
+                        e -> !versionSuffixSnapshot
+                                ? new SimpleProjectVersionRef(
+                                        e.asProjectRef(),
+                                        Version.removeSnapshot(e.getVersionString()))
+                                : e)
                 .collect(Collectors.toList());
     }
 

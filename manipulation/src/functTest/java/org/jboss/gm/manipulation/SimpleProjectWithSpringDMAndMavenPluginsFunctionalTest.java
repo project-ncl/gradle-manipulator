@@ -1,15 +1,16 @@
 package org.jboss.gm.manipulation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-
 import org.apache.maven.model.Model;
 import org.assertj.core.groups.Tuple;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.internal.Pair;
 import org.gradle.testkit.runner.BuildResult;
-import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.util.GradleVersion;
 import org.jboss.gm.common.io.ManipulationIO;
@@ -20,9 +21,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
 
 public class SimpleProjectWithSpringDMAndMavenPluginsFunctionalTest {
 
@@ -61,8 +59,11 @@ public class SimpleProjectWithSpringDMAndMavenPluginsFunctionalTest {
                 .isNotNull()
                 .satisfies(t -> assertThat(t.getOutcome()).isEqualTo(TaskOutcome.SUCCESS));
 
-        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(m2Directory, alignment,
-                "org/acme/root/1.0.1-redhat-00001/root-1.0.1-redhat-00001.pom", true);
+        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(
+                m2Directory,
+                alignment,
+                "org/acme/root/1.0.1-redhat-00001/root-1.0.1-redhat-00001.pom",
+                true);
         final ManipulationModel module = modelAndModule.getRight();
         assertThat(systemOutRule.getLog())
                 .contains(
@@ -70,16 +71,17 @@ public class SimpleProjectWithSpringDMAndMavenPluginsFunctionalTest {
         assertThat(module).isNotNull();
         assertThat(modelAndModule.getLeft())
                 .isNotNull()
-                .satisfies(m -> assertThat(m.getDependencies())
-                        .extracting("artifactId", "version")
-                        .containsOnly(
-                                TestUtils.getAlignedTuple(module, "commons-lang3", "3.8.1"),
-                                TestUtils.getAlignedTuple(module, "hibernate-core"),
-                                Tuple.tuple("hsqldb", null), // not present in manipulation model
-                                TestUtils.getAlignedTuple(module, "undertow-core"),
-                                TestUtils.getAlignedTuple(module, "slf4j-api"),
-                                Tuple.tuple("slf4j-ext", null), // not present in manipulation model
-                                TestUtils.getAlignedTuple(module, "junit", "4.12")));
+                .satisfies(
+                        m -> assertThat(m.getDependencies())
+                                .extracting("artifactId", "version")
+                                .containsOnly(
+                                        TestUtils.getAlignedTuple(module, "commons-lang3", "3.8.1"),
+                                        TestUtils.getAlignedTuple(module, "hibernate-core"),
+                                        Tuple.tuple("hsqldb", null), // not present in manipulation model
+                                        TestUtils.getAlignedTuple(module, "undertow-core"),
+                                        TestUtils.getAlignedTuple(module, "slf4j-api"),
+                                        Tuple.tuple("slf4j-ext", null), // not present in manipulation model
+                                        TestUtils.getAlignedTuple(module, "junit", "4.12")));
         // check that BOM is present as managed dependency
         assertThat(modelAndModule.getLeft().getDependencyManagement().getDependencies())
                 .extracting("artifactId", "version", "scope", "type")

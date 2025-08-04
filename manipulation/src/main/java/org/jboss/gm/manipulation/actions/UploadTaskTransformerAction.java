@@ -1,8 +1,9 @@
 package org.jboss.gm.manipulation.actions;
 
+import static org.jboss.gm.manipulation.ManipulationPlugin.LEGACY_MAVEN_PLUGIN;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -13,8 +14,6 @@ import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.manipulation.ResolvedDependenciesRepository;
-
-import static org.jboss.gm.manipulation.ManipulationPlugin.LEGACY_MAVEN_PLUGIN;
 
 /**
  * Fixes {@code pom.xml} generation in the old &quot;maven&quot; plugin.
@@ -45,7 +44,8 @@ public class UploadTaskTransformerAction implements Action<Project> {
      * @param alignmentConfiguration the alignment configuration
      * @param resolvedDependenciesRepository the resolved dependencies repository
      */
-    public UploadTaskTransformerAction(ManipulationModel alignmentConfiguration,
+    public UploadTaskTransformerAction(
+            ManipulationModel alignmentConfiguration,
             ResolvedDependenciesRepository resolvedDependenciesRepository) {
         this.alignmentConfiguration = alignmentConfiguration;
         this.resolvedDependenciesRepository = resolvedDependenciesRepository;
@@ -61,7 +61,9 @@ public class UploadTaskTransformerAction implements Action<Project> {
             Class<?> pomClass = Class.forName("org.gradle.api.artifacts.maven.MavenPom");
             withXmlMethod = pomClass.getDeclaredMethod("withXml", Action.class);
         } catch (ClassNotFoundException | NoSuchMethodException e) {
-            LOGGER.error("Failed to find required class or method for project {}", alignmentConfiguration.getName(),
+            LOGGER.error(
+                    "Failed to find required class or method for project {}",
+                    alignmentConfiguration.getName(),
                     e);
         }
     }
@@ -95,7 +97,8 @@ public class UploadTaskTransformerAction implements Action<Project> {
     private void execute(ArtifactRepository repository) {
         try {
             Object pom = getPomMethod.invoke(repository);
-            Action<XmlProvider> action = new MavenPomTransformerAction(alignmentConfiguration,
+            Action<XmlProvider> action = new MavenPomTransformerAction(
+                    alignmentConfiguration,
                     resolvedDependenciesRepository);
             withXmlMethod.invoke(pom, action);
         } catch (IllegalAccessException | InvocationTargetException e) {

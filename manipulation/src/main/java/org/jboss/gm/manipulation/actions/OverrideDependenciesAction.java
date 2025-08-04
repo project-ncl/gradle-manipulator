@@ -1,9 +1,10 @@
 package org.jboss.gm.manipulation.actions;
 
+import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.Action;
@@ -16,8 +17,6 @@ import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.manipulation.ResolvedDependenciesRepository;
-
-import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
 
 /**
  * An action which overrides dependencies.
@@ -39,7 +38,8 @@ public class OverrideDependenciesAction implements Action<Project> {
      * @param correspondingModule the corresponding module
      * @param resolvedDependenciesRepository the resolved dependencies repository
      */
-    public OverrideDependenciesAction(ManipulationModel correspondingModule,
+    public OverrideDependenciesAction(
+            ManipulationModel correspondingModule,
             ResolvedDependenciesRepository resolvedDependenciesRepository) {
         this.module = correspondingModule;
         this.resolver = new AlignedDependencyResolverAction(correspondingModule, resolvedDependenciesRepository);
@@ -57,11 +57,14 @@ public class OverrideDependenciesAction implements Action<Project> {
                 // TODO: Can we use reflection to force the state back to unresolved?
                 logger.warn("Configuration {} for {} is not in unresolved state", configuration.getName(), project);
             } else {
-                logger.trace("Adding GME resolver to configuration {} on project {}", configuration.getName(),
+                logger.trace(
+                        "Adding GME resolver to configuration {} on project {}",
+                        configuration.getName(),
                         project.getPath());
                 configuration.getResolutionStrategy().eachDependency(resolver);
 
-                final Set<ModuleVersionSelector> forcedOriginal = configuration.getResolutionStrategy().getForcedModules();
+                final Set<ModuleVersionSelector> forcedOriginal = configuration.getResolutionStrategy()
+                        .getForcedModules();
                 final Set<ModuleVersionSelector> forced = new HashSet<>();
                 final Map<String, ProjectVersionRef> alignedDependencies = module.getAlignedDependencies();
 
@@ -72,8 +75,11 @@ public class OverrideDependenciesAction implements Action<Project> {
                         final ProjectVersionRef aligned = alignedDependencies.get(requestedGAV.toString());
                         if (aligned != null) {
                             logger.info("Replacing force override of {} with {} ", requestedGAV, aligned);
-                            forced.add(new DefaultModuleVersionSelector(m.getGroup(), m.getName(),
-                                    aligned.getVersionString()));
+                            forced.add(
+                                    new DefaultModuleVersionSelector(
+                                            m.getGroup(),
+                                            m.getName(),
+                                            aligned.getVersionString()));
                         } else {
                             forced.add(m);
                         }
@@ -85,19 +91,27 @@ public class OverrideDependenciesAction implements Action<Project> {
                 configuration.getDependencies().configureEach(d -> {
                     if (d instanceof org.gradle.api.artifacts.ExternalModuleDependency) {
                         ExternalModuleDependency externalModuleDependency = (ExternalModuleDependency) d;
-                        if (StringUtils.isNotEmpty(externalModuleDependency.getVersionConstraint().getStrictVersion())) {
-                            logger.debug("Found version constraint of {} for {}",
-                                    externalModuleDependency.getVersionConstraint(), d);
+                        if (StringUtils
+                                .isNotEmpty(externalModuleDependency.getVersionConstraint().getStrictVersion())) {
+                            logger.debug(
+                                    "Found version constraint of {} for {}",
+                                    externalModuleDependency.getVersionConstraint(),
+                                    d);
                             final ProjectVersionRef requestedGAV = withGAV(
                                     externalModuleDependency.getModule().getGroup(),
                                     externalModuleDependency.getModule().getName(),
                                     externalModuleDependency.getVersionConstraint().getStrictVersion());
                             final ProjectVersionRef aligned = alignedDependencies.get(requestedGAV.toString());
                             if (aligned != null) {
-                                logger.info("Replacing strictly with forced version for {} with {}", requestedGAV, aligned);
+                                logger.info(
+                                        "Replacing strictly with forced version for {} with {}",
+                                        requestedGAV,
+                                        aligned);
                                 forced.add(
-                                        new DefaultModuleVersionSelector(externalModuleDependency.getModule().getGroup(),
-                                                externalModuleDependency.getModule().getName(), aligned.getVersionString()));
+                                        new DefaultModuleVersionSelector(
+                                                externalModuleDependency.getModule().getGroup(),
+                                                externalModuleDependency.getModule().getName(),
+                                                aligned.getVersionString()));
                             }
                             configuration.getResolutionStrategy().setForcedModules(forced.toArray());
                         }

@@ -1,9 +1,7 @@
 package org.jboss.gm.common.utils;
 
 import java.lang.reflect.InvocationTargetException;
-
 import lombok.experimental.UtilityClass;
-
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
@@ -100,7 +98,8 @@ public class ProjectUtils {
                         return value;
                     }
                 }
-            } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
+                    | IllegalAccessException e) {
                 logger.error("Unable to invoke getArchivesName method", e);
                 throw new ManipulationUncheckedException(e);
             }

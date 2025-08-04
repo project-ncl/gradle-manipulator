@@ -1,7 +1,10 @@
 package org.jboss.gm.manipulation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -9,7 +12,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
-
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.internal.Pair;
@@ -25,10 +27,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 
 public class SimpleProjectFunctionalTest {
 
@@ -93,8 +91,11 @@ public class SimpleProjectFunctionalTest {
                 .withArguments("--info", "generatePomFileForMainPublication")
                 .build();
 
-        assertThat(buildResult.task(":" + "generatePomFileForMainPublication").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
-        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(simpleProjectRoot, alignment,
+        assertThat(buildResult.task(":" + "generatePomFileForMainPublication").getOutcome())
+                .isEqualTo(TaskOutcome.SUCCESS);
+        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(
+                simpleProjectRoot,
+                alignment,
                 "build/publications/main/pom-default.xml");
 
         final ManipulationModel module = modelAndModule.getRight();
@@ -122,8 +123,10 @@ public class SimpleProjectFunctionalTest {
                 .build();
 
         assertThat(buildResult.task(":" + "distZip").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
-        assertThat(simpleProjectRoot.toPath().resolve("build/distributions/dummy-1.0.1-redhat-00001-docs.zip")).exists();
-        assertThat(simpleProjectRoot.toPath().resolve("build/distributions/dummy-1.0.1-redhat-00001-dist.zip")).exists();
+        assertThat(simpleProjectRoot.toPath().resolve("build/distributions/dummy-1.0.1-redhat-00001-docs.zip"))
+                .exists();
+        assertThat(simpleProjectRoot.toPath().resolve("build/distributions/dummy-1.0.1-redhat-00001-dist.zip"))
+                .exists();
     }
 
     @Test
@@ -146,7 +149,8 @@ public class SimpleProjectFunctionalTest {
 
         final String ARTIFACT_VERSION = "1.0.1-redhat-00001";
         final Path PATH_IN_REPOSITORY = Paths.get("org/acme/root/" + ARTIFACT_VERSION);
-        final File repoPathToJar = publishDirectory.toPath().resolve(PATH_IN_REPOSITORY)
+        final File repoPathToJar = publishDirectory.toPath()
+                .resolve(PATH_IN_REPOSITORY)
                 .resolve("root-" + ARTIFACT_VERSION + ".jar")
                 .toFile();
 

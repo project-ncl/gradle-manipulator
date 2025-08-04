@@ -1,10 +1,12 @@
 package org.jboss.gm.manipulation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
-
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.gradle.testkit.runner.BuildResult;
@@ -16,9 +18,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
 
 public class CarrotSearchHPPCFunctionalTest {
 
@@ -61,8 +60,11 @@ public class CarrotSearchHPPCFunctionalTest {
                 .build();
 
         assertThat(buildResult.task(":hppc:publish").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
-        assertThat(new File(publishDirectory,
-                "com/carrotsearch/hppc/0.10.0.redhat-00002/hppc-0.10.0.redhat-00002.jar")).exists();
+        assertThat(
+                new File(
+                        publishDirectory,
+                        "com/carrotsearch/hppc/0.10.0.redhat-00002/hppc-0.10.0.redhat-00002.jar"))
+                .exists();
         assertThat(systemOutRule.getLog()).contains("Found signing plugin; disabling");
     }
 }

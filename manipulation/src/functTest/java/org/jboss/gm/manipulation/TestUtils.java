@@ -1,5 +1,10 @@
 package org.jboss.gm.manipulation;
 
+import static org.apache.commons.lang3.StringUtils.equalsAny;
+import static org.apache.commons.lang3.StringUtils.startsWithAny;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
@@ -12,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
@@ -23,28 +27,33 @@ import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.internal.DefaultGradleRunner;
 import org.jboss.gm.common.model.ManipulationModel;
 
-import static org.apache.commons.lang3.StringUtils.equalsAny;
-import static org.apache.commons.lang3.StringUtils.startsWithAny;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-
 public final class TestUtils {
 
     private static final String[] PROPERTY_PREFIXES = { "java.", "user.", "sun." };
 
-    private static final String[] OTHER_PROPERTIES = { "file.separator", "line.separator", "os.arch", "os.name", "os.version",
+    private static final String[] OTHER_PROPERTIES = {
+            "file.separator",
+            "line.separator",
+            "os.arch",
+            "os.name",
+            "os.version",
             "path.separator" };
 
     private TestUtils() {
     }
 
     static void copyDirectory(String classpathResource, File target) throws URISyntaxException, IOException {
-        FileUtils.copyDirectory(Paths
-                .get(TestUtils.class.getClassLoader().getResource(classpathResource).toURI()).toFile(), target);
+        FileUtils.copyDirectory(
+                Paths
+                        .get(TestUtils.class.getClassLoader().getResource(classpathResource).toURI())
+                        .toFile(),
+                target);
     }
 
     static Tuple getAlignedTuple(ManipulationModel alignment, String artifactId, String expected) {
-        final List<String> versions = alignment.getAlignedDependencies().entrySet().stream()
+        final List<String> versions = alignment.getAlignedDependencies()
+                .entrySet()
+                .stream()
                 .filter(entry -> entry.getKey().contains(artifactId))
                 .map(entry -> entry.getValue().getVersionString())
                 .collect(Collectors.toList());
@@ -52,13 +61,15 @@ public final class TestUtils {
         if (count != 1) {
             if (count == 0) {
                 if (expected == null) {
-                    throw new IllegalArgumentException("No model was found for " + artifactId
-                            + " and needed an expected value to test against");
+                    throw new IllegalArgumentException(
+                            "No model was found for " + artifactId
+                                    + " and needed an expected value to test against");
                 }
                 return tuple(artifactId, expected);
             }
-            throw new IllegalArgumentException("Cannot retrieve a single version from " + artifactId
-                    + ". Use more specific information");
+            throw new IllegalArgumentException(
+                    "Cannot retrieve a single version from " + artifactId
+                            + ". Use more specific information");
         }
 
         return tuple(artifactId, versions.get(0));
@@ -68,7 +79,9 @@ public final class TestUtils {
         return getAlignedTuple(alignment, artifactId, null);
     }
 
-    static Pair<Model, ManipulationModel> getModelAndCheckGAV(File parentLocationForPom, ManipulationModel alignment,
+    static Pair<Model, ManipulationModel> getModelAndCheckGAV(
+            File parentLocationForPom,
+            ManipulationModel alignment,
             String relativeGeneratedPomPathAsString)
             throws IOException,
             XmlPullParserException {
@@ -76,8 +89,11 @@ public final class TestUtils {
         return getModelAndCheckGAV(parentLocationForPom, alignment, relativeGeneratedPomPathAsString, false);
     }
 
-    static Pair<Model, ManipulationModel> getModelAndCheckGAV(File parentLocationForPom, ManipulationModel alignment,
-            String relativeGeneratedPomPathAsString, boolean external)
+    static Pair<Model, ManipulationModel> getModelAndCheckGAV(
+            File parentLocationForPom,
+            ManipulationModel alignment,
+            String relativeGeneratedPomPathAsString,
+            boolean external)
             throws IOException,
             XmlPullParserException {
         final Path generatedPomPath = parentLocationForPom.toPath().resolve(relativeGeneratedPomPathAsString);
@@ -86,7 +102,8 @@ public final class TestUtils {
         // find module
         final ManipulationModel module;
         if (!external && !relativeGeneratedPomPathAsString.startsWith("build")) {
-            final String moduleName = relativeGeneratedPomPathAsString.substring(0,
+            final String moduleName = relativeGeneratedPomPathAsString.substring(
+                    0,
                     relativeGeneratedPomPathAsString.indexOf('/'));
             module = alignment.getChildren().get(moduleName);
         } else {

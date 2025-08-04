@@ -2,7 +2,6 @@ package org.jboss.gm.common.logging;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.internal.logging.events.LogEvent;
@@ -53,8 +52,13 @@ public class FilteringCustomLogger implements OutputEventListener {
         if (ignoreCategories.stream().noneMatch(i -> logEvent.getCategory().startsWith(i))) {
             if (logEvent.getCategory().startsWith("org.commonjava.maven.ext") ||
                     logEvent.getCategory().startsWith("com.redhat")) {
-                delegate.onOutput(new LogEvent(logEvent.getTimestamp(), logEvent.getCategory(), LogLevel.LIFECYCLE,
-                        logEvent.getMessage(), logEvent.getThrowable()));
+                delegate.onOutput(
+                        new LogEvent(
+                                logEvent.getTimestamp(),
+                                logEvent.getCategory(),
+                                LogLevel.LIFECYCLE,
+                                logEvent.getMessage(),
+                                logEvent.getThrowable()));
             } else {
                 delegate.onOutput(event);
             }

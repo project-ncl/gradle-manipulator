@@ -1,9 +1,7 @@
 package org.jboss.gm.analyzer.alignment.util;
 
 import java.util.Set;
-
 import lombok.experimental.UtilityClass;
-
 import org.apache.commons.lang.StringUtils;
 import org.gradle.api.artifacts.ModuleVersionSelector;
 import org.gradle.api.artifacts.ProjectDependency;
@@ -22,7 +20,8 @@ public class Comparator {
      * @param unresolvedDependency the UnresolvedDependency to verify
      * @return true if it does match
      */
-    public static boolean contains(Set<ProjectDependency> projectDependencies,
+    public static boolean contains(
+            Set<ProjectDependency> projectDependencies,
             UnresolvedDependency unresolvedDependency) {
         ModuleVersionSelector moduleVersionSelector = unresolvedDependency.getSelector();
         for (ProjectDependency projectDependency : projectDependencies) {

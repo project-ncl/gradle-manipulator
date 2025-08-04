@@ -1,5 +1,8 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -13,7 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -24,9 +26,6 @@ import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 
 public final class TestUtils {
 
@@ -55,7 +54,10 @@ public final class TestUtils {
         return align(projectRoot, expectFailure, Collections.emptyMap());
     }
 
-    static TestManipulationModel align(File projectRoot, String projectDirName, boolean expectFailure,
+    static TestManipulationModel align(
+            File projectRoot,
+            String projectDirName,
+            boolean expectFailure,
             Map<String, String> systemProps)
             throws IOException, URISyntaxException {
 
@@ -84,7 +86,8 @@ public final class TestUtils {
             systemProps.remove("--quiet");
         }
         finalSystemProps.putAll(systemProps);
-        final List<String> systemPropsList = finalSystemProps.entrySet().stream()
+        final List<String> systemPropsList = finalSystemProps.entrySet()
+                .stream()
                 .map(e -> (e.getKey().startsWith("-") ? e.getKey() : "-D" + e.getKey()) + "=" + e.getValue())
                 .collect(Collectors.toList());
         final List<String> allArguments = new ArrayList<>(systemPropsList.size() + 4);
@@ -120,8 +123,9 @@ public final class TestUtils {
      * @return the manipulation model
      */
     static TestManipulationModel align(File projectRoot, boolean expectFailure, Map<String, String> systemProps) {
-        assertTrue(projectRoot.toPath().resolve("build.gradle").toFile().exists() ||
-                projectRoot.toPath().resolve("build.gradle.kts").toFile().exists());
+        assertTrue(
+                projectRoot.toPath().resolve("build.gradle").toFile().exists() ||
+                        projectRoot.toPath().resolve("build.gradle.kts").toFile().exists());
 
         final GradleRunner runner = createGradleRunner(projectRoot, systemProps);
         final BuildResult buildResult;

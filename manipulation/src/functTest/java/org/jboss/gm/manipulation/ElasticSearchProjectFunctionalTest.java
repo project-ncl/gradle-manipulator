@@ -1,12 +1,16 @@
 package org.jboss.gm.manipulation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import org.apache.commons.io.FileUtils;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
@@ -18,11 +22,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 
 @Ignore
 public class ElasticSearchProjectFunctionalTest {
@@ -72,11 +71,14 @@ public class ElasticSearchProjectFunctionalTest {
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
         assertThat(
-                FileUtils.readFileToString(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile(),
-                        Charset.defaultCharset())).contains("transport-netty4-client");
+                FileUtils.readFileToString(
+                        pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile(),
+                        Charset.defaultCharset()))
+                .contains("transport-netty4-client");
         assertTrue(systemOutRule.getLog().contains("Detected application of plugin hook"));
         assertTrue(systemOutRule.getLog().contains("Removing publishing repository test"));
-        assertTrue(systemOutRule.getLog().contains("Disabling publishing task publishNebulaPublicationToTestRepository"));
+        assertTrue(
+                systemOutRule.getLog().contains("Disabling publishing task publishNebulaPublicationToTestRepository"));
         assertTrue(systemOutRule.getLog().contains("publication has been added but the POM file generation disabled"));
     }
 

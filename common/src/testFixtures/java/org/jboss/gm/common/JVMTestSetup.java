@@ -1,21 +1,18 @@
 package org.jboss.gm.common;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import kong.unirest.Unirest;
-
 import org.apache.commons.lang.SystemUtils;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.tar.TarGZipUnArchiver;
-import org.codehaus.plexus.archiver.zip.ZipUnArchiver;
 import org.codehaus.plexus.logging.LogEnabled;
 import org.codehaus.plexus.logging.console.ConsoleLoggerManager;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class JVMTestSetup {
     public static final Path GRADLE_JDK_HOME = Paths.get(System.getProperty("user.home"), ".gradle", "jdks");

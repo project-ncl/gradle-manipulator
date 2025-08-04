@@ -1,10 +1,17 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collection;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
@@ -22,18 +29,11 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.assertj.core.api.Assertions.assertThat;
-
 // See ensureInvalidNoException method for explanation of this rule.
 @RunWith(BMUnitRunner.class)
 @BMUnitConfig(verbose = true, bmunitVerbose = true)
-@BMRule(name = "override-inprocess-configuration",
+@BMRule(
+        name = "override-inprocess-configuration",
         targetClass = "org.jboss.gm.common.Configuration",
         isInterface = true,
         targetMethod = "ignoreUnresolvableDependencies()",
@@ -52,16 +52,20 @@ public class InvalidProjectPassFunctionalTest extends AbstractWiremockTest {
 
     @Before
     public void setup() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("invalid-project-da-response.json"))));
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("invalid-project-da-response-project.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("invalid-project-da-response.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("invalid-project-da-response-project.json"))));
 
         System.setProperty(Configuration.DA, "http://127.0.0.1:" + wireMockRule.port() + "/da/rest/v-1");
     }

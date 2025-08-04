@@ -1,5 +1,8 @@
 package org.jboss.gm.common.logging;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.aeonbits.owner.ConfigCache;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.api.logging.Logger;
@@ -10,9 +13,6 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TestRule;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class GMLoggerTest {
 

@@ -1,5 +1,8 @@
 package org.jboss.gm.analyzer.alignment.io;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -9,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
@@ -21,9 +23,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 public class LockFileIOTest {
 
@@ -87,9 +86,11 @@ public class LockFileIOTest {
         copyToLockfilesRoot("compileClasspath.lockfile");
 
         Map<String, ProjectVersionRef> map = new HashMap<>();
-        map.put("org.hdrhistogram:HdrHistogram:2.1.10",
+        map.put(
+                "org.hdrhistogram:HdrHistogram:2.1.10",
                 SimpleProjectVersionRef.parse("org.hdrhistogram:HdrHistogram:2.1.10.redhat-00001"));
-        map.put("org.apache.commons:commons-lang3:3.8",
+        map.put(
+                "org.apache.commons:commons-lang3:3.8",
                 SimpleProjectVersionRef.parse("org.apache.commons:commons-lang3:3.8.redhat-00001"));
 
         LockFileIO.updateLockfiles(logger, tempDir.getRoot(), map);
@@ -104,11 +105,13 @@ public class LockFileIOTest {
                         tuple("guava", "25.1-android"));
 
         List<File> locks = LockFileIO.getLockFiles(tempDir.getRoot());
-        assertThat(FileUtils.readLines(locks.get(0), Charset.defaultCharset())).anyMatch(f -> f.contains(
-                "2.1.10.redhat-00001=compileClasspath,runtimeClasspath"));
+        assertThat(FileUtils.readLines(locks.get(0), Charset.defaultCharset())).anyMatch(
+                f -> f.contains(
+                        "2.1.10.redhat-00001=compileClasspath,runtimeClasspath"));
 
-        assertThat(systemOutRule.getLog()).contains("Found lock file element 'org.apache.commons:commons-lang3:3"
-                + ".8' to be replaced by org.apache.commons:commons-lang3:3.8.redhat-00001");
+        assertThat(systemOutRule.getLog()).contains(
+                "Found lock file element 'org.apache.commons:commons-lang3:3"
+                        + ".8' to be replaced by org.apache.commons:commons-lang3:3.8.redhat-00001");
 
     }
 }

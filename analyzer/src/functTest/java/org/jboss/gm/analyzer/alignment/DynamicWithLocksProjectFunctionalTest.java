@@ -1,12 +1,21 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.Assume.assumeTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -25,16 +34,6 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.junit.Assume.assumeTrue;
-
 public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest {
 
     @Rule
@@ -48,16 +47,20 @@ public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest 
 
     @Before
     public void setup() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("dynamic-project.with-locks.json"))));
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("dynamic-project.with-locks-project.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("dynamic-project.with-locks.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("dynamic-project.with-locks-project.json"))));
 
         System.setProperty(Configuration.DA, "http://127.0.0.1:" + wireMockRule.port() + "/da/rest/v-1");
     }
@@ -70,8 +73,11 @@ public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest 
         final File projectRoot = tempDir.newFolder("dynamic-project-with-locks");
 
         //noinspection ConstantConditions
-        org.apache.commons.io.FileUtils.copyDirectory(Paths
-                .get(TestUtils.class.getClassLoader().getResource(projectRoot.getName()).toURI()).toFile(), projectRoot);
+        org.apache.commons.io.FileUtils.copyDirectory(
+                Paths
+                        .get(TestUtils.class.getClassLoader().getResource(projectRoot.getName()).toURI())
+                        .toFile(),
+                projectRoot);
 
         final File gitDir = new File(projectRoot, "dotgit");
         Files.move(gitDir.toPath(), projectRoot.toPath().resolve(".git"));
@@ -82,7 +88,9 @@ public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest 
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(
+                AlignmentTask.INJECT_GME_END,
+                FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.jboss.gm.analyzer.functest");
@@ -107,10 +115,14 @@ public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest 
         });
 
         assertThat(
-                LockFileIO.readProjectVersionRefLocksOfFile(new File(projectRoot, "gradle/dependency-locks"
-                        + "/compileClasspath.lockfile"))).doesNotContain(
-                                SimpleProjectVersionRef.parse("org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1"),
-                                SimpleProjectVersionRef.parse("io.undertow:undertow-core:2.0.21.Final"));
+                LockFileIO.readProjectVersionRefLocksOfFile(
+                        new File(
+                                projectRoot,
+                                "gradle/dependency-locks"
+                                        + "/compileClasspath.lockfile")))
+                .doesNotContain(
+                        SimpleProjectVersionRef.parse("org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1"),
+                        SimpleProjectVersionRef.parse("io.undertow:undertow-core:2.0.21.Final"));
         assertThat(
                 LockFileIO.readProjectVersionRefLocksOfFile(new File(projectRoot, "gradle.lockfile"))).doesNotContain(
                         SimpleProjectVersionRef.parse("org.apache.commons:commons-lang3:3.8"));
@@ -119,7 +131,8 @@ public class DynamicWithLocksProjectFunctionalTest extends AbstractWiremockTest 
         assertTrue(new File(projectRoot, "gradle.lockfile").exists());
 
         // make sure the project name was added
-        assertEquals("rootProject.name=\"undertow\"",
+        assertEquals(
+                "rootProject.name=\"undertow\"",
                 FileUtils.getLastLine(new File(projectRoot, "settings.gradle")));
     }
 }

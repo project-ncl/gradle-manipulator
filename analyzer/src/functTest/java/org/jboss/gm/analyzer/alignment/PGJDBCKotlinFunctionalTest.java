@@ -1,11 +1,19 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.List;
-
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.util.GradleVersion;
@@ -19,15 +27,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
 
 public class PGJDBCKotlinFunctionalTest extends AbstractWiremockTest {
 
@@ -48,20 +47,25 @@ public class PGJDBCKotlinFunctionalTest extends AbstractWiremockTest {
     }
 
     private void stubDACall() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("spring-like-layout-da-root.json"))));
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("spring-like-layout-da-root-project.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("spring-like-layout-da-root.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("spring-like-layout-da-root-project.json"))));
     }
 
     @Test
-    public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException, ManipulationException {
+    public void ensureAlignmentFileCreatedAndAlignmentTaskRun()
+            throws IOException, URISyntaxException, ManipulationException {
         // XXX:
         // Script compilation errors:
         //

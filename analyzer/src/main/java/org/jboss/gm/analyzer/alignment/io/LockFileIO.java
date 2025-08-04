@@ -14,9 +14,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.experimental.UtilityClass;
-
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -73,14 +71,20 @@ public class LockFileIO {
             return Collections.emptyList();
         }
 
-        try (Stream<Path> stream = Files.find(locksRoot.toPath(), 1,
-                (filePath, fileAttr) -> fileAttr.isRegularFile() && filePath.getFileName().toString().endsWith(
-                        (LOCKFILE_EXTENSION)))) {
+        try (Stream<Path> stream = Files.find(
+                locksRoot.toPath(),
+                1,
+                (filePath, fileAttr) -> fileAttr.isRegularFile() && filePath.getFileName()
+                        .toString()
+                        .endsWith(
+                                (LOCKFILE_EXTENSION)))) {
             return stream.map(Path::toFile).collect(Collectors.toList());
         }
     }
 
-    public void updateLockfiles(Logger logger, File directory,
+    public void updateLockfiles(
+            Logger logger,
+            File directory,
             Map<String, ProjectVersionRef> alignedDependencies) {
         List<File> locksFiles;
 
@@ -113,8 +117,9 @@ public class LockFileIO {
                         String line = lockFileLines.get(i);
                         if (line.contains(matcher)) {
                             logger.debug("Found lock file element '{}' to be replaced by {}", line, value);
-                            line = line.replaceFirst(matcher +
-                                    (dynamic ? ":([a-zA-Z0-9.]+)(=.*)*" : "(=.*)*"),
+                            line = line.replaceFirst(
+                                    matcher +
+                                            (dynamic ? ":([a-zA-Z0-9.]+)(=.*)*" : "(=.*)*"),
                                     value + (dynamic ? "$2" : "$1"));
                             lockFileLines.set(i, line);
                             modified.set(true);

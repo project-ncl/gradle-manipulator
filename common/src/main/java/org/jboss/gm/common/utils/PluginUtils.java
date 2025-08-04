@@ -1,5 +1,7 @@
 package org.jboss.gm.common.utils;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -13,10 +15,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -27,42 +27,68 @@ import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.FileIO;
 import org.slf4j.Logger;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
-
 public class PluginUtils {
     private static final Map<String, PluginReference> PLUGINS = new LinkedHashMap<>();
 
     public static final String SEMANTIC_BUILD_VERSIONING = "net.vivin.gradle-semantic-build-versioning";
 
     static {
-        PLUGINS.put("com.github.ben-manes.versions", new PluginReference(Collections.singleton("dependencyUpdates"),
-                "DependencyUpdatesTask", Stream.of("dependencyUpdates", "DependencyUpdatesTask").collect(
-                        Collectors.toSet()),
-                "", Collections.singleton("com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask")));
+        PLUGINS.put(
+                "com.github.ben-manes.versions",
+                new PluginReference(
+                        Collections.singleton("dependencyUpdates"),
+                        "DependencyUpdatesTask",
+                        Stream.of("dependencyUpdates", "DependencyUpdatesTask")
+                                .collect(
+                                        Collectors.toSet()),
+                        "",
+                        Collections.singleton("com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask")));
         PLUGINS.put("com.github.burrunan.s3-build-cache", new PluginReference("buildCache"));
-        PLUGINS.put("de.marcphilipp.nexus-publish",
-                new PluginReference(Collections.singleton("nexusPublishing"), "", Collections.singleton(
-                        "publishToSonatype"),
+        PLUGINS.put(
+                "de.marcphilipp.nexus-publish",
+                new PluginReference(
+                        Collections.singleton("nexusPublishing"),
+                        "",
+                        Collections.singleton(
+                                "publishToSonatype"),
                         "NexusPublishExtension",
                         Collections.singleton("de.marcphilipp.gradle.nexus.NexusPublishExtension")));
         PLUGINS.put("gradle-enterprise", new PluginReference("gradleEnterprise"));
-        PLUGINS.put("com.gradle.enterprise", new PluginReference(Stream.of("gradleEnterprise", "buildScan").collect(
-                Collectors.toSet()), "", null));
+        PLUGINS.put(
+                "com.gradle.enterprise",
+                new PluginReference(
+                        Stream.of("gradleEnterprise", "buildScan")
+                                .collect(
+                                        Collectors.toSet()),
+                        "",
+                        null));
         // Following three require Gradle Enterprise plugin so remove these as well.
         PLUGINS.put("io.spring.ge.conventions", new PluginReference(null));
         PLUGINS.put("io.spring.gradle-enterprise-conventions", new PluginReference(null));
         PLUGINS.put("com.gradle.common-custom-user-data-gradle-plugin", new PluginReference(null));
-        PLUGINS.put("io.codearte.nexus-staging", new PluginReference(Collections.singleton("nexusStaging"), "",
-                Stream.of("closeRepository", "releaseRepository", "closeAndReleaseRepository").collect(
-                        Collectors.toSet())));
+        PLUGINS.put(
+                "io.codearte.nexus-staging",
+                new PluginReference(
+                        Collections.singleton("nexusStaging"),
+                        "",
+                        Stream.of("closeRepository", "releaseRepository", "closeAndReleaseRepository")
+                                .collect(
+                                        Collectors.toSet())));
         PLUGINS.put("io.github.gradle-nexus.publish-plugin", new PluginReference("nexusPublishing"));
         PLUGINS.put("nebula.publish-verification", new PluginReference("nebulaPublishVerification"));
         PLUGINS.put("signing", new PluginReference(Collections.singleton("signing"), "SigningPlugin", null));
         PLUGINS.put(SEMANTIC_BUILD_VERSIONING, new PluginReference("preRelease"));
-        PLUGINS.put("ru.vyarus.animalsniffer", new PluginReference(Stream.of("animalsniffer").collect(
-                Collectors.toSet()), "",
-                Stream.of("\\s+signature\\s+[A-Za-z0-9.@:\"]+signature[A-Za-z.\"]+$", "ru.vyarus:gradle-animalsniffer-plugin")
-                        .collect(Collectors.toSet())));
+        PLUGINS.put(
+                "ru.vyarus.animalsniffer",
+                new PluginReference(
+                        Stream.of("animalsniffer")
+                                .collect(
+                                        Collectors.toSet()),
+                        "",
+                        Stream.of(
+                                "\\s+signature\\s+[A-Za-z0-9.@:\"]+signature[A-Za-z.\"]+$",
+                                "ru.vyarus:gradle-animalsniffer-plugin")
+                                .collect(Collectors.toSet())));
     }
 
     /**
@@ -192,8 +218,10 @@ public class PluginUtils {
                 configureExtension = pluginReference.configureExtension;
             }
 
-            final Collection<File> files = FileUtils.listFiles(target,
-                    new WildcardFileFilter("*.gradle", "*.gradle.kts"), TrueFileFilter.INSTANCE);
+            final Collection<File> files = FileUtils.listFiles(
+                    target,
+                    new WildcardFileFilter("*.gradle", "*.gradle.kts"),
+                    TrueFileFilter.INSTANCE);
 
             for (File buildFile : files) {
                 try {
@@ -218,10 +246,12 @@ public class PluginUtils {
                     // id("...")
                     // id "..."
                     // apply plugin: "..."
-                    boolean removed = lines.removeIf(i -> i.matches(".*([`\"'])" + plugin + "([`\"']).*") &&
-                            !i.contains("plugins.withId"));
-                    removed |= lines.removeIf(i -> i.matches(".*\\s+" + plugin + "(\\s|$)+.*")
-                            && !i.contains("{"));
+                    boolean removed = lines.removeIf(
+                            i -> i.matches(".*([`\"'])" + plugin + "([`\"']).*") &&
+                                    !i.contains("plugins.withId"));
+                    removed |= lines.removeIf(
+                            i -> i.matches(".*\\s+" + plugin + "(\\s|$)+.*")
+                                    && !i.contains("{"));
 
                     // Remove any task references.
                     for (String t : tasks) {
@@ -244,7 +274,11 @@ public class PluginUtils {
                     // Remove any configuration block
                     for (String configBlock : configBlocks) {
                         contentBuilder = new StringBuilder(content);
-                        removed |= removeBlock(logger, buildFile, eol, contentBuilder,
+                        removed |= removeBlock(
+                                logger,
+                                buildFile,
+                                eol,
+                                contentBuilder,
                                 "(?m)(^|project\\.|\\s)+" + configBlock + "(\\s|$)+");
                         content = contentBuilder.toString();
                     }
@@ -252,9 +286,17 @@ public class PluginUtils {
                     // Remove withType blocks
                     if (isNotEmpty(pluginType)) {
                         contentBuilder = new StringBuilder(content);
-                        removed |= removeBlock(logger, buildFile, eol, contentBuilder,
+                        removed |= removeBlock(
+                                logger,
+                                buildFile,
+                                eol,
+                                contentBuilder,
                                 "plugins.withType<" + pluginType + ">");
-                        removed |= removeBlock(logger, buildFile, eol, contentBuilder,
+                        removed |= removeBlock(
+                                logger,
+                                buildFile,
+                                eol,
+                                contentBuilder,
                                 "tasks.withType<" + pluginType + ">");
                         content = contentBuilder.toString();
                     }
@@ -262,7 +304,11 @@ public class PluginUtils {
                     // Remove withId blocks e.g.
                     // plugins.withId("de.marcphilipp.nexus-publish") { ... }
                     contentBuilder = new StringBuilder(content);
-                    removed |= removeBlock(logger, buildFile, eol, contentBuilder,
+                    removed |= removeBlock(
+                            logger,
+                            buildFile,
+                            eol,
+                            contentBuilder,
                             "plugins.withId\\(\"" + plugin + "\"\\)");
                     content = contentBuilder.toString();
 
@@ -270,7 +316,11 @@ public class PluginUtils {
                     // configure<NexusPublishExtension> {
                     if (isNotEmpty(configureExtension)) {
                         contentBuilder = new StringBuilder(content);
-                        removed |= removeBlock(logger, buildFile, eol, contentBuilder,
+                        removed |= removeBlock(
+                                logger,
+                                buildFile,
+                                eol,
+                                contentBuilder,
                                 "configure<" + configureExtension + ">");
                         content = contentBuilder.toString();
                     }
@@ -279,20 +329,35 @@ public class PluginUtils {
                     // rootProject.tasks.named("closeAndReleaseRepository") {
                     for (String t : tasks) {
                         contentBuilder = new StringBuilder(content);
-                        removed |= removeBlock(logger, buildFile, eol, contentBuilder,
+                        removed |= removeBlock(
+                                logger,
+                                buildFile,
+                                eol,
+                                contentBuilder,
                                 "(?m)^.*\\(\"" + t + "\"\\)(\\.configure|)");
                         // Sometimes tasks can be single quoted e.g.
                         // tasks.named('closeAndReleaseRepository') {
-                        removed |= removeBlock(logger, buildFile, eol, contentBuilder,
+                        removed |= removeBlock(
+                                logger,
+                                buildFile,
+                                eol,
+                                contentBuilder,
                                 "(?m)^.*\\('" + t + "'\\)(\\.configure|)");
-                        removed |= removeBlock(logger, buildFile, eol, contentBuilder,
+                        removed |= removeBlock(
+                                logger,
+                                buildFile,
+                                eol,
+                                contentBuilder,
                                 "(?m)^.*named<" + t + ">.*?\\s");
                         content = contentBuilder.toString();
                     }
 
                     if (removed) {
-                        logger.info("Removed instances of plugin {} with configuration block of {} from {}", plugin,
-                                String.join(",", configBlocks), buildFile);
+                        logger.info(
+                                "Removed instances of plugin {} with configuration block of {} from {}",
+                                plugin,
+                                String.join(",", configBlocks),
+                                buildFile);
                         FileUtils.writeStringToFile(buildFile, content, Charset.defaultCharset());
                     }
                 } catch (IOException e) {
@@ -335,7 +400,9 @@ public class PluginUtils {
     public static void addLenientLockMode(Logger logger, File target)
             throws ManipulationException {
         final String depLock = "dependencyLocking {";
-        final Collection<File> files = FileUtils.listFiles(target, new WildcardFileFilter("*.gradle", "*.gradle.kts"),
+        final Collection<File> files = FileUtils.listFiles(
+                target,
+                new WildcardFileFilter("*.gradle", "*.gradle.kts"),
                 TrueFileFilter.INSTANCE);
 
         for (File buildFile : files) {
@@ -419,10 +486,12 @@ public class PluginUtils {
             }
             if (bracketCount != 0) {
                 throw new ManipulationException(
-                        "Unable to locate block {} to remove within {}", block,
+                        "Unable to locate block {} to remove within {}",
+                        block,
                         buildFile);
             }
-            logger.debug("Removing plugin block of {}",
+            logger.debug(
+                    "Removing plugin block of {}",
                     content.substring(startIndex, endIndex));
             // The string split/join can lose the trailing new line so force append it.
             content.append(eol);

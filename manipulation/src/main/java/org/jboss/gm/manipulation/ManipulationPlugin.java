@@ -1,13 +1,13 @@
 package org.jboss.gm.manipulation;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.beanutils.ContextClassLoaderLocal;
-import org.apache.commons.lang.reflect.FieldUtils;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.util.ManifestUtils;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Plugin;
@@ -27,9 +27,6 @@ import org.jboss.gm.manipulation.actions.OverrideDependenciesAction;
 import org.jboss.gm.manipulation.actions.PublishTaskTransformerAction;
 import org.jboss.gm.manipulation.actions.PublishingArtifactsAction;
 import org.jboss.gm.manipulation.actions.UploadTaskTransformerAction;
-
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
  * The manipulation plugin.
@@ -86,7 +83,10 @@ public class ManipulationPlugin implements Plugin<Project> {
         }
 
         if (!new File(project.getRootDir(), ManipulationIO.MANIPULATION_FILE_NAME).exists()) {
-            logger.error("No {} found in {}; exiting plugin.", ManipulationIO.MANIPULATION_FILE_NAME, project.getRootDir());
+            logger.error(
+                    "No {} found in {}; exiting plugin.",
+                    ManipulationIO.MANIPULATION_FILE_NAME,
+                    project.getRootDir());
             return;
         }
 
@@ -97,7 +97,10 @@ public class ManipulationPlugin implements Plugin<Project> {
         if (!project.getVersion().equals(correspondingModule.getVersion())) {
             // we need to change the project version early so various tasks that ready early and create other vars based on it
             // (like the zip tasks) can use the correct version
-            logger.info("Updating project ({}) version {} to {}", project.getProjectDir(), project.getVersion(),
+            logger.info(
+                    "Updating project ({}) version {} to {}",
+                    project.getProjectDir(),
+                    project.getVersion(),
                     correspondingModule.getVersion());
             project.setVersion(correspondingModule.getVersion());
 
@@ -105,14 +108,18 @@ public class ManipulationPlugin implements Plugin<Project> {
                 // This double version set is required - sometimes other plugins seem to override the version we set initially.
                 // We need to set it at the start as other plugins also require it there. Hence this belt and braces approach.
                 if (!correspondingModule.getVersion().equals(project.getVersion())) {
-                    logger.warn("After evaluation, another plugin has reset the version to {}. Resetting to {}",
-                            project.getVersion(), correspondingModule.getVersion());
+                    logger.warn(
+                            "After evaluation, another plugin has reset the version to {}. Resetting to {}",
+                            project.getVersion(),
+                            correspondingModule.getVersion());
                     project.setVersion(correspondingModule.getVersion());
                 }
             });
         } else {
-            logger.info("Not updating project ({}) since version ({}) has not changed",
-                    project.getProjectDir(), project.getVersion());
+            logger.info(
+                    "Not updating project ({}) since version ({}) has not changed",
+                    project.getProjectDir(),
+                    project.getVersion());
         }
 
         final ResolvedDependenciesRepository resolvedDependenciesRepository = new ResolvedDependenciesRepository();
@@ -130,14 +137,22 @@ public class ManipulationPlugin implements Plugin<Project> {
 
         for (String hook : configuration.publishPluginHooks()) {
             project.getPluginManager().withPlugin(hook, action -> {
-                configurePublishingTask(configuration, project, correspondingModule, resolvedDependenciesRepository,
+                configurePublishingTask(
+                        configuration,
+                        project,
+                        correspondingModule,
+                        resolvedDependenciesRepository,
                         hook);
             });
         }
     }
 
-    private void configurePublishingTask(Configuration config, Project project, ManipulationModel correspondingModule,
-            ResolvedDependenciesRepository resolvedDependenciesRepository, String pluginHook) {
+    private void configurePublishingTask(
+            Configuration config,
+            Project project,
+            ManipulationModel correspondingModule,
+            ResolvedDependenciesRepository resolvedDependenciesRepository,
+            String pluginHook) {
         project.afterEvaluate(evaluatedProject -> {
             if (!isEmpty(pluginHook)) {
                 logger.warn("Detected application of plugin hook {} and now running publishing task again", pluginHook);
@@ -159,7 +174,9 @@ public class ManipulationPlugin implements Plugin<Project> {
                         } catch (ClassNotFoundException e) {
                             logger.error(
                                     "For project {}, found {} plugin, but the class org.gradle.api.plugins.MavenPlugin is not available",
-                                    evaluatedProject.getName(), LEGACY_MAVEN_PLUGIN, e);
+                                    evaluatedProject.getName(),
+                                    LEGACY_MAVEN_PLUGIN,
+                                    e);
                         }
                     }
                 } else if (MAVEN_PUBLISH_PLUGIN.equals(deployPlugin)) {
@@ -196,32 +213,39 @@ public class ManipulationPlugin implements Plugin<Project> {
                 if (archivesBaseName != null) {
                     logger.warn(
                             "Located archivesBaseName override ; forcing project name to '{}' from '{}' for correct usage",
-                            archivesBaseName, evaluatedProject.getName());
+                            archivesBaseName,
+                            evaluatedProject.getName());
                     ProjectUtils.updateNameField(evaluatedProject, archivesBaseName);
                 }
 
                 evaluatedProject
-                        .afterEvaluate(new UploadTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
+                        .afterEvaluate(
+                                new UploadTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
                 evaluatedProject.afterEvaluate(new LegacyMavenPublishingRepositoryAction());
 
                 List<String> taskNames = evaluatedProject.getGradle().getStartParameter().getTaskNames();
 
                 if (taskNames.stream().noneMatch(p -> p.contains("uploadArchives"))) {
-                    logger.error("Unable to find uploadArchives parameter in tasks {} for Legacy Maven Plugin for project {}",
-                            taskNames, evaluatedProject.getName());
+                    logger.error(
+                            "Unable to find uploadArchives parameter in tasks {} for Legacy Maven Plugin for project {}",
+                            taskNames,
+                            evaluatedProject.getName());
                 }
             } else if (MAVEN_PUBLISH_PLUGIN.equals(deployPlugin)) {
                 logger.info("Configuring {} plugin for project {}", deployPlugin, evaluatedProject.getName());
 
                 evaluatedProject.afterEvaluate(new MavenPublishingRepositoryAction());
                 evaluatedProject
-                        .afterEvaluate(new PublishTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
+                        .afterEvaluate(
+                                new PublishTaskTransformerAction(correspondingModule, resolvedDependenciesRepository));
 
                 List<String> taskNames = evaluatedProject.getGradle().getStartParameter().getTaskNames();
 
                 if (taskNames.stream().noneMatch(p -> p.contains("publish"))) {
-                    logger.error("Unable to find publish parameter in tasks {} for Maven Publish Plugin for project {}",
-                            taskNames, evaluatedProject.getName());
+                    logger.error(
+                            "Unable to find publish parameter in tasks {} for Maven Publish Plugin for project {}",
+                            taskNames,
+                            evaluatedProject.getName());
                 }
             } else {
                 logger.warn("No publishing plugin was configured for '{}'!", evaluatedProject.getName());
@@ -232,8 +256,9 @@ public class ManipulationPlugin implements Plugin<Project> {
     private static void checkEnforcedPluginSetting(Project evaluatedProject, String enforcedPlugin) {
         String otherPlugin = LEGACY_MAVEN_PLUGIN.equals(enforcedPlugin) ? MAVEN_PUBLISH_PLUGIN : LEGACY_MAVEN_PLUGIN;
         if (evaluatedProject.getPluginManager().hasPlugin(otherPlugin)) {
-            throw new InvalidUserDataException("User configuration enforces " + enforcedPlugin
-                    + " but project already uses " + otherPlugin);
+            throw new InvalidUserDataException(
+                    "User configuration enforces " + enforcedPlugin
+                            + " but project already uses " + otherPlugin);
         }
     }
 

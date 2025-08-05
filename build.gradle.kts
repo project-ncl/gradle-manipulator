@@ -224,12 +224,12 @@ subprojects {
     extra["jgitVersion"] = "6.3.0.202209071007-r"
     extra["junitVersion"] = "4.13.2"
     // Must use 1.3.x series as 1.4.x and above requires JDK11.
-    extra["logbackVersion"] = "1.3.14"
+    extra["logbackVersion"] = "1.3.15"
     extra["mavenVersion"] = "3.6.3"
     extra["opentelemetryVersion"] = "1.2.0"
     extra["ownerVersion"] = "1.0.12"
-    extra["pmeVersion"] = "4.17"
-    extra["slf4jVersion"] = "2.0.13"
+    extra["pmeVersion"] = "4.21"
+    extra["slf4jVersion"] = "2.0.17"
     extra["systemStubsVersion"] = "2.1.8"
 
     if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.4")) {

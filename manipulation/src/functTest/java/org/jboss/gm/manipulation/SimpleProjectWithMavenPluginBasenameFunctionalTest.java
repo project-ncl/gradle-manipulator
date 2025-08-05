@@ -1,12 +1,14 @@
 package org.jboss.gm.manipulation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import org.apache.commons.io.FileUtils;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
@@ -17,9 +19,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
 
 public class SimpleProjectWithMavenPluginBasenameFunctionalTest {
 
@@ -61,16 +60,21 @@ public class SimpleProjectWithMavenPluginBasenameFunctionalTest {
         assertThat(buildResult.task(":install").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
         assertThat(buildResult.task(":uploadArchives").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 
-        final File repoPathToPom = m2Directory.toPath().resolve(PATH_IN_REPOSITORY).resolve(ARTIFACT_NAME + ".pom").toFile();
+        final File repoPathToPom = m2Directory.toPath()
+                .resolve(PATH_IN_REPOSITORY)
+                .resolve(ARTIFACT_NAME + ".pom")
+                .toFile();
 
         // verify installed artifacts
         verifyArtifacts(m2Directory);
-        assertThat(FileUtils.readFileToString(repoPathToPom, Charset.defaultCharset())).contains("Apache License, Version")
+        assertThat(FileUtils.readFileToString(repoPathToPom, Charset.defaultCharset()))
+                .contains("Apache License, Version")
                 .contains("artifactId>base-name");
 
         // verify published artifacts
         verifyArtifacts(publishDirectory);
-        assertThat(FileUtils.readFileToString(repoPathToPom, Charset.defaultCharset())).contains("Apache License, Version")
+        assertThat(FileUtils.readFileToString(repoPathToPom, Charset.defaultCharset()))
+                .contains("Apache License, Version")
                 .contains("artifactId>base-name");
     }
 

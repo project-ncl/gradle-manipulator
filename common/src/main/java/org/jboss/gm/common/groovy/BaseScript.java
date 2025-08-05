@@ -4,9 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Properties;
-
 import lombok.Getter;
-
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.core.groovy.GradleBaseScript;
@@ -66,7 +64,8 @@ public abstract class BaseScript extends GradleBaseScript {
     public ManipulationModel getModel() {
         if (stage == InvocationStage.PREPARSE || stage == InvocationStage.FIRST) {
             logger.error("getModel unsupported for InvocationStage {}", stage.name());
-            throw new ManipulationUncheckedException("Getting the model is not supported for Groovy in stage " + stage.name());
+            throw new ManipulationUncheckedException(
+                    "Getting the model is not supported for Groovy in stage " + stage.name());
         }
         return model;
     }
@@ -122,8 +121,14 @@ public abstract class BaseScript extends GradleBaseScript {
      * @param rootProject Current project
      * @param model the current aligned model.
      */
-    public void setValues(Logger logger, InvocationStage stage, File rootDir, Properties properties, Translator restAPI,
-            Project rootProject, ManipulationModel model) {
+    public void setValues(
+            Logger logger,
+            InvocationStage stage,
+            File rootDir,
+            Properties properties,
+            Translator restAPI,
+            Project rootProject,
+            ManipulationModel model) {
         this.logger = logger;
         this.stage = stage;
         this.rootProject = rootProject;

@@ -2,7 +2,6 @@ package org.jboss.gm.analyzer.alignment;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.common.util.ManifestUtils;
@@ -55,7 +54,8 @@ public class AlignmentPlugin implements Plugin<Project> {
                 Method m = Task.class.getMethod("notCompatibleWithConfigurationCache", String.class);
                 m.invoke(task, "GME is not compatible with configuration cache");
             } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-                throw new ManipulationUncheckedException("Unable to set GME as incompatible with configuration caching",
+                throw new ManipulationUncheckedException(
+                        "Unable to set GME as incompatible with configuration caching",
                         e);
             }
         }

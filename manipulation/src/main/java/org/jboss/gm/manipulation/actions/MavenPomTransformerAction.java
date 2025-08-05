@@ -1,5 +1,7 @@
 package org.jboss.gm.manipulation.actions;
 
+import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
+
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.gradle.api.Action;
@@ -9,8 +11,6 @@ import org.jboss.gm.manipulation.ResolvedDependenciesRepository;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
 
 /**
  * Overrides data in a maven POM.
@@ -33,7 +33,8 @@ public class MavenPomTransformerAction
      * @param alignmentConfiguration the alignment configuration
      * @param resolvedDependenciesRepository the resolved dependencies repository
      */
-    public MavenPomTransformerAction(ManipulationModel alignmentConfiguration,
+    public MavenPomTransformerAction(
+            ManipulationModel alignmentConfiguration,
             ResolvedDependenciesRepository resolvedDependenciesRepository) {
         this.alignmentConfiguration = alignmentConfiguration;
         this.resolvedDependenciesRepository = resolvedDependenciesRepository;

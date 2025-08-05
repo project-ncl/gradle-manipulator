@@ -1,5 +1,9 @@
 package org.jboss.gm.manipulation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -13,7 +17,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.jar.JarInputStream;
 import java.util.stream.Collectors;
-
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.logging.Logger;
 import org.gradle.testkit.runner.BuildResult;
@@ -26,10 +29,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 
 public class ManifestVerificationFunctionalTest {
     private static final Logger logger = GMLogger.getLogger(ManifestVerificationFunctionalTest.class);
@@ -67,7 +66,8 @@ public class ManifestVerificationFunctionalTest {
                 .withArguments("uploadArchives", "--stacktrace", "--info")
                 .build();
 
-        assertThat(Objects.requireNonNull(buildResult.task(":uploadArchives")).getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
+        assertThat(Objects.requireNonNull(buildResult.task(":uploadArchives")).getOutcome())
+                .isEqualTo(TaskOutcome.SUCCESS);
 
         File manifestFile = new File(projectRoot, "build/tmp/jar/MANIFEST.MF");
         assertTrue(manifestFile.exists());
@@ -114,8 +114,9 @@ public class ManifestVerificationFunctionalTest {
                         "Implementation-Vendor: org.apache.thrift\r\n" +
                         "Implementation-Vendor-Id: org.apache.thrift");
 
-        Path pathToArtifacts = publishDirectory.toPath().resolve(
-                Paths.get("org/apache/thrift/libthrift/0.13.0.temporary-redhat-00001/"));
+        Path pathToArtifacts = publishDirectory.toPath()
+                .resolve(
+                        Paths.get("org/apache/thrift/libthrift/0.13.0.temporary-redhat-00001/"));
         final String ARTIFACT_NAME = "libthrift-0.13.0.temporary-redhat-00001";
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
@@ -156,9 +157,13 @@ public class ManifestVerificationFunctionalTest {
         File manifestFile = new File(projectRoot, "api/build/tmp/jar/MANIFEST.MF");
         assertTrue(manifestFile.exists());
 
-        try (JarInputStream jarInputStream = new JarInputStream(Files.newInputStream(new File(projectRoot,
-                "api/build/libs/reactive-streams-1.0.3.temporary-redhat-00001.jar").toPath()))) {
-            List<String> lines = jarInputStream.getManifest().getMainAttributes()
+        try (JarInputStream jarInputStream = new JarInputStream(
+                Files.newInputStream(
+                        new File(
+                                projectRoot,
+                                "api/build/libs/reactive-streams-1.0.3.temporary-redhat-00001.jar").toPath()))) {
+            List<String> lines = jarInputStream.getManifest()
+                    .getMainAttributes()
                     .entrySet()
                     .stream()
                     .map(entry -> entry.getKey() + ": " + entry.getValue())
@@ -167,25 +172,27 @@ public class ManifestVerificationFunctionalTest {
             String stringLines = String.join("\n", lines);
 
             assertThat(stringLines)
-                    .contains(""
-                            + "Bundle-Description: Reactive Streams API\n"
-                            + "Bundle-DocURL: http://reactive-streams.org\n"
-                            + "Bundle-ManifestVersion: 2\n"
-                            + "Bundle-Name: reactive-streams\n"
-                            + "Bundle-SymbolicName: org.reactivestreams.reactive-streams\n"
-                            + "Bundle-Vendor: Reactive Streams SIG\n"
-                            + "Bundle-Version: 1.0.3.temporary-redhat-00001\n")
-                    .contains(""
-                            + "Export-Package: org.reactivestreams;version=\"1.0.3.temporary-redhat-00001\"\n"
-                            + "Implementation-Title: reactive-streams\n"
-                            + "Implementation-Vendor-Id: org.reactivestreams\n"
-                            + "Implementation-Vendor: org.reactivestreams\n"
-                            + "Implementation-Version: 1.0.3.temporary-redhat-00001\n"
-                            + "Manifest-Version: 1.0\n"
-                            + "Require-Capability: osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(version=1.6))\"\n"
-                            + "Specification-Title: reactive-streams\n"
-                            + "Specification-Vendor: org.reactivestreams\n"
-                            + "Specification-Version: 1.0.3.temporary-redhat-00001\n");
+                    .contains(
+                            ""
+                                    + "Bundle-Description: Reactive Streams API\n"
+                                    + "Bundle-DocURL: http://reactive-streams.org\n"
+                                    + "Bundle-ManifestVersion: 2\n"
+                                    + "Bundle-Name: reactive-streams\n"
+                                    + "Bundle-SymbolicName: org.reactivestreams.reactive-streams\n"
+                                    + "Bundle-Vendor: Reactive Streams SIG\n"
+                                    + "Bundle-Version: 1.0.3.temporary-redhat-00001\n")
+                    .contains(
+                            ""
+                                    + "Export-Package: org.reactivestreams;version=\"1.0.3.temporary-redhat-00001\"\n"
+                                    + "Implementation-Title: reactive-streams\n"
+                                    + "Implementation-Vendor-Id: org.reactivestreams\n"
+                                    + "Implementation-Vendor: org.reactivestreams\n"
+                                    + "Implementation-Version: 1.0.3.temporary-redhat-00001\n"
+                                    + "Manifest-Version: 1.0\n"
+                                    + "Require-Capability: osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(version=1.6))\"\n"
+                                    + "Specification-Title: reactive-streams\n"
+                                    + "Specification-Vendor: org.reactivestreams\n"
+                                    + "Specification-Version: 1.0.3.temporary-redhat-00001\n");
         }
     }
 
@@ -217,17 +224,21 @@ public class ManifestVerificationFunctionalTest {
                 .isEqualTo(TaskOutcome.SUCCESS);
 
         Path pathToArtifacts = publishDirectory.toPath().resolve(PATH_IN_REPOSITORY);
-        assertTrue(systemOutRule.getLog().contains(
-                "Updating publication artifactId (driver-core) as it is not consistent with archivesBaseName (mongodb-driver-core)"));
+        assertTrue(
+                systemOutRule.getLog()
+                        .contains(
+                                "Updating publication artifactId (driver-core) as it is not consistent with archivesBaseName (mongodb-driver-core)"));
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
 
         File manifestFile = new File(projectRoot, "bson/build/tmp/jar/MANIFEST.MF");
         assertTrue(manifestFile.exists());
 
-        try (JarInputStream jarInputStream = new JarInputStream(Files.newInputStream(
-                new File(projectRoot, "bson/build/libs/bson-" + ARTIFACT_VERSION + ".jar").toPath()))) {
-            List<String> lines = jarInputStream.getManifest().getMainAttributes()
+        try (JarInputStream jarInputStream = new JarInputStream(
+                Files.newInputStream(
+                        new File(projectRoot, "bson/build/libs/bson-" + ARTIFACT_VERSION + ".jar").toPath()))) {
+            List<String> lines = jarInputStream.getManifest()
+                    .getMainAttributes()
                     .entrySet()
                     .stream()
                     .map(entry -> entry.getKey() + ": " + entry.getValue())
@@ -235,15 +246,16 @@ public class ManifestVerificationFunctionalTest {
                     .collect(Collectors.toList());
             String stringLines = String.join("\n", lines);
 
-            assertThat(stringLines).contains("Export-Package: org.bson;version=\"4.1.0\"\n"
-                    + "Implementation-Title: bson\n"
-                    + "Implementation-Vendor-Id: org.mongodb\n"
-                    + "Implementation-Vendor: org.mongodb\n"
-                    + "Implementation-Version: " + ARTIFACT_VERSION + "\n"
-                    + "Manifest-Version: 1.0\n"
-                    + "Require-Capability: osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(version=1.8))\"\n"
-                    + "Specification-Title: bson\n" + "Specification-Vendor: org.mongodb\n"
-                    + "Specification-Version: " + ARTIFACT_VERSION);
+            assertThat(stringLines).contains(
+                    "Export-Package: org.bson;version=\"4.1.0\"\n"
+                            + "Implementation-Title: bson\n"
+                            + "Implementation-Vendor-Id: org.mongodb\n"
+                            + "Implementation-Vendor: org.mongodb\n"
+                            + "Implementation-Version: " + ARTIFACT_VERSION + "\n"
+                            + "Manifest-Version: 1.0\n"
+                            + "Require-Capability: osgi.ee;filter:=\"(&(osgi.ee=JavaSE)(version=1.8))\"\n"
+                            + "Specification-Title: bson\n" + "Specification-Vendor: org.mongodb\n"
+                            + "Specification-Version: " + ARTIFACT_VERSION);
         }
     }
 
@@ -285,14 +297,20 @@ public class ManifestVerificationFunctionalTest {
         assertThat(manifestFile).exists();
 
         if (logger.isInfoEnabled()) {
-            logger.info("Contents of manifest file {}:{}{}",
-                    projectRoot.toPath().relativize(manifestFile.toPath()), System.lineSeparator(),
+            logger.info(
+                    "Contents of manifest file {}:{}{}",
+                    projectRoot.toPath().relativize(manifestFile.toPath()),
+                    System.lineSeparator(),
                     FileUtils.readFileToString(manifestFile, StandardCharsets.UTF_8));
         }
 
-        try (JarInputStream jarInputStream = new JarInputStream(Files.newInputStream(Paths.get(
-                projectRoot.getAbsolutePath(), "driver-core/build/libs/mongodb-driver-core-" + ARTIFACT_VERSION + ".jar")))) {
-            List<String> lines = jarInputStream.getManifest().getMainAttributes()
+        try (JarInputStream jarInputStream = new JarInputStream(
+                Files.newInputStream(
+                        Paths.get(
+                                projectRoot.getAbsolutePath(),
+                                "driver-core/build/libs/mongodb-driver-core-" + ARTIFACT_VERSION + ".jar")))) {
+            List<String> lines = jarInputStream.getManifest()
+                    .getMainAttributes()
                     .entrySet()
                     .stream()
                     .map(entry -> entry.getKey() + ": " + entry.getValue())
@@ -355,7 +373,8 @@ public class ManifestVerificationFunctionalTest {
 
         try (JarInputStream jarInputStream = new JarInputStream(
                 Files.newInputStream(new File(projectRoot, "asm/build/libs/asm-9.5.0.redhat-00001.jar").toPath()))) {
-            List<String> lines = jarInputStream.getManifest().getMainAttributes()
+            List<String> lines = jarInputStream.getManifest()
+                    .getMainAttributes()
                     .entrySet()
                     .stream()
                     .map(entry -> entry.getKey() + ": " + entry.getValue())

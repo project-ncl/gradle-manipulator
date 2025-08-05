@@ -4,10 +4,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import lombok.Getter;
 import lombok.Setter;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -123,7 +121,11 @@ public interface AlignmentService {
         private Optional<ProjectRef> matchingProjectRef(Project project, ProjectRef gav) {
             return dependencyOverrides == null ? Optional.empty()
                     : dependencyOverrides.get(project) == null ? Optional.empty()
-                            : dependencyOverrides.get(project).keySet().stream().filter(p -> p.matches(gav)).findFirst();
+                            : dependencyOverrides.get(project)
+                                    .keySet()
+                                    .stream()
+                                    .filter(p -> p.matches(gav))
+                                    .findFirst();
         }
     }
 

@@ -1,5 +1,9 @@
 package org.jboss.gm.manipulation.actions;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.jboss.gm.manipulation.ManipulationPlugin.LEGACY_MAVEN_PLUGIN;
+import static org.jboss.gm.manipulation.actions.MavenPublishingRepositoryAction.REPO_NAME;
+
 import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Action;
@@ -8,15 +12,10 @@ import org.gradle.api.credentials.HttpHeaderCredentials;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.Upload;
 import org.gradle.authentication.http.HttpHeaderAuthentication;
-import org.gradle.plugins.signing.SigningExtension;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.utils.ProjectUtils;
 import org.jboss.gm.manipulation.ManipulationPlugin;
-
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.jboss.gm.manipulation.ManipulationPlugin.LEGACY_MAVEN_PLUGIN;
-import static org.jboss.gm.manipulation.actions.MavenPublishingRepositoryAction.REPO_NAME;
 
 /**
  * Adds a publication repository to the legacy maven plugin.
@@ -71,9 +70,12 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
             logger.info("Creating uploadArchives task");
             uploadArchives = project.getTasks().create("uploadArchives", Upload.class);
         } else {
-            uploadArchives.getRepositories().configureEach(
-                    repository -> logger.info("Disabling repository publishing task {} for project {}",
-                            repository.getName(), project.getName()));
+            uploadArchives.getRepositories()
+                    .configureEach(
+                            repository -> logger.info(
+                                    "Disabling repository publishing task {} for project {}",
+                                    repository.getName(),
+                                    project.getName()));
             uploadArchives.getRepositories().clear();
         }
 
@@ -125,8 +127,10 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
             // checks the archivesBaseName value - overriding 'configurablePublishArtifact.setName' is insufficient.
             // We add it as an action to minimise any side effects.
             if (abn != null) {
-                logger.warn("Located archivesBaseName override ; forcing project name to {} from {} for correct deployment",
-                        abn, project.getName());
+                logger.warn(
+                        "Located archivesBaseName override ; forcing project name to {} from {} for correct deployment",
+                        abn,
+                        project.getName());
                 ProjectUtils.updateNameField(project, abn);
             }
         });
@@ -134,7 +138,10 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
             // TODO: Find a better method
             // Now revert the action performed above.
             if (abn != null) {
-                logger.warn("Resetting project name after archivesBaseName override to {} from {}", project.getName(), abn);
+                logger.warn(
+                        "Resetting project name after archivesBaseName override to {} from {}",
+                        project.getName(),
+                        abn);
                 ProjectUtils.updateNameField(project, abn);
             }
         });
@@ -142,12 +149,14 @@ public class LegacyMavenPublishingRepositoryAction implements Action<Project> {
         uploadArchives.setUploadDescriptor(false);
 
         // add an artifact referencing the POM
-        project.getArtifacts().add("publishArchives",
-                project.file(project.getBuildDir().toPath().resolve("poms/pom-default.xml")),
-                configurablePublishArtifact -> {
-                    configurablePublishArtifact.setName(abn == null ? project.getName() : abn);
-                    configurablePublishArtifact.setExtension("pom");
-                });
+        project.getArtifacts()
+                .add(
+                        "publishArchives",
+                        project.file(project.getBuildDir().toPath().resolve("poms/pom-default.xml")),
+                        configurablePublishArtifact -> {
+                            configurablePublishArtifact.setName(abn == null ? project.getName() : abn);
+                            configurablePublishArtifact.setExtension("pom");
+                        });
 
         // configure "install" and "uploadArchives" to use the new configurations
         Upload install = project.getTasks().withType(Upload.class).getByName("install");

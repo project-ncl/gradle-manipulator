@@ -1,27 +1,20 @@
 package org.jboss.gm.common.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
-import org.gradle.api.tasks.bundling.AbstractArchiveTask;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.utils.ProjectUtils;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * Contains the information extracted from a gradle project and its sub-project required to perform model and version
@@ -99,10 +92,11 @@ public class ManipulationModel {
         this.projectPathName = project.getName();
         this.group = ProjectUtils.getRealGroupId(project);
 
-        /* If a project has been configured like
+        /*
+         * If a project has been configured like
          * <code>
-         *  project(':streams') {
-         *    archivesBaseName = "my-streams"
+         * project(':streams') {
+         * archivesBaseName = "my-streams"
          * </code>
          * then that applies to any Task that has an archive base type.
          */
@@ -176,8 +170,10 @@ public class ManipulationModel {
         if (!path.contains(":")) {
             // we provided a simple name so assume we're looking for a direct child
             if (children.containsKey(path) && getName().equals(path)) {
-                getLogger().error("Child module ({}) has matching name to current module ({}) and unable to differentiate",
-                        children.keySet(), getName());
+                getLogger().error(
+                        "Child module ({}) has matching name to current module ({}) and unable to differentiate",
+                        children.keySet(),
+                        getName());
             }
 
             if (getName().equals(path) || path.isEmpty()) {

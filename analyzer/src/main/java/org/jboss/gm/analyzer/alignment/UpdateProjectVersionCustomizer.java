@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -46,7 +45,9 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
         this.cache = ManipulationCache.getCache(rootProject);
         state = new VersioningState(configuration.getProperties());
 
-        logger.info("Creating versioning state with {} and {}", configuration.versionIncrementalSuffix(),
+        logger.info(
+                "Creating versioning state with {} and {}",
+                configuration.versionIncrementalSuffix(),
                 configuration.versionIncrementalSuffixPadding());
     }
 
@@ -67,7 +68,9 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
             if (!DefaultProject.DEFAULT_VERSION.equals(project.getVersion())) {
                 if (configuration.versionModificationEnabled()) {
                     vc.translationMap = response.getTranslationMap();
-                    String version = vc.calculate(project.getGroup().toString(), project.getName(),
+                    String version = vc.calculate(
+                            project.getGroup().toString(),
+                            project.getName(),
                             project.getVersion().toString(),
                             state);
                     projectsToVersions.put(project, version);
@@ -76,15 +79,18 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
                     }
                 } else {
                     projectsToVersions.put(project, project.getVersion().toString());
-                    logger.info("Version modification is disabled. Not updating project {}:{} version {}",
+                    logger.info(
+                            "Version modification is disabled. Not updating project {}:{} version {}",
                             rootProject.getGroup(),
-                            rootProject.getName(), project.getVersion().toString());
+                            rootProject.getName(),
+                            project.getVersion().toString());
                 }
             }
         }
 
         // Set any that are 'unspecified' to the default project version.
-        rootProject.getAllprojects().stream()
+        rootProject.getAllprojects()
+                .stream()
                 .filter(f -> DefaultProject.DEFAULT_VERSION.equals(f.getVersion()))
                 .forEach(p -> projectsToVersions.put(p, newVersion[0]));
     }
@@ -96,7 +102,10 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
             super(null);
         }
 
-        public String calculate(final String groupId, final String artifactId, final String version,
+        public String calculate(
+                final String groupId,
+                final String artifactId,
+                final String version,
                 final VersioningState state) throws ManipulationException {
             return super.calculate(groupId, artifactId, version, state);
         }
@@ -111,7 +120,8 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
             if (m.exists()) {
                 result.add(ManipulationIO.readManipulationModel(rootProject.getRootDir()).getVersion());
             }
-            logger.debug("Adding project version candidates from cache {}",
+            logger.debug(
+                    "Adding project version candidates from cache {}",
                     cache.getProjectVersionRefs(state.isPreserveSnapshot()));
 
             if (translationMap == null) {

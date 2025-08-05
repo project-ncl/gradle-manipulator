@@ -1,10 +1,10 @@
 package org.jboss.gm.manipulation;
 
+import static junit.framework.TestCase.assertTrue;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.SystemOutRule;
-
-import static junit.framework.TestCase.assertTrue;
 
 public class ManipulationPluginTest {
 

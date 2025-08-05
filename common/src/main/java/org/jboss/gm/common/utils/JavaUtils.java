@@ -2,10 +2,8 @@ package org.jboss.gm.common.utils;
 
 import java.io.File;
 import java.io.IOException;
-
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
-
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.internal.jvm.JavaInfo;
 import org.gradle.internal.jvm.Jvm;

@@ -1,3 +1,10 @@
+buildscript {
+    configurations.all {
+        resolutionStrategy {
+            force 'com.netflix.nebula:nebula-gradle-interop:2.3.0'
+        }
+    }
+}
 
 plugins {
   id 'java-gradle-plugin'
@@ -6,7 +13,6 @@ plugins {
   id 'nebula.maven-base-publish' version '13.0.0'
   id 'nebula.maven-scm' version '13.0.0'
 }
-
 
 if (project == rootProject) {
   // change the build dir used during build init, so that doing a clean

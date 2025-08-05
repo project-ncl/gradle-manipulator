@@ -1,5 +1,7 @@
 package org.jboss.gm.analyzer.alignment.io;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -9,16 +11,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import lombok.experimental.UtilityClass;
-
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.utils.PluginUtils;
-
-import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * Utility class for settings file I/O.
@@ -100,11 +98,13 @@ public class SettingsFileIO {
 
                 if (settingsContents.contains("resolutionStrategy")) {
                     // Existing strategy so inject another
-                    settingsContents = settingsContents.replaceFirst("(?s)resolutionStrategy(\\s|$)+\\{",
+                    settingsContents = settingsContents.replaceFirst(
+                            "(?s)resolutionStrategy(\\s|$)+\\{",
                             "resolutionStrategy {\n eachPlugin { if (requested.id.id == \"org.jetbrains.dokka\") { useVersion(\"0.9.18\") } }\n");
                 } else if (settingsContents.contains("pluginManagement")) {
                     // Existing pluginManagement but no strategy so inject that
-                    settingsContents = settingsContents.replaceFirst("(?s)pluginManagement(\\s|$)+\\{",
+                    settingsContents = settingsContents.replaceFirst(
+                            "(?s)pluginManagement(\\s|$)+\\{",
                             "pluginManagement {\nresolutionStrategy {\n eachPlugin { if (requested.id.id == \"org.jetbrains.dokka\") { useVersion(\"0.9.18\") } } }\n");
                 } else {
                     // No pluginManagement so inject everything.
@@ -134,7 +134,9 @@ public class SettingsFileIO {
                     ".git/config file doesn't define SCM URL, failed to determine the root project name. File contents: {}",
                     lines);
         } catch (IOException e) {
-            throw new IOException("Unable to read .git/config file found, failed to determine the root project name", e);
+            throw new IOException(
+                    "Unable to read .git/config file found, failed to determine the root project name",
+                    e);
         }
     }
 

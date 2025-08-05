@@ -1,9 +1,7 @@
 package org.jboss.gm.analyzer.alignment.util;
 
 import java.util.function.Predicate;
-
 import lombok.experimental.UtilityClass;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
 import org.gradle.api.InvalidUserDataException;
@@ -41,7 +39,9 @@ public class DependencyPropertyParser {
                             + "' is not a properly formatted key since it is not properly split by '@' and '*");
         }
 
-        return new ResultImpl(SimpleProjectRef.parse(artifactAndModule[0]), createMatchesModulePredicate(artifactAndModule[1]));
+        return new ResultImpl(
+                SimpleProjectRef.parse(artifactAndModule[0]),
+                createMatchesModulePredicate(artifactAndModule[1]));
     }
 
     private static Predicate<ProjectRef> createMatchesModulePredicate(String moduleValue) {

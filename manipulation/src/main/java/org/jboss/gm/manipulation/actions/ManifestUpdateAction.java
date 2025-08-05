@@ -1,10 +1,11 @@
 package org.jboss.gm.manipulation.actions;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.lang.reflect.MethodUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Action;
@@ -14,8 +15,6 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.bundling.Jar;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
-
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
  * Overrides specified Manifest entries.
@@ -27,9 +26,13 @@ public class ManifestUpdateAction implements Action<Project> {
             "Specification-Version",
             "Bundle-Version",
     };
-    private static final String[] manifestOptionalNameValues = new String[] { "Implementation-Title", "Specification-Title",
+    private static final String[] manifestOptionalNameValues = new String[] {
+            "Implementation-Title",
+            "Specification-Title",
             "Bundle-Name" };
-    private static final String[] manifestOptionalGroupValues = new String[] { "Specification-Vendor", "Implementation-Vendor",
+    private static final String[] manifestOptionalGroupValues = new String[] {
+            "Specification-Vendor",
+            "Implementation-Vendor",
             "Implementation-Vendor-Id" };
 
     private final Logger logger = GMLogger.getLogger(getClass());
@@ -85,7 +88,9 @@ public class ManifestUpdateAction implements Action<Project> {
                 Class<?> osgi = Class.forName("org.gradle.api.plugins.osgi.OsgiManifest");
                 if (osgi.isInstance(manifest)) {
                     logger.debug("Detected OsgiManifest");
-                    MethodUtils.invokeExactMethod(osgi.cast(manifest), "setVersion",
+                    MethodUtils.invokeExactMethod(
+                            osgi.cast(manifest),
+                            "setVersion",
                             alignmentModel.getVersion());
                 }
             } catch (ClassNotFoundException e) {
@@ -100,24 +105,41 @@ public class ManifestUpdateAction implements Action<Project> {
                     Object value = manifest.getAttributes().get(key);
 
                     if (!value.toString().equals(alignmentModel.getVersion())) {
-                        logger.warn("For project {}, task {}, overriding {} value {} with {}", project.getName(),
-                                jar.getName(), key, value, alignmentModel.getVersion());
+                        logger.warn(
+                                "For project {}, task {}, overriding {} value {} with {}",
+                                project.getName(),
+                                jar.getName(),
+                                key,
+                                value,
+                                alignmentModel.getVersion());
                         manifest.getAttributes().put(key, alignmentModel.getVersion());
                     } else {
-                        logger.info("For project {}, task {}, not overriding value {} since version ({}) has not changed",
-                                project.getName(), jar.getName(), key, alignmentModel.getVersion());
+                        logger.info(
+                                "For project {}, task {}, not overriding value {} since version ({}) has not changed",
+                                project.getName(),
+                                jar.getName(),
+                                key,
+                                alignmentModel.getVersion());
                     }
                 } else {
-                    logger.info("For project {}, task {}, adding {} value with version {}", project.getName(),
-                            jar.getName(), key, alignmentModel.getVersion());
+                    logger.info(
+                            "For project {}, task {}, adding {} value with version {}",
+                            project.getName(),
+                            jar.getName(),
+                            key,
+                            alignmentModel.getVersion());
                     manifest.getAttributes().put(key, alignmentModel.getVersion());
                 }
             }
 
             for (String key : manifestOptionalNameValues) {
                 if (!manifest.getAttributes().containsKey(key)) {
-                    logger.info("For project {}, task {}, adding {} value with artifactId {}", project.getName(),
-                            jar.getName(), key, alignmentModel.getName());
+                    logger.info(
+                            "For project {}, task {}, adding {} value with artifactId {}",
+                            project.getName(),
+                            jar.getName(),
+                            key,
+                            alignmentModel.getName());
                     manifest.getAttributes().put(key, alignmentModel.getName());
                 }
             }
@@ -125,15 +147,22 @@ public class ManifestUpdateAction implements Action<Project> {
             if (isNotEmpty(alignmentModel.getGroup())) {
                 for (String key : manifestOptionalGroupValues) {
                     if (!manifest.getAttributes().containsKey(key)) {
-                        logger.info("For project {}, task {}, adding {} value with groupId {}", project.getName(),
-                                jar.getName(), key, alignmentModel.getGroup());
+                        logger.info(
+                                "For project {}, task {}, adding {} value with groupId {}",
+                                project.getName(),
+                                jar.getName(),
+                                key,
+                                alignmentModel.getGroup());
                         manifest.getAttributes().put(key, alignmentModel.getGroup());
                     }
                 }
             } else {
                 if (logger.isInfoEnabled()) {
-                    logger.info("For project {}, task {}, not adding {} since groupId is empty", project.getName(),
-                            jar.getName(), Arrays.asList(manifestOptionalGroupValues));
+                    logger.info(
+                            "For project {}, task {}, not adding {} since groupId is empty",
+                            project.getName(),
+                            jar.getName(),
+                            Arrays.asList(manifestOptionalGroupValues));
                 }
             }
 
@@ -146,20 +175,30 @@ public class ManifestUpdateAction implements Action<Project> {
                     if (!alignmentModel.getVersion().equals(matcher.group(1))) {
                         logger.info(
                                 "For project {}, task {}, updating Export-Package version {} to {} (old version {})",
-                                project.getName(), jar.getName(), matcher.group(1), alignmentModel.getVersion(),
+                                project.getName(),
+                                jar.getName(),
+                                matcher.group(1),
+                                alignmentModel.getVersion(),
                                 alignmentModel.getOriginalVersion());
                         manifest.getAttributes()
-                                .put(exportPackage,
-                                        exportContents.replaceAll("version=\"?" + matcher.group(1) + "\"?",
+                                .put(
+                                        exportPackage,
+                                        exportContents.replaceAll(
+                                                "version=\"?" + matcher.group(1) + "\"?",
                                                 "version=\"" + alignmentModel.getVersion() + '"'));
                     } else {
                         logger.info(
                                 "For project {}, task {}, not updating Export-Package since version ({}) has not changed",
-                                project.getName(), jar.getName(), matcher.group(1));
+                                project.getName(),
+                                jar.getName(),
+                                matcher.group(1));
                     }
                 } else {
-                    logger.warn("For project {}, task {}, not updating Export-Package as unable to match regex in {}",
-                            project.getName(), jar.getName(), exportContents);
+                    logger.warn(
+                            "For project {}, task {}, not updating Export-Package as unable to match regex in {}",
+                            project.getName(),
+                            jar.getName(),
+                            exportContents);
                 }
             }
 

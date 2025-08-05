@@ -1,5 +1,12 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static java.util.Comparator.comparingInt;
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.gradle.api.Project.DEFAULT_VERSION;
+import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
+import static org.jboss.gm.common.utils.FileUtils.append;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -24,7 +31,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.beanutils.ContextClassLoaderLocal;
 import org.apache.commons.io.FileUtils;
@@ -84,13 +90,6 @@ import org.jboss.gm.common.utils.ProjectUtils;
 import org.jboss.gm.common.versioning.DynamicVersionParser;
 import org.jboss.gm.common.versioning.ProjectVersionFactory;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
-
-import static java.util.Comparator.comparingInt;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
-import static org.gradle.api.Project.DEFAULT_VERSION;
-import static org.jboss.gm.common.io.ManipulationIO.writeManipulationModel;
-import static org.jboss.gm.common.utils.FileUtils.append;
 
 /**
  * The actual Gradle task that creates the {@code manipulation.json} file for the whole project
@@ -152,8 +151,10 @@ public class AlignmentTask extends DefaultTask {
     };
 
     /*
-     * While instanceof DefaultDependencyConstraint/DefaultProjectDependencyConstraint works at run time under Gradle 4.10
-     * they do not work at compile time as the class does not exist. Therefore, we need to use Class.forName().isInstance()
+     * While instanceof DefaultDependencyConstraint/DefaultProjectDependencyConstraint works at run time under Gradle
+     * 4.10
+     * they do not work at compile time as the class does not exist. Therefore, we need to use
+     * Class.forName().isInstance()
      * in place of instanceof.
      */
     private static final Class<?> PROJECT_CONSTRAINT_CLASS;
@@ -202,15 +203,21 @@ public class AlignmentTask extends DefaultTask {
         } else {
             currentProjectVersion = project.getVersion().toString();
         }
-        logger.info("Starting alignment task for project in directory '{}' with GAV {}:{}:{}",
-                project.getProjectDir().getName(), groupId, projectName, currentProjectVersion);
+        logger.info(
+                "Starting alignment task for project in directory '{}' with GAV {}:{}:{}",
+                project.getProjectDir().getName(),
+                groupId,
+                projectName,
+                currentProjectVersion);
 
         // If processing the root project _and_ we have a Maven publication configured then verify artifactId / groupId.
         Project rootProject = project.getRootProject();
 
         final String archivesBaseName = ProjectUtils.getArchivesBaseName(project);
         if (isNotEmpty(archivesBaseName)) {
-            logger.warn("Found archivesBaseName override ; resetting project name '{}' to '{}' ", project.getName(),
+            logger.warn(
+                    "Found archivesBaseName override ; resetting project name '{}' to '{}' ",
+                    project.getName(),
                     archivesBaseName);
             projectName = archivesBaseName;
         }
@@ -230,7 +237,8 @@ public class AlignmentTask extends DefaultTask {
             ManipulationModel childModel = alignmentModel.findCorrespondingChild(project);
             MavenPublication p = entry.get().getValue();
             if (!project.getGroup().equals(p.getGroupId())) {
-                logger.warn("Mismatched groupId between project {} and publication {} ; resetting to publication.",
+                logger.warn(
+                        "Mismatched groupId between project {} and publication {} ; resetting to publication.",
                         project.getGroup(),
                         p.getGroupId());
                 groupId = p.getGroupId();
@@ -261,24 +269,44 @@ public class AlignmentTask extends DefaultTask {
             logger.debug("For project {} adding to the cache the dependencies {}", project, dependencies); // TODO: Trace level?
             cache.addDependencies(project, dependencies);
 
-            project.getRepositories().forEach(r -> cache.addRepository(r,
-                    org.jboss.gm.common.utils.FileUtils.relativize(root, project.getProjectDir().toPath())));
-            project.getBuildscript().getRepositories().forEach(r -> cache.addRepository(r,
-                    org.jboss.gm.common.utils.FileUtils.relativize(root, project.getProjectDir().toPath())));
+            project.getRepositories()
+                    .forEach(
+                            r -> cache.addRepository(
+                                    r,
+                                    org.jboss.gm.common.utils.FileUtils
+                                            .relativize(root, project.getProjectDir().toPath())));
+            project.getBuildscript()
+                    .getRepositories()
+                    .forEach(
+                            r -> cache.addRepository(
+                                    r,
+                                    org.jboss.gm.common.utils.FileUtils
+                                            .relativize(root, project.getProjectDir().toPath())));
             // Complete hack due to
             //  https://github.com/gradle/gradle/issues/19711
             //  https://github.com/gradle/gradle/issues/17295
             //  https://github.com/gradlex-org/jvm-dependency-conflict-resolution/blob/1c25db65e0080ee5dcb9f54bd7db2dda4ca80b6c/src/main/java/org/gradlex/javaecosystem/capabilities/BasePluginApplication.java
-            ((GradleInternal) project.getGradle()).getSettings().getSettings().getPluginManagement().getRepositories().forEach(
-                    r -> cache.addRepository(r,
-                            org.jboss.gm.common.utils.FileUtils.relativize(root, project.getProjectDir().toPath())));
+            ((GradleInternal) project.getGradle()).getSettings()
+                    .getSettings()
+                    .getPluginManagement()
+                    .getRepositories()
+                    .forEach(
+                            r -> cache.addRepository(
+                                    r,
+                                    org.jboss.gm.common.utils.FileUtils
+                                            .relativize(root, project.getProjectDir().toPath())));
 
             if (StringUtils.isBlank(groupId) ||
                     DEFAULT_VERSION.equals(currentProjectVersion)) {
-                logger.warn("Project '{}:{}:{}' is not fully defined ; skipping. ", groupId, projectName,
+                logger.warn(
+                        "Project '{}:{}:{}' is not fully defined ; skipping. ",
+                        groupId,
+                        projectName,
                         currentProjectVersion);
             } else {
-                ProjectVersionRef current = ProjectVersionFactory.withGAV(groupId, projectName,
+                ProjectVersionRef current = ProjectVersionFactory.withGAV(
+                        groupId,
+                        projectName,
                         currentProjectVersion);
 
                 logger.debug("Adding {} to cache for scanning.", current);
@@ -288,8 +316,9 @@ public class AlignmentTask extends DefaultTask {
             AppliedPlugin ap = project.getPluginManager().findPlugin(DOKKA);
             if (configuration.dokkaPlugin() && ap != null) {
                 if (project.getPluginManager().findPlugin("com.vanniktech.maven.publish") != null) {
-                    logger.warn("Located https://github.com/vanniktech/gradle-maven-publish-plugin ; this embeds "
-                            + "Dokka plugin and may require manual changes");
+                    logger.warn(
+                            "Located https://github.com/vanniktech/gradle-maven-publish-plugin ; this embeds "
+                                    + "Dokka plugin and may require manual changes");
                 }
                 logger.debug("Plugin {} has been applied to {}", ap.getId(), project.getName());
                 @SuppressWarnings("rawtypes")
@@ -330,22 +359,33 @@ public class AlignmentTask extends DefaultTask {
      * @throws ManipulationException if an error occurs
      * @throws IOException if an error occurs
      */
-    private void align(Configuration configuration, ManipulationCache cache, ManipulationModel alignmentModel,
+    private void align(
+            Configuration configuration,
+            ManipulationCache cache,
+            ManipulationModel alignmentModel,
             Project rootProject) throws ManipulationException, IOException {
-        logger.info("Completed scanning {} projects; now processing for exclusions/REST/overrides...",
+        logger.info(
+                "Completed scanning {} projects; now processing for exclusions/REST/overrides...",
                 cache.getDependencies().size());
-        final List<ProjectVersionRef> allDeps = cache.getDependencies().values().stream()
-                .flatMap(m -> m.values().stream()).sorted().distinct().collect(Collectors.toList());
+        final List<ProjectVersionRef> allDeps = cache.getDependencies()
+                .values()
+                .stream()
+                .flatMap(m -> m.values().stream())
+                .sorted()
+                .distinct()
+                .collect(Collectors.toList());
 
         final AlignmentService alignmentService = new DAAlignmentService(configuration);
         final List<AlignmentService.Manipulator> manipulators = Stream
-                .of(new UpdateProjectVersionCustomizer(configuration, rootProject),
+                .of(
+                        new UpdateProjectVersionCustomizer(configuration, rootProject),
                         new DependencyOverrideCustomizer(configuration, rootProject.getAllprojects()))
                 .sorted(comparingInt(AlignmentService.Manipulator::order))
                 .collect(Collectors.toList());
 
         final Response alignmentResponse = alignmentService.align(
-                new AlignmentService.Request(cache.getProjectVersionRefs(configuration.versionSuffixSnapshot()),
+                new AlignmentService.Request(
+                        cache.getProjectVersionRefs(configuration.versionSuffixSnapshot()),
                         allDeps));
 
         // Apply the current manipulators (DependencyOverride and UpdateProjectVersion)
@@ -358,8 +398,9 @@ public class AlignmentTask extends DefaultTask {
         // Even if version modification is disabled, set the original version for consistency in the JSON file.
         final Optional<Project> optionalOriginalVersion = rootProject.getAllprojects()
                 .stream()
-                .filter(p -> !DEFAULT_VERSION.equals(
-                        p.getVersion().toString()))
+                .filter(
+                        p -> !DEFAULT_VERSION.equals(
+                                p.getVersion().toString()))
                 .findAny();
         if (optionalOriginalVersion.isPresent()) {
             alignmentModel.setOriginalVersion(optionalOriginalVersion.get().getVersion().toString());
@@ -371,8 +412,11 @@ public class AlignmentTask extends DefaultTask {
         // explicitly retrieve it and set its version.
         if (configuration.versionModificationEnabled()) {
             String newVersion = alignmentResponse.getProjectOverrides().get(rootProject);
-            logger.info("Updating model version for {} from {} to {}", rootProject,
-                    rootProject.getVersion(), newVersion);
+            logger.info(
+                    "Updating model version for {} from {} to {}",
+                    rootProject,
+                    rootProject.getVersion(),
+                    newVersion);
             alignmentModel.setVersion(newVersion);
         } else {
             alignmentModel.setVersion(alignmentModel.getOriginalVersion());
@@ -393,57 +437,81 @@ public class AlignmentTask extends DefaultTask {
                     throw new ManipulationUncheckedException(
                             "Looping on project versions but unable to compare project. Are project comparisons broken?");
                 }
-                logger.info("Updating sub-project {} (path: {}) from version {} to {}", correspondingModule,
-                        correspondingModule.getProjectPathName(), project.getVersion().toString(), newVersion);
+                logger.info(
+                        "Updating sub-project {} (path: {}) from version {} to {}",
+                        correspondingModule,
+                        correspondingModule.getProjectPathName(),
+                        project.getVersion().toString(),
+                        newVersion);
                 correspondingModule.setOriginalVersion(project.getVersion().toString());
                 correspondingModule.setVersion(newVersion);
             } else {
                 correspondingModule.setOriginalVersion(project.getVersion().toString());
                 correspondingModule.setVersion(project.getVersion().toString());
-                logger.info("Version modification disabled. Sub-project {} (path: {}) version is {}",
-                        correspondingModule, correspondingModule.getProjectPathName(), correspondingModule.getVersion());
+                logger.info(
+                        "Version modification disabled. Sub-project {} (path: {}) version is {}",
+                        correspondingModule,
+                        correspondingModule.getProjectPathName(),
+                        correspondingModule.getVersion());
             }
             updateModuleDependencies(project, correspondingModule, value, alignmentResponse);
             LockFileIO.updateLockfiles(logger, project.getProjectDir(), correspondingModule.getAlignedDependencies());
         });
         // Now need to update the historical lock file format (if it exists). This is one lockfile
         // per SCM repository
-        LockFileIO.updateLockfiles(logger, new File(rootProject.getRootDir(), "gradle/dependency-locks"),
+        LockFileIO.updateLockfiles(
+                logger,
+                new File(rootProject.getRootDir(), "gradle/dependency-locks"),
                 alignmentModel.getAllAlignedDependencies());
 
         // artifactId / rootProject.getName
         final String artifactId = SettingsFileIO.writeProjectNameIfNeeded(getProject().getRootDir());
         if (!isEmpty(artifactId)) {
-            logger.debug("Located artifactId ({}) for {}::{}", artifactId, alignmentModel.getGroup(),
+            logger.debug(
+                    "Located artifactId ({}) for {}::{}",
+                    artifactId,
+                    alignmentModel.getGroup(),
                     alignmentModel.getVersion());
             alignmentModel.setName(artifactId);
         }
 
         // groupId
         if (isEmpty(alignmentModel.getGroup())) {
-            final Set<String> candidates = cache.getModel().getChildren()
+            final Set<String> candidates = cache.getModel()
+                    .getChildren()
                     .values()
-                    .stream().map(ManipulationModel::getGroup)
+                    .stream()
+                    .map(ManipulationModel::getGroup)
                     .filter(StringUtils::isNotBlank)
                     .collect(Collectors.toSet());
 
             logger.debug("Found potential candidates of {} to establish a groupId.", candidates);
-            final String commonPrefix = StringUtils.stripEnd(StringUtils.getCommonPrefix(candidates
-                    .toArray(new String[0])), ".");
+            final String commonPrefix = StringUtils.stripEnd(
+                    StringUtils.getCommonPrefix(
+                            candidates
+                                    .toArray(new String[0])),
+                    ".");
 
             if (isEmpty(commonPrefix)) {
                 throw new ManipulationException(
                         "Empty groupId but unable to determine a suitable replacement from any child modules.");
             }
 
-            logger.warn("groupId for {} ({}) is empty. Defaulting to common prefix of '{}'", rootProject,
-                    rootProject.getProjectDir(), commonPrefix);
+            logger.warn(
+                    "groupId for {} ({}) is empty. Defaulting to common prefix of '{}'",
+                    rootProject,
+                    rootProject.getProjectDir(),
+                    commonPrefix);
             alignmentModel.setGroup(commonPrefix);
         }
         processPropertiesForBuildCache(rootProject.getRootDir());
 
         logger.info("Completed processing for alignment and writing {}", cache);
-        GroovyUtils.runCustomGroovyScript(logger, InvocationStage.LAST, rootProject.getRootDir(), configuration,
+        GroovyUtils.runCustomGroovyScript(
+                logger,
+                InvocationStage.LAST,
+                rootProject.getRootDir(),
+                configuration,
                 rootProject,
                 alignmentModel);
         writeManipulationModel(rootProject.getRootDir(), alignmentModel);
@@ -451,7 +519,10 @@ public class AlignmentTask extends DefaultTask {
         // files.
         updateAllExtraGradleFilesWithGmeRepos();
 
-        logger.info("For project script is {} and build file {}", rootProject.getBuildscript(), rootProject.getBuildFile());
+        logger.info(
+                "For project script is {} and build file {}",
+                rootProject.getBuildscript(),
+                rootProject.getBuildFile());
         logger.info("For project {}", rootProject.getBuildscript().getSourceFile());
         SettingsFileIO.writeDokkaSettings(rootProject.getRootDir(), cache.getDokkaVersion());
         writeGmeMarkerFile(configuration, rootProject.getBuildFile());
@@ -476,16 +547,22 @@ public class AlignmentTask extends DefaultTask {
     private void writeGmeMarkerFile(Configuration configuration, File rootGradle) throws IOException {
         File rootDir = getProject().getRootDir();
         File gmeGradle = new File(rootDir, GME);
-        Files.copy(getClass().getResourceAsStream('/' + GME), gmeGradle.toPath(),
+        Files.copy(
+                getClass().getResourceAsStream('/' + GME),
+                gmeGradle.toPath(),
                 StandardCopyOption.REPLACE_EXISTING);
 
         if (!isEmpty(configuration.manipulationVersion())) {
             String gmeGradleString = FileUtils.readFileToString(gmeGradle, Charset.defaultCharset());
             String currentVersion = gmeGradleString.replaceFirst(
-                    "(?s).*(classpath \"org.jboss.gm:manipulation:)([0-9]+\\.[0-9]+(-SNAPSHOT)??)\".*", "$2");
-            logger.info("Replacing version {} with {} for the ManipulationPlugin", currentVersion,
+                    "(?s).*(classpath \"org.jboss.gm:manipulation:)([0-9]+\\.[0-9]+(-SNAPSHOT)??)\".*",
+                    "$2");
+            logger.info(
+                    "Replacing version {} with {} for the ManipulationPlugin",
+                    currentVersion,
                     configuration.manipulationVersion());
-            FileUtils.writeStringToFile(gmeGradle,
+            FileUtils.writeStringToFile(
+                    gmeGradle,
                     gmeGradleString.replaceFirst(currentVersion, configuration.manipulationVersion()),
                     Charset.defaultCharset());
         }
@@ -525,7 +602,9 @@ public class AlignmentTask extends DefaultTask {
     private void writeGmePluginConfigMarkerFile(File rootGradle, DokkaVersion dokkaVersion) throws IOException {
         File rootDir = getProject().getRootDir();
         File gmePluginConfigsGradle = new File(rootDir, GME_PLUGINCONFIGS);
-        Files.copy(getClass().getResourceAsStream('/' + GME_PLUGINCONFIGS), gmePluginConfigsGradle.toPath(),
+        Files.copy(
+                getClass().getResourceAsStream('/' + GME_PLUGINCONFIGS),
+                gmePluginConfigsGradle.toPath(),
                 StandardCopyOption.REPLACE_EXISTING);
 
         // Use DokkaVersion to determine how to replace <DOKKA> in the gme-plugin-configs with
@@ -546,12 +625,14 @@ public class AlignmentTask extends DefaultTask {
             String replacementConfiguration = "         configuration {\n";
             switch (dokkaVersion) {
                 case MINIMUM: {
-                    gmePluginFile = gmePluginFile.replace("<DOKKA>",
+                    gmePluginFile = gmePluginFile.replace(
+                            "<DOKKA>",
                             replacementStart + replacementDokka + replacementMid + replacementEnd);
                     break;
                 }
                 case TEN: {
-                    gmePluginFile = gmePluginFile.replace("<DOKKA>",
+                    gmePluginFile = gmePluginFile.replace(
+                            "<DOKKA>",
                             replacementStart + replacementDokka + replacementConfiguration +
                                     replacementMid + "         }\n" + replacementEnd);
                     break;
@@ -597,7 +678,9 @@ public class AlignmentTask extends DefaultTask {
         gradleDir.mkdir();
         File gmeReposGradle = new File(gradleDir, GME_REPOS);
 
-        Files.copy(getClass().getResourceAsStream('/' + GME_REPOS), gmeReposGradle.toPath(),
+        Files.copy(
+                getClass().getResourceAsStream('/' + GME_REPOS),
+                gmeReposGradle.toPath(),
                 StandardCopyOption.REPLACE_EXISTING);
     }
 
@@ -607,7 +690,8 @@ public class AlignmentTask extends DefaultTask {
         if (!gradleScriptsDirectory.exists()) {
             return;
         }
-        final Collection<File> extraGradleScripts = FileUtils.listFiles(gradleScriptsDirectory,
+        final Collection<File> extraGradleScripts = FileUtils.listFiles(
+                gradleScriptsDirectory,
                 FileFilterUtils.and(new SuffixFileFilter(".gradle"), new NotFileFilter(new NameFileFilter(GME_REPOS))),
                 DirectoryFileFilter.DIRECTORY);
         for (File extraGradleScript : extraGradleScripts) {
@@ -635,7 +719,9 @@ public class AlignmentTask extends DefaultTask {
         return (PROJECT_CONSTRAINT_CLASS != null && PROJECT_CONSTRAINT_CLASS.isInstance(obj));
     }
 
-    private Map<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(Project project, ManipulationCache cache,
+    private Map<RelaxedProjectVersionRef, ProjectVersionRef> getDependencies(
+            Project project,
+            ManipulationCache cache,
             Configuration internalConfig,
             Set<ProjectVersionRef> lockFileDeps) {
 
@@ -709,7 +795,9 @@ public class AlignmentTask extends DefaultTask {
 
                     // Attempt to call copyRecursive for all types (kotlin/gradle).
                     if (!cache.isConstraints()) {
-                        logger.debug("In project {} in legacy mode recursively copying configuration for {}", project.getName(),
+                        logger.debug(
+                                "In project {} in legacy mode recursively copying configuration for {}",
+                                project.getName(),
                                 configuration.getName());
                         copy = configuration.copyRecursive();
                         lenient = copy.getResolvedConfiguration().getLenientConfiguration();
@@ -739,7 +827,9 @@ public class AlignmentTask extends DefaultTask {
                     // It can fail in bizarre ways due to constraints.
                     if (!fallbackCopying.get()) {
                         try {
-                            logger.debug("In project {} recursively copying configuration for {}", project.getName(),
+                            logger.debug(
+                                    "In project {} recursively copying configuration for {}",
+                                    project.getName(),
                                     configuration.getName());
                             copy = configuration.copyRecursive();
                             lenient = copy.getResolvedConfiguration().getLenientConfiguration();
@@ -771,16 +861,19 @@ public class AlignmentTask extends DefaultTask {
                 // We don't care about modules of the project being unresolvable at this stage. Had we not excluded them,
                 // we would get false negatives
                 final Set<UnresolvedDependency> unresolvedDependencies = getUnresolvedDependenciesExcludingProjectDependencies(
-                        lenient, allProjectDependencies);
+                        lenient,
+                        allProjectDependencies);
 
                 if (!unresolvedDependencies.isEmpty()) {
                     if (internalConfig.ignoreUnresolvableDependencies()) {
-                        logger.warn("For configuration {}, ignoring all unresolvable dependencies: {}",
+                        logger.warn(
+                                "For configuration {}, ignoring all unresolvable dependencies: {}",
                                 configuration.getName(),
                                 unresolvedDependencies);
                     } else {
 
-                        logger.error("For configuration {}, unable to resolve all dependencies: {}",
+                        logger.error(
+                                "For configuration {}, unable to resolve all dependencies: {}",
                                 configuration.getName(),
                                 lenient.getUnresolvedModuleDependencies());
                         for (UnresolvedDependency ud : unresolvedDependencies) {
@@ -788,7 +881,8 @@ public class AlignmentTask extends DefaultTask {
                         }
                         throw new ManipulationUncheckedException(
                                 "For configuration {}, unable to resolve all project dependencies: {}",
-                                configuration.getName(), unresolvedDependencies);
+                                configuration.getName(),
+                                unresolvedDependencies);
                     }
                 }
                 Set<ResolvedDependency> target;
@@ -810,13 +904,18 @@ public class AlignmentTask extends DefaultTask {
                 target.forEach(dep -> {
                     // skip dependencies on project modules
                     if (Comparator.contains(allProjectDependencies, dep)) {
-                        project.getLogger().debug("Skipping internal project dependency {} of configuration {}",
-                                dep.toString(), configuration.getName());
+                        project.getLogger()
+                                .debug(
+                                        "Skipping internal project dependency {} of configuration {}",
+                                        dep.toString(),
+                                        configuration.getName());
                         return;
                     }
                     if (dep.getModuleGroup().isEmpty()) {
-                        logger.warn("Ignoring dependency {} with no groupId for configuration {}",
-                                dep.getName(), configuration.getName());
+                        logger.warn(
+                                "Ignoring dependency {} with no groupId for configuration {}",
+                                dep.getName(),
+                                configuration.getName());
                         return;
                     }
 
@@ -830,12 +929,15 @@ public class AlignmentTask extends DefaultTask {
                         }
                     }
 
-                    ProjectVersionRef pvr = ProjectVersionFactory.withGAV(dep.getModuleGroup(), dep.getModuleName(),
+                    ProjectVersionRef pvr = ProjectVersionFactory.withGAV(
+                            dep.getModuleGroup(),
+                            dep.getModuleName(),
                             version);
 
                     List<Dependency> originalDeps = allDependencies.stream()
-                            .filter(d -> StringUtils.equals(d.getGroup(), dep.getModuleGroup()) &&
-                                    StringUtils.equals(d.getName(), dep.getModuleName()))
+                            .filter(
+                                    d -> StringUtils.equals(d.getGroup(), dep.getModuleGroup()) &&
+                                            StringUtils.equals(d.getName(), dep.getModuleName()))
                             .collect(Collectors.toList());
 
                     // Not sure this can ever happen - would mean we have GA with multiple V.
@@ -854,8 +956,11 @@ public class AlignmentTask extends DefaultTask {
                     }
 
                     if (depMap.put(relaxedProjectVersionRef, pvr) == null) {
-                        logger.debug("For {}, with original key {}, adding dependency to scan {}", configuration,
-                                relaxedProjectVersionRef, pvr);
+                        logger.debug(
+                                "For {}, with original key {}, adding dependency to scan {}",
+                                configuration,
+                                relaxedProjectVersionRef,
+                                pvr);
                     }
                 });
 
@@ -865,17 +970,24 @@ public class AlignmentTask extends DefaultTask {
                         ModuleVersionIdentifier mvi = ((DefaultResolvedDependencyResult) incomingResult).getSelected()
                                 .getModuleVersion();
                         // https://github.com/gradle/gradle/issues/17338
-                        String category = incomingResult.getRequested().getAttributes().getAttribute(
-                                Attribute.of("org.gradle.category", String.class));
+                        String category = incomingResult.getRequested()
+                                .getAttributes()
+                                .getAttribute(
+                                        Attribute.of("org.gradle.category", String.class));
 
                         if (mvi == null) {
                             logger.warn("No module version for {}", incomingResult);
                             // Can't use direct references to Category.ENFORCED_PLATFORM / PLATFORM as that is since 5.3
                         } else if ("enforced-platform".equals(category) || "platform".equals(category)) {
-                            ProjectVersionRef pvr = ProjectVersionFactory.withGAV(mvi.getGroup(), mvi.getName(),
+                            ProjectVersionRef pvr = ProjectVersionFactory.withGAV(
+                                    mvi.getGroup(),
+                                    mvi.getName(),
                                     mvi.getVersion());
-                            logger.debug("For {}, with category {} adding {} to scan",
-                                    configuration, category, pvr);
+                            logger.debug(
+                                    "For {}, with category {} adding {} to scan",
+                                    configuration,
+                                    category,
+                                    pvr);
                             depMap.put(new RelaxedProjectVersionRef(pvr), pvr);
                         }
                     }
@@ -888,9 +1000,11 @@ public class AlignmentTask extends DefaultTask {
         return depMap;
     }
 
-    private Set<UnresolvedDependency> getUnresolvedDependenciesExcludingProjectDependencies(LenientConfiguration lenient,
+    private Set<UnresolvedDependency> getUnresolvedDependenciesExcludingProjectDependencies(
+            LenientConfiguration lenient,
             Set<ProjectDependency> allProjectModules) {
-        Set<UnresolvedDependency> unresolvedDependencies = new LinkedHashSet<>(lenient.getUnresolvedModuleDependencies());
+        Set<UnresolvedDependency> unresolvedDependencies = new LinkedHashSet<>(
+                lenient.getUnresolvedModuleDependencies());
         unresolvedDependencies.removeIf(d -> Comparator.contains(allProjectModules, d));
         return unresolvedDependencies;
     }
@@ -903,21 +1017,30 @@ public class AlignmentTask extends DefaultTask {
      * @param allModuleDependencies the collection of dependencies
      * @param alignmentResponse the response which (possibly) contains overrides and DA information
      */
-    private void updateModuleDependencies(Project project, ManipulationModel correspondingModule,
+    private void updateModuleDependencies(
+            Project project,
+            ManipulationModel correspondingModule,
             Map<RelaxedProjectVersionRef, ProjectVersionRef> allModuleDependencies,
             Response alignmentResponse) {
 
         allModuleDependencies.forEach((d, projectVersionRef) -> {
             final String newDependencyVersion = alignmentResponse.getAlignedVersionOfGav(project, projectVersionRef);
             if (!StringUtils.isEmpty(newDependencyVersion)) {
-                logger.debug("In module {} with GAV {} found a replacement version of {}",
-                        correspondingModule.getProjectPathName(), projectVersionRef, newDependencyVersion);
+                logger.debug(
+                        "In module {} with GAV {} found a replacement version of {}",
+                        correspondingModule.getProjectPathName(),
+                        projectVersionRef,
+                        newDependencyVersion);
 
-                final ProjectVersionRef newVersion = ProjectVersionFactory.withNewVersion(projectVersionRef,
+                final ProjectVersionRef newVersion = ProjectVersionFactory.withNewVersion(
+                        projectVersionRef,
                         newDependencyVersion);
                 // we need to make sure that dynamic dependencies are stored with their original key
                 // in order for the manipulation plugin to be able to look them up properly
-                logger.debug("Mapping {} to {} (and is dynamic {})", d, newVersion,
+                logger.debug(
+                        "Mapping {} to {} (and is dynamic {})",
+                        d,
+                        newVersion,
                         DynamicVersionParser.isDynamic(d.getVersionString()));
                 correspondingModule.getAlignedDependencies().put(d.toString(), newVersion);
             }
@@ -947,7 +1070,8 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private Map<RelaxedProjectVersionRef, ProjectVersionRef> processAnyExistingManipulationFile(Project project,
+    private Map<RelaxedProjectVersionRef, ProjectVersionRef> processAnyExistingManipulationFile(
+            Project project,
             Map<RelaxedProjectVersionRef, ProjectVersionRef> allDependencies) {
 
         File m = new File(project.getRootDir(), ManipulationIO.MANIPULATION_FILE_NAME);
@@ -957,7 +1081,8 @@ public class AlignmentTask extends DefaultTask {
         }
 
         // If there is an existing manipulation file, also use this as potential candidates.
-        final ManipulationModel manipulationModel = ManipulationIO.readManipulationModel(project.getRootProject().getRootDir())
+        final ManipulationModel manipulationModel = ManipulationIO
+                .readManipulationModel(project.getRootProject().getRootDir())
                 .findCorrespondingChild(project);
 
         Map<String, ProjectVersionRef> aligned = manipulationModel.getAlignedDependencies();
@@ -975,9 +1100,13 @@ public class AlignmentTask extends DefaultTask {
 
                     if (d.equals(originalPvr)) {
 
-                        if (!modelDependencies.getValue().getVersionString().equals(entry.getValue().getVersionString())) {
+                        if (!modelDependencies.getValue()
+                                .getVersionString()
+                                .equals(entry.getValue().getVersionString())) {
 
-                            logger.info("Using existing model to update {} to {}", entry.getValue(),
+                            logger.info(
+                                    "Using existing model to update {} to {}",
+                                    entry.getValue(),
                                     modelDependencies.getValue());
 
                             allDependencies.put(d, modelDependencies.getValue());
@@ -1002,7 +1131,10 @@ public class AlignmentTask extends DefaultTask {
         }
     }
 
-    private void processAlignmentReport(Project project, Configuration configuration, ManipulationCache cache,
+    private void processAlignmentReport(
+            Project project,
+            Configuration configuration,
+            ManipulationCache cache,
             Set<ProjectVersionRef> nonAligned) throws ManipulationException, IOException {
         final ManipulationModel alignmentModel = cache.getModel();
         final String originalGa = alignmentModel.getGroup() + ":" + alignmentModel.getName();
@@ -1094,7 +1226,9 @@ public class AlignmentTask extends DefaultTask {
         }
 
         if (!StringUtils.isEmpty(configuration.reportJsonOutputFile())) {
-            writeReport(outputDir, configuration.reportJsonOutputFile(),
+            writeReport(
+                    outputDir,
+                    configuration.reportJsonOutputFile(),
                     JSONUtils.jsonToString(jsonReport) + System.lineSeparator());
         }
     }

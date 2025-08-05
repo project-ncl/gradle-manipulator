@@ -30,25 +30,11 @@ The documentation for the project can be found [here](https://project-ncl.github
 
 ### IDE Config and Code Style
 
-This project has a strictly enforced code style. Code formatting is done by the Eclipse code formatter, using the config files
-found in the `ide-config` directory. By default, when you run `./gradlew build` the code will be formatted automatically.
-
-#### Eclipse Setup
-
-Open the *Preferences* window, and then navigate to _Java_ -> _Code Style_ -> _Formatter_. Click _Import_ and then
-select the `eclipse-format.xml` file in the `ide-config` directory.
-
-Next navigate to _Java_ -> _Code Style_ -> _Organize Imports_. Click _Import_ and select the `eclipse.importorder` file.
+This project has a strictly enforced code style. Code formatting is done by the Eclipse code formatter, using the config files from https://github.com/project-ncl/ide-config/. By default, when you run `./gradlew build` the code will be formatted automatically.
 
 #### IDEA Setup
 
-Open the _Preferences_ window, navigate to _Plugins_ and install the [Eclipse Code Formatter Plugin](https://plugins.jetbrains.com/plugin/6546-eclipse-code-formatter).
-
-Restart you IDE, open the *Preferences* window again and navigate to _Other Settings_ -> _Eclipse Code Formatter_.
-
-Select _Use the Eclipse Code Formatter_, then change the _Eclipse Java Formatter Config File_ to point to the
-`eclipse-format.xml` file in the `ide-config` directory. Make sure the _Optimize Imports_ box is ticked, and
-select the `eclipse.importorder` file as the import order config file.
+Follow instructions in https://github.com/project-ncl/ide-config/.
 
 ### Code Recommendations
 
@@ -117,6 +103,9 @@ If you also wish to publish the artifacts to you local maven repository, replace
 gradle clean publishToMavenLocal
 ```
 
+Note: To use a development version of GME locally on another project one **must** use publishToMavenLocal otherwise
+the alignment plugin won't be correctly resolved.
+
 #### Running Tests
 
 Normally, Gradle will only run tests if the code has changed. However, you may wish to force all tests to run using
@@ -169,7 +158,7 @@ modify `README.md` to ensure it points to the correct version.
 
 #### Prerequisites
 
-* Run the release using Gradle 5.6.4 (currently later 6.x produce much larger jars)
+* Run the release using Gradle 6.8.3
 * Sign up for a Gradle account (see details [here](https://guides.gradle.org/publishing-plugins-to-gradle-plugin-portal/#create_an_account_on_the_gradle_plugin_portal))
 * Make sure you can push changes to Maven Central
 * Create or update the required `$HOME/.gradle/gradle.properties` locally with data from the API key (which can be found in your gradle account)

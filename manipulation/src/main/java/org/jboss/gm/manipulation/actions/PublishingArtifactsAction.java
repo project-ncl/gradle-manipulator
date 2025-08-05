@@ -37,9 +37,12 @@ public class PublishingArtifactsAction implements Action<Project> {
         try {
             SoftwareComponent javaComponent = (SoftwareComponent) project.getComponents().named("java");
             project.getExtensions()
-                    .configure(PublishingExtension.class,
+                    .configure(
+                            PublishingExtension.class,
                             publishingExtension -> publishingExtension.publications(publications -> {
-                                publications.register("mavenJava", MavenPublication.class,
+                                publications.register(
+                                        "mavenJava",
+                                        MavenPublication.class,
                                         mavenPublication -> mavenPublication.from(javaComponent));
                             }));
         } catch (UnknownDomainObjectException e) {

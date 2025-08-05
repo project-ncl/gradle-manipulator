@@ -1,9 +1,10 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static org.apache.commons.lang.StringUtils.isNotEmpty;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
@@ -16,8 +17,6 @@ import org.jboss.gm.analyzer.alignment.util.DependencyPropertyParser;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.utils.ProjectUtils;
-
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 
 /**
  * {@link Manipulator} that changes the versions of aligned dependencies.
@@ -44,7 +43,8 @@ public class DependencyOverrideCustomizer implements Manipulator {
     @Override
     public void customize(Response response) {
         final Map<Project, Map<ProjectRef, String>> dependencyOverrides = new LinkedHashMap<>();
-        final Map<String, String> prefixed = PropertiesUtils.getPropertiesByPrefix(configuration.getProperties(),
+        final Map<String, String> prefixed = PropertiesUtils.getPropertiesByPrefix(
+                configuration.getProperties(),
                 DEPENDENCY_OVERRIDE);
 
         if (!prefixed.isEmpty()) {
@@ -54,16 +54,22 @@ public class DependencyOverrideCustomizer implements Manipulator {
                 final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
 
                 for (Project project : projects) {
-                    Map<ProjectRef, String> overrideMap = dependencyOverrides.getOrDefault(project, new LinkedHashMap<>());
+                    Map<ProjectRef, String> overrideMap = dependencyOverrides
+                            .getOrDefault(project, new LinkedHashMap<>());
                     String group = ProjectUtils.getRealGroupId(project);
                     if (isNotEmpty(project.getVersion().toString()) &&
                             isNotEmpty(group) &&
                             isNotEmpty(project.getName())) {
-                        final ProjectVersionRef projectRef = new SimpleProjectVersionRef(group,
-                                project.getName(), project.getVersion().toString());
+                        final ProjectVersionRef projectRef = new SimpleProjectVersionRef(
+                                group,
+                                project.getName(),
+                                project.getVersion().toString());
                         if (keyParseResult.matchesModule(projectRef)) {
-                            logger.debug("Overriding dependency {} in module {} with version '{}'",
-                                    keyParseResult.getDependency(), projectRef, overrideVersion);
+                            logger.debug(
+                                    "Overriding dependency {} in module {} with version '{}'",
+                                    keyParseResult.getDependency(),
+                                    projectRef,
+                                    overrideVersion);
                             overrideMap.put(keyParseResult.getDependency(), overrideVersion);
                         }
                     }

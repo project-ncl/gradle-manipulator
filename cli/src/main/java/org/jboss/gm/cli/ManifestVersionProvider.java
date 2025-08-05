@@ -15,9 +15,7 @@
  */
 package org.jboss.gm.cli;
 
-import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.util.ManifestUtils;
-
 import picocli.CommandLine;
 
 public class ManifestVersionProvider

@@ -1,11 +1,14 @@
 package org.jboss.gm.manipulation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.util.GradleVersion;
@@ -15,10 +18,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 
 public class PostgresProjectFunctionalTest {
     private static final String TEST = "pgjdbc";
@@ -80,7 +79,9 @@ public class PostgresProjectFunctionalTest {
         Path pathToArtifacts = publishDirectory.toPath().resolve(PATH_IN_REPOSITORY);
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
-        assertTrue(systemOutRule.getLog().contains(
-                "Updating publication artifactId (postgresql) as it is not consistent with archivesBaseName (postgresql-jre7)"));
+        assertTrue(
+                systemOutRule.getLog()
+                        .contains(
+                                "Updating publication artifactId (postgresql) as it is not consistent with archivesBaseName (postgresql-jre7)"));
     }
 }

@@ -1,5 +1,19 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -8,7 +22,6 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-
 import org.apache.commons.lang.reflect.FieldUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -29,20 +42,6 @@ import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
-
 public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
     @Rule
@@ -62,20 +61,25 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
     }
 
     private void stubDACall() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("spring-like-layout-da-root.json"))));
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("spring-like-layout-da-root-project.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("spring-like-layout-da-root.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("spring-like-layout-da-root-project.json"))));
     }
 
     @Test
-    public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException, ManipulationException {
+    public void ensureAlignmentFileCreatedAndAlignmentTaskRun()
+            throws IOException, URISyntaxException, ManipulationException {
         // XXX: Caused by: java.lang.ClassNotFoundException: org.gradle.api.artifacts.maven.PomFilterContainer
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
 
@@ -84,7 +88,9 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(
+                AlignmentTask.INJECT_GME_END,
+                FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme");
@@ -92,8 +98,11 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
             assertThat(am.getVersion()).isEqualTo("1.1.2.redhat-00004");
             assertThat(am.getOriginalVersion()).isEqualTo(DefaultProject.DEFAULT_VERSION);
 
-            assertThat(am.getChildren().keySet()).hasSize(3).containsExactly("subproject1", "subproject2",
-                    "subproject3");
+            assertThat(am.getChildren().keySet()).hasSize(3)
+                    .containsExactly(
+                            "subproject1",
+                            "subproject2",
+                            "subproject3");
 
             assertThat(am.findCorrespondingChild("subproject1")).satisfies(subproject1 -> {
                 assertThat(subproject1.getVersion()).isEqualTo("1.1.2.redhat-00004");
@@ -130,18 +139,24 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
         final File projectRoot = tempDir.newFolder("grpc-like-layout");
 
         //noinspection ConstantConditions
-        org.apache.commons.io.FileUtils.copyDirectory(Paths
-                .get(TestUtils.class.getClassLoader().getResource(projectRoot.getName()).toURI()).toFile(), projectRoot);
+        org.apache.commons.io.FileUtils.copyDirectory(
+                Paths
+                        .get(TestUtils.class.getClassLoader().getResource(projectRoot.getName()).toURI())
+                        .toFile(),
+                projectRoot);
         // Remove the settings so we can't use a child project to establish groupId
         //noinspection ResultOfMethodCallIgnored
         new File(projectRoot, "settings.gradle").delete();
         // Write a version so this error isn't found first.
         org.apache.commons.io.FileUtils.writeStringToFile(
-                new File(projectRoot, "gradle.properties"), "    version = \"1.1.2\"\n", Charset.defaultCharset());
+                new File(projectRoot, "gradle.properties"),
+                "    version = \"1.1.2\"\n",
+                Charset.defaultCharset());
 
         assertThatExceptionOfType(ManipulationUncheckedException.class)
                 .isThrownBy(() -> TestUtils.align(projectRoot, true))
-                .withMessageContaining("Empty groupId but unable to determine a suitable replacement from any child modules");
+                .withMessageContaining(
+                        "Empty groupId but unable to determine a suitable replacement from any child modules");
     }
 
     @Test
@@ -149,8 +164,11 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
         final File projectRoot = tempDir.newFolder("grpc-like-layout");
 
         //noinspection ConstantConditions
-        org.apache.commons.io.FileUtils.copyDirectory(Paths
-                .get(TestUtils.class.getClassLoader().getResource(projectRoot.getName()).toURI()).toFile(), projectRoot);
+        org.apache.commons.io.FileUtils.copyDirectory(
+                Paths
+                        .get(TestUtils.class.getClassLoader().getResource(projectRoot.getName()).toURI())
+                        .toFile(),
+                projectRoot);
         // Remove the settings so we can't use a child project to establish version
         //noinspection ResultOfMethodCallIgnored
         new File(projectRoot, "settings.gradle").delete();
@@ -161,7 +179,8 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    public void ensureAlignmentFileWithArchiveBaseNameOverride() throws IOException, URISyntaxException, ManipulationException {
+    public void ensureAlignmentFileWithArchiveBaseNameOverride()
+            throws IOException, URISyntaxException, ManipulationException {
         // XXX: Caused by: java.lang.ClassNotFoundException: org.gradle.api.artifacts.maven.PomFilterContainer
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
 
@@ -171,19 +190,26 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(
+                AlignmentTask.INJECT_GME_END,
+                FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme");
             assertThat(am.getName()).isEqualTo("root");
 
-            assertThat(am.getChildren().keySet()).hasSize(3).containsExactly("subproject1", "subproject2",
-                    "subproject3");
+            assertThat(am.getChildren().keySet()).hasSize(3)
+                    .containsExactly(
+                            "subproject1",
+                            "subproject2",
+                            "subproject3");
             assertThat(am.findCorrespondingChild("subproject3")).satisfies(subproject3 -> {
                 assertThat(subproject3.getName()).isEqualTo("special-subproject-number3");
                 try {
-                    assertThat(FieldUtils.getDeclaredField(ManipulationModel.class, "projectPathName", true)
-                            .get(subproject3)).isEqualTo("subproject3");
+                    assertThat(
+                            FieldUtils.getDeclaredField(ManipulationModel.class, "projectPathName", true)
+                                    .get(subproject3))
+                            .isEqualTo("subproject3");
                 } catch (IllegalAccessException e) {
                     fail("Couldn't get field to check.");
                 }

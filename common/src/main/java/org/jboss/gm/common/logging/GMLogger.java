@@ -1,7 +1,6 @@
 package org.jboss.gm.common.logging;
 
 import java.util.Arrays;
-
 import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.logging.LogLevel;
@@ -64,7 +63,8 @@ public class GMLogger implements Logger {
         // And therefore we need to ensure we have at least 3 frames to examine.
         if (result.length < 4) {
             throw new ManipulationUncheckedException(
-                    "Internal logging failure ; not enough stacktrace elements {}", Arrays.toString(result));
+                    "Internal logging failure ; not enough stacktrace elements {}",
+                    Arrays.toString(result));
         }
         String loggingLevel = result[2].getMethodName().toUpperCase();
 

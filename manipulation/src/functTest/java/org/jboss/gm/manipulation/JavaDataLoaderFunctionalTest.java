@@ -1,9 +1,11 @@
 package org.jboss.gm.manipulation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.internal.Pair;
@@ -17,9 +19,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 
 public class JavaDataLoaderFunctionalTest {
 
@@ -45,8 +44,11 @@ public class JavaDataLoaderFunctionalTest {
                 .withArguments("--info", "generatePomFileForMavenPublication")
                 .build();
 
-        assertThat(buildResult.task(":" + "generatePomFileForMavenPublication").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
-        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(projectRoot, alignment,
+        assertThat(buildResult.task(":" + "generatePomFileForMavenPublication").getOutcome())
+                .isEqualTo(TaskOutcome.SUCCESS);
+        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(
+                projectRoot,
+                alignment,
                 "build/publications/maven/pom-default.xml");
         assertThat(systemOutRule.getLog())
                 .contains(

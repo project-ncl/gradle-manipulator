@@ -1,11 +1,14 @@
 package org.jboss.gm.manipulation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.internal.Pair;
@@ -20,10 +23,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 
 public class SimpleProjectWithMavenPluginFunctionalTest {
 
@@ -70,8 +69,10 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
 
         final String repoPathToPom = PATH_IN_REPOSITORY.resolve(ARTIFACT_NAME + ".pom").toString();
 
-        assertTrue(systemOutRule.getLog().contains(
-                "Replacing strictly with forced version for ch.qos.logback:logback-classic:1.1.3 with ch.qos.logback:logback-classic:1.1.2"));
+        assertTrue(
+                systemOutRule.getLog()
+                        .contains(
+                                "Replacing strictly with forced version for ch.qos.logback:logback-classic:1.1.3 with ch.qos.logback:logback-classic:1.1.2"));
 
         // verify installed artifacts
         verifyArtifacts(m2Directory);
@@ -84,8 +85,11 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
 
     private void verifyPom(File repoDirectory, String pathToPom, ManipulationModel alignment)
             throws IOException, XmlPullParserException {
-        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(repoDirectory, alignment,
-                pathToPom, true);
+        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(
+                repoDirectory,
+                alignment,
+                pathToPom,
+                true);
         final ManipulationModel module = modelAndModule.getRight();
         assertThat(modelAndModule.getLeft().getDependencies())
                 .extracting("artifactId", "version")

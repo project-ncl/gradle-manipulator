@@ -1,8 +1,10 @@
 package org.jboss.gm.cli;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.linesOf;
+
 import java.io.File;
 import java.util.Collections;
-
 import org.aeonbits.owner.ConfigCache;
 import org.eclipse.jgit.api.Git;
 import org.gradle.tooling.internal.consumer.ConnectorServices;
@@ -15,9 +17,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemErrRule;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.linesOf;
 
 public class SemanticPluginTest {
     @Rule

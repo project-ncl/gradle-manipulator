@@ -1,12 +1,24 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assume.assumeTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Collections;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
@@ -22,19 +34,6 @@ import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assume.assumeTrue;
 
 public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
@@ -56,20 +55,25 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
     }
 
     private void stubDACall() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("spring-like-layout-da-root.json"))));
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("spring-like-layout-da-root-project.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("spring-like-layout-da-root.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("spring-like-layout-da-root-project.json"))));
     }
 
     @Test
-    public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException, ManipulationException {
+    public void ensureAlignmentFileCreatedAndAlignmentTaskRun()
+            throws IOException, URISyntaxException, ManipulationException {
         // XXX: Caused by: java.lang.ClassNotFoundException: org.gradle.api.artifacts.maven.PomFilterContainer
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
 
@@ -78,14 +82,17 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(
+                AlignmentTask.INJECT_GME_END,
+                FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme");
             assertThat(am.getName()).isEqualTo("root");
             assertThat(am.getVersion()).isEqualTo("1.1.2.redhat-00004");
 
-            assertThat(am.getChildren().keySet()).hasSize(3).containsExactly("subproject1", "subproject2", "subproject3");
+            assertThat(am.getChildren().keySet()).hasSize(3)
+                    .containsExactly("subproject1", "subproject2", "subproject3");
 
             assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("1.1.2.redhat-00004");
@@ -109,7 +116,8 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
             assertThat(am.findCorrespondingChild("subproject3")).satisfies(subproject11 -> {
                 assertThat(subproject11.getVersion()).isEqualTo("1.1.2.redhat-00004");
-                final Collection<ProjectVersionRef> alignedDependencies = subproject11.getAlignedDependencies().values();
+                final Collection<ProjectVersionRef> alignedDependencies = subproject11.getAlignedDependencies()
+                        .values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
                         .containsOnly(
@@ -137,19 +145,24 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
 
         final File projectRoot = tempDir.newFolder("spring-like-layout");
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(),
+        final TestManipulationModel alignmentModel = TestUtils.align(
+                projectRoot,
+                projectRoot.getName(),
                 Collections.singletonMap("dokkaPlugin", "false"));
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(
+                AlignmentTask.INJECT_GME_END,
+                FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme");
             assertThat(am.getName()).isEqualTo("root");
             assertThat(am.getVersion()).isEqualTo("1.1.2.redhat-00004");
 
-            assertThat(am.getChildren().keySet()).hasSize(3).containsExactly("subproject1", "subproject2", "subproject3");
+            assertThat(am.getChildren().keySet()).hasSize(3)
+                    .containsExactly("subproject1", "subproject2", "subproject3");
 
             assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("1.1.2.redhat-00004");
@@ -173,7 +186,8 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
             assertThat(am.findCorrespondingChild("subproject3")).satisfies(subproject11 -> {
                 assertThat(subproject11.getVersion()).isEqualTo("1.1.2.redhat-00004");
-                final Collection<ProjectVersionRef> alignedDependencies = subproject11.getAlignedDependencies().values();
+                final Collection<ProjectVersionRef> alignedDependencies = subproject11.getAlignedDependencies()
+                        .values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
                         .containsOnly(

@@ -1,5 +1,7 @@
 package org.jboss.gm.manipulation.actions;
 
+import static org.jboss.gm.manipulation.ManipulationPlugin.MAVEN_PUBLISH_PLUGIN;
+
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
@@ -10,8 +12,6 @@ import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.ProjectUtils;
 import org.jboss.gm.manipulation.ResolvedDependenciesRepository;
-
-import static org.jboss.gm.manipulation.ManipulationPlugin.MAVEN_PUBLISH_PLUGIN;
 
 /**
  * Fixes pom.xml generation in "maven-publish" plugin.
@@ -34,7 +34,8 @@ public class PublishTaskTransformerAction
      * @param alignmentConfiguration the alignment configuration
      * @param resolvedDependenciesRepository the resolved dependencies repository
      */
-    public PublishTaskTransformerAction(ManipulationModel alignmentConfiguration,
+    public PublishTaskTransformerAction(
+            ManipulationModel alignmentConfiguration,
             ResolvedDependenciesRepository resolvedDependenciesRepository) {
         this.alignmentConfiguration = alignmentConfiguration;
         this.resolvedDependenciesRepository = resolvedDependenciesRepository;
@@ -73,13 +74,16 @@ public class PublishTaskTransformerAction
                     logger.warn(
                             "A '{}' (full name: '{}') publication has been added but the POM file generation disabled. "
                                     + "This causes issues with Gradle and should be reviewed. Force enabling it to prevent future errors.",
-                            generateName, task.getName());
+                            generateName,
+                            task.getName());
                     task.setEnabled(true);
                 }
             }
         });
 
-        project.getExtensions().getByType(PublishingExtension.class).getPublications()
+        project.getExtensions()
+                .getByType(PublishingExtension.class)
+                .getPublications()
                 .withType(MavenPublication.class)
                 .configureEach(publication -> {
                     logger.debug("Applying POM transformer to publication {}", publication.getName());
@@ -88,20 +92,24 @@ public class PublishTaskTransformerAction
                     if (archivesBaseName != null && !publication.getArtifactId().equals(archivesBaseName)) {
                         logger.warn(
                                 "Updating publication artifactId ({}) as it is not consistent with archivesBaseName ({})",
-                                publication.getArtifactId(), archivesBaseName);
+                                publication.getArtifactId(),
+                                archivesBaseName);
                         publication.setArtifactId(archivesBaseName);
                     }
 
                     if (!project.getVersion().equals(publication.getVersion())) {
                         logger.warn(
                                 "Mismatch between project version ({}) and publication version ({}). Resetting to project version.",
-                                project.getVersion(), publication.getVersion());
+                                project.getVersion(),
+                                publication.getVersion());
                         publication.setVersion(project.getVersion().toString());
                     }
                     if (publication.getPom() != null) {
                         publication.getPom()
-                                .withXml(new MavenPomTransformerAction(alignmentConfiguration,
-                                        resolvedDependenciesRepository));
+                                .withXml(
+                                        new MavenPomTransformerAction(
+                                                alignmentConfiguration,
+                                                resolvedDependenciesRepository));
                     }
                 });
     }

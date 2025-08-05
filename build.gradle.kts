@@ -7,6 +7,7 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.text.SimpleDateFormat
 import java.util.Date
+import kotlin.reflect.full.memberFunctions
 
 plugins {
     java
@@ -14,7 +15,10 @@ plugins {
     `maven-publish`
     idea
 
-    if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.4")) {
+    // Note spotless is only active for Gradle >= 6.1.1. Using 6.8.3 for the extra fixes.
+    if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("6.8.3")) {
+        id("com.diffplug.spotless") version "7.2.1"
+    } else if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.4")) {
         id("com.diffplug.gradle.spotless") version "4.5.1"
     } else {
         id("com.diffplug.spotless") version "5.14.2"
@@ -182,6 +186,8 @@ tasks.getByName("checkoutMergeFromReleaseBranch") {
 }
 
 allprojects {
+    extra["gradleReleaseVersion"] = "6.8.3"
+
     repositories {
         mavenCentral()
         mavenLocal()
@@ -199,8 +205,8 @@ allprojects {
 }
 
 val isReleaseBuild = ("true" == System.getProperty("release", ""))
-if (isReleaseBuild && GradleVersion.current().version != "5.6.4") {
-    throw GradleException("Gradle 5.6.4 is required to release this project")
+if (isReleaseBuild && GradleVersion.current().version != "${project.extra.get("gradleReleaseVersion")}") {
+    throw GradleException("Gradle ${project.extra.get("gradleReleaseVersion")} is required to release this project")
 }
 
 subprojects {
@@ -209,6 +215,7 @@ subprojects {
     extra["bytemanVersion"] = "4.0.15"
     extra["commonsBeanVersion"] = "1.9.4"
     extra["commonsVersion"] = "2.6"
+    // Used in the CLI. Only limited version range available in repo.gradle.org/ui/native/libs-releases-local
     extra["gradleVersion"] = "5.6.4"
     extra["groovyVersion"] = "3.0.17"
     extra["ivyVersion"] = "2.5.0"
@@ -462,15 +469,31 @@ subprojects {
         theme = ThemeType.MOCHA
     }
 
+
+    val spotlessConfig by configurations.creating
+    dependencies {
+        spotlessConfig("org.jboss.pnc:ide-config:1.1.0")
+    }
+
     spotless {
         java {
-            importOrderFile("$rootDir/ide-config/eclipse.importorder")
-            eclipse().configFile("$rootDir/ide-config/eclipse-format.xml")
+            // Can't use asFile (from https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.resources/-text-resource/index.html )
+            // as that creates and writes the File immediately ... which is then deleted
+            // by Gradle clean. configProperties was only available from Spotless 7.0 (which requires Gradle >= 6.1.1)
+            if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("${project.extra.get("gradleReleaseVersion")}")) {
+                removeUnusedImports()
+                importOrder(resources.text.fromArchiveEntry(spotlessConfig, "java-import-order.txt").asString())
+                val formatter = resources.text.fromArchiveEntry(spotlessConfig, "java-formatter.xml").asString()
+                val eclipseConfigXml = com.diffplug.gradle.spotless.JavaExtension.EclipseConfig::class.memberFunctions.find{it.name == "configXml"}
+                eclipseConfigXml?.call(eclipse(), arrayOf(formatter))
+            }
         }
     }
 
     tasks.withType<JavaCompile>().configureEach {
-        dependsOn("spotlessApply")
+        if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("${project.extra.get("gradleReleaseVersion")}")) {
+            dependsOn("spotlessApply")
+        }
     }
 
     if (project.name != "cli") {

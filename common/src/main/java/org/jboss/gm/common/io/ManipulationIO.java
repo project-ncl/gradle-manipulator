@@ -3,7 +3,6 @@ package org.jboss.gm.common.io;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -25,8 +24,10 @@ public final class ManipulationIO {
      */
     public static ManipulationModel readManipulationModel(File rootDir) {
         try {
-            return SerializationUtils.getObjectMapper().readValue(new File(rootDir, MANIPULATION_FILE_NAME),
-                    ManipulationModel.class);
+            return SerializationUtils.getObjectMapper()
+                    .readValue(
+                            new File(rootDir, MANIPULATION_FILE_NAME),
+                            ManipulationModel.class);
 
         } catch (IOException e) {
             throw new ManipulationUncheckedException("Unable to deserialize {}", MANIPULATION_FILE_NAME, e);
@@ -51,8 +52,11 @@ public final class ManipulationIO {
         try {
             FileUtils.writeStringToFile(
                     manipulationFilePath,
-                    SerializationUtils.getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(
-                            updatedManipulationModel) + System.lineSeparator(),
+                    SerializationUtils.getObjectMapper()
+                            .writerWithDefaultPrettyPrinter()
+                            .writeValueAsString(
+                                    updatedManipulationModel)
+                            + System.lineSeparator(),
                     StandardCharsets.UTF_8.name());
         } catch (IOException e) {
             throw new ManipulationException("Unable to write manipulation.json in project root", e);

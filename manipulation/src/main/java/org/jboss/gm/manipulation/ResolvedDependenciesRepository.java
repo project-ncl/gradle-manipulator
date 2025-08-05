@@ -2,7 +2,6 @@ package org.jboss.gm.manipulation;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.logging.GMLogger;

@@ -1,15 +1,13 @@
 package org.jboss.gm.common.utils;
 
+import com.redhat.resilience.otel.OTelCLIHelper;
 import lombok.experimental.UtilityClass;
-
 import org.aeonbits.owner.ConfigCache;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.FilteringCustomLogger;
 import org.jboss.gm.common.logging.GMLogger;
-
-import com.redhat.resilience.otel.OTelCLIHelper;
 
 @UtilityClass
 public class OTELUtils {
@@ -32,7 +30,9 @@ public class OTELUtils {
                 if (originalLevel != LogLevel.DEBUG) {
                     FilteringCustomLogger.getContext().setLevel(LogLevel.DEBUG);
                 }
-                OTelCLIHelper.startOTel(service, "alignment-plugin",
+                OTelCLIHelper.startOTel(
+                        service,
+                        "alignment-plugin",
                         OTelCLIHelper.defaultSpanProcessor(OTelCLIHelper.defaultSpanExporter(endpoint)));
             } finally {
                 FilteringCustomLogger.getContext().setLevel(originalLevel);

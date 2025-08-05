@@ -1,5 +1,7 @@
 package org.jboss.gm.common.versioning;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.DefaultVersionComparator;
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.DefaultVersionSelectorScheme;
@@ -7,11 +9,10 @@ import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionP
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionSelector;
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionSelectorScheme;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
-
 public class DynamicVersionParser {
 
-    private static final VersionSelectorScheme selector = new DefaultVersionSelectorScheme(new DefaultVersionComparator(),
+    private static final VersionSelectorScheme selector = new DefaultVersionSelectorScheme(
+            new DefaultVersionComparator(),
             new VersionParser());
 
     public static boolean isDynamic(String version) {

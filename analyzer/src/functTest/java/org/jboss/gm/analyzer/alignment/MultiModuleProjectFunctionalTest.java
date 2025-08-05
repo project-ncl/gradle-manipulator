@@ -1,41 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.List;
-
-import org.apache.maven.settings.Repository;
-import org.apache.maven.settings.Settings;
-import org.apache.maven.settings.io.xpp3.SettingsXpp3Reader;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.common.json.GAV;
-import org.commonjava.maven.ext.common.json.ModulesItem;
-import org.commonjava.maven.ext.common.json.PME;
-import org.commonjava.maven.ext.common.util.JSONUtils;
-import org.commonjava.maven.ext.io.rest.DefaultTranslator;
-import org.gradle.api.Project;
-import org.gradle.util.GradleVersion;
-import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
-import org.jboss.gm.common.Configuration;
-import org.jboss.gm.common.utils.FileUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
-import org.junit.rules.TemporaryFolder;
-import org.junit.rules.TestRule;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -49,13 +13,47 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.List;
+import org.apache.maven.settings.Repository;
+import org.apache.maven.settings.Settings;
+import org.apache.maven.settings.io.xpp3.SettingsXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.common.json.GAV;
+import org.commonjava.maven.ext.common.json.ModulesItem;
+import org.commonjava.maven.ext.common.json.PME;
+import org.commonjava.maven.ext.common.util.JSONUtils;
+import org.commonjava.maven.ext.io.rest.DefaultTranslator;
+import org.gradle.api.Project;
+import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
+import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.utils.FileUtils;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
+
 public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -69,16 +67,20 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
     }
 
     private void stubDACall() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("multi-module-da-root.json"))));
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("multi-module-da-root-project.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("multi-module-da-root.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("multi-module-da-root-project.json"))));
     }
 
     @Test
@@ -90,7 +92,9 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(
+                AlignmentTask.INJECT_GME_END,
+                FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme");
@@ -127,7 +131,8 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
 
             assertThat(am.findCorrespondingChild(":subproject1:subproject11")).satisfies(subproject11 -> {
                 assertThat(subproject11.getVersion()).isEqualTo("1.1.2.redhat-00005");
-                final Collection<ProjectVersionRef> alignedDependencies = subproject11.getAlignedDependencies().values();
+                final Collection<ProjectVersionRef> alignedDependencies = subproject11.getAlignedDependencies()
+                        .values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
                         .containsOnly(
@@ -135,7 +140,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
             });
         });
 
-        assertThat(systemOutRule.getLog()).contains("Attempting to disable alignment task in");
+        assertThat(systemOutRule.getLinesNormalized()).contains("Attempting to disable alignment task in");
 
         // we care about how many calls are made to DA from an implementation perspective which is why we assert
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
@@ -156,28 +161,34 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         }
 
         // make sure the project name was not changed
-        List<String> settingsLines = org.apache.commons.io.FileUtils.readLines(new File(projectRoot, "settings.gradle"),
+        List<String> settingsLines = org.apache.commons.io.FileUtils.readLines(
+                new File(projectRoot, "settings.gradle"),
                 Charset.defaultCharset());
-        assertThat(settingsLines).map(String::trim).filteredOn(s -> s.startsWith("rootProject.name"))
-                .singleElement(as(STRING)).endsWith("'root'");
+        assertThat(settingsLines).map(String::trim)
+                .filteredOn(s -> s.startsWith("rootProject.name"))
+                .singleElement(as(STRING))
+                .endsWith("'root'");
     }
 
     @Test
     public void verifyAlignmentReportJson() throws IOException, URISyntaxException {
         final Path projectRoot = tempDir.newFolder("multi-module").toPath();
         assertThat(projectRoot).isDirectory();
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot.toFile(),
+        final TestManipulationModel alignmentModel = TestUtils.align(
+                projectRoot.toFile(),
                 projectRoot.getFileName().toString());
         assertThat(alignmentModel).isNotNull();
         final Path buildRoot = projectRoot.resolve("build");
         assertThat(buildRoot).isDirectory();
         final Path jsonFile = buildRoot.resolve(Configuration.REPORT_JSON_OUTPUT_FILE);
         assertThat(jsonFile).isRegularFile().isReadable();
-        final Path textFile = buildRoot.resolve(Configuration.REPORT_JSON_OUTPUT_FILE
-                .replaceFirst("\\.json$", ".txt"));
+        final Path textFile = buildRoot.resolve(
+                Configuration.REPORT_JSON_OUTPUT_FILE
+                        .replaceFirst("\\.json$", ".txt"));
         assertThat(textFile).doesNotExist();
         final PME jsonReport = JSONUtils.fileToJSON(jsonFile.toFile());
-        final String jsonString = org.apache.commons.io.FileUtils.readFileToString(jsonFile.toFile(),
+        final String jsonString = org.apache.commons.io.FileUtils.readFileToString(
+                jsonFile.toFile(),
                 StandardCharsets.UTF_8);
         final String expectedJsonString = String.format(
                 "{%n" +
@@ -267,9 +278,11 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(module2.getGav().getVersion()).isEqualTo("1.1.2.redhat-00005");
         assertThat(module2.getGav().getOriginalGAV()).isEqualTo("org.acme:subproject1:1.1.2");
         assertThat(module2.getDependencies()).hasSize(2)
-                .containsEntry("org.hibernate:hibernate-core:5.4.2.Final",
+                .containsEntry(
+                        "org.hibernate:hibernate-core:5.4.2.Final",
                         SimpleProjectVersionRef.parse("org.hibernate:hibernate-core:5.4.2.Final-redhat-00001"))
-                .containsEntry("org.springframework:spring-context:5.1.6.RELEASE",
+                .containsEntry(
+                        "org.springframework:spring-context:5.1.6.RELEASE",
                         SimpleProjectVersionRef.parse("org.springframework:spring-context:5.1.6.RELEASE-redhat-00005"));
         assertThat(module3.getGav()).isNotNull();
         assertThat(module3.getGav().getGroupId()).isEqualTo("org.acme");
@@ -277,7 +290,8 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(module3.getGav().getVersion()).isEqualTo("1.1.2.redhat-00005");
         assertThat(module3.getGav().getOriginalGAV()).isEqualTo("org.acme:subproject2:1.1.2");
         assertThat(module3.getDependencies()).hasSize(1)
-                .containsEntry("org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1",
+                .containsEntry(
+                        "org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1",
                         SimpleProjectVersionRef.parse("org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1-redhat-00001"));
         assertThat(module4.getGav()).isNotNull();
         assertThat(module4.getGav().getGroupId()).isEqualTo("org.acme");
@@ -285,7 +299,8 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(module4.getGav().getVersion()).isEqualTo("1.1.2.redhat-00005");
         assertThat(module4.getGav().getOriginalGAV()).isEqualTo("org.acme:subproject11:1.1.2");
         assertThat(module4.getDependencies()).hasSize(1)
-                .containsEntry("org.springframework:spring-context:5.1.6.RELEASE",
+                .containsEntry(
+                        "org.springframework:spring-context:5.1.6.RELEASE",
                         SimpleProjectVersionRef.parse("org.springframework:spring-context:5.1.6.RELEASE-redhat-00005"));
         final String expectedTextString = String.format(
                 "------------------- project org.acme:root (path: :)%n" +
@@ -311,7 +326,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                         "\tDependencies : org.springframework:spring-context:5.1.6.RELEASE --> org.springframework:spring-context:5.1.6.RELEASE-redhat-00005%n"
                         +
                         "%n");
-        assertThat(systemOutRule.getLog()).contains(expectedTextString);
+        assertThat(systemOutRule.getLinesNormalized()).contains(expectedTextString);
     }
 
     @Test
@@ -319,16 +334,20 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         System.setProperty("reportJSONOutputFile", "");
         final String reportJsonOutputFile = System.getProperty("reportJSONOutputFile");
         assertThat(reportJsonOutputFile).isNotNull().isEmpty();
-        System.setProperty("reportTxtOutputFile", Configuration.REPORT_JSON_OUTPUT_FILE
-                .replaceFirst("\\.json$", ".txt"));
+        System.setProperty(
+                "reportTxtOutputFile",
+                Configuration.REPORT_JSON_OUTPUT_FILE
+                        .replaceFirst("\\.json$", ".txt"));
         final String reportTxtOutputFile = System.getProperty("reportTxtOutputFile");
-        assertThat(reportTxtOutputFile).isEqualTo(Configuration.REPORT_JSON_OUTPUT_FILE
-                .replaceFirst("\\.json$", ".txt"));
+        assertThat(reportTxtOutputFile).isEqualTo(
+                Configuration.REPORT_JSON_OUTPUT_FILE
+                        .replaceFirst("\\.json$", ".txt"));
         final String reportNonAligned = System.getProperty("reportNonAligned");
         assertThat(reportNonAligned).isNull();
         final Path projectRoot = tempDir.newFolder("multi-module").toPath();
         assertThat(projectRoot).isDirectory();
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot.toFile(),
+        final TestManipulationModel alignmentModel = TestUtils.align(
+                projectRoot.toFile(),
                 projectRoot.getFileName().toString());
         assertThat(alignmentModel).isNotNull();
         final Path buildRoot = projectRoot.resolve("build");
@@ -337,7 +356,8 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(jsonFile).doesNotExist();
         final Path textFile = buildRoot.resolve(System.getProperty("reportTxtOutputFile"));
         assertThat(textFile).isRegularFile().isReadable();
-        final String textString = org.apache.commons.io.FileUtils.readFileToString(textFile.toFile(), StandardCharsets.UTF_8);
+        final String textString = org.apache.commons.io.FileUtils
+                .readFileToString(textFile.toFile(), StandardCharsets.UTF_8);
         final String expectedTextString = String.format(
                 "------------------- project org.acme:root (path: :)%n" +
                         "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
@@ -363,7 +383,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                         +
                         "%n");
         assertThat(textString).isEqualTo(expectedTextString);
-        assertThat(systemOutRule.getLog()).contains(expectedTextString);
+        assertThat(systemOutRule.getLinesNormalized()).contains(expectedTextString);
     }
 
     @Test
@@ -371,17 +391,21 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         System.setProperty("reportJSONOutputFile", "");
         final String reportJsonOutputFile = System.getProperty("reportJSONOutputFile");
         assertThat(reportJsonOutputFile).isNotNull().isEmpty();
-        System.setProperty("reportTxtOutputFile", Configuration.REPORT_JSON_OUTPUT_FILE
-                .replaceFirst("\\.json$", ".txt"));
+        System.setProperty(
+                "reportTxtOutputFile",
+                Configuration.REPORT_JSON_OUTPUT_FILE
+                        .replaceFirst("\\.json$", ".txt"));
         final String reportTxtOutputFile = System.getProperty("reportTxtOutputFile");
-        assertThat(reportTxtOutputFile).isEqualTo(Configuration.REPORT_JSON_OUTPUT_FILE
-                .replaceFirst("\\.json$", ".txt"));
+        assertThat(reportTxtOutputFile).isEqualTo(
+                Configuration.REPORT_JSON_OUTPUT_FILE
+                        .replaceFirst("\\.json$", ".txt"));
         System.setProperty("reportNonAligned", Boolean.TRUE.toString());
         final String reportNonAligned = System.getProperty("reportNonAligned");
         assertThat(reportNonAligned).isNotEmpty().isEqualTo(Boolean.TRUE.toString());
         final Path projectRoot = tempDir.newFolder("multi-module").toPath();
         assertThat(projectRoot).isDirectory();
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot.toFile(),
+        final TestManipulationModel alignmentModel = TestUtils.align(
+                projectRoot.toFile(),
                 projectRoot.getFileName().toString());
         assertThat(alignmentModel).isNotNull();
         final Path buildRoot = projectRoot.resolve("build");
@@ -390,7 +414,8 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(jsonFile).doesNotExist();
         final Path textFile = buildRoot.resolve(reportTxtOutputFile);
         assertThat(textFile).isRegularFile().isReadable();
-        final String textString = org.apache.commons.io.FileUtils.readFileToString(textFile.toFile(), StandardCharsets.UTF_8);
+        final String textString = org.apache.commons.io.FileUtils
+                .readFileToString(textFile.toFile(), StandardCharsets.UTF_8);
         final String expectedTextString = String.format(
                 "------------------- project org.acme:root (path: :)%n" +
                         "\tProject version : 1.1.2 --> 1.1.2.redhat-00005%n" +
@@ -423,6 +448,6 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                         "\tNon-Aligned Dependencies : org.apache.commons:commons-lang3:3.8.1%n" +
                         "%n");
         assertThat(textString).isEqualTo(expectedTextString);
-        assertThat(systemOutRule.getLog()).contains(expectedTextString);
+        assertThat(systemOutRule.getLinesNormalized()).contains(expectedTextString);
     }
 }

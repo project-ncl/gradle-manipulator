@@ -1,10 +1,12 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence.NONE;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.commonjava.maven.ext.core.state.DependencyState;
@@ -16,9 +18,6 @@ import org.jboss.gm.common.logging.FilteringCustomLogger;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.utils.RESTUtils;
 import org.slf4j.Logger;
-
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence.NONE;
 
 /**
  * An implementation of {@link AlignmentService} that uses the Dependency Analyzer service
@@ -51,7 +50,8 @@ public class DAAlignmentService implements AlignmentService {
         logger.debug("endpointUrl = {}, dependencySource = {}", endpointUrl, dependencySource);
 
         if (isEmpty(endpointUrl) && dependencySource != NONE) {
-            throw new ManipulationUncheckedException("'{}' must be configured in order for dependency scanning to work",
+            throw new ManipulationUncheckedException(
+                    "'{}' must be configured in order for dependency scanning to work",
                     Configuration.DA);
         }
 

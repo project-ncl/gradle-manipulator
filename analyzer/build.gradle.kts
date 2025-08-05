@@ -69,7 +69,7 @@ dependencies {
     testImplementation(project(path = ":common", configuration = "testFixturesCompile"))
     testImplementation(gradleTestKit())
     testImplementation("junit:junit:${project.extra.get("junitVersion")}")
-    testImplementation("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
+    testImplementation("uk.org.webcompere:system-stubs-junit4:${project.extra.get("systemStubsVersion")}")
     testImplementation("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
     testImplementation("org.jboss.byteman:byteman-bmunit:${project.extra.get("bytemanVersion")}")
     testImplementation(files ("${System.getProperty("java.home")}/../lib/tools.jar") )

@@ -1,37 +1,35 @@
 package org.jboss.gm.manipulation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-
 import org.apache.maven.model.Model;
 import org.assertj.core.groups.Tuple;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.internal.Pair;
 import org.gradle.testkit.runner.BuildResult;
-import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class SimpleProjectWithSpringDMAndMavenPublishPluginsFunctionalTest {
-
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Test
     public void ensureProperPomGenerated() throws IOException, URISyntaxException, XmlPullParserException {
@@ -52,28 +50,34 @@ public class SimpleProjectWithSpringDMAndMavenPublishPluginsFunctionalTest {
                 .withArguments("publishToMavenLocal")
                 .build();
         assertThat(buildResult.task(":publishToMavenLocal")).isNotNull()
-                .satisfies(t -> assertThat(t.getOutcome())
-                        .isEqualTo(TaskOutcome.SUCCESS));
+                .satisfies(
+                        t -> assertThat(t.getOutcome())
+                                .isEqualTo(TaskOutcome.SUCCESS));
 
-        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(m2Directory, alignment,
-                "org/acme/root/1.0.1-redhat-00001/root-1.0.1-redhat-00001.pom", true);
+        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(
+                m2Directory,
+                alignment,
+                "org/acme/root/1.0.1-redhat-00001/root-1.0.1-redhat-00001.pom",
+                true);
         assertThat(modelAndModule.getLeft()).isNotNull()
-                .satisfies(m -> assertThat(m.getDependencies())
-                        .extracting("artifactId", "version")
-                        .containsOnly(
-                                Tuple.tuple("commons-lang3", "3.8.1"),
-                                Tuple.tuple("hibernate-core", "5.0.11.Final"),
-                                Tuple.tuple("hsqldb", null),
-                                Tuple.tuple("undertow-core", "1.4.25.Final"),
-                                Tuple.tuple("slf4j-api", "1.7.26"),
-                                Tuple.tuple("slf4j-ext", null)));
+                .satisfies(
+                        m -> assertThat(m.getDependencies())
+                                .extracting("artifactId", "version")
+                                .containsOnly(
+                                        Tuple.tuple("commons-lang3", "3.8.1"),
+                                        Tuple.tuple("hibernate-core", "5.0.11.Final"),
+                                        Tuple.tuple("hsqldb", null),
+                                        Tuple.tuple("undertow-core", "1.4.25.Final"),
+                                        Tuple.tuple("slf4j-api", "1.7.26"),
+                                        Tuple.tuple("slf4j-ext", null)));
         // check that BOM is present as managed dependency
         assertThat(modelAndModule.getLeft().getDependencyManagement()).isNotNull()
-                .satisfies(dm -> assertThat(dm.getDependencies())
-                        .extracting("artifactId", "version", "scope", "type")
-                        .containsOnly(
-                                Tuple.tuple("spring-boot-dependencies", "1.5.19.RELEASE", "import", "pom"),
-                                Tuple.tuple("slf4j-api", "1.7.25", null, "jar"),
-                                Tuple.tuple("slf4j-ext", "1.7.25", null, "jar")));
+                .satisfies(
+                        dm -> assertThat(dm.getDependencies())
+                                .extracting("artifactId", "version", "scope", "type")
+                                .containsOnly(
+                                        Tuple.tuple("spring-boot-dependencies", "1.5.19.RELEASE", "import", "pom"),
+                                        Tuple.tuple("slf4j-api", "1.7.25", null, "jar"),
+                                        Tuple.tuple("slf4j-ext", "1.7.25", null, "jar")));
     }
 }

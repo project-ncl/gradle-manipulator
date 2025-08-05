@@ -1,18 +1,16 @@
 package org.jboss.gm.common.utils;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
-
 import lombok.experimental.UtilityClass;
-
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.helpers.MessageFormatter;
-
-import static org.apache.commons.lang.StringUtils.isBlank;
 
 @UtilityClass
 public class FileUtils {

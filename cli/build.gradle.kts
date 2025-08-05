@@ -50,7 +50,7 @@ dependencies {
     testImplementation(project(":analyzer"))
     testImplementation("junit:junit:${project.extra.get("junitVersion")}")
     testImplementation("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
-    testImplementation("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
+    testImplementation("uk.org.webcompere:system-stubs-junit4:${project.extra.get("systemStubsVersion")}")
     testImplementation("org.codehaus.plexus:plexus-archiver:4.2.3")
     testImplementation("org.eclipse.jgit:org.eclipse.jgit:${project.extra.get("jgitVersion")}")
 }

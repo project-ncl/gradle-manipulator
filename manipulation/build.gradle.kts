@@ -50,7 +50,7 @@ dependencies {
     testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsVersion")}")
     testImplementation("junit:junit:${project.extra.get("junitVersion")}")
     testImplementation("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
-    testImplementation("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
+    testImplementation("uk.org.webcompere:system-stubs-junit4:${project.extra.get("systemStubsVersion")}")
     testImplementation("org.eclipse.jgit:org.eclipse.jgit:${project.extra.get("jgitVersion")}")
     testImplementation(project(path = ":common", configuration = "testFixturesCompile"))
 

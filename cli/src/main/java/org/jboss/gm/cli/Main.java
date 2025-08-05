@@ -1,5 +1,8 @@
 package org.jboss.gm.cli;
 
+import static org.jboss.gm.common.utils.PluginUtils.SEMANTIC_BUILD_VERSIONING;
+
+import ch.qos.logback.classic.Level;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -15,16 +18,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -46,17 +46,14 @@ import org.jboss.gm.common.utils.JavaUtils;
 import org.jboss.gm.common.utils.PluginUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Unmatched;
-import ch.qos.logback.classic.Level;
-
-import static org.jboss.gm.common.utils.PluginUtils.SEMANTIC_BUILD_VERSIONING;
 
 @SuppressWarnings("unused")
-@Command(name = "GradleAnalyser",
+@Command(
+        name = "GradleAnalyser",
         description = "CLI to optionally run Groovy scripts and then invoke Gradle.",
         mixinStandardHelpOptions = true, // add --help and --version options
         versionProvider = ManifestVersionProvider.class)
@@ -65,7 +62,8 @@ public class Main implements Callable<Void> {
 
     private static final GradleVersion MIN_GRADLE_VERSION_GRADLE_ISSUE_3117 = GradleVersion.version("5.3");
 
-    private static final List<GradleVersion> BROKEN_GRADLE_VERSIONS = Arrays.asList(GradleVersion.version("8.10"),
+    private static final List<GradleVersion> BROKEN_GRADLE_VERSIONS = Arrays.asList(
+            GradleVersion.version("8.10"),
             GradleVersion.version("8.10.1"));
 
     private final GradleConnector connector = GradleConnector.newConnector();
@@ -73,7 +71,8 @@ public class Main implements Callable<Void> {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @SuppressWarnings({ "FieldCanBeLocal", "FieldMayBeFinal" })
-    @Option(names = "--no-colour",
+    @Option(
+            names = "--no-colour",
             negatable = true,
             description = "Enable (or disable with '--no-colour') colour output on logging.")
     private boolean colour = true;
@@ -84,7 +83,8 @@ public class Main implements Callable<Void> {
     @Option(names = "--trace", description = "Enable trace.")
     private boolean trace;
 
-    @Option(names = { "-t", "--target" },
+    @Option(
+            names = { "-t", "--target" },
             description = "Target Gradle directory (default: ${DEFAULT-VALUE}).",
             defaultValue = "${sys:user.dir}")
     private File target;
@@ -142,7 +142,9 @@ public class Main implements Callable<Void> {
             logger.info("JVM arguments: {}", javaEnvironment.getJvmArguments());
 
             if (version.compareTo(MIN_GRADLE_VERSION) < 0) {
-                throw new ManipulationException("{} is too old and is unsupported. You need at least {}.", version,
+                throw new ManipulationException(
+                        "{} is too old and is unsupported. You need at least {}.",
+                        version,
                         MIN_GRADLE_VERSION);
             }
             if (BROKEN_GRADLE_VERSIONS.contains(version)) {
@@ -167,7 +169,8 @@ public class Main implements Callable<Void> {
                         if (matcher.matches()) {
                             String javaVersion = matcher.group("version");
                             logger.debug("Caught exception processing Gradle API", e);
-                            throw new ManipulationException("Java {} is incompatible with Gradle version used to build",
+                            throw new ManipulationException(
+                                    "Java {} is incompatible with Gradle version used to build",
                                     javaVersion);
                         }
                     }
@@ -178,7 +181,8 @@ public class Main implements Callable<Void> {
         }
     }
 
-    private void executeGradle(OutputStream out, boolean quiet, List<String> currentGradleArgs) throws ManipulationException {
+    private void executeGradle(OutputStream out, boolean quiet, List<String> currentGradleArgs)
+            throws ManipulationException {
         if (installation != null) {
             if (!installation.exists()) {
                 throw new ManipulationException("Unable to locate Gradle installation at {}", installation);
@@ -220,11 +224,16 @@ public class Main implements Callable<Void> {
             envVars.put("JAVA_HOME", javaHome.getAbsolutePath());
 
             BuildLauncher build = connection.newBuild();
-            List<String> jvmArgs = jvmPropertyParams.entrySet().stream()
+            List<String> jvmArgs = jvmPropertyParams.entrySet()
+                    .stream()
                     .map(entry -> "-D" + entry.getKey() + '=' + entry.getValue())
                     .collect(Collectors.toCollection(ArrayList::new));
-            jvmArgs.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments().stream()
-                    .filter(s -> s.startsWith("-Xdebug") || s.startsWith("-Xrunjdwp")).collect(Collectors.toList()));
+            jvmArgs.addAll(
+                    ManagementFactory.getRuntimeMXBean()
+                            .getInputArguments()
+                            .stream()
+                            .filter(s -> s.startsWith("-Xdebug") || s.startsWith("-Xrunjdwp"))
+                            .collect(Collectors.toList()));
 
             // Can't use build.addJvmArguments as it wasn't fixed till 8.13
             // https://github.com/gradle/gradle/issues/31462
@@ -240,11 +249,17 @@ public class Main implements Callable<Void> {
                 Collections.addAll(jvmArgs, System.getenv("JAVA_OPTS").split("\\s+"));
             }
 
-            logger.info("Executing CLI {} on Gradle project {} with JVM args '{}' and arguments '{}'",
-                    ManifestUtils.getManifestInformation(Main.class), target, jvmArgs, currentGradleArgs);
+            logger.info(
+                    "Executing CLI {} on Gradle project {} with JVM args '{}' and arguments '{}'",
+                    ManifestUtils.getManifestInformation(Main.class),
+                    target,
+                    jvmArgs,
+                    currentGradleArgs);
 
             if (logger.isDebugEnabled()) {
-                logger.debug("Environment variables: {}", envVars.keySet().stream().sorted().collect(Collectors.toList()));
+                logger.debug(
+                        "Environment variables: {}",
+                        envVars.keySet().stream().sorted().collect(Collectors.toList()));
             }
 
             if (gradleVersion.compareTo(MIN_GRADLE_VERSION_GRADLE_ISSUE_3117) < 0) {
@@ -342,7 +357,8 @@ public class Main implements Callable<Void> {
                             "Unable to determine a project version. Has this been built from an upstream tag?");
                 }
                 logger.debug("Found project version {}", projectVersion);
-                Files.write(Paths.get(target.getPath(), "gradle.properties"),
+                Files.write(
+                        Paths.get(target.getPath(), "gradle.properties"),
                         (System.lineSeparator() + "version=" + projectVersion + System.lineSeparator())
                                 .getBytes(StandardCharsets.UTF_8),
                         StandardOpenOption.APPEND);
@@ -389,13 +405,17 @@ public class Main implements Callable<Void> {
          * Handles an {@code Exception} that occurred while executing the {@code Runnable} or
          * {@code Callable} command and returns an exit code suitable for returning from execute.
          *
-         * @param ex the Exception thrown by the {@code Runnable}, {@code Callable} or {@code Method} user object of the command
+         * @param ex the Exception thrown by the {@code Runnable}, {@code Callable} or {@code Method} user object of the
+         *        command
          * @param commandLine the CommandLine representing the command or subcommand where the exception occurred
          * @param parseResult the result of parsing the command line arguments
          * @return an exit code
          */
         @Override
-        public int handleExecutionException(Exception ex, CommandLine commandLine, CommandLine.ParseResult parseResult) {
+        public int handleExecutionException(
+                Exception ex,
+                CommandLine commandLine,
+                CommandLine.ParseResult parseResult) {
             this.exception = ex;
             return 1;
         }

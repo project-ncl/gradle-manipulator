@@ -1,34 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
-
-import org.aeonbits.owner.ConfigCache;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.io.rest.DefaultTranslator;
-import org.gradle.api.Project;
-import org.gradle.util.GradleVersion;
-import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
-import org.jboss.gm.common.Configuration;
-import org.jboss.gm.common.utils.FileUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
-import org.junit.rules.TemporaryFolder;
-import org.junit.rules.TestRule;
-import org.junit.runner.RunWith;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -41,14 +12,41 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.Assume.assumeTrue;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+import org.aeonbits.owner.ConfigCache;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.io.rest.DefaultTranslator;
+import org.gradle.api.Project;
+import org.gradle.util.GradleVersion;
+import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
+import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.utils.FileUtils;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
+import org.junit.runner.RunWith;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
+
 @RunWith(JUnitParamsRunner.class)
 public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -64,16 +62,20 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
     }
 
     private void stubDACall() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("spring-like-layout-da-root.json"))));
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("spring-like-layout-da-root-project.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("spring-like-layout-da-root.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("spring-like-layout-da-root-project.json"))));
     }
 
     @Test
@@ -86,12 +88,16 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.0")) < 0);
 
         final File projectRoot = tempDir.newFolder("opentelemetry");
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(),
+        final TestManipulationModel alignmentModel = TestUtils.align(
+                projectRoot,
+                projectRoot.getName(),
                 Collections.singletonMap("-DuseLegacyConfigurationCopy", String.valueOf(useLegacyConfigurationCopy)));
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(
+                AlignmentTask.INJECT_GME_END,
+                FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("io.opentelemetry");
@@ -126,7 +132,8 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START_KOTLIN + " }", TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.INJECT_GME_END_KOTLIN,
+        assertEquals(
+                AlignmentTask.INJECT_GME_END_KOTLIN,
                 FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE + ".kts")));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
@@ -135,9 +142,13 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
             assertThat(am.getVersion()).isEqualTo("0.17.0.redhat-00001");
             assertThat(am.getOriginalVersion()).isEqualTo("0.17.0");
 
-            assertThat(am.getChildren().keySet()).hasSize(5).containsExactly("bom",
-                    "api", "dependencyManagement", "bom-alpha",
-                    "exporters");
+            assertThat(am.getChildren().keySet()).hasSize(5)
+                    .containsExactly(
+                            "bom",
+                            "api",
+                            "dependencyManagement",
+                            "bom-alpha",
+                            "exporters");
 
             assertThat(am.getChildren().get("bom"))
                     .hasToString("io.opentelemetry:opentelemetry-bom:0.17.0.redhat-00001");
@@ -167,8 +178,9 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         });
 
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
-        assertThat(systemOutRule.getLog()).contains("io.opentelemetry:opentelemetry-exporter-jaeger:0.17.0");
-        assertThat(systemOutRule.getLog()).contains("io.opentelemetry:bom:0.17.0");
+        assertThat(systemOutRule.getLinesNormalized())
+                .contains("io.opentelemetry:opentelemetry-exporter-jaeger:0.17.0");
+        assertThat(systemOutRule.getLinesNormalized()).contains("io.opentelemetry:bom:0.17.0");
     }
 
     @Test
@@ -190,7 +202,8 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START_KOTLIN + " }", TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.INJECT_GME_END_KOTLIN,
+        assertEquals(
+                AlignmentTask.INJECT_GME_END_KOTLIN,
                 FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE + ".kts")));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
@@ -199,14 +212,15 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
             assertThat(am.getName()).isEqualTo("opentelemetry-java-instrumentation");
             assertThat(am.getVersion()).isEqualTo("1.17.0.redhat-00001");
 
-            assertThat(am.getChildren().keySet()).hasSize(7).contains(
-                    "bom-alpha",
-                    "benchmark-overhead-jmh",
-                    "custom-checks",
-                    "dependencyManagement",
-                    "instrumentation-api",
-                    "instrumentation-api-semconv",
-                    "smoke-tests");
+            assertThat(am.getChildren().keySet()).hasSize(7)
+                    .contains(
+                            "bom-alpha",
+                            "benchmark-overhead-jmh",
+                            "custom-checks",
+                            "dependencyManagement",
+                            "instrumentation-api",
+                            "instrumentation-api-semconv",
+                            "smoke-tests");
 
             assertThat(am.getChildren().get("bom-alpha"))
                     .hasToString(
@@ -218,8 +232,9 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         });
 
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
-        assertThat(systemOutRule.getLog()).contains("Found archivesBaseName override ; resetting project name "
-                + "'benchmark-overhead-jmh' to 'opentelemetry-benchmark-overhead-jmh'");
+        assertThat(systemOutRule.getLinesNormalized()).contains(
+                "Found archivesBaseName override ; resetting project name "
+                        + "'benchmark-overhead-jmh' to 'opentelemetry-benchmark-overhead-jmh'");
     }
 
     @Test
@@ -239,7 +254,8 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START_KOTLIN + " }", TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.INJECT_GME_END_KOTLIN,
+        assertEquals(
+                AlignmentTask.INJECT_GME_END_KOTLIN,
                 FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE + ".kts")));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
@@ -248,17 +264,18 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
             assertThat(am.getVersion()).isEqualTo("1.44.1.redhat-00001");
             assertThat(am.getOriginalVersion()).isEqualTo("1.44.1");
 
-            assertThat(am.getChildren().keySet()).hasSize(10).containsExactlyInAnyOrder(
-                    "all",
-                    "animal-sniffer-signature",
-                    "api",
-                    "bom",
-                    "bom-alpha",
-                    "context",
-                    "custom-checks",
-                    "dependencyManagement",
-                    "extensions",
-                    "testing-internal");
+            assertThat(am.getChildren().keySet()).hasSize(10)
+                    .containsExactlyInAnyOrder(
+                            "all",
+                            "animal-sniffer-signature",
+                            "api",
+                            "bom",
+                            "bom-alpha",
+                            "context",
+                            "custom-checks",
+                            "dependencyManagement",
+                            "extensions",
+                            "testing-internal");
 
             assertThat(am.getChildren().get("bom"))
                     .hasToString("io.opentelemetry:opentelemetry-bom:1.44.1.redhat-00001");
@@ -286,6 +303,6 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         });
 
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
-        assertThat(systemOutRule.getLog()).contains("io.opentelemetry:bom:1.44.1");
+        assertThat(systemOutRule.getLinesNormalized()).contains("io.opentelemetry:bom:1.44.1");
     }
 }

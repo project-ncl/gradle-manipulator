@@ -1,27 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.io.rest.DefaultTranslator;
-import org.gradle.api.Project;
-import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
-import org.jboss.gm.common.Configuration;
-import org.jboss.gm.common.utils.FileUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
-import org.junit.rules.TemporaryFolder;
-import org.junit.rules.TestRule;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -32,14 +10,35 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.io.rest.DefaultTranslator;
+import org.gradle.api.Project;
+import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
+import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.utils.FileUtils;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
+
 public class GrpcLikeLayoutWithPartialGroupFunctionalTest
         extends AbstractWiremockTest {
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -53,29 +52,37 @@ public class GrpcLikeLayoutWithPartialGroupFunctionalTest
     }
 
     private void stubDACall() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("spring-like-layout-da-root.json"))));
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("spring-like-layout-da-root-project.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("spring-like-layout-da-root.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("spring-like-layout-da-root-project.json"))));
     }
 
     @Test
-    public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException, ManipulationException {
+    public void ensureAlignmentFileCreatedAndAlignmentTaskRun()
+            throws IOException, URISyntaxException, ManipulationException {
 
         final File projectRoot = tempDir.newFolder("grpc-like-layout-with-partial-group");
-        final Map<String, String> props = Collections.singletonMap("dependencyOverride.io.netty:*@*",
+        final Map<String, String> props = Collections.singletonMap(
+                "dependencyOverride.io.netty:*@*",
                 "4.1.42.Final-redhat-00001");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), props);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(
+                AlignmentTask.INJECT_GME_END,
+                FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme");

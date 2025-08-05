@@ -1,5 +1,8 @@
 package org.jboss.gm.common;
 
+import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
+import static org.aeonbits.owner.Config.LoadType.MERGE;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,7 +12,6 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.aeonbits.owner.Accessible;
 import org.aeonbits.owner.Config;
 import org.aeonbits.owner.Config.LoadPolicy;
@@ -19,9 +21,6 @@ import org.aeonbits.owner.Reloadable;
 import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
 import org.commonjava.maven.ext.core.state.RESTState;
 import org.commonjava.maven.ext.io.rest.Translator;
-
-import static org.aeonbits.owner.Config.DisableableFeature.VARIABLE_EXPANSION;
-import static org.aeonbits.owner.Config.LoadType.MERGE;
 
 /**
  * This class is used to hold all configuration values for the two plugins. The configuration is processed
@@ -302,7 +301,10 @@ public interface Configuration extends Accessible, Reloadable {
      */
     default String dumpCurrentConfig() {
         final List<String> values = Arrays.stream(Configuration.class.getMethods())
-                .map(method -> method.getAnnotation(Key.class)).filter(Objects::nonNull).map(Key::value).sorted()
+                .map(method -> method.getAnnotation(Key.class))
+                .filter(Objects::nonNull)
+                .map(Key::value)
+                .sorted()
                 .collect(Collectors.toList());
         final StringBuilder currentProperties = new StringBuilder(900);
 

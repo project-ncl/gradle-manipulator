@@ -1,9 +1,12 @@
 package org.jboss.gm.analyzer.alignment.io;
 
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -13,23 +16,19 @@ import org.jboss.gm.common.rules.LoggingRule;
 import org.jboss.gm.common.utils.PluginUtils;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
-
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class SettingsFileIOTest {
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemPropertiesRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public LoggingRule loggingRule = new LoggingRule(LogLevel.DEBUG);
@@ -50,7 +49,8 @@ public class SettingsFileIOTest {
 
     @Test
     public void testSCMNameWithSCMHigher() throws IOException {
-        File testPath = new File(TestUtils.class.getClassLoader().getResource("").getPath()).getParentFile().getParentFile()
+        File testPath = new File(TestUtils.class.getClassLoader().getResource("").getPath()).getParentFile()
+                .getParentFile()
                 .getParentFile();
         File testSettings = new File(testPath, "tmp" + File.separator + "tests");
         testSettings.mkdirs();
@@ -96,13 +96,17 @@ public class SettingsFileIOTest {
     public void testSettingsDokkaExisting() throws IOException {
         File tmpFolder = folder.newFolder();
         File settingsGradle = new File(tmpFolder, "settings.gradle");
-        FileUtils.writeStringToFile(settingsGradle, "pluginManagement\n\n{\n\n}\nrootProject.name = 'reactor'",
+        FileUtils.writeStringToFile(
+                settingsGradle,
+                "pluginManagement\n\n{\n\n}\nrootProject.name = 'reactor'",
                 Charset.defaultCharset());
         SettingsFileIO.writeDokkaSettings(tmpFolder, PluginUtils.DokkaVersion.MINIMUM);
         String result = FileUtils.readFileToString(settingsGradle, Charset.defaultCharset());
-        assertTrue(result.contains("pluginManagement {\nresolutionStrategy {\n"
-                + " eachPlugin { if (requested.id.id == \"org.jetbrains.dokka\") { useVersion"
-                + "(\"0.9.18\") } }"));
+        assertTrue(
+                result.contains(
+                        "pluginManagement {\nresolutionStrategy {\n"
+                                + " eachPlugin { if (requested.id.id == \"org.jetbrains.dokka\") { useVersion"
+                                + "(\"0.9.18\") } }"));
         assertEquals(StringUtils.countMatches(result, "{"), StringUtils.countMatches(result, "}"));
     }
 
@@ -110,15 +114,19 @@ public class SettingsFileIOTest {
     public void testSettingsDokkaExisting2() throws IOException {
         File tmpFolder = folder.newFolder();
         File settingsGradle = new File(tmpFolder, "settings.gradle");
-        FileUtils.writeStringToFile(settingsGradle, "/*\n*\n*/\npluginManagement\n\n{\nresolutionStrategy "
-                + "{}\n}\nrootProject.name = "
-                + "'reactor'",
+        FileUtils.writeStringToFile(
+                settingsGradle,
+                "/*\n*\n*/\npluginManagement\n\n{\nresolutionStrategy "
+                        + "{}\n}\nrootProject.name = "
+                        + "'reactor'",
                 Charset.defaultCharset());
         SettingsFileIO.writeDokkaSettings(tmpFolder, PluginUtils.DokkaVersion.MINIMUM);
         String result = FileUtils.readFileToString(settingsGradle, Charset.defaultCharset());
         assertEquals(StringUtils.countMatches(result, "{"), StringUtils.countMatches(result, "}"));
-        assertTrue(result.contains("resolutionStrategy {\n"
-                + " eachPlugin { if (requested.id.id == \"org.jetbrains.dokka\") { useVersion"
-                + "(\"0.9.18\") } }"));
+        assertTrue(
+                result.contains(
+                        "resolutionStrategy {\n"
+                                + " eachPlugin { if (requested.id.id == \"org.jetbrains.dokka\") { useVersion"
+                                + "(\"0.9.18\") } }"));
     }
 }

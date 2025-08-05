@@ -1,12 +1,15 @@
 package org.jboss.gm.common.utils;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -14,21 +17,17 @@ import org.gradle.api.logging.LogLevel;
 import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
 
 public class PluginUtilsTest {
     @Rule
     public final LoggingRule loggingRule = new LoggingRule(LogLevel.DEBUG);
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
@@ -40,8 +39,10 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
-                "# empty file", Charset.defaultCharset());
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
+                "# empty file",
+                Charset.defaultCharset());
 
         PluginUtils.pluginRemoval(logger, target.getParentFile(), Collections.singleton("gradle-enterprise-2"));
     }
@@ -51,14 +52,17 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
-                "# empty file\n", Charset.defaultCharset());
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
+                "# empty file\n",
+                Charset.defaultCharset());
 
         PluginUtils.pluginRemoval(logger, target.getParentFile(), Collections.singleton("gradle-enterprise"));
 
-        assertFalse(systemOutRule.getLog()
-                .contains("Looking to remove gradle-enterprise with configuration block of gradleEnterprise"));
-        assertFalse(systemOutRule.getLog().contains("Removed instances of plugin"));
+        assertFalse(
+                systemOutRule.getLinesNormalized()
+                        .contains("Looking to remove gradle-enterprise with configuration block of gradleEnterprise"));
+        assertFalse(systemOutRule.getLinesNormalized().contains("Removed instances of plugin"));
     }
 
     @Test
@@ -66,14 +70,17 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
-                "# empty file\n", Charset.defaultCharset());
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
+                "# empty file\n",
+                Charset.defaultCharset());
 
         PluginUtils.pluginRemoval(logger, target.getParentFile(), null);
 
-        assertFalse(systemOutRule.getLog()
-                .contains("Looking to remove gradle-enterprise with configuration block of gradleEnterprise"));
-        assertFalse(systemOutRule.getLog().contains("Removed instances of plugin"));
+        assertFalse(
+                systemOutRule.getLinesNormalized()
+                        .contains("Looking to remove gradle-enterprise with configuration block of gradleEnterprise"));
+        assertFalse(systemOutRule.getLinesNormalized().contains("Removed instances of plugin"));
     }
 
     @Test
@@ -81,7 +88,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle.kts");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "plugins {\n" + "    `gradle-enterprise`\n"
                         + "    id(\"com.github.burrunan.s3-build-cache\")\n"
                         + "}\n" + "\n"
@@ -107,15 +115,18 @@ public class PluginUtilsTest {
                 Charset.defaultCharset());
 
         PluginUtils.pluginRemoval(logger, target.getParentFile(), Collections.singleton("gradle-enterprise"));
-        assertTrue(systemOutRule.getLog()
-                .contains("Removed instances of plugin gradle-enterprise with configuration block of gradleEnterprise"));
-        assertTrue(systemOutRule.getLog().contains("Removed instances of plugin"));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains(
+                                "Removed instances of plugin gradle-enterprise with configuration block of gradleEnterprise"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Removed instances of plugin"));
 
         String result = "plugins {\n" + "    id(\"com.github.burrunan.s3-build-cache\")\n" + "}\n" + "\n"
                 + "// This is the name of a current project\n"
                 + "// Note: it cannot be inferred from the directory name as developer might clone pgjdbc to pgjdbc_tmp (or whatever) folder\n"
                 + "rootProject.name = \"pgjdbc\"\n" + "\n" + "include(\n" + "    \"bom\",\n" + "    \"benchmarks\",\n"
-                + "    \"postgresql\"\n" + ")\n" + "\n" + "project(\":postgresql\").projectDir = file(\"pgjdbc\")\n" + "\n"
+                + "    \"postgresql\"\n" + ")\n" + "\n" + "project(\":postgresql\").projectDir = file(\"pgjdbc\")\n"
+                + "\n"
                 + "// Gradle inherits Ant \"default excludes\", however we do want to archive those files\n"
                 + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitattributes\")\n"
                 + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitignore\")\n" + "\n"
@@ -130,7 +141,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle.kts");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "plugins {\n" + "    `gradle-enterprise`\n"
                         + "    id(\"com.github.burrunan.s3-build-cache\")\n"
                         + "}\n" + "\n"
@@ -159,15 +171,18 @@ public class PluginUtilsTest {
 
         PluginUtils.pluginRemoval(logger, target.getParentFile(), Collections.singleton("gradle-enterprise"));
 
-        assertTrue(systemOutRule.getLog()
-                .contains("Removed instances of plugin gradle-enterprise with configuration block of gradleEnterprise"));
-        assertTrue(systemOutRule.getLog().contains("Removed instances of plugin"));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains(
+                                "Removed instances of plugin gradle-enterprise with configuration block of gradleEnterprise"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Removed instances of plugin"));
 
         String result = "plugins {\n" + "    id(\"com.github.burrunan.s3-build-cache\")\n" + "}\n" + "\n"
                 + "// This is the name of a current project\n"
                 + "// Note: it cannot be inferred from the directory name as developer might clone pgjdbc to pgjdbc_tmp (or whatever) folder\n"
                 + "rootProject.name = \"pgjdbc\"\n" + "\n" + "include(\n" + "    \"bom\",\n" + "    \"benchmarks\",\n"
-                + "    \"postgresql\"\n" + ")\n" + "\n" + "project(\":postgresql\").projectDir = file(\"pgjdbc\")\n" + "\n"
+                + "    \"postgresql\"\n" + ")\n" + "\n" + "project(\":postgresql\").projectDir = file(\"pgjdbc\")\n"
+                + "\n"
                 + "// Gradle inherits Ant \"default excludes\", however we do want to archive those files\n"
                 + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitattributes\")\n"
                 + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitignore\")\n" + "\n"
@@ -182,41 +197,44 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle");
-        org.apache.commons.io.FileUtils.writeStringToFile(target, "plugins {\n" + "    `gradle-enterprise`\n"
-                + "    id(\"com.github.burrunan.s3-build-cache\")\n" + "}\n"
-                + "\n"
-                + "// This is the name of a current project\n"
-                + "// Note: it cannot be inferred from the directory name as developer might clone pgjdbc to pgjdbc_tmp (or whatever) folder\n"
-                + "rootProject.name = \"pgjdbc\"\n" + "\n" + "include(\n"
-                + "    \"bom\",\n" + "    \"benchmarks\",\n"
-                + "    \"postgresql\"\n" + ")\n" + "\n" + "project(\":postgresql\").projectDir = file(\"pgjdbc\")\n"
-                + "\n"
-                + "// Gradle inherits Ant \"default excludes\", however we do want to archive those files\n"
-                + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitattributes\")\n"
-                + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitignore\")\n"
-                + "\n"
-                + "fun property(name: String) =\n" + "    when (extra.has(name)) {\n"
-                + "        true -> extra.get(name) as? String\n" + "        else -> null\n"
-                + "    }\n" + "\n"
-                + "val isCiServer = System.getenv().containsKey(\"CI\")\n"
-                + "\n" + "if (isCiServer) {\n"
-                + "    gradleEnterprise {\n" + "        buildScan {\n"
-                + "            termsOfServiceUrl = \"https://gradle.com/terms-of-service\"\n"
-                + "            termsOfServiceAgree = \"yes\"\n" + "            tag(\"CI\")\n"
-                + "        }\n" + "    }\n"
-                + "}\n" + "buildCache {\n" + "    local {\n"
-                + "        // Local build cache is dangerous as it might produce inconsistent results\n"
-                + "        // in case developer modifies files while the build is running\n"
-                + "        enabled = false\n"
-                + "    }\n" + "    remote(com.github.burrunan.s3cache.AwsS3BuildCache) {\n"
-                + "        region = 'eu-west-1'\n" + "        bucket = 'your-bucket'\n"
-                + "        prefix = 'cache/'\n"
-                + "        push = isCiServer\n"
-                + "        // Credentials will be taken from  S3_BUILD_CACHE_... environment variables\n"
-                + "        // anonymous access will be used if environment variables are missing\n"
-                + "    }\n"
-                + "}\n"
-                + "if (true) { }\n",
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
+                "plugins {\n" + "    `gradle-enterprise`\n"
+                        + "    id(\"com.github.burrunan.s3-build-cache\")\n" + "}\n"
+                        + "\n"
+                        + "// This is the name of a current project\n"
+                        + "// Note: it cannot be inferred from the directory name as developer might clone pgjdbc to pgjdbc_tmp (or whatever) folder\n"
+                        + "rootProject.name = \"pgjdbc\"\n" + "\n" + "include(\n"
+                        + "    \"bom\",\n" + "    \"benchmarks\",\n"
+                        + "    \"postgresql\"\n" + ")\n" + "\n"
+                        + "project(\":postgresql\").projectDir = file(\"pgjdbc\")\n"
+                        + "\n"
+                        + "// Gradle inherits Ant \"default excludes\", however we do want to archive those files\n"
+                        + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitattributes\")\n"
+                        + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitignore\")\n"
+                        + "\n"
+                        + "fun property(name: String) =\n" + "    when (extra.has(name)) {\n"
+                        + "        true -> extra.get(name) as? String\n" + "        else -> null\n"
+                        + "    }\n" + "\n"
+                        + "val isCiServer = System.getenv().containsKey(\"CI\")\n"
+                        + "\n" + "if (isCiServer) {\n"
+                        + "    gradleEnterprise {\n" + "        buildScan {\n"
+                        + "            termsOfServiceUrl = \"https://gradle.com/terms-of-service\"\n"
+                        + "            termsOfServiceAgree = \"yes\"\n" + "            tag(\"CI\")\n"
+                        + "        }\n" + "    }\n"
+                        + "}\n" + "buildCache {\n" + "    local {\n"
+                        + "        // Local build cache is dangerous as it might produce inconsistent results\n"
+                        + "        // in case developer modifies files while the build is running\n"
+                        + "        enabled = false\n"
+                        + "    }\n" + "    remote(com.github.burrunan.s3cache.AwsS3BuildCache) {\n"
+                        + "        region = 'eu-west-1'\n" + "        bucket = 'your-bucket'\n"
+                        + "        prefix = 'cache/'\n"
+                        + "        push = isCiServer\n"
+                        + "        // Credentials will be taken from  S3_BUILD_CACHE_... environment variables\n"
+                        + "        // anonymous access will be used if environment variables are missing\n"
+                        + "    }\n"
+                        + "}\n"
+                        + "if (true) { }\n",
                 Charset.defaultCharset());
 
         HashSet<String> plugins = new LinkedHashSet<>();
@@ -224,15 +242,17 @@ public class PluginUtilsTest {
         plugins.add("gradle-enterprise");
         PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
 
-        assertTrue(systemOutRule.getLog()
-                .contains(
-                        "Removed instances of plugin com.github.burrunan.s3-build-cache with configuration block of buildCache"));
-        assertTrue(systemOutRule.getLog().contains("Removed instances of plugin"));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains(
+                                "Removed instances of plugin com.github.burrunan.s3-build-cache with configuration block of buildCache"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Removed instances of plugin"));
 
         String result = "plugins {\n" + "}\n" + "\n" + "// This is the name of a current project\n"
                 + "// Note: it cannot be inferred from the directory name as developer might clone pgjdbc to pgjdbc_tmp (or whatever) folder\n"
                 + "rootProject.name = \"pgjdbc\"\n" + "\n" + "include(\n" + "    \"bom\",\n" + "    \"benchmarks\",\n"
-                + "    \"postgresql\"\n" + ")\n" + "\n" + "project(\":postgresql\").projectDir = file(\"pgjdbc\")\n" + "\n"
+                + "    \"postgresql\"\n" + ")\n" + "\n" + "project(\":postgresql\").projectDir = file(\"pgjdbc\")\n"
+                + "\n"
                 + "// Gradle inherits Ant \"default excludes\", however we do want to archive those files\n"
                 + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitattributes\")\n"
                 + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitignore\")\n" + "\n"
@@ -248,53 +268,59 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle");
-        org.apache.commons.io.FileUtils.writeStringToFile(target, "plugins {\n" + "    `gradle-enterprise`\n"
-                + "    id(\"com.github.burrunan.s3-build-cache\")\n" + "}\n"
-                + "\n"
-                + "// This is the name of a current project\n"
-                + "// Note: it cannot be inferred from the directory name as developer might clone pgjdbc to pgjdbc_tmp (or whatever) folder\n"
-                + "rootProject.name = \"pgjdbc\"\n" + "\n" + "include(\n"
-                + "    \"bom\",\n" + "    \"benchmarks\",\n"
-                + "    \"postgresql\"\n" + ")\n" + "\n" + "project(\":postgresql\").projectDir = file(\"pgjdbc\")\n"
-                + "\n"
-                + "// Gradle inherits Ant \"default excludes\", however we do want to archive those files\n"
-                + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitattributes\")\n"
-                + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitignore\")\n"
-                + "\n"
-                + "fun property(name: String) =\n" + "    when (extra.has(name)) {\n"
-                + "        true -> extra.get(name) as? String\n" + "        else -> null\n"
-                + "    }\n" + "\n"
-                + "val isCiServer = System.getenv().containsKey(\"CI\")\n"
-                + "\n" + "if (isCiServer) {\n"
-                + "    gradleEnterprise {\n" + "        buildScan {\n"
-                + "            termsOfServiceUrl = \"https://gradle.com/terms-of-service\"\n"
-                + "            termsOfServiceAgree = \"yes\"\n" + "            tag(\"CI\")\n"
-                + "        }\n" + "    }\n"
-                + "}\n" + "buildCache {\n" + "    local {\n"
-                + "        // Local build cache is dangerous as it might produce inconsistent results\n"
-                + "        // in case developer modifies files while the build is running\n"
-                + "        enabled = false\n"
-                + "    }\n" + "    remote(com.github.burrunan.s3cache.AwsS3BuildCache) {\n"
-                + "        region = 'eu-west-1'\n" + "        bucket = 'your-bucket'\n"
-                + "        prefix = 'cache/'\n"
-                + "        push = isCiServer\n"
-                + "        // Credentials will be taken from  S3_BUILD_CACHE_... environment variables\n"
-                + "        // anonymous access will be used if environment variables are missing\n"
-                + "    }\n"
-                + "}\nif (true) { }\n",
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
+                "plugins {\n" + "    `gradle-enterprise`\n"
+                        + "    id(\"com.github.burrunan.s3-build-cache\")\n" + "}\n"
+                        + "\n"
+                        + "// This is the name of a current project\n"
+                        + "// Note: it cannot be inferred from the directory name as developer might clone pgjdbc to pgjdbc_tmp (or whatever) folder\n"
+                        + "rootProject.name = \"pgjdbc\"\n" + "\n" + "include(\n"
+                        + "    \"bom\",\n" + "    \"benchmarks\",\n"
+                        + "    \"postgresql\"\n" + ")\n" + "\n"
+                        + "project(\":postgresql\").projectDir = file(\"pgjdbc\")\n"
+                        + "\n"
+                        + "// Gradle inherits Ant \"default excludes\", however we do want to archive those files\n"
+                        + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitattributes\")\n"
+                        + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitignore\")\n"
+                        + "\n"
+                        + "fun property(name: String) =\n" + "    when (extra.has(name)) {\n"
+                        + "        true -> extra.get(name) as? String\n" + "        else -> null\n"
+                        + "    }\n" + "\n"
+                        + "val isCiServer = System.getenv().containsKey(\"CI\")\n"
+                        + "\n" + "if (isCiServer) {\n"
+                        + "    gradleEnterprise {\n" + "        buildScan {\n"
+                        + "            termsOfServiceUrl = \"https://gradle.com/terms-of-service\"\n"
+                        + "            termsOfServiceAgree = \"yes\"\n" + "            tag(\"CI\")\n"
+                        + "        }\n" + "    }\n"
+                        + "}\n" + "buildCache {\n" + "    local {\n"
+                        + "        // Local build cache is dangerous as it might produce inconsistent results\n"
+                        + "        // in case developer modifies files while the build is running\n"
+                        + "        enabled = false\n"
+                        + "    }\n" + "    remote(com.github.burrunan.s3cache.AwsS3BuildCache) {\n"
+                        + "        region = 'eu-west-1'\n" + "        bucket = 'your-bucket'\n"
+                        + "        prefix = 'cache/'\n"
+                        + "        push = isCiServer\n"
+                        + "        // Credentials will be taken from  S3_BUILD_CACHE_... environment variables\n"
+                        + "        // anonymous access will be used if environment variables are missing\n"
+                        + "    }\n"
+                        + "}\nif (true) { }\n",
                 Charset.defaultCharset());
 
         // Avoid singleton as the set is manipulated within the method
         PluginUtils.pluginRemoval(logger, target.getParentFile(), new LinkedHashSet<>(Collections.singleton("ALL")));
 
-        assertTrue(systemOutRule.getLog()
-                .contains("Removed instances of plugin gradle-enterprise with configuration block of gradleEnterprise from"));
-        assertTrue(systemOutRule.getLog().contains("Removed instances of plugin"));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains(
+                                "Removed instances of plugin gradle-enterprise with configuration block of gradleEnterprise from"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Removed instances of plugin"));
 
         String result = "plugins {\n" + "}\n" + "\n" + "// This is the name of a current project\n"
                 + "// Note: it cannot be inferred from the directory name as developer might clone pgjdbc to pgjdbc_tmp (or whatever) folder\n"
                 + "rootProject.name = \"pgjdbc\"\n" + "\n" + "include(\n" + "    \"bom\",\n" + "    \"benchmarks\",\n"
-                + "    \"postgresql\"\n" + ")\n" + "\n" + "project(\":postgresql\").projectDir = file(\"pgjdbc\")\n" + "\n"
+                + "    \"postgresql\"\n" + ")\n" + "\n" + "project(\":postgresql\").projectDir = file(\"pgjdbc\")\n"
+                + "\n"
                 + "// Gradle inherits Ant \"default excludes\", however we do want to archive those files\n"
                 + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitattributes\")\n"
                 + "org.apache.tools.ant.DirectoryScanner.removeDefaultExclude(\"**/.gitignore\")\n" + "\n"
@@ -310,7 +336,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "import org.gradle.api.tasks.testing.logging.TestExceptionFormat\n"
                         + "import org.gradle.api.tasks.testing.logging.TestLogEvent\n" + "\n" + "plugins {\n"
                         + "    id \"org.jruyi.thrift\" version \"0.4.0\"\n" + "    id \"jacoco\"\n"
@@ -334,18 +361,23 @@ public class PluginUtilsTest {
 
         File subfolder = folder.newFolder();
         File subtarget = new File(subfolder, "publish.gradle");
-        org.apache.commons.io.FileUtils.writeStringToFile(subtarget, "signing {\n" + "    if (isReleaseVersion) {\n"
-                + "        sign publishing.publications.mavenJava\n" + "    }\n"
-                + "}\n", Charset.defaultCharset());
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                subtarget,
+                "signing {\n" + "    if (isReleaseVersion) {\n"
+                        + "        sign publishing.publications.mavenJava\n" + "    }\n"
+                        + "}\n",
+                Charset.defaultCharset());
 
         // Avoid singleton as the set is manipulated within the method
         PluginUtils.pluginRemoval(logger, target.getParentFile(), new LinkedHashSet<>(Collections.singleton("ALL")));
 
         String result = FileUtils.readFileToString(target, Charset.defaultCharset());
 
-        assertTrue(systemOutRule.getLog()
-                .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
-        assertTrue(systemOutRule.getLog().contains("Replacing nexus-publish apply plugin with maven-publish"));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
+        assertTrue(
+                systemOutRule.getLinesNormalized().contains("Replacing nexus-publish apply plugin with maven-publish"));
         assertTrue(result.contains("apply plugin: \"maven-publish\""));
         assertFalse(result.contains("com.github.ben-manes.versions"));
         assertTrue(FileUtils.readFileToString(subtarget, Charset.defaultCharset()).trim().isEmpty());
@@ -356,108 +388,116 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle.kts");
-        org.apache.commons.io.FileUtils.writeStringToFile(target, "plugins {\n" + "  `maven-publish`\n" + "  signing\n"
-                + "\n" + "  id(\"otel.japicmp-conventions\")\n" + "}\n" + "\n"
-                + "publishing {\n" + "  publications {\n"
-                + "    register<MavenPublication>(\"mavenPublication\") {\n"
-                + "      val release = findProperty(\"otel.release\")\n" + "      if (release != null) {\n"
-                + "        val versionParts = version.split('-').toMutableList()\n"
-                + "        versionParts[0] += \"-$release\"\n" + "        version = versionParts.joinToString(\"-\")\n"
-                + "      }\n" + "      groupId = \"io.opentelemetry\"\n" + "      afterEvaluate {\n"
-                + "        // not available until evaluated.\n" + "        artifactId = base.archivesName.get()\n"
-                + "        pom.description.set(project.description)\n" + "      }\n"
-                + "\n"
-                + "      plugins.withId(\"java-platform\") {\n" + "        from(components[\"javaPlatform\"])\n"
-                + "      }\n" + "      plugins.withId(\"java-library\") {\n"
-                + "        from(components[\"java\"])\n"
-                + "      }\n" + "\n" + "      versionMapping {\n" + "        allVariants {\n"
-                + "          fromResolutionResult()\n" + "        }\n" + "      }\n"
-                + "\n" + "      pom {\n"
-                + "        name.set(\"OpenTelemetry Java\")\n"
-                + "        url.set(\"https://github.com/open-telemetry/opentelemetry-java\")\n"
-                + "\n"
-                + "        licenses {\n" + "          license {\n"
-                + "            name.set(\"The Apache License, Version 2.0\")\n"
-                + "            url.set(\"http://www.apache.org/licenses/LICENSE-2.0.txt\")\n"
-                + "          }\n"
-                + "        }\n" + "\n" + "        developers {\n" + "          developer {\n"
-                + "            id.set(\"opentelemetry\")\n" + "            name.set(\"OpenTelemetry\")\n"
-                + "            url.set(\"https://github.com/open-telemetry/community\")\n"
-                + "          }\n" + "        }\n"
-                + "\n" + "        scm {\n"
-                + "          connection.set(\"scm:git:git@github.com:open-telemetry/opentelemetry-java.git\")\n"
-                + "          developerConnection.set(\"scm:git:git@github.com:open-telemetry/opentelemetry-java.git\")\n"
-                + "          url.set(\"git@github.com:open-telemetry/opentelemetry-java.git\")\n"
-                + "        }\n"
-                + "      }\n" + "    }\n" + "  }\n" + "}\n" + "\n" + "afterEvaluate {\n"
-                + "  val publishToSonatype by tasks.getting\n" + "  val release by rootProject.tasks.existing\n"
-                + "  release.configure {\n" + "    finalizedBy(publishToSonatype)\n"
-                + "  }\n" + "}\n" + "\n"
-                + "if (System.getenv(\"CI\") != null) {\n" + "  signing {\n"
-                + "    useInMemoryPgpKeys(System.getenv(\"GPG_PRIVATE_KEY\"), System.getenv(\"GPG_PASSWORD\"))\n"
-                + "    sign(publishing.publications[\"mavenPublication\"])\n"
-                + "  }\n" + "}\n",
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
+                "plugins {\n" + "  `maven-publish`\n" + "  signing\n"
+                        + "\n" + "  id(\"otel.japicmp-conventions\")\n" + "}\n" + "\n"
+                        + "publishing {\n" + "  publications {\n"
+                        + "    register<MavenPublication>(\"mavenPublication\") {\n"
+                        + "      val release = findProperty(\"otel.release\")\n" + "      if (release != null) {\n"
+                        + "        val versionParts = version.split('-').toMutableList()\n"
+                        + "        versionParts[0] += \"-$release\"\n"
+                        + "        version = versionParts.joinToString(\"-\")\n"
+                        + "      }\n" + "      groupId = \"io.opentelemetry\"\n" + "      afterEvaluate {\n"
+                        + "        // not available until evaluated.\n"
+                        + "        artifactId = base.archivesName.get()\n"
+                        + "        pom.description.set(project.description)\n" + "      }\n"
+                        + "\n"
+                        + "      plugins.withId(\"java-platform\") {\n" + "        from(components[\"javaPlatform\"])\n"
+                        + "      }\n" + "      plugins.withId(\"java-library\") {\n"
+                        + "        from(components[\"java\"])\n"
+                        + "      }\n" + "\n" + "      versionMapping {\n" + "        allVariants {\n"
+                        + "          fromResolutionResult()\n" + "        }\n" + "      }\n"
+                        + "\n" + "      pom {\n"
+                        + "        name.set(\"OpenTelemetry Java\")\n"
+                        + "        url.set(\"https://github.com/open-telemetry/opentelemetry-java\")\n"
+                        + "\n"
+                        + "        licenses {\n" + "          license {\n"
+                        + "            name.set(\"The Apache License, Version 2.0\")\n"
+                        + "            url.set(\"http://www.apache.org/licenses/LICENSE-2.0.txt\")\n"
+                        + "          }\n"
+                        + "        }\n" + "\n" + "        developers {\n" + "          developer {\n"
+                        + "            id.set(\"opentelemetry\")\n" + "            name.set(\"OpenTelemetry\")\n"
+                        + "            url.set(\"https://github.com/open-telemetry/community\")\n"
+                        + "          }\n" + "        }\n"
+                        + "\n" + "        scm {\n"
+                        + "          connection.set(\"scm:git:git@github.com:open-telemetry/opentelemetry-java.git\")\n"
+                        + "          developerConnection.set(\"scm:git:git@github.com:open-telemetry/opentelemetry-java.git\")\n"
+                        + "          url.set(\"git@github.com:open-telemetry/opentelemetry-java.git\")\n"
+                        + "        }\n"
+                        + "      }\n" + "    }\n" + "  }\n" + "}\n" + "\n" + "afterEvaluate {\n"
+                        + "  val publishToSonatype by tasks.getting\n" + "  val release by rootProject.tasks.existing\n"
+                        + "  release.configure {\n" + "    finalizedBy(publishToSonatype)\n"
+                        + "  }\n" + "}\n" + "\n"
+                        + "if (System.getenv(\"CI\") != null) {\n" + "  signing {\n"
+                        + "    useInMemoryPgpKeys(System.getenv(\"GPG_PRIVATE_KEY\"), System.getenv(\"GPG_PASSWORD\"))\n"
+                        + "    sign(publishing.publications[\"mavenPublication\"])\n"
+                        + "  }\n" + "}\n",
                 Charset.defaultCharset());
 
         // Avoid singleton as the set is manipulated within the method
         PluginUtils.pluginRemoval(logger, target.getParentFile(), new LinkedHashSet<>(Collections.singleton("ALL")));
 
-        assertTrue(systemOutRule.getLog()
-                .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
 
         assertFalse(FileUtils.readFileToString(target, Charset.defaultCharset()).contains("publishToSonatype"));
-        assertTrue(FileUtils.readFileToString(target, Charset.defaultCharset()).contains("  id(\"otel.japicmp-conventions\")\n"
-                + "}\n" + "\n"
-                + "publishing {\n"
-                + "  publications {\n"
-                + "    register<MavenPublication>(\"mavenPublication\") {\n"
-                + "      val release = findProperty(\"otel.release\")\n"
-                + "      if (release != null) {\n"
-                + "        val versionParts = version.split('-').toMutableList()\n"
-                + "        versionParts[0] += \"-$release\"\n"
-                + "        version = versionParts.joinToString(\"-\")\n"
-                + "      }\n"
-                + "      groupId = \"io.opentelemetry\"\n"
-                + "      afterEvaluate {\n"
-                + "        // not available until evaluated.\n"
-                + "        artifactId = base.archivesName.get()\n"
-                + "        pom.description.set(project.description)\n"
-                + "      }\n" + "\n"
-                + "      plugins.withId(\"java-platform\") {\n"
-                + "        from(components[\"javaPlatform\"])\n"
-                + "      }\n"
-                + "      plugins.withId(\"java-library\") {\n"
-                + "        from(components[\"java\"])\n"
-                + "      }\n" + "\n"
-                + "      versionMapping {\n"
-                + "        allVariants {\n"
-                + "          fromResolutionResult()\n"
-                + "        }\n"
-                + "      }\n" + "\n"
-                + "      pom {\n"
-                + "        name.set(\"OpenTelemetry Java\")\n"
-                + "        url.set(\"https://github.com/open-telemetry/opentelemetry-java\")\n"
-                + "\n"
-                + "        licenses {\n"
-                + "          license {\n"
-                + "            name.set(\"The Apache License, Version 2.0\")\n"
-                + "            url.set(\"http://www.apache.org/licenses/LICENSE-2.0.txt\")\n"
-                + "          }\n"
-                + "        }\n" + "\n"
-                + "        developers {\n"
-                + "          developer {\n"
-                + "            id.set(\"opentelemetry\")\n"
-                + "            name.set(\"OpenTelemetry\")\n"
-                + "            url.set(\"https://github.com/open-telemetry/community\")\n"
-                + "          }\n"
-                + "        }\n" + "\n"
-                + "        scm {\n"
-                + "          connection.set(\"scm:git:git@github.com:open-telemetry/opentelemetry-java.git\")\n"
-                + "          developerConnection.set(\"scm:git:git@github.com:open-telemetry/opentelemetry-java.git\")\n"
-                + "          url.set(\"git@github.com:open-telemetry/opentelemetry-java.git\")\n"
-                + "        }\n"
-                + "      }\n" + "    }\n"
-                + "  }\n" + "}\n"));
+        assertTrue(
+                FileUtils.readFileToString(target, Charset.defaultCharset())
+                        .contains(
+                                "  id(\"otel.japicmp-conventions\")\n"
+                                        + "}\n" + "\n"
+                                        + "publishing {\n"
+                                        + "  publications {\n"
+                                        + "    register<MavenPublication>(\"mavenPublication\") {\n"
+                                        + "      val release = findProperty(\"otel.release\")\n"
+                                        + "      if (release != null) {\n"
+                                        + "        val versionParts = version.split('-').toMutableList()\n"
+                                        + "        versionParts[0] += \"-$release\"\n"
+                                        + "        version = versionParts.joinToString(\"-\")\n"
+                                        + "      }\n"
+                                        + "      groupId = \"io.opentelemetry\"\n"
+                                        + "      afterEvaluate {\n"
+                                        + "        // not available until evaluated.\n"
+                                        + "        artifactId = base.archivesName.get()\n"
+                                        + "        pom.description.set(project.description)\n"
+                                        + "      }\n" + "\n"
+                                        + "      plugins.withId(\"java-platform\") {\n"
+                                        + "        from(components[\"javaPlatform\"])\n"
+                                        + "      }\n"
+                                        + "      plugins.withId(\"java-library\") {\n"
+                                        + "        from(components[\"java\"])\n"
+                                        + "      }\n" + "\n"
+                                        + "      versionMapping {\n"
+                                        + "        allVariants {\n"
+                                        + "          fromResolutionResult()\n"
+                                        + "        }\n"
+                                        + "      }\n" + "\n"
+                                        + "      pom {\n"
+                                        + "        name.set(\"OpenTelemetry Java\")\n"
+                                        + "        url.set(\"https://github.com/open-telemetry/opentelemetry-java\")\n"
+                                        + "\n"
+                                        + "        licenses {\n"
+                                        + "          license {\n"
+                                        + "            name.set(\"The Apache License, Version 2.0\")\n"
+                                        + "            url.set(\"http://www.apache.org/licenses/LICENSE-2.0.txt\")\n"
+                                        + "          }\n"
+                                        + "        }\n" + "\n"
+                                        + "        developers {\n"
+                                        + "          developer {\n"
+                                        + "            id.set(\"opentelemetry\")\n"
+                                        + "            name.set(\"OpenTelemetry\")\n"
+                                        + "            url.set(\"https://github.com/open-telemetry/community\")\n"
+                                        + "          }\n"
+                                        + "        }\n" + "\n"
+                                        + "        scm {\n"
+                                        + "          connection.set(\"scm:git:git@github.com:open-telemetry/opentelemetry-java.git\")\n"
+                                        + "          developerConnection.set(\"scm:git:git@github.com:open-telemetry/opentelemetry-java.git\")\n"
+                                        + "          url.set(\"git@github.com:open-telemetry/opentelemetry-java.git\")\n"
+                                        + "        }\n"
+                                        + "      }\n" + "    }\n"
+                                        + "  }\n" + "}\n"));
     }
 
     @Test
@@ -465,7 +505,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle.kts");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "plugins {\n"
                         + "  `maven-publish`\n"
                         + "  signing\n"
@@ -482,22 +523,28 @@ public class PluginUtilsTest {
                 Charset.defaultCharset());
 
         // Avoid singleton as the set is manipulated within the method
-        PluginUtils.pluginRemoval(logger, target.getParentFile(),
+        PluginUtils.pluginRemoval(
+                logger,
+                target.getParentFile(),
                 new LinkedHashSet<>(Collections.singleton("signing")));
 
-        assertTrue(systemOutRule.getLog()
-                .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
 
         System.out.println(FileUtils.readFileToString(target, Charset.defaultCharset()));
-        assertTrue(FileUtils.readFileToString(target, Charset.defaultCharset()).contains("plugins {\n"
-                + "  `maven-publish`\n"
-                + "  signing\n" + "}\n"
-                + "// Sign only if we have a key to do so\n"
-                + "val signingKey: String? = System.getenv(\"GPG_PRIVATE_KEY\")\n"
-                + "// Stub out entire signing block off of CI since Gradle provides no way of lazy configuration of\n"
-                + "// signing tasks.\n"
-                + "if (System.getenv(\"CI\") != null && signingKey != null) {\n"
-                + "}\n"));
+        assertTrue(
+                FileUtils.readFileToString(target, Charset.defaultCharset())
+                        .contains(
+                                "plugins {\n"
+                                        + "  `maven-publish`\n"
+                                        + "  signing\n" + "}\n"
+                                        + "// Sign only if we have a key to do so\n"
+                                        + "val signingKey: String? = System.getenv(\"GPG_PRIVATE_KEY\")\n"
+                                        + "// Stub out entire signing block off of CI since Gradle provides no way of lazy configuration of\n"
+                                        + "// signing tasks.\n"
+                                        + "if (System.getenv(\"CI\") != null && signingKey != null) {\n"
+                                        + "}\n"));
     }
 
     @Test
@@ -505,7 +552,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle.kts");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "pluginManagement {\n" + "  plugins {\n"
                         + "    id(\"com.bmuschko.docker-remote-api\") version \"7.3.0\"\n"
                         + "    id(\"com.github.ben-manes.versions\") version \"0.42.0\"\n"
@@ -516,7 +564,8 @@ public class PluginUtilsTest {
                         + "    id(\"org.jetbrains.kotlin.jvm\") version \"1.6.20\"\n"
                         + "    id(\"org.unbroken-dome.test-sets\") version \"4.0.0\"\n"
                         + "    id(\"org.xbib.gradle.plugin.jflex\") version \"1.6.0\"\n"
-                        + "    id(\"org.unbroken-dome.xjc\") version \"2.0.0\"\n" + "  }\n" + "\n" + "  repositories {\n"
+                        + "    id(\"org.unbroken-dome.xjc\") version \"2.0.0\"\n" + "  }\n" + "\n"
+                        + "  repositories {\n"
                         + "    gradlePluginPortal()\n" + "    mavenCentral()\n" + "  }\n" + "}\n" + "\n" + "plugins {\n"
                         + "  id(\"com.gradle.enterprise\") version \"3.11.1\"\n"
                         + "  id(\"com.github.burrunan.s3-build-cache\") version \"1.3\"\n"
@@ -527,7 +576,8 @@ public class PluginUtilsTest {
                         + "val isCI = System.getenv(\"CI\") != null\n"
                         + "val geAccessKey = System.getenv(\"GRADLE_ENTERPRISE_ACCESS_KEY\") ?: \"\"\n" + "\n"
                         + "// if GE access key is not given and we are in CI, then we publish to scans.gradle.com\n"
-                        + "val useScansGradleCom = isCI && geAccessKey.isEmpty()\n" + "\n" + "if (useScansGradleCom) {\n"
+                        + "val useScansGradleCom = isCI && geAccessKey.isEmpty()\n" + "\n"
+                        + "if (useScansGradleCom) {\n"
                         + "  gradleEnterprise {\n" + "    buildScan {\n"
                         + "      termsOfServiceUrl = \"https://gradle.com/terms-of-service\"\n"
                         + "      termsOfServiceAgree = \"yes\"\n" + "      isUploadInBackground = !isCI\n"
@@ -559,7 +609,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle.kts");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "allprojects {\n" + "    group = \"org.postgresql\"\n"
                         + "    version = buildVersion\n" + "\n"
                         + "    apply(plugin = \"com.github.vlsi.gradle-extensions\")\n"
@@ -620,7 +671,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle.kts");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "        val publishToSonatype by tasks.getting\n"
                         + "        releaseTask.configure {\n"
                         + "            finalizedBy(publishToSonatype)\n"
@@ -649,7 +701,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle.kts");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "import com.google.protobuf.gradle.*\n" + "import de.marcphilipp.gradle.nexus.NexusPublishExtension\n\n"
                         + "    plugins.withId(\"maven-publish\") {\n" + "        plugins.apply(\"signing\")\n" + "\n"
                         + "        plugins.apply(\"de.marcphilipp.nexus-publish\")\n" + "\n"
@@ -659,11 +712,14 @@ public class PluginUtilsTest {
                         + "                    if (release != null) {\n"
                         + "                        val versionParts = version.split('-').toMutableList()\n"
                         + "                        versionParts[0] += \"-${release}\"\n"
-                        + "                        version = versionParts.joinToString(\"-\")\n" + "                    }\n"
-                        + "                    groupId = \"io.opentelemetry\"\n" + "                    afterEvaluate {\n"
+                        + "                        version = versionParts.joinToString(\"-\")\n"
+                        + "                    }\n"
+                        + "                    groupId = \"io.opentelemetry\"\n"
+                        + "                    afterEvaluate {\n"
                         + "                        // not available until evaluated.\n"
                         + "                        artifactId = the<BasePluginConvention>().archivesBaseName\n"
-                        + "                        pom.description.set(project.description)\n" + "                    }\n"
+                        + "                        pom.description.set(project.description)\n"
+                        + "                    }\n"
                         + "\n" + "                    plugins.withId(\"java-platform\") {\n"
                         + "                        from(components[\"javaPlatform\"])\n" + "                    }\n"
                         + "                    plugins.withId(\"java-library\") {\n"
@@ -717,7 +773,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle.kts");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask\n"
                         + "\n" + "plugins {\n" + "    `java-platform`\n" + "\n"
                         + "    id(\"com.github.ben-manes.versions\")\n"
@@ -746,7 +803,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle.kts");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "// See https://github.com/vlsi/vlsi-release-plugins\n"
                         + "buildscript {\n" + "  dependencies {\n"
                         + "    classpath('com.github.vlsi.gradle:checksum-dependency-plugin:1.44.0') {\n"
@@ -801,7 +859,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle.kts");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "plugins {\n"
                         + "  // This adds tasks to auto close or release nexus staging repos\n"
                         + "  // see https://github.com/Codearte/gradle-nexus-staging-plugin/\n"
@@ -849,7 +908,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "import org.gradle.api.tasks.testing.logging.TestExceptionFormat\n"
                         + "import org.gradle.api.tasks.testing.logging.TestLogEvent\n" + "\n" + "plugins {\n"
                         + "    id \"org.jruyi.thrift\" version \"0.4.0\"\n" + "    id \"jacoco\"\n"
@@ -873,12 +933,15 @@ public class PluginUtilsTest {
                 Charset.defaultCharset());
 
         // Avoid singleton as the set is manipulated within the method
-        PluginUtils.pluginRemoval(logger, target.getParentFile(),
+        PluginUtils.pluginRemoval(
+                logger,
+                target.getParentFile(),
                 new LinkedHashSet<>(Collections.singleton("RECC")));
 
         String result = FileUtils.readFileToString(target, Charset.defaultCharset());
 
-        assertTrue(systemOutRule.getLog().contains("Replacing nexus-publish apply plugin with maven-publish"));
+        assertTrue(
+                systemOutRule.getLinesNormalized().contains("Replacing nexus-publish apply plugin with maven-publish"));
         assertTrue(result.contains("id 'signing'"));
         assertTrue(result.contains("apply plugin: \"maven-publish\""));
         assertFalse(result.contains("com.github.ben-manes.versions"));
@@ -889,7 +952,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "\n" + "plugins {\n" + "    `java-platform`\n" + "\n"
                         + "    id(\"com.github.ben-manes.versions\")\n"
                         + "}\ntasks {\n"
@@ -922,7 +986,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask\n"
                         + "\n" + "plugins {\n" + "  `kotlin-dsl`\n"
                         + "  alias(libs.plugins.versions)\n" + "}\n" + "\n"
@@ -974,7 +1039,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "buildscript {\n" +
                         "  repositories {\n" +
                         "    jcenter()\n" +
@@ -1018,7 +1084,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("settings.gradle");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "import org.gradle.util.GradleVersion\n" + "\n"
                         + "buildscript {\n" + "  repositories {\n"
                         + "    maven {\n"
@@ -1034,7 +1101,7 @@ public class PluginUtilsTest {
 
         boolean result = PluginUtils.checkForSemanticBuildVersioning(logger, target.getParentFile());
         assertFalse(result);
-        assertFalse(systemOutRule.getLog().contains("Found Semantic Build Versioning Plugin"));
+        assertFalse(systemOutRule.getLinesNormalized().contains("Found Semantic Build Versioning Plugin"));
     }
 
     @Test
@@ -1042,7 +1109,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("settings.gradle");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "import org.gradle.util.GradleVersion\n" + "\n"
                         + "buildscript {\n" + "  repositories {\n"
                         + "    maven {\n"
@@ -1061,7 +1129,7 @@ public class PluginUtilsTest {
 
         boolean result = PluginUtils.checkForSemanticBuildVersioning(logger, target.getParentFile());
         assertTrue(result);
-        assertTrue(systemOutRule.getLog().contains("Found Semantic Build Versioning Plugin"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Found Semantic Build Versioning Plugin"));
     }
 
     @Test
@@ -1069,7 +1137,8 @@ public class PluginUtilsTest {
             throws IOException, ManipulationException {
 
         File target = folder.newFile("build.gradle");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "\n" + "buildscript {\n" + "    dependencyLocking {\n"
                         + "        lockAllConfigurations()\n" + "    }\n" + "\n"
                         + "    repositories {\n" + "        mavenCentral()\n"
@@ -1078,19 +1147,23 @@ public class PluginUtilsTest {
                 Charset.defaultCharset());
 
         PluginUtils.addLenientLockMode(logger, target.getParentFile());
-        assertTrue(systemOutRule.getLog().contains("Added LENIENT lockMode"));
-        assertTrue(FileUtils.readFileToString(target, Charset.defaultCharset()).contains("buildscript {\n"
-                + "    dependencyLocking {\n"
-                + " lockMode = LockMode.LENIENT\n"
-                + "        lockAllConfigurations()\n"
-                + "    }\n"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Added LENIENT lockMode"));
+        assertTrue(
+                FileUtils.readFileToString(target, Charset.defaultCharset())
+                        .contains(
+                                "buildscript {\n"
+                                        + "    dependencyLocking {\n"
+                                        + " lockMode = LockMode.LENIENT\n"
+                                        + "        lockAllConfigurations()\n"
+                                        + "    }\n"));
     }
 
     @Test
     public void testLenientLockMode2()
             throws IOException, ManipulationException {
         File target = folder.newFile("build.gradle.kts");
-        org.apache.commons.io.FileUtils.writeStringToFile(target,
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
                 "\n" + "buildscript {\n" + "    dependencyLocking {\n"
                         + "        lockAllConfigurations()\n" + "    }\n" + "\n"
                         + "    repositories {\n" + "        mavenCentral()\n"
@@ -1099,12 +1172,15 @@ public class PluginUtilsTest {
                 Charset.defaultCharset());
 
         PluginUtils.addLenientLockMode(logger, target.getParentFile());
-        assertTrue(systemOutRule.getLog().contains("Added LENIENT lockMode"));
-        assertTrue(FileUtils.readFileToString(target, Charset.defaultCharset()).contains("buildscript {\n"
-                + "    dependencyLocking {\n"
-                + " lockMode.set(LockMode.LENIENT) \n"
-                + "        lockAllConfigurations()\n"
-                + "    }\n"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Added LENIENT lockMode"));
+        assertTrue(
+                FileUtils.readFileToString(target, Charset.defaultCharset())
+                        .contains(
+                                "buildscript {\n"
+                                        + "    dependencyLocking {\n"
+                                        + " lockMode.set(LockMode.LENIENT) \n"
+                                        + "        lockAllConfigurations()\n"
+                                        + "    }\n"));
     }
 
     @Test

@@ -1,5 +1,12 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static junit.framework.TestCase.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -12,11 +19,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
 import kong.unirest.ContentType;
 import kong.unirest.HeaderNames;
 import kong.unirest.HttpStatus;
-
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -33,24 +38,17 @@ import org.jboss.gm.common.utils.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static junit.framework.TestCase.assertEquals;
-import static org.assertj.core.api.Assertions.assertThat;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class WarFunctionalTest extends AbstractWiremockTest {
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -77,21 +75,26 @@ public class WarFunctionalTest extends AbstractWiremockTest {
 
     private static final String GAV_NEW = String.join(":", GROUP_ID, ARTIFACT_ID, VERSION_NEW);
 
-    private static final Map<String, ProjectVersionRef> DEPENDENCIES = Collections.singletonMap(GAV,
+    private static final Map<String, ProjectVersionRef> DEPENDENCIES = Collections.singletonMap(
+            GAV,
             SimpleProjectVersionRef.parse(GAV_NEW));
 
     @Before
     public void setup() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo(TEST_URL + DefaultTranslator.Endpoint.LOOKUP_GAVS))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.OK)
-                        .withHeader(HeaderNames.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBody(readSampleDAResponse(RESPONSE_FILE_NAME))));
-        stubFor(post(urlEqualTo(TEST_URL + DefaultTranslator.Endpoint.LOOKUP_LATEST))
-                .willReturn(aResponse()
-                        .withStatus(HttpStatus.OK)
-                        .withHeader(HeaderNames.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBody(readSampleDAResponse(RESPONSE_PROJECT_FILE_NAME))));
+        stubFor(
+                post(urlEqualTo(TEST_URL + DefaultTranslator.Endpoint.LOOKUP_GAVS))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(HttpStatus.OK)
+                                        .withHeader(HeaderNames.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
+                                        .withBody(readSampleDAResponse(RESPONSE_FILE_NAME))));
+        stubFor(
+                post(urlEqualTo(TEST_URL + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(HttpStatus.OK)
+                                        .withHeader(HeaderNames.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
+                                        .withBody(readSampleDAResponse(RESPONSE_PROJECT_FILE_NAME))));
 
         System.setProperty(Configuration.DA, DA_HOST + ":" + wireMockRule.port() + TEST_URL);
     }
@@ -106,14 +109,18 @@ public class WarFunctionalTest extends AbstractWiremockTest {
         // may not be available causing this to fail. We can't do the same as DifferentJVMTest as
         // we need the manipulation library built. Hence, we'll use JGit to establish the last tag
         // (i.e. release) and use that.
-        Collection<Ref> refs2 = Git.lsRemoteRepository().setRemote("https://github.com/project-ncl/gradle-manipulator.git")
-                .setTags(true).call();
+        Collection<Ref> refs2 = Git.lsRemoteRepository()
+                .setRemote("https://github.com/project-ncl/gradle-manipulator.git")
+                .setTags(true)
+                .call();
         @SuppressWarnings("OptionalGetWithoutIsPresent")
         String name = refs2.stream().map(Ref::getName).max(Comparator.naturalOrder()).get();
         properties.put("manipulationVersion", name.substring(name.lastIndexOf('/') + 1));
 
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot.toFile(),
-                projectRoot.getFileName().toString(), properties);
+        final TestManipulationModel alignmentModel = TestUtils.align(
+                projectRoot.toFile(),
+                projectRoot.getFileName().toString(),
+                properties);
 
         assertThat(projectRoot.resolve(AlignmentTask.GME)).exists();
         assertThat(projectRoot.resolve(AlignmentTask.GRADLE).resolve(AlignmentTask.GME_REPOS)).exists();
@@ -121,7 +128,8 @@ public class WarFunctionalTest extends AbstractWiremockTest {
         assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot.toFile()));
         assertThat(FileUtils.getLastLine(projectRoot.resolve(Project.DEFAULT_BUILD_FILE).toFile()))
                 .isEqualTo(AlignmentTask.INJECT_GME_END);
-        assertThat(systemOutRule.getLog()).contains("Passing 1 GAVs into the REST client api [" + GAV + "]");
+        assertThat(systemOutRule.getLinesNormalized())
+                .contains("Passing 1 GAVs into the REST client api [" + GAV + "]");
         assertThat(alignmentModel).isNotNull();
         assertThat(alignmentModel.getAlignedDependencies()).containsExactlyEntriesOf(DEPENDENCIES);
 
@@ -130,7 +138,8 @@ public class WarFunctionalTest extends AbstractWiremockTest {
 
     private static void verifyWar(Path projectRoot) throws IOException {
         final BuildResult buildResult = TestUtils.createGradleRunner(projectRoot.toFile(), Collections.emptyMap())
-                .withArguments("war").build();
+                .withArguments("war")
+                .build();
 
         assertThat(Objects.requireNonNull(buildResult.task(":war")).getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
 
@@ -140,10 +149,11 @@ public class WarFunctionalTest extends AbstractWiremockTest {
         assertThat(warFile).isRegularFile().isReadable();
 
         try (final ZipFile zipFile = new ZipFile(warFile.toFile())) {
-            assertThat(zipFile.stream()
-                    .filter(zipEntry -> !zipEntry.isDirectory() && zipEntry.getName().endsWith(".jar"))
-                    .map(ZipEntry::getName))
-                            .containsExactly("WEB-INF/lib/" + ARTIFACT_ID + "-" + VERSION_NEW + ".jar");
+            assertThat(
+                    zipFile.stream()
+                            .filter(zipEntry -> !zipEntry.isDirectory() && zipEntry.getName().endsWith(".jar"))
+                            .map(ZipEntry::getName))
+                    .containsExactly("WEB-INF/lib/" + ARTIFACT_ID + "-" + VERSION_NEW + ".jar");
         }
     }
 }

@@ -1,5 +1,12 @@
 package org.jboss.gm.cli;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import ch.qos.logback.core.pattern.color.ANSIConstants;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -8,7 +15,6 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Properties;
 import java.util.UUID;
-
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -26,19 +32,11 @@ import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemErrRule;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
-
-import ch.qos.logback.core.pattern.color.ANSIConstants;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import uk.org.webcompere.systemstubs.rules.EnvironmentVariablesRule;
+import uk.org.webcompere.systemstubs.rules.SystemErrRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class MainTest {
 
@@ -46,19 +44,19 @@ public class MainTest {
     public final LoggingRule loggingRule = new LoggingRule(LogLevel.DEBUG);
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final SystemErrRule systemErrRule = new SystemErrRule().enableLog().muteForSuccessfulTests();
+    public final SystemErrRule systemErrRule = new SystemErrRule();
 
     @Rule
-    public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemPropertiesRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
+    public final EnvironmentVariablesRule environmentVariables = new EnvironmentVariablesRule();
 
     private static String escapeBackslashes(String dir) {
         if (SystemUtils.IS_OS_WINDOWS) {
@@ -80,7 +78,11 @@ public class MainTest {
     @Test
     public void testGradleNotFound() throws IOException {
         Main m = new Main();
-        String[] args = new String[] { "-t", tempDir.newFolder().getAbsolutePath(), "-l", UUID.randomUUID().toString() };
+        String[] args = new String[] {
+                "-t",
+                tempDir.newFolder().getAbsolutePath(),
+                "-l",
+                UUID.randomUUID().toString() };
         try {
             m.run(args);
             fail("No exception thrown");
@@ -98,9 +100,9 @@ public class MainTest {
         String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "help" };
         m.run(args);
 
-        assertFalse(systemOutRule.getLog().contains("loggingColours=false"));
-        assertTrue(systemOutRule.getLog().contains("Welcome to Gradle"));
-        assertTrue(systemOutRule.getLog().contains(ANSIConstants.ESC_START));
+        assertFalse(systemOutRule.getLinesNormalized().contains("loggingColours=false"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Welcome to Gradle"));
+        assertTrue(systemOutRule.getLinesNormalized().contains(ANSIConstants.ESC_START));
     }
 
     @Test
@@ -113,9 +115,9 @@ public class MainTest {
         String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "help" };
         m.run(args);
 
-        assertTrue(systemOutRule.getLog().contains("loggingColours=false"));
-        assertTrue(systemOutRule.getLog().contains("Welcome to Gradle"));
-        assertFalse(systemOutRule.getLog().contains(ANSIConstants.ESC_START));
+        assertTrue(systemOutRule.getLinesNormalized().contains("loggingColours=false"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Welcome to Gradle"));
+        assertFalse(systemOutRule.getLinesNormalized().contains(ANSIConstants.ESC_START));
     }
 
     @Test
@@ -124,13 +126,19 @@ public class MainTest {
         final File projectRoot = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
 
         Main m = new Main();
-        String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "help", "--info",
+        String[] args = new String[] {
+                "-d",
+                "-t",
+                projectRoot.getParentFile().getAbsolutePath(),
+                "help",
+                "--info",
                 "-Dfoobar=nothing",
-                "-Dfoobar=barfoo", "-DdependencyOverride.org.jboss.slf4j:*@*=",
+                "-Dfoobar=barfoo",
+                "-DdependencyOverride.org.jboss.slf4j:*@*=",
                 "-DgroovyScripts=https://www.foo.com/tmp/fake-file" };
         m.run(args);
 
-        assertTrue(systemOutRule.getLog().contains("Welcome to Gradle"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Welcome to Gradle"));
     }
 
     @Test
@@ -141,22 +149,27 @@ public class MainTest {
         final URL groovy = Thread.currentThread().getContextClassLoader().getResource("sample.groovy");
 
         Main m = new Main();
-        String[] args = new String[] { "-t", projectRoot.getParentFile().getAbsolutePath(), "tasks",
+        String[] args = new String[] {
+                "-t",
+                projectRoot.getParentFile().getAbsolutePath(),
+                "tasks",
                 "-DdependencyOverride.org.jboss.slf4j:*@*=",
                 "-DgroovyScripts=" + groovy };
         m.run(args);
 
-        int start = systemOutRule.getLog().indexOf("JVM arguments: [") + 16;
-        int end = systemOutRule.getLog().indexOf(",", start);
-        String jvmArgs = systemOutRule.getLog().substring(start, end);
-        assertTrue(StringUtils.indexOf(systemOutRule.getLog(), jvmArgs, end) > 0);
-        assertTrue(systemOutRule.getLog().contains("Running Groovy script on"));
-        assertTrue(systemOutRule.getLog().contains("dependencyOverride.org.jboss.slf4j:*@*="));
-        assertTrue(systemOutRule.getLog().contains("with JVM args '[-DdependencyOverride.org.jboss.slf4j:*@*="));
-        assertFalse(systemOutRule.getLog().contains(", DdependencyOverride.org.jboss.slf4j:*@*="));
-        assertTrue(systemOutRule.getLog().contains("groovyScripts="));
-        assertTrue(systemOutRule.getLog().contains("Verification tasks"));
-        assertTrue(systemOutRule.getLog().contains("Executor org.zeroturnaround.exec.ProcessExecutor"));
+        int start = systemOutRule.getLinesNormalized().indexOf("JVM arguments: [") + 16;
+        int end = systemOutRule.getLinesNormalized().indexOf(",", start);
+        String jvmArgs = systemOutRule.getLinesNormalized().substring(start, end);
+        assertTrue(StringUtils.indexOf(systemOutRule.getLinesNormalized(), jvmArgs, end) > 0);
+        assertTrue(systemOutRule.getLinesNormalized().contains("Running Groovy script on"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("dependencyOverride.org.jboss.slf4j:*@*="));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains("with JVM args '[-DdependencyOverride.org.jboss.slf4j:*@*="));
+        assertFalse(systemOutRule.getLinesNormalized().contains(", DdependencyOverride.org.jboss.slf4j:*@*="));
+        assertTrue(systemOutRule.getLinesNormalized().contains("groovyScripts="));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Verification tasks"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Executor org.zeroturnaround.exec.ProcessExecutor"));
     }
 
     @Test
@@ -167,15 +180,19 @@ public class MainTest {
         final URL groovy = Thread.currentThread().getContextClassLoader().getResource("sample.groovy");
 
         Main m = new Main();
-        String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "tasks",
+        String[] args = new String[] {
+                "-d",
+                "-t",
+                projectRoot.getParentFile().getAbsolutePath(),
+                "tasks",
                 "-DgroovyScripts=" + groovy,
                 "-DdependencyOverride.org.jboss.slf4j:*@*=",
                 "-Dmanipulation.disable=true" };
         m.run(args);
 
-        assertTrue(systemOutRule.getLog().contains("Running Groovy script on"));
-        assertFalse(systemOutRule.getLog().contains("Verification tasks"));
-        assertTrue(systemOutRule.getLog().contains("Gradle Manipulator disabled"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Running Groovy script on"));
+        assertFalse(systemOutRule.getLinesNormalized().contains("Verification tasks"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Gradle Manipulator disabled"));
     }
 
     @Test
@@ -183,20 +200,28 @@ public class MainTest {
         final File target = tempDir.newFolder();
         final File source = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
         final File root = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath())
-                .getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();
+                .getParentFile()
+                .getParentFile()
+                .getParentFile()
+                .getParentFile()
+                .getParentFile();
         final File projectRoot = new File(target, source.getName());
         FileUtils.copyFile(source, projectRoot);
 
         // This hack-fest is because the development version is not in Maven Central so it won't be resolvable
         // This adds the compiled libraries as flat dir repositories.
         final File initFile = tempDir.newFile();
-        String init = FileUtils.readFileToString(new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
+        String init = FileUtils.readFileToString(
+                new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
                 Charset.defaultCharset());
         final String dir1 = escapeBackslashes(
-                new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent());
+                new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().toURI())
+                        .getParent());
         final String dir2 = escapeBackslashes(
-                new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent());
-        init = init.replaceFirst("(?s)mavenLocal.*snapshots\"\\n\\s+[}]",
+                new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().toURI())
+                        .getParent());
+        init = init.replaceFirst(
+                "(?s)mavenLocal.*snapshots\"\\n\\s+[}]",
                 "\n        flatDir {\n            dirs '" + dir1 +
                         "'\n        }\n" +
                         "\n        flatDir {\n            dirs '" + dir2 +
@@ -212,7 +237,10 @@ public class MainTest {
 
         final URL groovy = Thread.currentThread().getContextClassLoader().getResource("sample.groovy");
         Main m = new Main();
-        String[] args = new String[] { "-t", projectRoot.getParentFile().getAbsolutePath(), "generateAlignmentMetadata",
+        String[] args = new String[] {
+                "-t",
+                projectRoot.getParentFile().getAbsolutePath(),
+                "generateAlignmentMetadata",
                 "--init-script=" + initFile.getCanonicalPath(),
                 "-DdependencySource=NONE",
                 "-DignoreUnresolvableDependencies=true",
@@ -224,15 +252,17 @@ public class MainTest {
         assertEquals(0, result);
 
         File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), AlignmentTask.GME);
-        assertTrue(systemOutRule.getLog().contains("Task :generateAlignmentMetadata"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Task :generateAlignmentMetadata"));
 
-        System.err.println("Verifying it has injected " + AlignmentTask.GME + " with version "
-                + actualVersion.getProperty("version"));
+        System.err.println(
+                "Verifying it has injected " + AlignmentTask.GME + " with version "
+                        + actualVersion.getProperty("version"));
         assertTrue(gmeGradle.exists());
-        assertTrue(FileUtils.readFileToString(gmeGradle, Charset.defaultCharset())
-                .contains("org.jboss.gm:manipulation:" + actualVersion.getProperty("version")));
-        assertTrue(systemOutRule.getLog().contains(ANSIConstants.ESC_START));
-        assertTrue(systemOutRule.getLog().contains("Executor org.zeroturnaround.exec.ProcessExecutor"));
+        assertTrue(
+                FileUtils.readFileToString(gmeGradle, Charset.defaultCharset())
+                        .contains("org.jboss.gm:manipulation:" + actualVersion.getProperty("version")));
+        assertTrue(systemOutRule.getLinesNormalized().contains(ANSIConstants.ESC_START));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Executor org.zeroturnaround.exec.ProcessExecutor"));
     }
 
     @Test
@@ -240,7 +270,11 @@ public class MainTest {
         final File target = tempDir.newFolder();
         final File source = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
         final File root = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath())
-                .getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();
+                .getParentFile()
+                .getParentFile()
+                .getParentFile()
+                .getParentFile()
+                .getParentFile();
         final File projectRoot = new File(target, source.getName());
         FileUtils.copyFile(source, projectRoot);
 
@@ -250,12 +284,16 @@ public class MainTest {
         // This adds the compiled libraries as flat dir repositories.
         final File initFile = tempDir.newFile();
         final String dir1 = escapeBackslashes(
-                new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent());
+                new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().toURI())
+                        .getParent());
         final String dir2 = escapeBackslashes(
-                new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent());
-        String init = FileUtils.readFileToString(new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
+                new File(ManipulationModel.class.getProtectionDomain().getCodeSource().getLocation().toURI())
+                        .getParent());
+        String init = FileUtils.readFileToString(
+                new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
                 Charset.defaultCharset());
-        init = init.replaceFirst("(?s)mavenLocal.*snapshots\"\\n\\s+[}]",
+        init = init.replaceFirst(
+                "(?s)mavenLocal.*snapshots\"\\n\\s+[}]",
                 "\n        flatDir {\n            dirs '" + dir1 +
                         "'\n        }\n" +
                         "\n        flatDir {\n            dirs '" + dir2 +
@@ -264,7 +302,10 @@ public class MainTest {
         FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
 
         Main m = new Main();
-        String[] args = new String[] { "-t", projectRoot.getParentFile().getAbsolutePath(), "generateAlignmentMetadata",
+        String[] args = new String[] {
+                "-t",
+                projectRoot.getParentFile().getAbsolutePath(),
+                "generateAlignmentMetadata",
                 "--init-script=" + initFile.getCanonicalPath(),
                 "-DignoreUnresolvableDependencies=true",
                 "-DdependencyOverride.junit:junit@*=4.10"
@@ -273,17 +314,18 @@ public class MainTest {
         try {
             m.run(args);
         } catch (Exception e) {
-            assertThat(e.getCause().getMessage()).contains("must be configured in order for dependency scanning to "
-                    + "work");
+            assertThat(e.getCause().getMessage()).contains(
+                    "must be configured in order for dependency scanning to "
+                            + "work");
         }
 
-        assertThat(systemErrRule.getLog()).doesNotContain(ANSIConstants.ESC_START);
+        assertThat(systemErrRule.getLinesNormalized()).doesNotContain(ANSIConstants.ESC_START);
 
         if (GradleVersion.current().compareTo(GradleVersion.version("5.4.1")) >= 0) {
-            assertThat(systemErrRule.getLog()).contains(
+            assertThat(systemErrRule.getLinesNormalized()).contains(
                     "'" + Configuration.DA + "' must be configured in order for dependency scanning to work");
         } else {
-            assertThat(systemOutRule.getLog()).contains(
+            assertThat(systemOutRule.getLinesNormalized()).contains(
                     "'" + Configuration.DA + "' must be configured in order for dependency scanning to work");
         }
     }
@@ -294,10 +336,15 @@ public class MainTest {
         final File projectRoot = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
 
         Main m = new Main();
-        String[] args = new String[] { "--trace", "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "getGitVersion" };
+        String[] args = new String[] {
+                "--trace",
+                "-d",
+                "-t",
+                projectRoot.getParentFile().getAbsolutePath(),
+                "getGitVersion" };
         m.run(args);
 
-        assertTrue(systemOutRule.getLog().contains("Process 'command 'git'' finished with exit value"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Process 'command 'git'' finished with exit value"));
     }
 
     @Test
@@ -308,16 +355,22 @@ public class MainTest {
         final URL groovy = Thread.currentThread().getContextClassLoader().getResource("sample.groovy");
 
         Main m = new Main();
-        String[] args = new String[] { "--no-colour", "-t", projectRoot.getParentFile().getAbsolutePath(), "tasks",
+        String[] args = new String[] {
+                "--no-colour",
+                "-t",
+                projectRoot.getParentFile().getAbsolutePath(),
+                "tasks",
                 "-DdependencyOverride.org.jboss.slf4j:*@*=",
                 "-DgroovyScripts=" + groovy };
         m.run(args);
 
-        assertTrue(systemOutRule.getLog().contains("Running Groovy script on"));
-        assertTrue(systemOutRule.getLog().contains("dependencyOverride.org.jboss.slf4j:*@*="));
-        assertTrue(systemOutRule.getLog().contains("with JVM args '[-DdependencyOverride.org.jboss.slf4j:*@*="));
-        assertFalse(systemOutRule.getLog().contains(", DdependencyOverride.org.jboss.slf4j:*@*="));
-        assertTrue(systemOutRule.getLog().contains("groovyScripts="));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Running Groovy script on"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("dependencyOverride.org.jboss.slf4j:*@*="));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains("with JVM args '[-DdependencyOverride.org.jboss.slf4j:*@*="));
+        assertFalse(systemOutRule.getLinesNormalized().contains(", DdependencyOverride.org.jboss.slf4j:*@*="));
+        assertTrue(systemOutRule.getLinesNormalized().contains("groovyScripts="));
     }
 
     @Test
@@ -353,9 +406,9 @@ public class MainTest {
         String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "help" };
         m.run(args);
 
-        assertThat(systemOutRule.getLog()).contains("LETTERS");
+        assertThat(systemOutRule.getLinesNormalized()).contains("LETTERS");
         // Should be the last in the JVM arg list.
-        assertThat(systemOutRule.getLog()).contains(" -Xmx260m]");
+        assertThat(systemOutRule.getLinesNormalized()).contains(" -Xmx260m]");
     }
 
     @Test
@@ -364,7 +417,7 @@ public class MainTest {
         Main m = new Main();
         String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().toString(), "help" };
         m.run(args);
-        assertTrue(systemOutRule.getLog().contains("Found gradle-consistent-versions lock file"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Found gradle-consistent-versions lock file"));
         File lockFile = new File(projectRoot.getParentFile(), "versions.lock");
         assertEquals(0, lockFile.length());
     }
@@ -375,7 +428,10 @@ public class MainTest {
         final URL groovy = Thread.currentThread().getContextClassLoader().getResource("fixGradle810.groovy");
 
         Main m = new Main();
-        String[] args = new String[] { "-t", projectRoot.getAbsolutePath(), "help",
+        String[] args = new String[] {
+                "-t",
+                projectRoot.getAbsolutePath(),
+                "help",
                 "-DignoreUnresolvableDependencies=true",
         };
 
@@ -393,7 +449,10 @@ public class MainTest {
         final URL groovy = Thread.currentThread().getContextClassLoader().getResource("fixGradle810.groovy");
 
         Main m = new Main();
-        String[] args = new String[] { "-t", projectRoot.getAbsolutePath(), "help",
+        String[] args = new String[] {
+                "-t",
+                projectRoot.getAbsolutePath(),
+                "help",
                 "-DgroovyScripts=" + groovy
         };
 

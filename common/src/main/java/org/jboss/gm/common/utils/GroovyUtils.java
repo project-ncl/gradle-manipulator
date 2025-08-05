@@ -1,5 +1,8 @@
 package org.jboss.gm.common.utils;
 
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
+import groovy.lang.Script;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,9 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
 import lombok.experimental.UtilityClass;
-
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -24,16 +25,13 @@ import org.jboss.gm.common.groovy.BaseScript;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.slf4j.Logger;
 
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
-import groovy.lang.Script;
-
 @UtilityClass
 public class GroovyUtils {
 
     /**
      *
-     * @param logger The logger to use. Note: this is specifically using SLF4J logging to allow interaction with the CLI.
+     * @param logger The logger to use. Note: this is specifically using SLF4J logging to allow interaction with the
+     *        CLI.
      * @param targetStage The stage we are running
      * @param target The target directory to run against.
      * @param configuration The current configuration object.
@@ -41,8 +39,12 @@ public class GroovyUtils {
      * @param alignmentModel The current model ; may be null.
      * @throws ManipulationException if an error occurs.
      */
-    public static void runCustomGroovyScript(Logger logger, InvocationStage targetStage, File target,
-            Configuration configuration, Project rootProject,
+    public static void runCustomGroovyScript(
+            Logger logger,
+            InvocationStage targetStage,
+            File target,
+            Configuration configuration,
+            Project rootProject,
             ManipulationModel alignmentModel) throws ManipulationException {
 
         final List<File> groovyFiles = new ArrayList<>();
@@ -104,14 +106,21 @@ public class GroovyUtils {
                 logger.debug("InvocationPoint is {}", invocationPoint.invocationPoint());
                 stage = invocationPoint.invocationPoint();
             } else {
-                throw new ManipulationException("Mandatory annotation '@InvocationPoint(invocationPoint = ' not declared");
+                throw new ManipulationException(
+                        "Mandatory annotation '@InvocationPoint(invocationPoint = ' not declared");
             }
 
             if (targetStage == stage || stage == InvocationStage.ALL) {
                 // Inject the values via a new BaseScript so user's can have completion.
                 if (script instanceof BaseScript) {
-                    ((BaseScript) script).setValues(logger, targetStage, target, configuration.getProperties(),
-                            RESTUtils.getTranslator(configuration), rootProject, alignmentModel);
+                    ((BaseScript) script).setValues(
+                            logger,
+                            targetStage,
+                            target,
+                            configuration.getProperties(),
+                            RESTUtils.getTranslator(configuration),
+                            rootProject,
+                            alignmentModel);
                 } else {
                     throw new ManipulationException("Cannot cast {} to a BaseScript to set values.", script);
                 }

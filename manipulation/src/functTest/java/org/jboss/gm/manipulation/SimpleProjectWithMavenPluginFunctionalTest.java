@@ -1,11 +1,14 @@
 package org.jboss.gm.manipulation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.internal.Pair;
@@ -16,14 +19,10 @@ import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class SimpleProjectWithMavenPluginFunctionalTest {
 
@@ -31,13 +30,13 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
     private static final Path PATH_IN_REPOSITORY = Paths.get("org/acme/root/1.0.1-redhat-00001/");
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
-
-    @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Test
     public void ensureProperPomGeneratedForLegacyPlugin() throws IOException, URISyntaxException,
@@ -70,8 +69,10 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
 
         final String repoPathToPom = PATH_IN_REPOSITORY.resolve(ARTIFACT_NAME + ".pom").toString();
 
-        assertTrue(systemOutRule.getLog().contains(
-                "Replacing strictly with forced version for ch.qos.logback:logback-classic:1.1.3 with ch.qos.logback:logback-classic:1.1.2"));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains(
+                                "Replacing strictly with forced version for ch.qos.logback:logback-classic:1.1.3 with ch.qos.logback:logback-classic:1.1.2"));
 
         // verify installed artifacts
         verifyArtifacts(m2Directory);
@@ -84,8 +85,11 @@ public class SimpleProjectWithMavenPluginFunctionalTest {
 
     private void verifyPom(File repoDirectory, String pathToPom, ManipulationModel alignment)
             throws IOException, XmlPullParserException {
-        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(repoDirectory, alignment,
-                pathToPom, true);
+        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(
+                repoDirectory,
+                alignment,
+                pathToPom,
+                true);
         final ManipulationModel module = modelAndModule.getRight();
         assertThat(modelAndModule.getLeft().getDependencies())
                 .extracting("artifactId", "version")

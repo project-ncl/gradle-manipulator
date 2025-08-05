@@ -1,5 +1,11 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -9,7 +15,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -37,21 +42,16 @@ import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 @RunWith(BMUnitRunner.class)
 @BMUnitConfig(bmunitVerbose = true)
-@BMRule(name = "handle-injectIntoNewInstance",
+@BMRule(
+        name = "handle-injectIntoNewInstance",
         targetClass = "org.gradle.api.internal.AbstractTask",
         targetMethod = "injectIntoNewInstance(ProjectInternal, TaskIdentity, Callable)",
         targetLocation = "AFTER INVOKE set",
@@ -62,13 +62,13 @@ public class AlignmentTaskEmptyVersionTest {
     public final TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
     public final LoggingRule loggingRule = new LoggingRule(LogLevel.INFO);
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     /**
      * We can't just create a new AlignmentTask as the base AbstractTask has checks to
@@ -90,8 +90,12 @@ public class AlignmentTaskEmptyVersionTest {
         if (GradleVersion.current().compareTo(GradleVersion.version("8.0")) < 0) {
             // In Gradle 8.2. this static method doesn't exist. However, we're only testing this under Gradle 8.0
             Method method = TaskIdentity.class.getMethod("create", String.class, Class.class, ProjectInternal.class);
-            AbstractTask.injectIntoNewInstance(projectInternal,
-                    (TaskIdentity) method.invoke(null, "DummyIdentity", taskType,
+            AbstractTask.injectIntoNewInstance(
+                    projectInternal,
+                    (TaskIdentity) method.invoke(
+                            null,
+                            "DummyIdentity",
+                            taskType,
                             projectInternal),
                     null);
         }
@@ -118,11 +122,17 @@ public class AlignmentTaskEmptyVersionTest {
         Configuration config = ConfigFactory.create(Configuration.class);
 
         // As getDependencies is private, use reflection to modify the access control.
-        Method m = at.getClass().getDeclaredMethod("getDependencies", Project.class, ManipulationCache.class,
-                Configuration.class, Set.class);
+        Method m = at.getClass()
+                .getDeclaredMethod(
+                        "getDependencies",
+                        Project.class,
+                        ManipulationCache.class,
+                        Configuration.class,
+                        Set.class);
         m.setAccessible(true);
         @SuppressWarnings("unchecked")
-        Map<Dependency, ProjectVersionRef> result = (Map<Dependency, ProjectVersionRef>) m.invoke(at,
+        Map<Dependency, ProjectVersionRef> result = (Map<Dependency, ProjectVersionRef>) m.invoke(
+                at,
                 new Object[] { p, ManipulationCache.getCache(p), config, new HashSet<ProjectVersionRef>() });
         Collection<ProjectVersionRef> allDependencies = result.values();
 
@@ -133,7 +143,7 @@ public class AlignmentTaskEmptyVersionTest {
     @Test
     public void verifyPluginLog() {
         new AlignmentPlugin();
-        assertTrue(systemOutRule.getLog().contains("Running Gradle Alignment Plugin"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Running Gradle Alignment Plugin"));
     }
 
     @Test
@@ -160,6 +170,6 @@ public class AlignmentTaskEmptyVersionTest {
 
             assertEquals(result, formats.get(line));
         }
-        assertTrue(systemOutRule.getLog().contains("Examining git config content"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Examining git config content"));
     }
 }

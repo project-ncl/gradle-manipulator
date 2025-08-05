@@ -1,28 +1,26 @@
 package org.jboss.gm.manipulation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-
 import org.apache.maven.model.Model;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.internal.Pair;
 import org.gradle.testkit.runner.BuildResult;
-import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
 
 public class MultiModuleFunctionalTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -39,20 +37,24 @@ public class MultiModuleFunctionalTest {
                 .withArguments("generatePomFileForMainPublication")
                 .build();
 
-        assertThat(buildResult.task(":" + "generatePomFileForMainPublication").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
+        assertThat(buildResult.task(":" + "generatePomFileForMainPublication").getOutcome())
+                .isEqualTo(TaskOutcome.SUCCESS);
 
         assertRootPom(multiModuleRoot, alignment);
         assertSubproject1Pom(multiModuleRoot, alignment);
         assertSubproject2Pom(multiModuleRoot, alignment);
     }
 
-    private void assertRootPom(File multiModuleRoot, ManipulationModel alignment) throws IOException, XmlPullParserException {
+    private void assertRootPom(File multiModuleRoot, ManipulationModel alignment)
+            throws IOException, XmlPullParserException {
         TestUtils.getModelAndCheckGAV(multiModuleRoot, alignment, "build/publications/main/pom-default.xml");
     }
 
     private void assertSubproject1Pom(File multiModuleRoot, ManipulationModel alignment) throws IOException,
             XmlPullParserException {
-        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(multiModuleRoot, alignment,
+        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(
+                multiModuleRoot,
+                alignment,
                 "subproject1/build/publications/main/pom-default.xml");
         final ManipulationModel module = modelAndModule.getRight();
         assertThat(modelAndModule.getLeft().getDependencies())
@@ -65,7 +67,9 @@ public class MultiModuleFunctionalTest {
 
     private void assertSubproject2Pom(File multiModuleRoot, ManipulationModel alignment)
             throws IOException, XmlPullParserException {
-        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(multiModuleRoot, alignment,
+        final Pair<Model, ManipulationModel> modelAndModule = TestUtils.getModelAndCheckGAV(
+                multiModuleRoot,
+                alignment,
                 "subproject2/build/publications/main/pom-default.xml");
         final ManipulationModel module = modelAndModule.getRight();
         assertThat(modelAndModule.getLeft().getDependencies())

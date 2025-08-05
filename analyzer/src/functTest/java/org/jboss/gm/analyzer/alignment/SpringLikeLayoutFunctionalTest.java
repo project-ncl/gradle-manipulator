@@ -1,28 +1,5 @@
 package org.jboss.gm.analyzer.alignment;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.Collections;
-
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.io.rest.DefaultTranslator;
-import org.gradle.api.Project;
-import org.gradle.util.GradleVersion;
-import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
-import org.jboss.gm.common.Configuration;
-import org.jboss.gm.common.utils.FileUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
-import org.junit.rules.TemporaryFolder;
-import org.junit.rules.TestRule;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -36,13 +13,35 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assume.assumeTrue;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.Collections;
+import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.maven.ext.common.ManipulationException;
+import org.commonjava.maven.ext.io.rest.DefaultTranslator;
+import org.gradle.api.Project;
+import org.gradle.util.GradleVersion;
+import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
+import org.jboss.gm.common.Configuration;
+import org.jboss.gm.common.utils.FileUtils;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
+
 public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -56,20 +55,25 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
     }
 
     private void stubDACall() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("spring-like-layout-da-root.json"))));
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse("spring-like-layout-da-root-project.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("spring-like-layout-da-root.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse("spring-like-layout-da-root-project.json"))));
     }
 
     @Test
-    public void ensureAlignmentFileCreatedAndAlignmentTaskRun() throws IOException, URISyntaxException, ManipulationException {
+    public void ensureAlignmentFileCreatedAndAlignmentTaskRun()
+            throws IOException, URISyntaxException, ManipulationException {
         // XXX: Caused by: java.lang.ClassNotFoundException: org.gradle.api.artifacts.maven.PomFilterContainer
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
 
@@ -78,14 +82,17 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(
+                AlignmentTask.INJECT_GME_END,
+                FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme");
             assertThat(am.getName()).isEqualTo("root");
             assertThat(am.getVersion()).isEqualTo("1.1.2.redhat-00004");
 
-            assertThat(am.getChildren().keySet()).hasSize(3).containsExactly("subproject1", "subproject2", "subproject3");
+            assertThat(am.getChildren().keySet()).hasSize(3)
+                    .containsExactly("subproject1", "subproject2", "subproject3");
 
             assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("1.1.2.redhat-00004");
@@ -109,7 +116,8 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
             assertThat(am.findCorrespondingChild("subproject3")).satisfies(subproject11 -> {
                 assertThat(subproject11.getVersion()).isEqualTo("1.1.2.redhat-00004");
-                final Collection<ProjectVersionRef> alignedDependencies = subproject11.getAlignedDependencies().values();
+                final Collection<ProjectVersionRef> alignedDependencies = subproject11.getAlignedDependencies()
+                        .values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
                         .containsOnly(
@@ -121,12 +129,12 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
         File pluginConfigs = new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS);
         String pContents = org.apache.commons.io.FileUtils.readFileToString(pluginConfigs, Charset.defaultCharset());
-        assertTrue(systemOutRule.getLog().contains("Replacing Dokka template for version MINIMUM"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Replacing Dokka template for version MINIMUM"));
         assertTrue(pContents.contains("noJdkLink = true"));
 
         File settings = new File(projectRoot, "settings.gradle");
         String sContents = org.apache.commons.io.FileUtils.readFileToString(settings, Charset.defaultCharset());
-        assertTrue(systemOutRule.getLog().contains("with Dokka resolutionStrategy information"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("with Dokka resolutionStrategy information"));
         assertTrue(sContents.contains("pluginManagement { resolutionStrategy { eachPlugin { if (requested.id.id =="));
     }
 
@@ -137,19 +145,24 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
 
         final File projectRoot = tempDir.newFolder("spring-like-layout");
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(),
+        final TestManipulationModel alignmentModel = TestUtils.align(
+                projectRoot,
+                projectRoot.getName(),
                 Collections.singletonMap("dokkaPlugin", "false"));
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
-        assertEquals(AlignmentTask.INJECT_GME_END, FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+        assertEquals(
+                AlignmentTask.INJECT_GME_END,
+                FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.acme");
             assertThat(am.getName()).isEqualTo("root");
             assertThat(am.getVersion()).isEqualTo("1.1.2.redhat-00004");
 
-            assertThat(am.getChildren().keySet()).hasSize(3).containsExactly("subproject1", "subproject2", "subproject3");
+            assertThat(am.getChildren().keySet()).hasSize(3)
+                    .containsExactly("subproject1", "subproject2", "subproject3");
 
             assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("1.1.2.redhat-00004");
@@ -173,7 +186,8 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
             assertThat(am.findCorrespondingChild("subproject3")).satisfies(subproject11 -> {
                 assertThat(subproject11.getVersion()).isEqualTo("1.1.2.redhat-00004");
-                final Collection<ProjectVersionRef> alignedDependencies = subproject11.getAlignedDependencies().values();
+                final Collection<ProjectVersionRef> alignedDependencies = subproject11.getAlignedDependencies()
+                        .values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
                         .containsOnly(
@@ -185,7 +199,7 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
         File pluginConfigs = new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS);
         String pContents = org.apache.commons.io.FileUtils.readFileToString(pluginConfigs, Charset.defaultCharset());
-        assertFalse(systemOutRule.getLog().contains("Replacing Dokka template for version MINIMUM"));
+        assertFalse(systemOutRule.getLinesNormalized().contains("Replacing Dokka template for version MINIMUM"));
         assertFalse(pContents.contains("noJdkLink = true"));
 
         File settings = new File(projectRoot, "settings.gradle");

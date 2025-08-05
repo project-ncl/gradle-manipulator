@@ -8,12 +8,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.maven.settings.Profile;
 import org.apache.maven.settings.Repository;
 import org.apache.maven.settings.RepositoryPolicy;
 import org.apache.maven.settings.Settings;
-import org.apache.maven.settings.building.DefaultSettingsBuilder;
 import org.apache.maven.settings.building.DefaultSettingsBuilderFactory;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
@@ -68,12 +66,15 @@ public final class RepositoryExporter {
         try {
             settingsWriter.write(repositoryExporter.mavenSettings, settingsFile);
         } catch (ManipulationException e) {
-            throw new ManipulationUncheckedException("Could not write repository settings file into {}",
+            throw new ManipulationUncheckedException(
+                    "Could not write repository settings file into {}",
                     settingsFile.getAbsolutePath());
         }
     }
 
-    private static void processRepositories(RepositoryExporter repositoryExporter, Map<ArtifactRepository, Path> repositories) {
+    private static void processRepositories(
+            RepositoryExporter repositoryExporter,
+            Map<ArtifactRepository, Path> repositories) {
         for (Map.Entry<ArtifactRepository, Path> entry : repositories.entrySet()) {
             ArtifactRepository repository = entry.getKey();
             Path path = entry.getValue();
@@ -87,7 +88,10 @@ public final class RepositoryExporter {
                 if (isSupportedScheme(url)) {
                     addRepository(REPO_TYPE.Maven, repositoryExporter, artifactRepository.getName(), url.toString());
                 } else {
-                    logger.debug("Skipping maven repository '{}' with unsupported scheme {} from {}", repository.getName(), url,
+                    logger.debug(
+                            "Skipping maven repository '{}' with unsupported scheme {} from {}",
+                            repository.getName(),
+                            url,
                             path);
                 }
             } else if (repository instanceof IvyArtifactRepository) {
@@ -97,11 +101,16 @@ public final class RepositoryExporter {
                 if (isSupportedScheme(url)) {
                     addRepository(REPO_TYPE.Ivy, repositoryExporter, artifactRepository.getName(), url.toString());
                 } else {
-                    logger.debug("Skipping ivy repository '{}' with unsupported scheme {} from {}", repository.getName(), url,
+                    logger.debug(
+                            "Skipping ivy repository '{}' with unsupported scheme {} from {}",
+                            repository.getName(),
+                            url,
                             path);
                 }
             } else {
-                logger.debug("Skipping repository of type {} from {}", repository.getClass().getSimpleName(),
+                logger.debug(
+                        "Skipping repository of type {} from {}",
+                        repository.getClass().getSimpleName(),
                         path);
             }
         }

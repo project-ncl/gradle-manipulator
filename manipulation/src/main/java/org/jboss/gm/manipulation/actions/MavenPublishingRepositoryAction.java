@@ -1,7 +1,9 @@
 package org.jboss.gm.manipulation.actions;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.jboss.gm.manipulation.ManipulationPlugin.MAVEN_PUBLISH_PLUGIN;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.aeonbits.owner.ConfigCache;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Action;
@@ -11,13 +13,9 @@ import org.gradle.api.credentials.HttpHeaderCredentials;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.authentication.http.HttpHeaderAuthentication;
-import org.gradle.plugins.signing.SigningExtension;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.manipulation.ManipulationPlugin;
-
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.jboss.gm.manipulation.ManipulationPlugin.MAVEN_PUBLISH_PLUGIN;
 
 /**
  * Adds a publishing repository specific to PNC environment.
@@ -60,7 +58,8 @@ public class MavenPublishingRepositoryAction implements Action<Project> {
             // Only ignore buildSrc if it doesn't have an existing publishing mechanism.
             logger.warn(
                     "Not adding publishing extension to project {} as {} is build-time only and not configured for publishing.",
-                    project, BUILD_SRC);
+                    project,
+                    BUILD_SRC);
             return;
         }
 

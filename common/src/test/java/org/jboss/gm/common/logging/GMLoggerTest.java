@@ -1,5 +1,8 @@
 package org.jboss.gm.common.logging;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import org.aeonbits.owner.ConfigCache;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.api.logging.Logger;
@@ -7,12 +10,9 @@ import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TestRule;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class GMLoggerTest {
 
@@ -20,10 +20,10 @@ public class GMLoggerTest {
     public LoggingRule rule = new LoggingRule(LogLevel.DEBUG);
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Test
     public void debug() {
@@ -35,13 +35,14 @@ public class GMLoggerTest {
         logger.info("Test logging at info");
         logger.debug("Test logging at debug");
 
-        assertTrue(systemOutRule.getLog().contains("Test logging"));
-        assertTrue(systemOutRule.getLog().contains("[LIFECYCLE] [org.jboss.gm.common.logging.GMLoggerTest]"));
-        assertTrue(systemOutRule.getLog().contains("[INFO] [org.jboss.gm.common.logging.GMLoggerTest]"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Test logging"));
+        assertTrue(
+                systemOutRule.getLinesNormalized().contains("[LIFECYCLE] [org.jboss.gm.common.logging.GMLoggerTest]"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("[INFO] [org.jboss.gm.common.logging.GMLoggerTest]"));
         // Was previously "[DEBUG][GMLogger" but gives spurious failures on CI. We really want to establish
         // that both the above logging lines are output anyway.
-        assertTrue(systemOutRule.getLog().contains("Test logging at info"));
-        assertTrue(systemOutRule.getLog().contains("Test logging at debug"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Test logging at info"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Test logging at debug"));
     }
 
     @Test

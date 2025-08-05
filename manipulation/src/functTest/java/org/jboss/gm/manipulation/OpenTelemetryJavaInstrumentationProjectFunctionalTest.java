@@ -1,10 +1,13 @@
 package org.jboss.gm.manipulation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.gm.common.JVMTestSetup.JDK17_DIR;
+import static org.junit.Assume.assumeTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
-
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.gradle.testkit.runner.BuildResult;
@@ -14,25 +17,21 @@ import org.jboss.gm.common.JVMTestSetup;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.gm.common.JVMTestSetup.JDK17_DIR;
-import static org.junit.Assume.assumeTrue;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class OpenTelemetryJavaInstrumentationProjectFunctionalTest {
-
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @BeforeClass
     public static void setupJVM() throws IOException {
@@ -65,8 +64,12 @@ public class OpenTelemetryJavaInstrumentationProjectFunctionalTest {
 
         final BuildResult buildResult = TestUtils.createGradleRunner()
                 .withProjectDir(opentelemetryProjectRoot)
-                .withArguments("-q", "-Potel.stable=true", "-Dorg.gradle.java.home=" + JDK17_DIR,
-                        "--no-parallel", ":bom:publish")
+                .withArguments(
+                        "-q",
+                        "-Potel.stable=true",
+                        "-Dorg.gradle.java.home=" + JDK17_DIR,
+                        "--no-parallel",
+                        ":bom:publish")
                 // "publish", "-x", "test", "-x", "spotlessCheck", "-x", "checkstyleMain", "-x", "javadoc")
                 .forwardOutput()
                 .withDebug(false)
@@ -74,8 +77,10 @@ public class OpenTelemetryJavaInstrumentationProjectFunctionalTest {
                 .build();
 
         assertThat(buildResult.task(":bom:publish").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
-        assertThat(new File(publishDirectory,
-                "io/opentelemetry/instrumentation/opentelemetry-instrumentation-bom/2.5.0.redhat-00001/opentelemetry-instrumentation-bom-2.5.0.redhat-00001.pom"))
-                        .exists();
+        assertThat(
+                new File(
+                        publishDirectory,
+                        "io/opentelemetry/instrumentation/opentelemetry-instrumentation-bom/2.5.0.redhat-00001/opentelemetry-instrumentation-bom-2.5.0.redhat-00001.pom"))
+                .exists();
     }
 }

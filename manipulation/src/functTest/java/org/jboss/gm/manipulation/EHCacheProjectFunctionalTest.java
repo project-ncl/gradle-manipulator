@@ -1,10 +1,14 @@
 package org.jboss.gm.manipulation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.gm.common.JVMTestSetup.JDK8_DIR;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
-
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.gradle.testkit.runner.BuildResult;
@@ -14,26 +18,21 @@ import org.jboss.gm.common.JVMTestSetup;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.gm.common.JVMTestSetup.JDK8_DIR;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class EHCacheProjectFunctionalTest {
-
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @BeforeClass
     public static void setupJVM() throws IOException {
@@ -74,18 +73,23 @@ public class EHCacheProjectFunctionalTest {
                 .withProjectDir(simpleProjectRoot)
                 .withArguments(
                         "-Dorg.gradle.java.home=" + JDK8_DIR,
-                        "--info", "publish", "-x", "test")
+                        "--info",
+                        "publish",
+                        "-x",
+                        "test")
                 // While we normally want to run with debug enabled to capture coverage we need to fork to change
                 // the JVM in use.
                 .withDebug(false)
                 .build();
 
         assertThat(
-                buildResult.task(":clustered:server:ehcache-service:publishMavenJavaPublicationToGMERepository").getOutcome())
-                        .isEqualTo(TaskOutcome.SUCCESS);
+                buildResult.task(":clustered:server:ehcache-service:publishMavenJavaPublicationToGMERepository")
+                        .getOutcome())
+                .isEqualTo(TaskOutcome.SUCCESS);
         assertThat(publishDirectory).exists();
-        assertTrue(systemOutRule.getLog()
-                .contains("Detected use of conflict resolution strategy strict"));
-        assertTrue(systemOutRule.getLog().contains("Found signing plugin; disabling"));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains("Detected use of conflict resolution strategy strict"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Found signing plugin; disabling"));
     }
 }

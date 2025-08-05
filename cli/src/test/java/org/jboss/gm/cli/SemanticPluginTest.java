@@ -1,8 +1,10 @@
 package org.jboss.gm.cli;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.linesOf;
+
 import java.io.File;
 import java.util.Collections;
-
 import org.aeonbits.owner.ConfigCache;
 import org.eclipse.jgit.api.Git;
 import org.gradle.tooling.internal.consumer.ConnectorServices;
@@ -10,30 +12,24 @@ import org.jboss.gm.common.utils.PluginUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemErrRule;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.linesOf;
+import uk.org.webcompere.systemstubs.rules.EnvironmentVariablesRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class SemanticPluginTest {
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
-    public final SystemErrRule systemErrRule = new SystemErrRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemPropertiesRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
+    public final EnvironmentVariablesRule environmentVariables = new EnvironmentVariablesRule();
 
     @Before
     public void reset() {

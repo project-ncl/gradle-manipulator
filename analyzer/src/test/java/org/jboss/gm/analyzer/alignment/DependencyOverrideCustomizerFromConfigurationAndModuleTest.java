@@ -1,5 +1,8 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -9,7 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.aeonbits.owner.ConfigFactory;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
@@ -20,12 +22,9 @@ import org.jboss.gm.common.Configuration;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
 
@@ -35,7 +34,7 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     private Set<Project> projects;
 
@@ -73,39 +72,62 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
 
     @Test
     public void ensureOverrideMatches() throws ManipulationException {
-        final ProjectVersionRef hibernateCoreGav = withGAV("org.hibernate", "hibernate-core",
+        final ProjectVersionRef hibernateCoreGav = withGAV(
+                "org.hibernate",
+                "hibernate-core",
                 "5.3.9.Final-redhat-00001");
-        final ProjectVersionRef hibernateValidatorGav = withGAV("org.hibernate", "hibernate-validator",
+        final ProjectVersionRef hibernateValidatorGav = withGAV(
+                "org.hibernate",
+                "hibernate-validator",
                 "6.0.16.Final-redhat-00001");
-        final ProjectVersionRef undertowGav = withGAV("io.undertow", "undertow-core",
+        final ProjectVersionRef undertowGav = withGAV(
+                "io.undertow",
+                "undertow-core",
                 "2.0.15.Final-redhat-00001");
-        final ProjectVersionRef jacksonCoreGav = withGAV("com.fasterxml.jackson.core", "jackson-core",
+        final ProjectVersionRef jacksonCoreGav = withGAV(
+                "com.fasterxml.jackson.core",
+                "jackson-core",
                 "2.9.8-redhat-00001");
-        final ProjectVersionRef jacksonMapperGav = withGAV("com.fasterxml.jackson.core", "jackson-mapper",
+        final ProjectVersionRef jacksonMapperGav = withGAV(
+                "com.fasterxml.jackson.core",
+                "jackson-mapper",
                 "2.9.8-redhat-00001");
         final ProjectVersionRef mongoGav = withGAV("org.mongodb", "mongo-java-driver", "3.10.2-redhat-00001");
         final ProjectVersionRef mockitoGav = withGAV("org.mockito", "mockito-core", "2.27.0-redhat-00001");
-        final ProjectVersionRef wiremockGav = withGAV("com.github.tomakehurst", "wiremock-jre8",
+        final ProjectVersionRef wiremockGav = withGAV(
+                "com.github.tomakehurst",
+                "wiremock-jre8",
                 "2.23.2-redhat-00001");
 
-        System.setProperty("dependencyOverride.org.hibernate:hibernate-core@*",
+        System.setProperty(
+                "dependencyOverride.org.hibernate:hibernate-core@*",
                 "5.3.7.Final-redhat-00001"); // should result in overriding only hibernate-core dependency
-        System.setProperty("dependencyOverride.com.fasterxml.jackson.core:*@*",
+        System.setProperty(
+                "dependencyOverride.com.fasterxml.jackson.core:*@*",
                 "2.9.5-redhat-00001"); // should result in overriding all jackson dependencies
-        System.setProperty("dependencyOverride.io.undertow:undertow-servlet@*",
+        System.setProperty(
+                "dependencyOverride.io.undertow:undertow-servlet@*",
                 "2.0.14.Final-redhat-00001"); // should NOT result in overriding the undertow dependency since the artifact doesn't match
-        System.setProperty("dependencyOverride.org.mockito:*@org.acme:test",
+        System.setProperty(
+                "dependencyOverride.org.mockito:*@org.acme:test",
                 "2.27.0-redhat-00002"); // should result in overriding the mockito dependency
-        System.setProperty("dependencyOverride.com.github.tomakehurst:*@org.acme:other",
+        System.setProperty(
+                "dependencyOverride.com.github.tomakehurst:*@org.acme:other",
                 ""); // should NOT result overriding the wiremock dependency since the module doesn't match
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
 
         final AlignmentService.Manipulator sut = new DependencyOverrideCustomizer(configuration, projects);
         final Map<ProjectVersionRef, String> translationMap = new HashMap<>();
-        final List<ProjectVersionRef> gavs = Arrays.asList(hibernateCoreGav, hibernateValidatorGav, undertowGav, jacksonCoreGav,
+        final List<ProjectVersionRef> gavs = Arrays.asList(
+                hibernateCoreGav,
+                hibernateValidatorGav,
+                undertowGav,
+                jacksonCoreGav,
                 jacksonMapperGav,
-                mongoGav, mockitoGav, wiremockGav);
+                mongoGav,
+                mockitoGav,
+                wiremockGav);
 
         gavs.forEach(d -> translationMap.put(d, d.getVersionString()));
 

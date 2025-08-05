@@ -1,7 +1,6 @@
 package org.jboss.gm.common.utils;
 
 import lombok.experimental.UtilityClass;
-
 import org.apache.commons.beanutils.ContextClassLoaderLocal;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.commonjava.maven.ext.io.rest.Translator;

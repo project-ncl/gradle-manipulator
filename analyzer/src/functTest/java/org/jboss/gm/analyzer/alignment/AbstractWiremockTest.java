@@ -1,19 +1,17 @@
 package org.jboss.gm.analyzer.alignment;
 
+import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.log.StdErrLog;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
-
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
 
 public abstract class AbstractWiremockTest {
 

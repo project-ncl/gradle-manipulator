@@ -1,5 +1,13 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
+
+import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -8,7 +16,6 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.io.FileUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
@@ -24,23 +31,14 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-
-import com.github.tomakehurst.wiremock.junit.WireMockClassRule;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 @RunWith(Parameterized.class)
 public class DAAlignmentServiceWiremockTest {
@@ -48,7 +46,7 @@ public class DAAlignmentServiceWiremockTest {
     private static final int PORT = 8089;
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @ClassRule
     public static WireMockClassRule wireMockRule = new WireMockClassRule(PORT);
@@ -60,7 +58,7 @@ public class DAAlignmentServiceWiremockTest {
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
     public final LoggingRule loggingRule = new LoggingRule(LogLevel.INFO);
@@ -78,16 +76,20 @@ public class DAAlignmentServiceWiremockTest {
 
     @Before
     public void setup() throws IOException, URISyntaxException {
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAResponse())));
-        stubFor(post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json;charset=utf-8")
-                        .withBody(readSampleDAProjectResponse())));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAResponse())));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(readSampleDAProjectResponse())));
     }
 
     @Test
@@ -103,11 +105,13 @@ public class DAAlignmentServiceWiremockTest {
         final ProjectVersionRef hibernateGav = withGAV("org.hibernate", "hibernate-core", "5.3.7.Final");
         final ProjectVersionRef undertowGav = withGAV("io.undertow", "undertow-core", "2.0.15.Final");
         final ProjectVersionRef mockitoGav = withGAV("org.mockito", "mockito-core", "2.27.0");
-        final AlignmentService.Response response = sut.align(new AlignmentService.Request(
-                Collections.singletonList(projectGav),
-                Stream.of(hibernateGav,
-                        undertowGav,
-                        mockitoGav).collect(Collectors.toList())));
+        final AlignmentService.Response response = sut.align(
+                new AlignmentService.Request(
+                        Collections.singletonList(projectGav),
+                        Stream.of(
+                                hibernateGav,
+                                undertowGav,
+                                mockitoGav).collect(Collectors.toList())));
 
         final File simpleProjectRoot = tempDir.newFolder("dummy");
         final Project project = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
@@ -120,7 +124,7 @@ public class DAAlignmentServiceWiremockTest {
                 assertThat(r.getAlignedVersionOfGav(project, undertowGav)).isEqualTo("2.0.15.Final-redhat-00001");
                 assertThat(r.getAlignedVersionOfGav(project, mockitoGav)).isNull();
             } else {
-                assertThat(systemOutRule.getLog()).contains(
+                assertThat(systemOutRule.getLinesNormalized()).contains(
                         "No dependencySource configured ; unable pass GAVs into endpoint");
             }
         });
@@ -128,16 +132,23 @@ public class DAAlignmentServiceWiremockTest {
 
     private String readSampleDAResponse() throws URISyntaxException, IOException {
         return FileUtils.readFileToString(
-                Paths.get(DAAlignmentServiceWiremockTest.class.getClassLoader().getResource("sample-da-response.json")
-                        .toURI()).toFile(),
+                Paths.get(
+                        DAAlignmentServiceWiremockTest.class.getClassLoader()
+                                .getResource("sample-da-response.json")
+                                .toURI())
+                        .toFile(),
                 StandardCharsets.UTF_8.name());
     }
 
     private String readSampleDAProjectResponse() throws URISyntaxException, IOException {
         return FileUtils.readFileToString(
-                Paths.get(DAAlignmentServiceWiremockTest.class.getClassLoader().getResource("sample-da-response-project" +
-                        ".json")
-                        .toURI()).toFile(),
+                Paths.get(
+                        DAAlignmentServiceWiremockTest.class.getClassLoader()
+                                .getResource(
+                                        "sample-da-response-project" +
+                                                ".json")
+                                .toURI())
+                        .toFile(),
                 StandardCharsets.UTF_8.name());
     }
 }

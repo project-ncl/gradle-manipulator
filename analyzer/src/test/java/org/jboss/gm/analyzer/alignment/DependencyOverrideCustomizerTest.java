@@ -1,10 +1,12 @@
 package org.jboss.gm.analyzer.alignment;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
-
 import org.aeonbits.owner.ConfigFactory;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.Project;
@@ -14,12 +16,9 @@ import org.jboss.gm.common.Configuration;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class DependencyOverrideCustomizerTest {
 
@@ -31,7 +30,7 @@ public class DependencyOverrideCustomizerTest {
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     private Project project;
 
@@ -53,13 +52,16 @@ public class DependencyOverrideCustomizerTest {
 
         final String newProjectVersion = "1.0.0" + DEFAULT_SUFFIX;
 
-        System.setProperty(DependencyOverrideCustomizer.DEPENDENCY_OVERRIDE + "org.hibernate:*@*", "5.3.10.Final-redhat-00001");
+        System.setProperty(
+                DependencyOverrideCustomizer.DEPENDENCY_OVERRIDE + "org.hibernate:*@*",
+                "5.3.10.Final-redhat-00001");
         System.setProperty(DependencyOverrideCustomizer.DEPENDENCY_OVERRIDE + "org.mockito:mockito-*@*", "");
 
         final Configuration configuration = ConfigFactory.create(Configuration.class);
 
         // make a customizer that overrides any hibernate dependency but no other gavs
-        final DependencyOverrideCustomizer sut = new DependencyOverrideCustomizer(configuration,
+        final DependencyOverrideCustomizer sut = new DependencyOverrideCustomizer(
+                configuration,
                 Collections.singleton(project));
 
         Response originalResp = new Response(

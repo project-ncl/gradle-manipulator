@@ -426,7 +426,7 @@ subprojects {
                 }
             }
 
-            generateRepositories(this, this@Build_gradle)
+            generateRepositories(this, isReleaseBuild)
         }
 
         if (isReleaseBuild) {
@@ -446,7 +446,7 @@ subprojects {
                     generatePom()
                 }
             }
-            generateRepositories(this, this@Build_gradle)
+            generateRepositories(this, isReleaseBuild)
         }
 
         if (isReleaseBuild) {
@@ -486,6 +486,7 @@ subprojects {
                 removeUnusedImports()
                 importOrder(resources.text.fromArchiveEntry(spotlessConfig, "java-import-order.txt").asString())
                 val formatter = resources.text.fromArchiveEntry(spotlessConfig, "java-formatter.xml").asString()
+                // Using reflection instead of 'eclipse().configXml(formatter)' to avoid issues when earlier spotless plugin versions are used.
                 val eclipseConfigXml = com.diffplug.gradle.spotless.JavaExtension.EclipseConfig::class.memberFunctions.find{it.name == "configXml"}
                 eclipseConfigXml?.call(eclipse(), arrayOf(formatter))
             }
@@ -512,9 +513,9 @@ subprojects {
     }
 }
 
-fun generateRepositories(publishingExtension: PublishingExtension, buildGradle: Build_gradle) {
+fun generateRepositories(publishingExtension: PublishingExtension, isReleaseBuild: Boolean) {
     publishingExtension.repositories {
-        if (buildGradle.isReleaseBuild) {
+        if (isReleaseBuild) {
             maven {
                 name = "sonatype-nexus-staging"
                 url = project.uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")

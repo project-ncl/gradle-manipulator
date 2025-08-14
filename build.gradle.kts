@@ -1,7 +1,11 @@
 import com.adarshr.gradle.testlogger.theme.ThemeType
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.freefair.gradle.plugins.lombok.LombokExtension
+import net.linguica.gradle.maven.settings.LocalMavenSettingsLoader
+import net.linguica.gradle.maven.settings.MavenSettingsPlugin.MAVEN_SETTINGS_EXTENSION_NAME
+import net.linguica.gradle.maven.settings.MavenSettingsPluginExtension
 import org.ajoberstar.grgit.Grgit
+import org.apache.maven.settings.building.SettingsBuildingException
 import org.gradle.util.GradleVersion
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -27,11 +31,10 @@ plugins {
     id("com.gradle.plugin-publish") version "0.15.0"
     id("net.researchgate.release") version "2.8.1"
     id("org.ajoberstar.grgit") version "4.1.1"
-    if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.0")) {
-        // Only supporting publishing when running with Gradle < 8
-        // https://github.com/mark-vieira/gradle-maven-settings-plugin/issues/29
-        id("net.linguica.maven-settings") version "0.5"
-    }
+    // Were using mark-vieira/gradle-maven-settings-plugin but due to
+    // https://github.com/mark-vieira/gradle-maven-settings-plugin/issues/29 it doesn't work with Gradle >= 8.2
+    // We really only need minimal code from it anyway
+    id("io.github.rmanibus.maven-settings") version "0.8" apply false
 
     when {
         org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.0") -> {
@@ -51,13 +54,16 @@ plugins {
             id("com.adarshr.test-logger") version "3.2.0"
             id("com.github.johnrengelman.shadow") version "7.1.2"
         }
-        org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.4") -> {
+        org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.3") -> {
             id("com.adarshr.test-logger") version "3.2.0"
             id("com.github.johnrengelman.shadow") version "8.1.1"
         }
+        // When running with release enabled we were encountering https://github.com/GradleUp/shadow/issues/875
+        // so have switched to using 8.3.9 instead of 8.3.6
         else -> {
             id("com.adarshr.test-logger") version "3.2.0"
-            id("com.gradleup.shadow") version "8.3.6"
+            id("com.gradleup.shadow") version "8.3.9"
+            id("com.gradleup.nmcp.aggregation") version "1.0.3" apply false
         }
     }
 
@@ -87,6 +93,7 @@ plugins {
         id("org.kordamp.gradle.jacoco") version "0.46.0"
     }
 }
+
 
 // XXX: Jacoco plugin only supports Gradle >= 5.3 ; create empty task on those Gradle versions so that build does not fail
 if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.3")) {
@@ -186,7 +193,7 @@ tasks.getByName("checkoutMergeFromReleaseBranch") {
 }
 
 allprojects {
-    extra["gradleReleaseVersion"] = "6.8.3"
+    extra["gradleReleaseVersion"] = "8.3"
 
     repositories {
         mavenCentral()
@@ -204,10 +211,42 @@ allprojects {
     apply(plugin = "idea")
 }
 
+
 val isReleaseBuild = ("true" == System.getProperty("release", ""))
 if (isReleaseBuild && GradleVersion.current().version != "${project.extra.get("gradleReleaseVersion")}") {
+    logger.info ("Running as release build")
     throw GradleException("Gradle ${project.extra.get("gradleReleaseVersion")} is required to release this project")
+} else if (isReleaseBuild) {
+    logger.info ("Running as release build")
 }
+
+if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("8.3")) {
+    // LinkageError: loader constraint violation from GMEFunctionalTest otherwise
+    if (System.getProperty("gmeFunctionalTest") == null) {
+        val mavenExtension =
+            project.extensions.create(MAVEN_SETTINGS_EXTENSION_NAME, MavenSettingsPluginExtension::class, project)
+        // Previously was encoding the repository name into repositories that were attached to the
+        // publications. As those aren't needed now due to Central portal upload changes, just
+        // hardcode the name here. This should match the name in $HOME/.m2/settings.xml
+        loadSettings(mavenExtension, "central")
+        // We have to delay applying the plugin and load the extension configuration from a groovy file as:
+        // 1. We can't use the plugin on other JDK/Gradle combinations
+        // 2. We can't use Kotlin types in external files (https://github.com/gradle/gradle/issues/30878) and we
+        //    don't want them eagerly precompiled anyway.
+        apply(plugin = "com.gradleup.nmcp.aggregation")
+        apply {
+            from("$rootDir/gradle/nmcp.gradle")
+        }
+        project.rootProject.tasks.register("publishToCentral") {
+            if (project.version.toString().endsWith("-SNAPSHOT")) {
+                dependsOn("publishAggregationToCentralPortalSnapshots")
+            } else {
+                dependsOn("publishAggregationToCentralPortal")
+            }
+        }
+    }
+}
+
 
 subprojects {
     extra["assertjVersion"] = "3.19.0"
@@ -281,9 +320,6 @@ subprojects {
 
     apply(plugin = "signing")
     apply(plugin = "maven-publish")
-    if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.0")) {
-        apply(plugin = "net.linguica.maven-settings")
-    }
 
     val sourcesJar by tasks.registering(Jar::class) {
         archiveClassifier.set("sources")
@@ -354,7 +390,7 @@ subprojects {
          * Another great source of information is the configuration of the shadow plugin itself:
          * https://github.com/johnrengelman/shadow/blob/main/build.gradle
          */
-        if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.4")) {
+        if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.3")) {
             apply(plugin = "com.github.johnrengelman.shadow")
         } else {
             apply(plugin = "com.gradleup.shadow")
@@ -425,8 +461,6 @@ subprojects {
                     generatePom()
                 }
             }
-
-            generateRepositories(this, isReleaseBuild)
         }
 
         if (isReleaseBuild) {
@@ -446,7 +480,6 @@ subprojects {
                     generatePom()
                 }
             }
-            generateRepositories(this, isReleaseBuild)
         }
 
         if (isReleaseBuild) {
@@ -513,22 +546,6 @@ subprojects {
     }
 }
 
-fun generateRepositories(publishingExtension: PublishingExtension, isReleaseBuild: Boolean) {
-    publishingExtension.repositories {
-        if (isReleaseBuild) {
-            maven {
-                name = "sonatype-nexus-staging"
-                url = project.uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
-            }
-        } else {
-            maven {
-                name = "sonatype-nexus-snapshots"
-                url = project.uri("https://oss.sonatype.org/content/repositories/snapshots")
-            }
-        }
-    }
-}
-
 fun MavenPublication.generatePom() {
     pom {
         name.set("Gradle Manipulation Extension")
@@ -581,4 +598,28 @@ fun MavenPublication.generatePom() {
             url.set("https://github.com/project-ncl/gradle-manipulator")
         }
     }
+}
+
+fun loadSettings(extension: MavenSettingsPluginExtension, repository: String) {
+    val settingsLoader = LocalMavenSettingsLoader(extension)
+    try {
+        val settings = settingsLoader.loadSettings()
+        for (server in settings.servers) {
+            logger.debug("Settings parser examining server {}", server.id)
+            if (repository == server.id) {
+                if (server.username != null && server.password != null) {
+                    logger.info("Found valid credentials for publishing")
+                    // As the nmcp configuration has been moved to a separate groovy file
+                    // instead of returning a Pair<String,String> store the values in the ext.
+                    project.ext.set("central_username", server.username)
+                    project.ext.set("central_password", server.password)
+                }
+                break
+            }
+        }
+    } catch (e : SettingsBuildingException) {
+        throw GradleScriptException("Unable to read local Maven settings.", e)
+    }
+    project.ext.set("central_username", "")
+    project.ext.set("central_password", "")
 }

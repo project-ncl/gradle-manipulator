@@ -1,0 +1,13 @@
+// Configuration for https://github.com/GradleUp/nmcp
+
+nmcpAggregation {
+    centralPortal {
+        // publish manually from the portal
+        publishingType = "USER_MANAGED"
+        username = "$rootProject.ext.central_username"
+        password = "$rootProject.ext.central_password"
+    }
+
+    // Publish all projects that apply the 'maven-publish' plugin
+    publishAllProjectsProbablyBreakingProjectIsolation()
+}

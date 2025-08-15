@@ -76,3 +76,7 @@ tasks.getByName("test") {
 tasks.getByName("publishShadowPublicationToMavenLocal") {
     dependsOn("shadowJar")
 }
+
+tasks.getByName("generateMetadataFileForShadowPublication") {
+    dependsOn("jar")
+}

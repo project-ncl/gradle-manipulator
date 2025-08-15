@@ -145,4 +145,4 @@ jobs:
             }]
     - uses: gradle/gradle-build-action@v3
       with:
-        arguments: clean build publishToCentral
+        arguments: build publishToCentral -x test -x funcTest

@@ -164,7 +164,7 @@ tasks.getByName("check") {
     dependsOn(functionalTest)
 }
 
-tasks.whenTaskAdded {
+tasks.configureEach {
     if (name == "publishPluginJar") {
         dependsOn("spotlessJava")
     }
@@ -184,4 +184,8 @@ tasks.getByName("functionalTest") {
 
 tasks.getByName("publishShadowPublicationToMavenLocal") {
     dependsOn("publishPluginJavaDocsJar", "publishPluginJar")
+}
+
+tasks.getByName("generateMetadataFileForShadowPublication") {
+    dependsOn("jar")
 }

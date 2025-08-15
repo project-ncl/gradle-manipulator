@@ -185,3 +185,11 @@ tasks.getByName("functionalTest") {
 tasks.getByName("publishShadowPublicationToMavenLocal") {
     dependsOn("publishPluginJavaDocsJar", "publishPluginJar")
 }
+
+tasks.getByName("generateMetadataFileForShadowPublication") {
+    dependsOn("jar", "shadowJar")
+}
+
+tasks.getByName("publishShadowPublicationToNmcpRepository") {
+    dependsOn("publishPluginJavaDocsJar", "publishPluginJar")
+}

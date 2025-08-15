@@ -613,8 +613,8 @@ fun loadSettings(extension: MavenSettingsPluginExtension, repository: String) {
                     // instead of returning a Pair<String,String> store the values in the ext.
                     project.ext.set("central_username", server.username)
                     project.ext.set("central_password", server.password)
+                    return
                 }
-                break
             }
         }
     } catch (e : SettingsBuildingException) {

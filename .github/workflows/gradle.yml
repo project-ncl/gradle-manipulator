@@ -145,4 +145,4 @@ jobs:
             }]
     - uses: gradle/gradle-build-action@v3
       with:
-        arguments: clean build publish AggregateJacocoReport
+        arguments: clean build publishToCentral

@@ -41,17 +41,17 @@ import org.jboss.gm.common.io.ManipulationIO;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -359,7 +359,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                         "\tDependencies : com.yammer.metrics:metrics-core:2.2.0 --> com.yammer.metrics:metrics-core:2.2.0-redhat-00001%n"
                         +
                         "%n");
-        assertThat(systemOutRule.getLog()).contains(expectedTextString);
+        assertThat(systemOutRule.getLinesNormalized()).contains(expectedTextString);
     }
 
     @Test
@@ -450,7 +450,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                         "\tDependencies : com.yammer.metrics:metrics-core:2.2.0 --> com.yammer.metrics:metrics-core:2.2.0-redhat-00001%n"
                         +
                         "%n");
-        assertThat(systemOutRule.getLog()).contains(expectedTextString);
+        assertThat(systemOutRule.getLinesNormalized()).contains(expectedTextString);
     }
 
     @Test
@@ -493,7 +493,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                         +
                         "%n");
         assertThat(textString).isEqualTo(expectedTextString);
-        assertThat(systemOutRule.getLog()).contains(expectedTextString);
+        assertThat(systemOutRule.getLinesNormalized()).contains(expectedTextString);
     }
 
     @Test
@@ -539,7 +539,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                         "\tNon-Aligned Dependencies : junit:junit:4.12%n" +
                         "%n");
         assertThat(textString).isEqualTo(expectedTextString);
-        assertThat(systemOutRule.getLog()).contains(expectedTextString);
+        assertThat(systemOutRule.getLinesNormalized()).contains(expectedTextString);
     }
 
     @Test

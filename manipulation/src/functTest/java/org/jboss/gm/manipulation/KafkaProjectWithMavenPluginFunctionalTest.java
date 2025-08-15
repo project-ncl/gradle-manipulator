@@ -17,10 +17,10 @@ import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.util.GradleVersion;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class KafkaProjectWithMavenPluginFunctionalTest {
 
@@ -28,13 +28,13 @@ public class KafkaProjectWithMavenPluginFunctionalTest {
     private static final Path PATH_IN_REPOSITORY = Paths.get("org/apache/kafka/connect-runtime/2.6.0.redhat-00001/");
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
-
-    @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Test
     public void verifyProjectNamingOverrides() throws IOException, URISyntaxException {
@@ -63,14 +63,14 @@ public class KafkaProjectWithMavenPluginFunctionalTest {
         Path pathToArtifacts = publishDirectory.toPath().resolve(PATH_IN_REPOSITORY);
         File repoPathToPom = pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile();
         assertTrue(
-                systemOutRule.getLog()
+                systemOutRule.getLinesNormalized()
                         .contains(
                                 "Located archivesBaseName override ; forcing project name to 'connect-runtime' from 'runtime' for correct usage"));
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
         assertThat(FileUtils.readFileToString(repoPathToPom, Charset.defaultCharset()))
                 .contains("artifactId>connect-transforms");
-        assertTrue(systemOutRule.getLog().contains("Found signing plugin; disabling"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Found signing plugin; disabling"));
     }
 
     @Test
@@ -122,7 +122,7 @@ public class KafkaProjectWithMavenPluginFunctionalTest {
                     .isEqualTo(0);
         }
         assertTrue(
-                systemOutRule.getLog()
+                systemOutRule.getLinesNormalized()
                         .contains(
                                 "Replacing force override of org.javassist:javassist:3.27.0-GA "
                                         + "with org.javassist:javassist:3.27.0.GA-redhat-00001"));

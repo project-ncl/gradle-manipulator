@@ -28,11 +28,11 @@ import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemErrRule;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runners.MethodSorters;
+import uk.org.webcompere.systemstubs.rules.SystemErrRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DifferentJVMTest {
@@ -41,13 +41,13 @@ public class DifferentJVMTest {
     public final LoggingRule loggingRule = new LoggingRule(LogLevel.DEBUG);
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final SystemErrRule systemErrRule = new SystemErrRule().enableLog().muteForSuccessfulTests();
+    public final SystemErrRule systemErrRule = new SystemErrRule();
 
     @Rule
-    public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemPropertiesRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -144,8 +144,8 @@ public class DifferentJVMTest {
         m.run(args);
 
         File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), AlignmentTask.GME);
-        assertTrue(systemOutRule.getLog().contains("Task :generateAlignmentMetadata"));
-        assertTrue(systemOutRule.getLog().matches("(?s).*Environment:.*JAVA_HOME=.*"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Task :generateAlignmentMetadata"));
+        assertTrue(systemOutRule.getLinesNormalized().matches("(?s).*Environment:.*JAVA_HOME=.*"));
 
         System.out.println(
                 "Verifying it has injected " + AlignmentTask.GME + " with version "
@@ -212,10 +212,10 @@ public class DifferentJVMTest {
         };
         m.run(args);
 
-        assertTrue(systemOutRule.getLog().contains("Java home: "));
-        assertTrue(systemOutRule.getLog().contains("Java home overridden to: " + JDK8_DIR));
-        assertTrue(systemOutRule.getLog().contains("Task :generateAlignmentMetadata"));
-        assertTrue(systemOutRule.getLog().matches("(?s).*Environment:.*JAVA_HOME=.*jdk8.*"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Java home: "));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Java home overridden to: " + JDK8_DIR));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Task :generateAlignmentMetadata"));
+        assertTrue(systemOutRule.getLinesNormalized().matches("(?s).*Environment:.*JAVA_HOME=.*jdk8.*"));
 
         File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), AlignmentTask.GME);
         System.out.println(
@@ -288,16 +288,16 @@ public class DifferentJVMTest {
         assumeTrue(v.compareTo(GradleVersion.version("5.3.1")) != 0);
 
         if (v.compareTo(GradleVersion.version("5.4.1")) >= 0) {
-            assertThat(systemErrRule.getLog()).contains(
+            assertThat(systemErrRule.getLinesNormalized()).contains(
                     "Task 'FOOgenerateAlignmentMetadataBAR' not found in root "
                             + "project");
         } else {
-            assertThat(systemOutRule.getLog()).contains(
+            assertThat(systemOutRule.getLinesNormalized()).contains(
                     "Task 'FOOgenerateAlignmentMetadataBAR' not found in root "
                             + "project");
         }
 
-        assertThat(systemErrRule.getLog()).contains("Build exception. Examine log for problems");
-        assertThat(systemOutRule.getLog()).contains("Java home overridden to: " + JDK8_DIR);
+        assertThat(systemErrRule.getLinesNormalized()).contains("Build exception. Examine log for problems");
+        assertThat(systemOutRule.getLinesNormalized()).contains("Java home overridden to: " + JDK8_DIR);
     }
 }

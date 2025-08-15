@@ -27,18 +27,18 @@ import org.jboss.gm.common.Configuration;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractWiremockTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -107,9 +107,9 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
                 .singleElement()
                 .contains("2.0.15.Final-redhat-00001");
         assertTrue(lines.stream().anyMatch(s -> s.contains("CustomVersion( '1.0.1.redhat-00002', project )")));
-        assertTrue(systemOutRule.getLog().contains("Attempting to read URL"));
-        assertTrue(systemOutRule.getLog().contains("found new version is 1.0.1.redhat-00002"));
-        assertTrue(systemOutRule.getLog().contains("original version is 1.0.1" + System.lineSeparator()));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Attempting to read URL"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("found new version is 1.0.1.redhat-00002"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("original version is 1.0.1" + System.lineSeparator()));
         assertThat(FileUtils.readFileToString(new File(projectRoot, "build.gradle"), Charset.defaultCharset()))
                 .contains("classpath \"org.hibernate:hibernate-core:5.3.7.Final-redhat-00001")
                 .contains(
@@ -121,6 +121,6 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
         assertThat(FileUtils.readFileToString(new File(projectRoot, "settings.gradle"), Charset.defaultCharset()))
                 .doesNotContain("x-pack")
                 .contains("another-pack");
-        assertTrue(systemOutRule.getLog().contains("Retrieved"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Retrieved"));
     }
 }

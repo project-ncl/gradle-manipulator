@@ -18,10 +18,10 @@ import org.gradle.util.GradleVersion;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 @Ignore
 public class ElasticSearchProjectFunctionalTest {
@@ -31,13 +31,13 @@ public class ElasticSearchProjectFunctionalTest {
             .get("org/elasticsearch/plugin/transport-netty4-client/6.8.6.temporary-redhat-00001/");
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
-
-    @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Test
     public void ensurePublishWithNestedPlugin() throws IOException, URISyntaxException {
@@ -75,11 +75,14 @@ public class ElasticSearchProjectFunctionalTest {
                         pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile(),
                         Charset.defaultCharset()))
                 .contains("transport-netty4-client");
-        assertTrue(systemOutRule.getLog().contains("Detected application of plugin hook"));
-        assertTrue(systemOutRule.getLog().contains("Removing publishing repository test"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Detected application of plugin hook"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Removing publishing repository test"));
         assertTrue(
-                systemOutRule.getLog().contains("Disabling publishing task publishNebulaPublicationToTestRepository"));
-        assertTrue(systemOutRule.getLog().contains("publication has been added but the POM file generation disabled"));
+                systemOutRule.getLinesNormalized()
+                        .contains("Disabling publishing task publishNebulaPublicationToTestRepository"));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains("publication has been added but the POM file generation disabled"));
     }
 
     @Test
@@ -116,6 +119,6 @@ public class ElasticSearchProjectFunctionalTest {
         Path pathToArtifacts = publishDirectory.toPath().resolve(PATH_IN_REPOSITORY);
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).doesNotExist();
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).doesNotExist();
-        assertFalse(systemOutRule.getLog().contains("Detected application of plugin hook"));
+        assertFalse(systemOutRule.getLinesNormalized().contains("Detected application of plugin hook"));
     }
 }

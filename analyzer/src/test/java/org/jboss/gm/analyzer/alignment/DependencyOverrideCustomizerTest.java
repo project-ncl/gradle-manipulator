@@ -16,9 +16,9 @@ import org.jboss.gm.common.Configuration;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class DependencyOverrideCustomizerTest {
 
@@ -30,7 +30,7 @@ public class DependencyOverrideCustomizerTest {
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     private Project project;
 

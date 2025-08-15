@@ -21,8 +21,8 @@ import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
 
 public class LockFileIOTest {
 
@@ -35,7 +35,7 @@ public class LockFileIOTest {
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Test
     public void readNonExistingFileShouldReturnEmptySet()
@@ -109,7 +109,7 @@ public class LockFileIOTest {
                 f -> f.contains(
                         "2.1.10.redhat-00001=compileClasspath,runtimeClasspath"));
 
-        assertThat(systemOutRule.getLog()).contains(
+        assertThat(systemOutRule.getLinesNormalized()).contains(
                 "Found lock file element 'org.apache.commons:commons-lang3:3"
                         + ".8' to be replaced by org.apache.commons:commons-lang3:3.8.redhat-00001");
 

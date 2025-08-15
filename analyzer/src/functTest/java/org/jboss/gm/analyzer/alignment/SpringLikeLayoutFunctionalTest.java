@@ -30,18 +30,18 @@ import org.jboss.gm.common.utils.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -129,12 +129,12 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
         File pluginConfigs = new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS);
         String pContents = org.apache.commons.io.FileUtils.readFileToString(pluginConfigs, Charset.defaultCharset());
-        assertTrue(systemOutRule.getLog().contains("Replacing Dokka template for version MINIMUM"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Replacing Dokka template for version MINIMUM"));
         assertTrue(pContents.contains("noJdkLink = true"));
 
         File settings = new File(projectRoot, "settings.gradle");
         String sContents = org.apache.commons.io.FileUtils.readFileToString(settings, Charset.defaultCharset());
-        assertTrue(systemOutRule.getLog().contains("with Dokka resolutionStrategy information"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("with Dokka resolutionStrategy information"));
         assertTrue(sContents.contains("pluginManagement { resolutionStrategy { eachPlugin { if (requested.id.id =="));
     }
 
@@ -199,7 +199,7 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
 
         File pluginConfigs = new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS);
         String pContents = org.apache.commons.io.FileUtils.readFileToString(pluginConfigs, Charset.defaultCharset());
-        assertFalse(systemOutRule.getLog().contains("Replacing Dokka template for version MINIMUM"));
+        assertFalse(systemOutRule.getLinesNormalized().contains("Replacing Dokka template for version MINIMUM"));
         assertFalse(pContents.contains("noJdkLink = true"));
 
         File settings = new File(projectRoot, "settings.gradle");

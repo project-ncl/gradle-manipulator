@@ -14,21 +14,21 @@ import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.util.GradleVersion;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class CarrotSearchHPPCFunctionalTest {
-
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();//.muteForSuccessfulTests();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Test
     public void testHPPC() throws IOException, URISyntaxException, GitAPIException {
@@ -65,6 +65,6 @@ public class CarrotSearchHPPCFunctionalTest {
                         publishDirectory,
                         "com/carrotsearch/hppc/0.10.0.redhat-00002/hppc-0.10.0.redhat-00002.jar"))
                 .exists();
-        assertThat(systemOutRule.getLog()).contains("Found signing plugin; disabling");
+        assertThat(systemOutRule.getLinesNormalized()).contains("Found signing plugin; disabling");
     }
 }

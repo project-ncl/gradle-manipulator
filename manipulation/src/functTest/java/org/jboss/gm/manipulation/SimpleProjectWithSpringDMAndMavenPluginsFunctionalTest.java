@@ -17,21 +17,21 @@ import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class SimpleProjectWithSpringDMAndMavenPluginsFunctionalTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Test
     public void ensureProperPomGenerated() throws IOException, URISyntaxException, XmlPullParserException {
@@ -65,7 +65,7 @@ public class SimpleProjectWithSpringDMAndMavenPluginsFunctionalTest {
                 "org/acme/root/1.0.1-redhat-00001/root-1.0.1-redhat-00001.pom",
                 true);
         final ManipulationModel module = modelAndModule.getRight();
-        assertThat(systemOutRule.getLog())
+        assertThat(systemOutRule.getLinesNormalized())
                 .contains(
                         "Unable to find uploadArchives parameter in tasks [install] for Legacy Maven Plugin for project root");
         assertThat(module).isNotNull();

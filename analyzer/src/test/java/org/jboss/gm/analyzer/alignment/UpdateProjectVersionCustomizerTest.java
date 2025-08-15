@@ -17,10 +17,10 @@ import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class UpdateProjectVersionCustomizerTest {
 
@@ -28,10 +28,10 @@ public class UpdateProjectVersionCustomizerTest {
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Test
     public void testVersionModificationDisabled() throws IOException, ManipulationException {

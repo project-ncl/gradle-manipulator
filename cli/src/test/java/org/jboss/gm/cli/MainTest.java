@@ -32,11 +32,11 @@ import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemErrRule;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
+import uk.org.webcompere.systemstubs.rules.EnvironmentVariablesRule;
+import uk.org.webcompere.systemstubs.rules.SystemErrRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class MainTest {
 
@@ -44,19 +44,19 @@ public class MainTest {
     public final LoggingRule loggingRule = new LoggingRule(LogLevel.DEBUG);
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final SystemErrRule systemErrRule = new SystemErrRule().enableLog().muteForSuccessfulTests();
+    public final SystemErrRule systemErrRule = new SystemErrRule();
 
     @Rule
-    public final RestoreSystemProperties restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemPropertiesRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
+    public final EnvironmentVariablesRule environmentVariables = new EnvironmentVariablesRule();
 
     private static String escapeBackslashes(String dir) {
         if (SystemUtils.IS_OS_WINDOWS) {
@@ -100,9 +100,9 @@ public class MainTest {
         String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "help" };
         m.run(args);
 
-        assertFalse(systemOutRule.getLog().contains("loggingColours=false"));
-        assertTrue(systemOutRule.getLog().contains("Welcome to Gradle"));
-        assertTrue(systemOutRule.getLog().contains(ANSIConstants.ESC_START));
+        assertFalse(systemOutRule.getLinesNormalized().contains("loggingColours=false"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Welcome to Gradle"));
+        assertTrue(systemOutRule.getLinesNormalized().contains(ANSIConstants.ESC_START));
     }
 
     @Test
@@ -115,9 +115,9 @@ public class MainTest {
         String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "help" };
         m.run(args);
 
-        assertTrue(systemOutRule.getLog().contains("loggingColours=false"));
-        assertTrue(systemOutRule.getLog().contains("Welcome to Gradle"));
-        assertFalse(systemOutRule.getLog().contains(ANSIConstants.ESC_START));
+        assertTrue(systemOutRule.getLinesNormalized().contains("loggingColours=false"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Welcome to Gradle"));
+        assertFalse(systemOutRule.getLinesNormalized().contains(ANSIConstants.ESC_START));
     }
 
     @Test
@@ -138,7 +138,7 @@ public class MainTest {
                 "-DgroovyScripts=https://www.foo.com/tmp/fake-file" };
         m.run(args);
 
-        assertTrue(systemOutRule.getLog().contains("Welcome to Gradle"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Welcome to Gradle"));
     }
 
     @Test
@@ -157,17 +157,19 @@ public class MainTest {
                 "-DgroovyScripts=" + groovy };
         m.run(args);
 
-        int start = systemOutRule.getLog().indexOf("JVM arguments: [") + 16;
-        int end = systemOutRule.getLog().indexOf(",", start);
-        String jvmArgs = systemOutRule.getLog().substring(start, end);
-        assertTrue(StringUtils.indexOf(systemOutRule.getLog(), jvmArgs, end) > 0);
-        assertTrue(systemOutRule.getLog().contains("Running Groovy script on"));
-        assertTrue(systemOutRule.getLog().contains("dependencyOverride.org.jboss.slf4j:*@*="));
-        assertTrue(systemOutRule.getLog().contains("with JVM args '[-DdependencyOverride.org.jboss.slf4j:*@*="));
-        assertFalse(systemOutRule.getLog().contains(", DdependencyOverride.org.jboss.slf4j:*@*="));
-        assertTrue(systemOutRule.getLog().contains("groovyScripts="));
-        assertTrue(systemOutRule.getLog().contains("Verification tasks"));
-        assertTrue(systemOutRule.getLog().contains("Executor org.zeroturnaround.exec.ProcessExecutor"));
+        int start = systemOutRule.getLinesNormalized().indexOf("JVM arguments: [") + 16;
+        int end = systemOutRule.getLinesNormalized().indexOf(",", start);
+        String jvmArgs = systemOutRule.getLinesNormalized().substring(start, end);
+        assertTrue(StringUtils.indexOf(systemOutRule.getLinesNormalized(), jvmArgs, end) > 0);
+        assertTrue(systemOutRule.getLinesNormalized().contains("Running Groovy script on"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("dependencyOverride.org.jboss.slf4j:*@*="));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains("with JVM args '[-DdependencyOverride.org.jboss.slf4j:*@*="));
+        assertFalse(systemOutRule.getLinesNormalized().contains(", DdependencyOverride.org.jboss.slf4j:*@*="));
+        assertTrue(systemOutRule.getLinesNormalized().contains("groovyScripts="));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Verification tasks"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Executor org.zeroturnaround.exec.ProcessExecutor"));
     }
 
     @Test
@@ -188,9 +190,9 @@ public class MainTest {
                 "-Dmanipulation.disable=true" };
         m.run(args);
 
-        assertTrue(systemOutRule.getLog().contains("Running Groovy script on"));
-        assertFalse(systemOutRule.getLog().contains("Verification tasks"));
-        assertTrue(systemOutRule.getLog().contains("Gradle Manipulator disabled"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Running Groovy script on"));
+        assertFalse(systemOutRule.getLinesNormalized().contains("Verification tasks"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Gradle Manipulator disabled"));
     }
 
     @Test
@@ -250,7 +252,7 @@ public class MainTest {
         assertEquals(0, result);
 
         File gmeGradle = new File(projectRoot.getParentFile().getAbsolutePath(), AlignmentTask.GME);
-        assertTrue(systemOutRule.getLog().contains("Task :generateAlignmentMetadata"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Task :generateAlignmentMetadata"));
 
         System.err.println(
                 "Verifying it has injected " + AlignmentTask.GME + " with version "
@@ -259,8 +261,8 @@ public class MainTest {
         assertTrue(
                 FileUtils.readFileToString(gmeGradle, Charset.defaultCharset())
                         .contains("org.jboss.gm:manipulation:" + actualVersion.getProperty("version")));
-        assertTrue(systemOutRule.getLog().contains(ANSIConstants.ESC_START));
-        assertTrue(systemOutRule.getLog().contains("Executor org.zeroturnaround.exec.ProcessExecutor"));
+        assertTrue(systemOutRule.getLinesNormalized().contains(ANSIConstants.ESC_START));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Executor org.zeroturnaround.exec.ProcessExecutor"));
     }
 
     @Test
@@ -317,13 +319,13 @@ public class MainTest {
                             + "work");
         }
 
-        assertThat(systemErrRule.getLog()).doesNotContain(ANSIConstants.ESC_START);
+        assertThat(systemErrRule.getLinesNormalized()).doesNotContain(ANSIConstants.ESC_START);
 
         if (GradleVersion.current().compareTo(GradleVersion.version("5.4.1")) >= 0) {
-            assertThat(systemErrRule.getLog()).contains(
+            assertThat(systemErrRule.getLinesNormalized()).contains(
                     "'" + Configuration.DA + "' must be configured in order for dependency scanning to work");
         } else {
-            assertThat(systemOutRule.getLog()).contains(
+            assertThat(systemOutRule.getLinesNormalized()).contains(
                     "'" + Configuration.DA + "' must be configured in order for dependency scanning to work");
         }
     }
@@ -342,7 +344,7 @@ public class MainTest {
                 "getGitVersion" };
         m.run(args);
 
-        assertTrue(systemOutRule.getLog().contains("Process 'command 'git'' finished with exit value"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Process 'command 'git'' finished with exit value"));
     }
 
     @Test
@@ -362,11 +364,13 @@ public class MainTest {
                 "-DgroovyScripts=" + groovy };
         m.run(args);
 
-        assertTrue(systemOutRule.getLog().contains("Running Groovy script on"));
-        assertTrue(systemOutRule.getLog().contains("dependencyOverride.org.jboss.slf4j:*@*="));
-        assertTrue(systemOutRule.getLog().contains("with JVM args '[-DdependencyOverride.org.jboss.slf4j:*@*="));
-        assertFalse(systemOutRule.getLog().contains(", DdependencyOverride.org.jboss.slf4j:*@*="));
-        assertTrue(systemOutRule.getLog().contains("groovyScripts="));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Running Groovy script on"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("dependencyOverride.org.jboss.slf4j:*@*="));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains("with JVM args '[-DdependencyOverride.org.jboss.slf4j:*@*="));
+        assertFalse(systemOutRule.getLinesNormalized().contains(", DdependencyOverride.org.jboss.slf4j:*@*="));
+        assertTrue(systemOutRule.getLinesNormalized().contains("groovyScripts="));
     }
 
     @Test
@@ -402,9 +406,9 @@ public class MainTest {
         String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().getAbsolutePath(), "help" };
         m.run(args);
 
-        assertThat(systemOutRule.getLog()).contains("LETTERS");
+        assertThat(systemOutRule.getLinesNormalized()).contains("LETTERS");
         // Should be the last in the JVM arg list.
-        assertThat(systemOutRule.getLog()).contains(" -Xmx260m]");
+        assertThat(systemOutRule.getLinesNormalized()).contains(" -Xmx260m]");
     }
 
     @Test
@@ -413,7 +417,7 @@ public class MainTest {
         Main m = new Main();
         String[] args = new String[] { "-d", "-t", projectRoot.getParentFile().toString(), "help" };
         m.run(args);
-        assertTrue(systemOutRule.getLog().contains("Found gradle-consistent-versions lock file"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Found gradle-consistent-versions lock file"));
         File lockFile = new File(projectRoot.getParentFile(), "versions.lock");
         assertEquals(0, lockFile.length());
     }

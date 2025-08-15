@@ -38,17 +38,17 @@ import org.jboss.gm.common.utils.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class WarFunctionalTest extends AbstractWiremockTest {
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -128,7 +128,8 @@ public class WarFunctionalTest extends AbstractWiremockTest {
         assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot.toFile()));
         assertThat(FileUtils.getLastLine(projectRoot.resolve(Project.DEFAULT_BUILD_FILE).toFile()))
                 .isEqualTo(AlignmentTask.INJECT_GME_END);
-        assertThat(systemOutRule.getLog()).contains("Passing 1 GAVs into the REST client api [" + GAV + "]");
+        assertThat(systemOutRule.getLinesNormalized())
+                .contains("Passing 1 GAVs into the REST client api [" + GAV + "]");
         assertThat(alignmentModel).isNotNull();
         assertThat(alignmentModel.getAlignedDependencies()).containsExactlyEntriesOf(DEPENDENCIES);
 

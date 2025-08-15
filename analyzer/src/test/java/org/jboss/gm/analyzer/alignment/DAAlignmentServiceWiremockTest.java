@@ -31,14 +31,14 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 @RunWith(Parameterized.class)
 public class DAAlignmentServiceWiremockTest {
@@ -46,7 +46,7 @@ public class DAAlignmentServiceWiremockTest {
     private static final int PORT = 8089;
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @ClassRule
     public static WireMockClassRule wireMockRule = new WireMockClassRule(PORT);
@@ -58,7 +58,7 @@ public class DAAlignmentServiceWiremockTest {
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
     public final LoggingRule loggingRule = new LoggingRule(LogLevel.INFO);
@@ -124,7 +124,7 @@ public class DAAlignmentServiceWiremockTest {
                 assertThat(r.getAlignedVersionOfGav(project, undertowGav)).isEqualTo("2.0.15.Final-redhat-00001");
                 assertThat(r.getAlignedVersionOfGav(project, mockitoGav)).isNull();
             } else {
-                assertThat(systemOutRule.getLog()).contains(
+                assertThat(systemOutRule.getLinesNormalized()).contains(
                         "No dependencySource configured ; unable pass GAVs into endpoint");
             }
         });

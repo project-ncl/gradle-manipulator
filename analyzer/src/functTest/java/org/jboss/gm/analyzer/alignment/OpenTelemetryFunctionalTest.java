@@ -33,20 +33,20 @@ import org.jboss.gm.common.utils.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 @RunWith(JUnitParamsRunner.class)
 public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -178,8 +178,9 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         });
 
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
-        assertThat(systemOutRule.getLog()).contains("io.opentelemetry:opentelemetry-exporter-jaeger:0.17.0");
-        assertThat(systemOutRule.getLog()).contains("io.opentelemetry:bom:0.17.0");
+        assertThat(systemOutRule.getLinesNormalized())
+                .contains("io.opentelemetry:opentelemetry-exporter-jaeger:0.17.0");
+        assertThat(systemOutRule.getLinesNormalized()).contains("io.opentelemetry:bom:0.17.0");
     }
 
     @Test
@@ -231,7 +232,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         });
 
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
-        assertThat(systemOutRule.getLog()).contains(
+        assertThat(systemOutRule.getLinesNormalized()).contains(
                 "Found archivesBaseName override ; resetting project name "
                         + "'benchmark-overhead-jmh' to 'opentelemetry-benchmark-overhead-jmh'");
     }
@@ -302,6 +303,6 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
         });
 
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
-        assertThat(systemOutRule.getLog()).contains("io.opentelemetry:bom:1.44.1");
+        assertThat(systemOutRule.getLinesNormalized()).contains("io.opentelemetry:bom:1.44.1");
     }
 }

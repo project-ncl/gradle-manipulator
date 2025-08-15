@@ -233,7 +233,7 @@ subprojects {
     extra["ownerVersion"] = "1.0.12"
     extra["pmeVersion"] = "4.17"
     extra["slf4jVersion"] = "2.0.13"
-    extra["systemRulesVersion"] = "1.19.0"
+    extra["systemStubsVersion"] = "2.1.8"
 
     if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.4")) {
         apply(plugin = "com.diffplug.gradle.spotless")
@@ -467,6 +467,8 @@ subprojects {
         slowThreshold = 120000
         // Nicer looking theme than default.
         theme = ThemeType.MOCHA
+        showPassedStandardStreams = false
+        showSkippedStandardStreams = false
     }
 
 

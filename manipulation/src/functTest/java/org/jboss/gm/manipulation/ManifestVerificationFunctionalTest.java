@@ -25,10 +25,10 @@ import org.gradle.util.GradleVersion;
 import org.jboss.gm.common.logging.GMLogger;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class ManifestVerificationFunctionalTest {
     private static final Logger logger = GMLogger.getLogger(ManifestVerificationFunctionalTest.class);
@@ -37,13 +37,13 @@ public class ManifestVerificationFunctionalTest {
     private static final Path PATH_IN_REPOSITORY = Paths.get("org/mongodb/mongodb-driver-core/" + ARTIFACT_VERSION);
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
-
-    @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Test
     public void verifyThriftManifest() throws IOException, URISyntaxException {
@@ -121,10 +121,10 @@ public class ManifestVerificationFunctionalTest {
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
 
-        assertThat(systemOutRule.getLog())
+        assertThat(systemOutRule.getLinesNormalized())
                 .contains(
                         "For project libthrift, task jar, updating Export-Package version 0.13.0-SNAPSHOT to 0.13.0.temporary-redhat-00001 (old version 0.13.0-SNAPSHOT)");
-        assertTrue(systemOutRule.getLog().contains("Found signing plugin; disabling"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Found signing plugin; disabling"));
     }
 
     @Test
@@ -225,7 +225,7 @@ public class ManifestVerificationFunctionalTest {
 
         Path pathToArtifacts = publishDirectory.toPath().resolve(PATH_IN_REPOSITORY);
         assertTrue(
-                systemOutRule.getLog()
+                systemOutRule.getLinesNormalized()
                         .contains(
                                 "Updating publication artifactId (driver-core) as it is not consistent with archivesBaseName (mongodb-driver-core)"));
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
@@ -287,7 +287,7 @@ public class ManifestVerificationFunctionalTest {
                 .isEqualTo(TaskOutcome.SUCCESS);
 
         final Path pathToArtifacts = publishDirectory.toPath().resolve(PATH_IN_REPOSITORY);
-        assertThat(systemOutRule.getLog()).contains(
+        assertThat(systemOutRule.getLinesNormalized()).contains(
                 "Updating publication artifactId (driver-core) as it is not consistent with archivesBaseName (mongodb-driver-core)");
 
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
@@ -329,7 +329,7 @@ public class ManifestVerificationFunctionalTest {
                     "Specification-Version: " + ARTIFACT_VERSION);
         }
 
-        assertThat(systemOutRule.getLog())
+        assertThat(systemOutRule.getLinesNormalized())
                 .contains(
                         "For project driver-core, task jar, not overriding value Implementation-Version since version ("
                                 + ARTIFACT_VERSION + ") has not changed")
@@ -388,7 +388,7 @@ public class ManifestVerificationFunctionalTest {
                             + "Implementation-Vendor-Id: org.ow2.asm\n"
                             + "Implementation-Vendor: org.ow2.asm\n"
                             + "Implementation-Version: 9.5.0.redhat-00001\n");
-            assertThat(systemOutRule.getLog())
+            assertThat(systemOutRule.getLinesNormalized())
                     .contains(
                             "For project asm, task jar, not updating Export-Package since version (9.5.0.redhat-00001) has not changed");
         }

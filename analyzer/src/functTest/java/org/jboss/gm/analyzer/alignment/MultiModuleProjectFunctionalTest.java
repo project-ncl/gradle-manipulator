@@ -42,18 +42,18 @@ import org.jboss.gm.common.utils.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -140,7 +140,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
             });
         });
 
-        assertThat(systemOutRule.getLog()).contains("Attempting to disable alignment task in");
+        assertThat(systemOutRule.getLinesNormalized()).contains("Attempting to disable alignment task in");
 
         // we care about how many calls are made to DA from an implementation perspective which is why we assert
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
@@ -326,7 +326,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                         "\tDependencies : org.springframework:spring-context:5.1.6.RELEASE --> org.springframework:spring-context:5.1.6.RELEASE-redhat-00005%n"
                         +
                         "%n");
-        assertThat(systemOutRule.getLog()).contains(expectedTextString);
+        assertThat(systemOutRule.getLinesNormalized()).contains(expectedTextString);
     }
 
     @Test
@@ -383,7 +383,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                         +
                         "%n");
         assertThat(textString).isEqualTo(expectedTextString);
-        assertThat(systemOutRule.getLog()).contains(expectedTextString);
+        assertThat(systemOutRule.getLinesNormalized()).contains(expectedTextString);
     }
 
     @Test
@@ -448,6 +448,6 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
                         "\tNon-Aligned Dependencies : org.apache.commons:commons-lang3:3.8.1%n" +
                         "%n");
         assertThat(textString).isEqualTo(expectedTextString);
-        assertThat(systemOutRule.getLog()).contains(expectedTextString);
+        assertThat(systemOutRule.getLinesNormalized()).contains(expectedTextString);
     }
 }

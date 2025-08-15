@@ -41,19 +41,19 @@ import org.jboss.gm.common.utils.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class MultiModuleProjectWithOverridesFunctionalTest
         extends AbstractWiremockTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public final TemporaryFolder tempDir = new TemporaryFolder();
@@ -109,11 +109,11 @@ public class MultiModuleProjectWithOverridesFunctionalTest
                 dependencyOverrides);
 
         // Ensure we have only passed unique GAV to the REST API.
-        assertThat(systemOutRule.getLog()).contains(
+        assertThat(systemOutRule.getLinesNormalized()).contains(
                 "Passing 9 GAVs into the REST client api [com.google.inject:guice:4.2.2, io.netty:netty:3.7.0.Final, "
                         + "io.netty:netty-buffer:4.1.68.Final, io.netty:netty-codec:4.1.68.Final, junit:junit:4.12, org.apache.commons:commons-lang3:3.8.1, "
                         + "org.hibernate:hibernate-core:5.4.2.Final, org.jboss.resteasy:resteasy-jaxrs:3.6.3.SP1, org.springframework:spring-context:5.1.6.RELEASE]");
-        assertThat(systemOutRule.getLog()).contains(
+        assertThat(systemOutRule.getLinesNormalized()).contains(
                 "Updating sub-project org.acme:subproject1:null (path: "
                         + "subproject1) from version 1.1.2 to 1.1.2.redhat-00005");
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());

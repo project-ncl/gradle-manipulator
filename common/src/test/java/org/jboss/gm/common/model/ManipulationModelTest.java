@@ -12,7 +12,7 @@ import org.gradle.api.logging.LogLevel;
 import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemErrRule;
+import uk.org.webcompere.systemstubs.rules.SystemErrRule;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>
@@ -23,7 +23,7 @@ public class ManipulationModelTest {
     public final LoggingRule loggingRule = new LoggingRule(LogLevel.DEBUG);
 
     @Rule
-    public final SystemErrRule systemErrRule = new SystemErrRule().enableLog().muteForSuccessfulTests();
+    public final SystemErrRule systemErrRule = new SystemErrRule();
 
     @Test
     public void findCorrespondingChildWithName() {
@@ -142,7 +142,7 @@ public class ManipulationModelTest {
         // have correctly colon separated paths.
         assertEquals(System.identityHashCode(model.findCorrespondingChild("foo")), System.identityHashCode(model));
         assertTrue(
-                systemErrRule.getLog()
+                systemErrRule.getLinesNormalized()
                         .contains(
                                 "Child module ([child2, foo]) has matching name to current module (foo) and unable to differentiate"));
     }

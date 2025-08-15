@@ -15,18 +15,18 @@ import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class JavaDataLoaderFunctionalTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
@@ -50,7 +50,7 @@ public class JavaDataLoaderFunctionalTest {
                 projectRoot,
                 alignment,
                 "build/publications/maven/pom-default.xml");
-        assertThat(systemOutRule.getLog())
+        assertThat(systemOutRule.getLinesNormalized())
                 .contains(
                         "Unable to find publish parameter in tasks [generatePomFileForMavenPublication] for Maven Publish Plugin for project java-dataloader-like-project");
         assertEquals("1.2.0.redhat-00001", modelAndModule.right.getVersion());

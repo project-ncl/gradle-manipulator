@@ -17,17 +17,17 @@ import org.gradle.api.logging.LogLevel;
 import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
 
 public class PluginUtilsTest {
     @Rule
     public final LoggingRule loggingRule = new LoggingRule(LogLevel.DEBUG);
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
@@ -60,9 +60,9 @@ public class PluginUtilsTest {
         PluginUtils.pluginRemoval(logger, target.getParentFile(), Collections.singleton("gradle-enterprise"));
 
         assertFalse(
-                systemOutRule.getLog()
+                systemOutRule.getLinesNormalized()
                         .contains("Looking to remove gradle-enterprise with configuration block of gradleEnterprise"));
-        assertFalse(systemOutRule.getLog().contains("Removed instances of plugin"));
+        assertFalse(systemOutRule.getLinesNormalized().contains("Removed instances of plugin"));
     }
 
     @Test
@@ -78,9 +78,9 @@ public class PluginUtilsTest {
         PluginUtils.pluginRemoval(logger, target.getParentFile(), null);
 
         assertFalse(
-                systemOutRule.getLog()
+                systemOutRule.getLinesNormalized()
                         .contains("Looking to remove gradle-enterprise with configuration block of gradleEnterprise"));
-        assertFalse(systemOutRule.getLog().contains("Removed instances of plugin"));
+        assertFalse(systemOutRule.getLinesNormalized().contains("Removed instances of plugin"));
     }
 
     @Test
@@ -116,10 +116,10 @@ public class PluginUtilsTest {
 
         PluginUtils.pluginRemoval(logger, target.getParentFile(), Collections.singleton("gradle-enterprise"));
         assertTrue(
-                systemOutRule.getLog()
+                systemOutRule.getLinesNormalized()
                         .contains(
                                 "Removed instances of plugin gradle-enterprise with configuration block of gradleEnterprise"));
-        assertTrue(systemOutRule.getLog().contains("Removed instances of plugin"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Removed instances of plugin"));
 
         String result = "plugins {\n" + "    id(\"com.github.burrunan.s3-build-cache\")\n" + "}\n" + "\n"
                 + "// This is the name of a current project\n"
@@ -172,10 +172,10 @@ public class PluginUtilsTest {
         PluginUtils.pluginRemoval(logger, target.getParentFile(), Collections.singleton("gradle-enterprise"));
 
         assertTrue(
-                systemOutRule.getLog()
+                systemOutRule.getLinesNormalized()
                         .contains(
                                 "Removed instances of plugin gradle-enterprise with configuration block of gradleEnterprise"));
-        assertTrue(systemOutRule.getLog().contains("Removed instances of plugin"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Removed instances of plugin"));
 
         String result = "plugins {\n" + "    id(\"com.github.burrunan.s3-build-cache\")\n" + "}\n" + "\n"
                 + "// This is the name of a current project\n"
@@ -243,10 +243,10 @@ public class PluginUtilsTest {
         PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
 
         assertTrue(
-                systemOutRule.getLog()
+                systemOutRule.getLinesNormalized()
                         .contains(
                                 "Removed instances of plugin com.github.burrunan.s3-build-cache with configuration block of buildCache"));
-        assertTrue(systemOutRule.getLog().contains("Removed instances of plugin"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Removed instances of plugin"));
 
         String result = "plugins {\n" + "}\n" + "\n" + "// This is the name of a current project\n"
                 + "// Note: it cannot be inferred from the directory name as developer might clone pgjdbc to pgjdbc_tmp (or whatever) folder\n"
@@ -311,10 +311,10 @@ public class PluginUtilsTest {
         PluginUtils.pluginRemoval(logger, target.getParentFile(), new LinkedHashSet<>(Collections.singleton("ALL")));
 
         assertTrue(
-                systemOutRule.getLog()
+                systemOutRule.getLinesNormalized()
                         .contains(
                                 "Removed instances of plugin gradle-enterprise with configuration block of gradleEnterprise from"));
-        assertTrue(systemOutRule.getLog().contains("Removed instances of plugin"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Removed instances of plugin"));
 
         String result = "plugins {\n" + "}\n" + "\n" + "// This is the name of a current project\n"
                 + "// Note: it cannot be inferred from the directory name as developer might clone pgjdbc to pgjdbc_tmp (or whatever) folder\n"
@@ -374,9 +374,10 @@ public class PluginUtilsTest {
         String result = FileUtils.readFileToString(target, Charset.defaultCharset());
 
         assertTrue(
-                systemOutRule.getLog()
+                systemOutRule.getLinesNormalized()
                         .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
-        assertTrue(systemOutRule.getLog().contains("Replacing nexus-publish apply plugin with maven-publish"));
+        assertTrue(
+                systemOutRule.getLinesNormalized().contains("Replacing nexus-publish apply plugin with maven-publish"));
         assertTrue(result.contains("apply plugin: \"maven-publish\""));
         assertFalse(result.contains("com.github.ben-manes.versions"));
         assertTrue(FileUtils.readFileToString(subtarget, Charset.defaultCharset()).trim().isEmpty());
@@ -438,7 +439,7 @@ public class PluginUtilsTest {
         PluginUtils.pluginRemoval(logger, target.getParentFile(), new LinkedHashSet<>(Collections.singleton("ALL")));
 
         assertTrue(
-                systemOutRule.getLog()
+                systemOutRule.getLinesNormalized()
                         .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
 
         assertFalse(FileUtils.readFileToString(target, Charset.defaultCharset()).contains("publishToSonatype"));
@@ -528,7 +529,7 @@ public class PluginUtilsTest {
                 new LinkedHashSet<>(Collections.singleton("signing")));
 
         assertTrue(
-                systemOutRule.getLog()
+                systemOutRule.getLinesNormalized()
                         .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
 
         System.out.println(FileUtils.readFileToString(target, Charset.defaultCharset()));
@@ -939,7 +940,8 @@ public class PluginUtilsTest {
 
         String result = FileUtils.readFileToString(target, Charset.defaultCharset());
 
-        assertTrue(systemOutRule.getLog().contains("Replacing nexus-publish apply plugin with maven-publish"));
+        assertTrue(
+                systemOutRule.getLinesNormalized().contains("Replacing nexus-publish apply plugin with maven-publish"));
         assertTrue(result.contains("id 'signing'"));
         assertTrue(result.contains("apply plugin: \"maven-publish\""));
         assertFalse(result.contains("com.github.ben-manes.versions"));
@@ -1099,7 +1101,7 @@ public class PluginUtilsTest {
 
         boolean result = PluginUtils.checkForSemanticBuildVersioning(logger, target.getParentFile());
         assertFalse(result);
-        assertFalse(systemOutRule.getLog().contains("Found Semantic Build Versioning Plugin"));
+        assertFalse(systemOutRule.getLinesNormalized().contains("Found Semantic Build Versioning Plugin"));
     }
 
     @Test
@@ -1127,7 +1129,7 @@ public class PluginUtilsTest {
 
         boolean result = PluginUtils.checkForSemanticBuildVersioning(logger, target.getParentFile());
         assertTrue(result);
-        assertTrue(systemOutRule.getLog().contains("Found Semantic Build Versioning Plugin"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Found Semantic Build Versioning Plugin"));
     }
 
     @Test
@@ -1145,7 +1147,7 @@ public class PluginUtilsTest {
                 Charset.defaultCharset());
 
         PluginUtils.addLenientLockMode(logger, target.getParentFile());
-        assertTrue(systemOutRule.getLog().contains("Added LENIENT lockMode"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Added LENIENT lockMode"));
         assertTrue(
                 FileUtils.readFileToString(target, Charset.defaultCharset())
                         .contains(
@@ -1170,7 +1172,7 @@ public class PluginUtilsTest {
                 Charset.defaultCharset());
 
         PluginUtils.addLenientLockMode(logger, target.getParentFile());
-        assertTrue(systemOutRule.getLog().contains("Added LENIENT lockMode"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Added LENIENT lockMode"));
         assertTrue(
                 FileUtils.readFileToString(target, Charset.defaultCharset())
                         .contains(

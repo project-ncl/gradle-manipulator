@@ -23,21 +23,21 @@ import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class SimpleProjectFunctionalTest {
-
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
 
     @Rule
     public TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     @Test
     public void ignoreMissingManipulationFile() throws IOException, URISyntaxException {
@@ -57,7 +57,7 @@ public class SimpleProjectFunctionalTest {
                 .withPluginClasspath()
                 .build();
 
-        assertTrue(systemOutRule.getLog().contains("No manipulation.json found in"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("No manipulation.json found in"));
     }
 
     @Test
@@ -73,7 +73,7 @@ public class SimpleProjectFunctionalTest {
                 .withArguments("-Dmanipulation.disable=true", "generatePomFileForMainPublication")
                 .build();
 
-        assertTrue(systemOutRule.getLog().contains("Gradle Manipulator disabled"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Gradle Manipulator disabled"));
     }
 
     @Test
@@ -163,7 +163,9 @@ public class SimpleProjectFunctionalTest {
                 .isEqualTo(TaskOutcome.SKIPPED);
         assertThat(buildResult.task(":" + "publish").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
         assertThat(publishDirectory).exists();
-        assertTrue(systemOutRule.getLog().contains("as buildSrc is build-time only and not configured for publishing"));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains("as buildSrc is build-time only and not configured for publishing"));
     }
 
     @Test

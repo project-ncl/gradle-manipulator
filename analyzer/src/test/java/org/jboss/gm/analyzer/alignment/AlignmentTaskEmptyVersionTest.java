@@ -42,11 +42,11 @@ import org.jboss.gm.common.rules.LoggingRule;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.RestoreSystemProperties;
-import org.junit.contrib.java.lang.system.SystemOutRule;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 @RunWith(BMUnitRunner.class)
 @BMUnitConfig(bmunitVerbose = true)
@@ -62,13 +62,13 @@ public class AlignmentTaskEmptyVersionTest {
     public final TemporaryFolder tempDir = new TemporaryFolder();
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
     public final LoggingRule loggingRule = new LoggingRule(LogLevel.INFO);
 
     @Rule
-    public final TestRule restoreSystemProperties = new RestoreSystemProperties();
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
 
     /**
      * We can't just create a new AlignmentTask as the base AbstractTask has checks to
@@ -143,7 +143,7 @@ public class AlignmentTaskEmptyVersionTest {
     @Test
     public void verifyPluginLog() {
         new AlignmentPlugin();
-        assertTrue(systemOutRule.getLog().contains("Running Gradle Alignment Plugin"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Running Gradle Alignment Plugin"));
     }
 
     @Test
@@ -170,6 +170,6 @@ public class AlignmentTaskEmptyVersionTest {
 
             assertEquals(result, formats.get(line));
         }
-        assertTrue(systemOutRule.getLog().contains("Examining git config content"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Examining git config content"));
     }
 }

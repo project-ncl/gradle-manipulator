@@ -4,17 +4,17 @@ import static junit.framework.TestCase.assertTrue;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.java.lang.system.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
 
 public class ManipulationPluginTest {
 
     @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule().enableLog().muteForSuccessfulTests();
+    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Test
     public void verifyPluginLog() {
         new ManipulationPlugin();
-        assertTrue(systemOutRule.getLog().contains("Running Gradle Manipulation Plugin"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Running Gradle Manipulation Plugin"));
     }
 
 }

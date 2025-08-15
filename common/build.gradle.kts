@@ -50,6 +50,6 @@ dependencies {
     testFixturesCompile("org.codehaus.plexus:plexus-archiver:4.2.3")
     testFixturesCompile("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
     testImplementation("junit:junit:${project.extra.get("junitVersion")}")
-    testImplementation("com.github.stefanbirkner:system-rules:${project.extra.get("systemRulesVersion")}")
+    testImplementation("uk.org.webcompere:system-stubs-junit4:${project.extra.get("systemStubsVersion")}")
     testImplementation(gradleApi())
 }

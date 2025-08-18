@@ -24,12 +24,12 @@ jobs:
   gradle-wrapper-validation:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: gradle/wrapper-validation-action@v3
   check-java-formatting:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -56,7 +56,7 @@ jobs:
     if: github.repository == 'project-ncl/gradle-manipulator' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Set up JDK 11
       uses: actions/setup-java@v4
       with:
@@ -91,7 +91,7 @@ jobs:
     if: github.repository == 'project-ncl/gradle-manipulator' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -119,7 +119,7 @@ jobs:
     if: github.repository == 'project-ncl/gradle-manipulator' && github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - uses: gradle/wrapper-validation-action@v3
     - name: Set up JDK 17
       uses: actions/setup-java@v4

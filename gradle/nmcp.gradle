@@ -11,3 +11,11 @@ nmcpAggregation {
     // Publish all projects that apply the 'maven-publish' plugin
     publishAllProjectsProbablyBreakingProjectIsolation()
 }
+
+subprojects {
+    if (project.name != "common" && project.name != "cli") {
+        tasks.named("publishShadowPublicationToNmcpRepository") {
+            dependsOn("publishPluginJar", "publishPluginJavaDocsJar")
+        }
+    }
+}

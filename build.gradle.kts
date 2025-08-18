@@ -117,14 +117,8 @@ release {
     gitConfig.requireBranch = "main"
 }
 
-if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.0")) {
-    task<Wrapper>("wrapper") {
-        distributionType = Wrapper.DistributionType.ALL
-    }
-} else {
-    tasks.getByName<Wrapper>("wrapper") {
-        distributionType = Wrapper.DistributionType.ALL
-    }
+tasks.withType<Wrapper>().configureEach {
+    distributionType = Wrapper.DistributionType.ALL
 }
 
 tasks.getByName("afterReleaseBuild") {
@@ -209,42 +203,6 @@ allprojects {
         }
     }
     apply(plugin = "idea")
-}
-
-
-val isReleaseBuild = ("true" == System.getProperty("release", ""))
-if (isReleaseBuild && GradleVersion.current().version != "${project.extra.get("gradleReleaseVersion")}") {
-    logger.info ("Running as release build")
-    throw GradleException("Gradle ${project.extra.get("gradleReleaseVersion")} is required to release this project")
-} else if (isReleaseBuild) {
-    logger.info ("Running as release build")
-}
-
-if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("8.3")) {
-    // LinkageError: loader constraint violation from GMEFunctionalTest otherwise
-    if (System.getProperty("gmeFunctionalTest") == null) {
-        val mavenExtension =
-            project.extensions.create(MAVEN_SETTINGS_EXTENSION_NAME, MavenSettingsPluginExtension::class, project)
-        // Previously was encoding the repository name into repositories that were attached to the
-        // publications. As those aren't needed now due to Central portal upload changes, just
-        // hardcode the name here. This should match the name in $HOME/.m2/settings.xml
-        loadSettings(mavenExtension, "central")
-        // We have to delay applying the plugin and load the extension configuration from a groovy file as:
-        // 1. We can't use the plugin on other JDK/Gradle combinations
-        // 2. We can't use Kotlin types in external files (https://github.com/gradle/gradle/issues/30878) and we
-        //    don't want them eagerly precompiled anyway.
-        apply(plugin = "com.gradleup.nmcp.aggregation")
-        apply {
-            from("$rootDir/gradle/nmcp.gradle")
-        }
-        project.rootProject.tasks.register("publishToCentral") {
-            if (project.version.toString().endsWith("-SNAPSHOT")) {
-                dependsOn("publishAggregationToCentralPortalSnapshots")
-            } else {
-                dependsOn("publishAggregationToCentralPortal")
-            }
-        }
-    }
 }
 
 
@@ -398,6 +356,7 @@ subprojects {
 
         // Make assemble/build task depend on shadowJar
         tasks["assemble"].dependsOn(tasks["shadowJar"])
+        tasks["build"].dependsOn(tasks["shadowJar"])
 
         tasks.withType<ShadowJar>().configureEach {
             // ensure that a single jar is built which is the shadowed one
@@ -623,3 +582,40 @@ fun loadSettings(extension: MavenSettingsPluginExtension, repository: String) {
     project.ext.set("central_username", "")
     project.ext.set("central_password", "")
 }
+
+
+val isReleaseBuild = ("true" == System.getProperty("release", ""))
+if (isReleaseBuild && GradleVersion.current().version != "${project.extra.get("gradleReleaseVersion")}") {
+    logger.info ("Running as release build")
+    throw GradleException("Gradle ${project.extra.get("gradleReleaseVersion")} is required to release this project")
+} else if (isReleaseBuild) {
+    logger.info ("Running as release build")
+}
+
+if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("8.3")) {
+    // LinkageError: loader constraint violation from GMEFunctionalTest otherwise
+    if (System.getProperty("gmeFunctionalTest") == null) {
+        val mavenExtension =
+            project.extensions.create(MAVEN_SETTINGS_EXTENSION_NAME, MavenSettingsPluginExtension::class, project)
+        // Previously was encoding the repository name into repositories that were attached to the
+        // publications. As those aren't needed now due to Central portal upload changes, just
+        // hardcode the name here. This should match the name in $HOME/.m2/settings.xml
+        loadSettings(mavenExtension, "central")
+        // We have to delay applying the plugin and load the extension configuration from a groovy file as:
+        // 1. We can't use the plugin on other JDK/Gradle combinations
+        // 2. We can't use Kotlin types in external files (https://github.com/gradle/gradle/issues/30878) and we
+        //    don't want them eagerly precompiled anyway.
+        apply(plugin = "com.gradleup.nmcp.aggregation")
+        apply {
+            from("$rootDir/gradle/nmcp.gradle")
+        }
+        project.rootProject.tasks.register("publishToCentral") {
+            if (project.version.toString().endsWith("-SNAPSHOT")) {
+                dependsOn("publishAggregationToCentralPortalSnapshots")
+            } else {
+                dependsOn("publishAggregationToCentralPortal")
+            }
+        }
+    }
+}
+

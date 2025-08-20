@@ -63,7 +63,7 @@ plugins {
         else -> {
             id("com.adarshr.test-logger") version "3.2.0"
             id("com.gradleup.shadow") version "8.3.9"
-            id("com.gradleup.nmcp.aggregation") version "1.0.3" apply false
+            id("com.gradleup.nmcp.aggregation") version "1.1.0" apply false
         }
     }
 
@@ -618,4 +618,3 @@ if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.ver
         }
     }
 }
-

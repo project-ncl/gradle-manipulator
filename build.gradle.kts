@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 import com.adarshr.gradle.testlogger.theme.ThemeType
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.freefair.gradle.plugins.lombok.LombokExtension
@@ -20,15 +22,19 @@ plugins {
     idea
 
     // Note spotless is only active for Gradle >= 6.1.1. Using 6.8.3 for the extra fixes.
-    if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("6.8.3")) {
+    if (GradleVersions.versionCurrent >= GradleVersions.version683) {
         id("com.diffplug.spotless") version "7.2.1"
-    } else if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.4")) {
+    } else if (GradleVersions.versionCurrent < GradleVersions.version54) {
         id("com.diffplug.gradle.spotless") version "4.5.1"
     } else {
         id("com.diffplug.spotless") version "5.14.2"
     }
 
-    id("com.gradle.plugin-publish") version "0.15.0"
+    if (GradleVersions.versionCurrent >= GradleVersions.version60) {
+        id("com.gradle.plugin-publish") version "1.3.1" apply false
+    } else {
+        id("com.gradle.plugin-publish") version "0.21.0" apply false
+    }
     id("net.researchgate.release") version "2.8.1"
     id("org.ajoberstar.grgit") version "4.1.1"
     // Were using mark-vieira/gradle-maven-settings-plugin but due to
@@ -37,66 +43,84 @@ plugins {
     id("io.github.rmanibus.maven-settings") version "0.8" apply false
 
     when {
-        org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.0") -> {
+        GradleVersions.versionCurrent < GradleVersions.version50 -> {
             id("com.adarshr.test-logger") version "1.7.1"
             // XXX: Versions 4.x > 4.0.1 suffer from <https://github.com/johnrengelman/shadow/issues/425>
-            id("com.github.johnrengelman.shadow") version "4.0.1"
+            id("com.github.johnrengelman.shadow") version "4.0.1" apply false
         }
-        org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("6.0") -> {
+
+        GradleVersions.versionCurrent < GradleVersions.version60 -> {
             id("com.adarshr.test-logger") version "2.1.1"
-            id("com.github.johnrengelman.shadow") version "5.2.0"
+            id("com.github.johnrengelman.shadow") version "5.2.0" apply false
         }
-        org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("7.0") -> {
+
+        GradleVersions.versionCurrent < GradleVersions.version70 -> {
             id("com.adarshr.test-logger") version "2.1.1"
-            id("com.github.johnrengelman.shadow") version "6.1.0"
+            id("com.github.johnrengelman.shadow") version "6.1.0" apply false
         }
-        org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.0") -> {
+
+        GradleVersions.versionCurrent < GradleVersions.version80 -> {
             id("com.adarshr.test-logger") version "3.2.0"
-            id("com.github.johnrengelman.shadow") version "7.1.2"
+            id("com.github.johnrengelman.shadow") version "7.1.2" apply false
         }
-        org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.3") -> {
+
+        GradleVersions.versionCurrent < GradleVersions.version83 -> {
             id("com.adarshr.test-logger") version "3.2.0"
-            id("com.github.johnrengelman.shadow") version "8.1.1"
+            id("com.github.johnrengelman.shadow") version "8.1.1" apply false
         }
-        // When running with release enabled we were encountering https://github.com/GradleUp/shadow/issues/875
+
+        GradleVersions.versionCurrent >= GradleVersions.version90 -> {
+            id("com.adarshr.test-logger") version "4.0.0"
+            id("com.gradleup.shadow") version "9.0.2" apply false
+        }
+        // For all Gradle 8.x after 8.3 (which is used for release). Note when running with release
+        // enabled we were encountering https://github.com/GradleUp/shadow/issues/875
         // so have switched to using 8.3.9 instead of 8.3.6
         else -> {
-            id("com.adarshr.test-logger") version "3.2.0"
-            id("com.gradleup.shadow") version "8.3.9"
+            id("com.adarshr.test-logger") version "4.0.0"
+            id("com.gradleup.shadow") version "8.3.9" apply false
+            // TODO: Can't reset wrapper with this so for IntelliJ might need to be commented out :-(
             id("com.gradleup.nmcp.aggregation") version "1.1.0" apply false
         }
     }
 
     when {
-        org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.0") -> {
+        GradleVersions.versionCurrent < GradleVersions.version50 -> {
             id("io.freefair.lombok") version "2.9.5" apply false
         }
-        org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.2") -> {
+
+        GradleVersions.versionCurrent < GradleVersions.version52 -> {
             id("io.freefair.lombok") version "3.0.0" apply false
         }
-        org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("6.0") -> {
+
+        GradleVersions.versionCurrent < GradleVersions.version60 -> {
             id("io.freefair.lombok") version "4.1.6" apply false
         }
-        org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.0") -> {
+
+        GradleVersions.versionCurrent < GradleVersions.version80 -> {
             id("io.freefair.lombok") version "5.3.3.3" apply false
         }
+
         else -> {
             id("io.freefair.lombok") version "6.6.3" apply false
         }
     }
 
-    if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("8.0")) {
-        id("org.kordamp.gradle.jacoco") version "0.54.0"
-    } else if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("7.0")) {
-        id("org.kordamp.gradle.jacoco") version "0.47.0"
-    } else if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.3")) {
-        id("org.kordamp.gradle.jacoco") version "0.46.0"
+    // Not compatible with Gradle 9 yet.
+    // https://github.com/kordamp/kordamp-gradle-plugins/issues/540
+    if (GradleVersions.versionCurrent < GradleVersions.version90) {
+        if (GradleVersions.versionCurrent >= GradleVersions.version80) {
+            id("org.kordamp.gradle.jacoco") version "0.54.0"
+        } else if (GradleVersions.versionCurrent >= GradleVersions.version70) {
+            id("org.kordamp.gradle.jacoco") version "0.47.0"
+        } else if (GradleVersions.versionCurrent >= GradleVersions.version53) {
+            id("org.kordamp.gradle.jacoco") version "0.46.0"
+        }
     }
 }
 
-
 // XXX: Jacoco plugin only supports Gradle >= 5.3 ; create empty task on those Gradle versions so that build does not fail
-if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.3")) {
+if (GradleVersions.versionCurrent < GradleVersions.version53) {
     tasks.register("AggregateJacocoReport")
 }
 
@@ -104,7 +128,7 @@ if (!JavaVersion.current().isJava11Compatible) {
     throw GradleException("This build must be run with at least Java 11")
 }
 
-if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("4.10")) {
+if (GradleVersions.versionCurrent < GradleVersions.version410) {
     throw GradleException("This build must be run with at least Gradle 4.10")
 }
 
@@ -202,7 +226,6 @@ allprojects {
             url = uri("https://maven.repository.redhat.com/ga/")
         }
     }
-    apply(plugin = "idea")
 }
 
 
@@ -232,20 +255,21 @@ subprojects {
     extra["slf4jVersion"] = "2.0.17"
     extra["systemStubsVersion"] = "2.1.8"
 
-    if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.4")) {
+    if (GradleVersions.versionCurrent < GradleVersions.version54) {
         apply(plugin = "com.diffplug.gradle.spotless")
     } else {
         apply(plugin = "com.diffplug.spotless")
     }
 
+    apply(plugin = "idea")
     apply(plugin = "com.adarshr.test-logger")
     apply(plugin = "io.freefair.lombok")
 
     extra["lombokVersion"] = extensions.findByType(LombokExtension::class)?.version
 
     // XXX: Lombok plugin 3.x < 3.6.1 suffers from <https://github.com/freefair/gradle-plugins/issues/31>
-    if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.0")
-        || org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.2")) {
+    if (GradleVersions.versionCurrent < GradleVersions.version50
+        || GradleVersions.versionCurrent >= GradleVersions.version52) {
         // Don't generate lombok.config files ( https://docs.freefair.io/gradle-plugins/3.6.6/reference/#_lombok_config_handling )
         tasks.findByName("generateLombokConfig")?.enabled = false
     }
@@ -275,8 +299,6 @@ subprojects {
             }
         }
     }
-
-    apply(plugin = "signing")
     apply(plugin = "maven-publish")
 
     val sourcesJar by tasks.registering(Jar::class) {
@@ -348,12 +370,13 @@ subprojects {
          * Another great source of information is the configuration of the shadow plugin itself:
          * https://github.com/johnrengelman/shadow/blob/main/build.gradle
          */
-        if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.3")) {
+        if (GradleVersions.versionCurrent < GradleVersions.version83) {
             apply(plugin = "com.github.johnrengelman.shadow")
         } else {
             apply(plugin = "com.gradleup.shadow")
         }
 
+        // TODO: ### shadow 9 doesn't need this?
         // Make assemble/build task depend on shadowJar
         tasks["assemble"].dependsOn(tasks["shadowJar"])
         tasks["build"].dependsOn(tasks["shadowJar"])
@@ -365,7 +388,7 @@ subprojects {
             exclude("analyzer-init.gradle")
 
             // XXX: Skip minimization for Gradle 4.10 (ShadowJar 4.0.1) due to missing classes
-            if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.0")) {
+            if (GradleVersions.versionCurrent >= GradleVersions.version50) {
                 // Minimise the resulting uber-jars to ensure we don't have massive jars
                 minimize {
                     // Sometimes minimisation takes away too much ... ensure we keep these.
@@ -404,7 +427,6 @@ subprojects {
         configure<PublishingExtension> {
             publications {
                 create<MavenPublication>("shadow") {
-                    project.shadow.component(this)
                     artifact(sourcesJar.get())
                     artifact(javadocJar.get())
 
@@ -419,10 +441,15 @@ subprojects {
 
                     generatePom()
                 }
+
             }
+        }
+        apply {
+            from("$rootDir/gradle/publish.gradle")
         }
 
         if (isReleaseBuild) {
+            apply(plugin = "signing")
             signing {
                 useGpgCmd()
                 sign(publishing.publications["shadow"])
@@ -442,6 +469,7 @@ subprojects {
         }
 
         if (isReleaseBuild) {
+            apply(plugin = "signing")
             signing {
                 useGpgCmd()
                 sign(publishing.publications["mavenJava"])
@@ -474,7 +502,7 @@ subprojects {
             // Can't use asFile (from https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.resources/-text-resource/index.html )
             // as that creates and writes the File immediately ... which is then deleted
             // by Gradle clean. configProperties was only available from Spotless 7.0 (which requires Gradle >= 6.1.1)
-            if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("${project.extra.get("gradleReleaseVersion")}")) {
+            if (GradleVersions.versionCurrent >= org.gradle.util.GradleVersion.version("${project.extra.get("gradleReleaseVersion")}")) {
                 removeUnusedImports()
                 importOrder(resources.text.fromArchiveEntry(spotlessConfig, "java-import-order.txt").asString())
                 val formatter = resources.text.fromArchiveEntry(spotlessConfig, "java-formatter.xml").asString()
@@ -486,7 +514,7 @@ subprojects {
     }
 
     tasks.withType<JavaCompile>().configureEach {
-        if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("${project.extra.get("gradleReleaseVersion")}")) {
+        if (GradleVersions.versionCurrent >= org.gradle.util.GradleVersion.version("${project.extra.get("gradleReleaseVersion")}")) {
             dependsOn("spotlessApply")
         }
     }
@@ -592,7 +620,8 @@ if (isReleaseBuild && GradleVersion.current().version != "${project.extra.get("g
     logger.info ("Running as release build")
 }
 
-if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("8.3")) {
+if (GradleVersions.versionCurrent >= GradleVersions.version83 &&
+    GradleVersions.versionCurrent < GradleVersions.version90) {
     // LinkageError: loader constraint violation from GMEFunctionalTest otherwise
     if (System.getProperty("gmeFunctionalTest") == null) {
         val mavenExtension =

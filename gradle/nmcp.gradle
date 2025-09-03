@@ -14,8 +14,8 @@ nmcpAggregation {
 
 subprojects {
     if (project.name != "common" && project.name != "cli") {
-        tasks.named("publishShadowPublicationToNmcpRepository") {
-            dependsOn("publishPluginJar", "publishPluginJavaDocsJar")
-        }
+//        tasks.named("publishShadowPublicationToNmcpRepository") {
+//            dependsOn("publishPluginJar", "publishPluginJavaDocsJar")
+//        }
     }
 }

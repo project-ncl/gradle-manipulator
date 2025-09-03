@@ -1,0 +1,18 @@
+
+if (GradleVersions.versionCurrent < GradleVersions.version70) {
+    publishing {
+        publications {
+            shadow(MavenPublication) { p ->
+                project.shadow.component(p)
+            }
+        }
+    }
+} else {
+    publishing {
+        publications {
+            shadow(MavenPublication) {
+                from components.shadow
+            }
+        }
+    }
+}

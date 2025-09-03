@@ -9,7 +9,6 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
 import org.gradle.api.internal.artifacts.ivyservice.resolutionstrategy.DefaultResolutionStrategy;
 import org.gradle.api.logging.Logger;
-import org.gradle.api.plugins.BasePluginConvention;
 import org.gradle.api.provider.Property;
 import org.gradle.util.GradleVersion;
 import org.jboss.gm.common.logging.GMLogger;
@@ -88,8 +87,8 @@ public class ProjectUtils {
         // See https://docs.gradle.org/8.10.1/userguide/upgrading_version_8.html#deprecated_access_to_conventions
         // The BasePluginExtension was added in 7.1 in https://github.com/gradle/gradle/issues/3425 but the warnings
         // were not added till 8.1 in https://github.com/gradle/gradle/issues/22908
-        if (GradleVersion.current().compareTo(GradleVersion.version("8.1")) >= 0) {
-            try {
+        try {
+            if (GradleVersion.current().compareTo(GradleVersion.version("8.1")) >= 0) {
                 Class<?> c = Class.forName("org.gradle.api.plugins.BasePluginExtension");
                 Object extension = project.getExtensions().findByType(c);
                 if (extension != null) {
@@ -98,19 +97,26 @@ public class ProjectUtils {
                         return value;
                     }
                 }
-            } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
-                    | IllegalAccessException e) {
-                logger.error("Unable to invoke getArchivesName method", e);
-                throw new ManipulationUncheckedException(e);
-            }
-        } else {
-            BasePluginConvention convention = project.getConvention().findPlugin(BasePluginConvention.class);
-            if (convention != null) {
-                String archivesBaseName = convention.getArchivesBaseName();
-                if (!project.getName().equals(archivesBaseName)) {
-                    return archivesBaseName;
+            } else {
+                // Have to use reflection as convention plugins were removed in Gradle 9
+                Class<?> c = Class.forName("org.gradle.api.plugins.BasePluginConvention");
+                Object conventionObject = project.getClass().getMethod("getConvention").invoke(project);
+                Object basePluginConvention = conventionObject.getClass()
+                        .getMethod("findPlugin", Class.class)
+                        .invoke(conventionObject, c);
+                if (basePluginConvention != null) {
+                    String value = (String) basePluginConvention.getClass()
+                            .getMethod("getArchivesBaseName")
+                            .invoke(basePluginConvention);
+                    if (!project.getName().equals(value)) {
+                        return value;
+                    }
                 }
             }
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException
+                | IllegalAccessException e) {
+            logger.error("Unable to invoke getArchivesName method", e);
+            throw new ManipulationUncheckedException(e);
         }
         return null;
     }

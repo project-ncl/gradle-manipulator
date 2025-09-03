@@ -89,6 +89,7 @@ public class GMEFunctionalTest extends AbstractWiremockTest {
                 projectRoot,
                 FileFilterUtils.or(
                         DirectoryFileFilter.DIRECTORY,
+                        FileFilterUtils.nameFileFilter("publish.gradle"),
                         FileFilterUtils.nameFileFilter("gradle.properties"),
                         FileFilterUtils.suffixFileFilter("kts")));
         org.apache.commons.io.FileUtils.copyDirectory(

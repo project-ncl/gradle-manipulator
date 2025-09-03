@@ -8,7 +8,6 @@ import net.linguica.gradle.maven.settings.MavenSettingsPlugin.MAVEN_SETTINGS_EXT
 import net.linguica.gradle.maven.settings.MavenSettingsPluginExtension
 import org.ajoberstar.grgit.Grgit
 import org.apache.maven.settings.building.SettingsBuildingException
-import org.gradle.util.GradleVersion
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.text.SimpleDateFormat
@@ -33,7 +32,7 @@ plugins {
     if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("6.0")) {
         id("com.gradle.plugin-publish") version "1.3.1" apply false
     } else {
-        id("com.gradle.plugin-publish") version "0.21.0" apply false
+        id("com.gradle.plugin-publish") version "0.21.0"
     }
     id("net.researchgate.release") version "2.8.1"
     id("org.ajoberstar.grgit") version "4.1.1"
@@ -424,30 +423,32 @@ subprojects {
         }
 
         // configure publishing of the shadowJar
-        configure<PublishingExtension> {
-            publications {
-                create<MavenPublication>("shadow") {
-                    artifact(sourcesJar.get())
-                    artifact(javadocJar.get())
+        if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("8.3")) {
+            configure<PublishingExtension> {
+                publications {
+                    create<MavenPublication>("shadow") {
+                        from(components["shadow"])
+                        artifact(sourcesJar.get())
+                        artifact(javadocJar.get())
 
-                    // we publish the init gradle file to make it easy for tools that use
-                    // the plugin to set it up without having to create their own init gradle file
-                    if (project.name == "analyzer") {
-                        artifact("${sourceSets["main"].output.resourcesDir}/analyzer-init.gradle") {
-                            classifier = "init"
-                            extension = "gradle"
+                        // we publish the init gradle file to make it easy for tools that use
+                        // the plugin to set it up without having to create their own init gradle file
+                        if (project.name == "analyzer") {
+                            artifact("${sourceSets["main"].output.resourcesDir}/analyzer-init.gradle") {
+                                classifier = "init"
+                                extension = "gradle"
+                            }
                         }
+                        generatePom()
                     }
-
-                    generatePom()
                 }
-
             }
         }
-        apply {
-            from("$rootDir/gradle/publish.gradle")
+        else {
+            apply {
+                from("$rootDir/gradle/publish.gradle")
+            }
         }
-
         if (isReleaseBuild) {
             apply(plugin = "signing")
             signing {

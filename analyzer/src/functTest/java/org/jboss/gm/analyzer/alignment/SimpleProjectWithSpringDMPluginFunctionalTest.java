@@ -8,6 +8,7 @@ import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.net.URISyntaxException;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.FileUtils;
@@ -63,6 +65,9 @@ public class SimpleProjectWithSpringDMPluginFunctionalTest extends AbstractWirem
 
     @Test
     public void ensureAlignmentFileCreated() throws IOException, URISyntaxException, ManipulationException {
+        // XXX: Spring plugins uses org/gradle/api/tasks/Upload
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("9.0.0")) < 0);
+
         final File projectRoot = tempDir.newFolder("simple-project-with-spring-dm-plugin");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 

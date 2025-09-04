@@ -351,6 +351,7 @@ public class ManifestVerificationFunctionalTest {
 
         final File projectRoot = tempDir.newFolder("asm");
         TestUtils.copyDirectory("asm", projectRoot);
+        new File(projectRoot, "asm").mkdirs();
         assertThat(projectRoot.toPath().resolve("build.gradle")).exists();
 
         final BuildResult buildResult = TestUtils.createGradleRunner()

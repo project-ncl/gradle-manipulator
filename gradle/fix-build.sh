@@ -19,6 +19,7 @@ case "${VERSION}" in
              -e 's|archiveFileName = |archiveName |g;' \
              -e 's|destinationDirectory = |destinationDir |g;' \
              -e 's|archiveBaseName = |baseName = |g;' \
+             -e 's|\.archiveFile|.archivePath|g;' \
              -e 's|${archiveBaseName}|${baseName}|g;'
         ;;
     *)

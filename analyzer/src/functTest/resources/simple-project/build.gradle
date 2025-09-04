@@ -9,7 +9,9 @@ plugins {
 
 // This does not have a buildscript block
 
-sourceCompatibility = 1.8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+}
 
 repositories {
     mavenCentral()

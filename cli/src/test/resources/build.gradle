@@ -4,7 +4,9 @@ plugins {
 }
 version=1.0
 
-sourceCompatibility = 1.8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+}
 
 allprojects {
     group = 'org.acme'
@@ -41,16 +43,12 @@ if ( System.getenv("JAVA_HOME") == null ) {
 }
 System.out.println("Environment: JAVA_HOME=" + System.getenv("JAVA_HOME"))
 
-task getGitVersion {
-    def outputAsString = ""
-    new ByteArrayOutputStream().withStream { os ->
-        exec {
-            executable 'git'
-            args 'describe', '--tags', '--always', '--dirty'
-            standardOutput = os
-            setIgnoreExitValue(true)
-        }
-        outputAsString = os.toString().trim()
+task getGitVersion(type: Exec) {
+    executable '/usr/bin/git'
+    args 'describe', '--tags', '--always', '--dirty'
+    ignoreExitValue true
+    standardOutput = new ByteArrayOutputStream()
+    doLast {
+        logger.lifecycle(standardOutput.toString().trim())
     }
-    println(outputAsString)
 }

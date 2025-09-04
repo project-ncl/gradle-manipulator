@@ -103,6 +103,8 @@ public class MultiModuleProjectWithOverridesFunctionalTest
                         .replaceFirst("\\.json$", ".txt"));
 
         final File projectRoot = tempDir.newFolder("multi-module-for-overrides");
+        new File(projectRoot, "subproject1/subproject11").mkdirs();
+        new File(projectRoot, "subproject2").mkdirs();
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot,
                 projectRoot.getName(),
@@ -205,7 +207,8 @@ public class MultiModuleProjectWithOverridesFunctionalTest
     @Test
     public void verifyManipulationJSON() throws IOException, URISyntaxException {
         final Path projectRoot = tempDir.newFolder("multi-module-for-overrides").toPath();
-        assertThat(projectRoot).isDirectory();
+        new File(projectRoot.toFile(), "subproject1/subproject11").mkdirs();
+        new File(projectRoot.toFile(), "subproject2").mkdirs();
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot.toFile(),
                 projectRoot.getFileName().toString(),

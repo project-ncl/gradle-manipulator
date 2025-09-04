@@ -28,7 +28,9 @@ allprojects {
         }
     }
 
-    sourceCompatibility = 1.8
+    java {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+    }
 }
 
 

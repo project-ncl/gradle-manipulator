@@ -65,6 +65,7 @@ public class CELProjectFunctionalTest extends AbstractWiremockTest {
     public void ensureAlignmentFileCreated()
             throws IOException, URISyntaxException, GitAPIException {
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.5")) >= 0);
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("9.0.0")) < 0);
 
         final File projectRoot = tempDir.newFolder();
 

@@ -5,7 +5,9 @@ plugins {
     id 'maven-publish'
 }
 
-sourceCompatibility = 1.8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+}
 
 allprojects {
     group = 'org.acme'
@@ -62,7 +64,7 @@ task distZip(type: Zip, dependsOn: [docsZip]) {
     ext.baseDir = "${archiveBaseName}-${project.version}";
 
 
-    from(zipTree(docsZip.archivePath)) {
+    from(zipTree(docsZip.archiveFile)) {
         into "${baseDir}/docs"
     }
 

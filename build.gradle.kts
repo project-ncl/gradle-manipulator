@@ -98,6 +98,7 @@ plugins {
 
     // Not compatible with Gradle 9 yet.
     // https://github.com/kordamp/kordamp-gradle-plugins/issues/540
+    // See also below as a fake task for AggregateJacocoReport has been created for Gradle 9
     if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("9.0.0")) {
         if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("8.0")) {
             id("org.kordamp.gradle.jacoco") version "0.54.0"
@@ -110,7 +111,9 @@ plugins {
 }
 
 // XXX: Jacoco plugin only supports Gradle >= 5.3 ; create empty task on those Gradle versions so that build does not fail
-if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.3")) {
+if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.3")
+    || org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("9.0.0")
+    ) {
     tasks.register("AggregateJacocoReport")
 }
 

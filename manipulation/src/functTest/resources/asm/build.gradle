@@ -60,8 +60,10 @@ subprojects {
   repositories { mavenCentral() }
   apply plugin: 'java-library'
   apply plugin: 'jacoco'
-  sourceCompatibility = '1.8'
-  targetCompatibility = '1.8'
+  java {
+      sourceCompatibility = JavaVersion.VERSION_1_8
+      targetCompatibility = JavaVersion.VERSION_1_8
+  }
   test { useJUnitPlatform() }
   ext.provides = []  // The provided java packages, e.g. ['org.objectweb.asm']
   ext.requires = []  // The required Gradle projects, e.g. [':asm-test']
@@ -112,8 +114,6 @@ subprojects {
   tasks.withType(AbstractArchiveTask).configureEach {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
-    dirMode = 0775
-    fileMode = 0664
   }
 }
 

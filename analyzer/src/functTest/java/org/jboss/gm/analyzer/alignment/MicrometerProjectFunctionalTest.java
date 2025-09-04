@@ -73,6 +73,8 @@ public class MicrometerProjectFunctionalTest extends AbstractWiremockTest {
     public void ensureAlignmentFileCreated()
             throws IOException, URISyntaxException, GitAPIException {
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.10.2")) >= 0);
+        // XXX: Uses org.gradle.api.tasks.bundling.Jar.getConvention
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("9.0.0")) < 0);
 
         final File projectRoot = tempDir.newFolder();
 

@@ -183,7 +183,7 @@ tasks {
 
 // Implicit dependencies detected by Gradle 7
 // See <https://docs.gradle.org/7.0/userguide/validation_problems.html#implicit_dependency>
-tasks.getByName("check") {
+tasks.named("check") {
     dependsOn(functionalTest)
 }
 
@@ -193,20 +193,20 @@ tasks.configureEach {
     }
 }
 
-tasks.getByName("delombok") {
+tasks.named("delombok") {
     dependsOn("spotlessJava")
 }
 
-tasks.getByName("test") {
+tasks.named("test") {
     dependsOn("shadowJar")
 }
 
-tasks.getByName("functionalTest") {
+tasks.named("functionalTest") {
     dependsOn("shadowJar")
 }
 
 if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.0")) {
-    tasks.getByName("generateMetadataFileForShadowPublication") {
+    tasks.named("generateMetadataFileForShadowPublication") {
         dependsOn("jar")
     }
 }

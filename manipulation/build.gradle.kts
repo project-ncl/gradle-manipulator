@@ -78,12 +78,8 @@ dependencies {
 
 if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("9.0.0")) {
     // Include a fake Upload purely for compilation purposes.
-    sourceSets {
-        main {
-            java {
-                srcDir("src/gradle9/java")
-            }
-        }
+    sourceSets.getByName ("main") {
+        java.srcDir("src/gradle9/java")
     }
 }
 
@@ -152,10 +148,8 @@ tasks.getByName("functionalTest") {
     dependsOn("shadowJar")
 }
 
-//tasks.getByName("publishShadowPublicationToMavenLocal") {
-//    dependsOn("publishPluginJar") //"publishPluginJavaDocsJar",
-//}
-
-tasks.getByName("generateMetadataFileForShadowPublication") {
-    dependsOn("jar")
+if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.0")) {
+    tasks.getByName("generateMetadataFileForShadowPublication") {
+        dependsOn("jar")
+    }
 }

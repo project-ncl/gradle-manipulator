@@ -73,10 +73,12 @@ tasks.getByName("test") {
     dependsOn("shadowJar")
 }
 
-tasks.getByName("publishShadowPublicationToMavenLocal") {
-    dependsOn("shadowJar")
-}
+if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.0")) {
+    tasks.getByName("publishShadowPublicationToMavenLocal") {
+        dependsOn("shadowJar")
+    }
 
-tasks.getByName("generateMetadataFileForShadowPublication") {
-    dependsOn("jar")
+    tasks.getByName("generateMetadataFileForShadowPublication") {
+        dependsOn("jar")
+    }
 }

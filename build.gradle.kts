@@ -47,27 +47,22 @@ plugins {
             // XXX: Versions 4.x > 4.0.1 suffer from <https://github.com/johnrengelman/shadow/issues/425>
             id("com.github.johnrengelman.shadow") version "4.0.1" apply false
         }
-
         org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("6.0") -> {
             id("com.adarshr.test-logger") version "2.1.1"
             id("com.github.johnrengelman.shadow") version "5.2.0" apply false
         }
-
         org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("7.0") -> {
             id("com.adarshr.test-logger") version "2.1.1"
             id("com.github.johnrengelman.shadow") version "6.1.0" apply false
         }
-
         org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.0") -> {
             id("com.adarshr.test-logger") version "3.2.0"
             id("com.github.johnrengelman.shadow") version "7.1.2" apply false
         }
-
         org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.3") -> {
             id("com.adarshr.test-logger") version "3.2.0"
             id("com.github.johnrengelman.shadow") version "8.1.1" apply false
         }
-
         org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("9.0.0") -> {
             id("com.adarshr.test-logger") version "4.0.0"
             id("com.gradleup.shadow") version "9.0.2" apply false
@@ -87,19 +82,15 @@ plugins {
         org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.0") -> {
             id("io.freefair.lombok") version "2.9.5" apply false
         }
-
         org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("5.2") -> {
             id("io.freefair.lombok") version "3.0.0" apply false
         }
-
         org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("6.0") -> {
             id("io.freefair.lombok") version "4.1.6" apply false
         }
-
         org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("8.0") -> {
             id("io.freefair.lombok") version "5.3.3.3" apply false
         }
-
         else -> {
             id("io.freefair.lombok") version "6.6.3" apply false
         }
@@ -125,9 +116,7 @@ if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.vers
 
 if (!JavaVersion.current().isJava11Compatible) {
     throw GradleException("This build must be run with at least Java 11")
-}
-
-if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("4.10")) {
+} else if (org.gradle.util.GradleVersion.current() < org.gradle.util.GradleVersion.version("4.10")) {
     throw GradleException("This build must be run with at least Gradle 4.10")
 }
 

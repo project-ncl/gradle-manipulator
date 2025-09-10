@@ -262,9 +262,15 @@ public class ManipulationPlugin implements Plugin<Project> {
         }
     }
 
-    // Move the call to disable signing plugin into the publishing task actions to avoid issues
-    // when a publishing plugin that isn't natively configured but a later injection adds publishing
-    // and triggers the signing injection.
+    /**
+     * Helper function to disable signing.
+     * Move the call to disable signing plugin into the publishing task actions to avoid issues
+     * when a publishing plugin that isn't natively configured but a later injection adds publishing
+     * and triggers the signing injection.
+     *
+     * @param logger the current logger
+     * @param project the current project
+     */
     public static void disableSigning(Logger logger, Project project) {
         SigningExtension sign = project.getExtensions().findByType(SigningExtension.class);
         if (sign != null) {

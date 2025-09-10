@@ -459,6 +459,7 @@ subprojects {
         slowThreshold = 120000
         // Nicer looking theme than default.
         theme = ThemeType.MOCHA
+        showStandardStreams = true
         showPassedStandardStreams = false
         showSkippedStandardStreams = false
     }

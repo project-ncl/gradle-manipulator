@@ -93,6 +93,10 @@ public class Main implements Callable<Void> {
     @Option(names = "-D", description = "Pass supplemental arguments (e.g. groovy script commands)")
     private Map<String, String> jvmPropertyParams = new LinkedHashMap<>();
 
+    @SuppressWarnings({ "MismatchedQueryAndUpdateOfCollection", "FieldMayBeFinal" })
+    @Option(names = "-e", description = "Pass supplemental environment variables ")
+    private Map<String, String> envParams = new LinkedHashMap<>();
+
     @Option(names = "-l", description = "Location of Gradle installation.")
     private File installation;
 
@@ -247,6 +251,9 @@ public class Main implements Callable<Void> {
             }
             if (StringUtils.isNotEmpty(System.getenv("JAVA_OPTS"))) {
                 Collections.addAll(jvmArgs, System.getenv("JAVA_OPTS").split("\\s+"));
+            }
+            if (!envParams.isEmpty()) {
+                envVars.putAll(envParams);
             }
 
             logger.info(

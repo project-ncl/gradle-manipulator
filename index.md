@@ -51,6 +51,7 @@ CLI to optionally run Groovy scripts and then invoke Gradle.
   -d                      Enable debug.
   -D=<String=String>      Pass supplemental arguments (e.g. groovy script
                             commands)
+  -e=<String=String>      Pass supplemental environment variables
   -h, --help              Show this help message and exit.
   -l=<installation>       Location of Gradle installation.
   -t, --target=<target>   Target Gradle directory.
@@ -71,6 +72,7 @@ java -jar cli.jar --target=<gradle-project> -d
     -DversionIncrementalSuffix=temporary-redhat
     -DrestRepositoryGroup=DA-temporary-builds
     -DgroovyScripts=file:///tmp/fixup.groovy
+    -eJAVA_RUNTIME_HOME=$JAVA_HOME
     generateAlignmentMetadata
     -x task-to-exclude
 ```

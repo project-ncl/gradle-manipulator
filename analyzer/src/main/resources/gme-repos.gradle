@@ -4,8 +4,8 @@
 if (System.getenv("AProxDependencyUrl") != null) {
     repositories {
         maven {
-            name "indy-mvn"
-            url System.getenv("AProxDependencyUrl")
+            name = "indy-mvn"
+            url = System.getenv("AProxDependencyUrl")
             credentials(HttpHeaderCredentials) {
                 name = "Authorization"
                 value = "Bearer " + System.getenv('accessToken')

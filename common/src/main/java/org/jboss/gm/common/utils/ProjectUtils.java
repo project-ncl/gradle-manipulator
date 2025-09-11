@@ -83,6 +83,7 @@ public class ProjectUtils {
      * @param project the current project
      * @return the value for the archivesBaseName or null if not set
      */
+    @SuppressWarnings({ "unchecked", "deprecation", "UnstableApiUsage" })
     public String getArchivesBaseName(Project project) {
         // See https://docs.gradle.org/8.10.1/userguide/upgrading_version_8.html#deprecated_access_to_conventions
         // The BasePluginExtension was added in 7.1 in https://github.com/gradle/gradle/issues/3425 but the warnings

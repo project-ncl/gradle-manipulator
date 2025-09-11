@@ -139,6 +139,30 @@ public class MainTest {
         m.run(args);
 
         assertTrue(systemOutRule.getLinesNormalized().contains("Welcome to Gradle"));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains(
+                                "with JVM args '[-Dfoobar=barfoo, -DdependencyOverride.org.jboss.slf4j:*@*=, -DgroovyScripts=https://www.foo.com/tmp/fake-file,"));
+    }
+
+    @Test
+    public void testInvokeGradleWithEnvironmentVars() throws Exception {
+
+        final File projectRoot = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
+
+        Main m = new Main();
+        String[] args = new String[] {
+                "-d",
+                "-t",
+                projectRoot.getParentFile().getAbsolutePath(),
+                "help",
+                "--info",
+                "-eAA_JAVA_RUNTIME_HOME=/tmp/fake" };
+        m.run(args);
+
+        assertTrue(systemOutRule.getLinesNormalized().contains("Welcome to Gradle"));
+        assertTrue(
+                systemOutRule.getLinesNormalized().contains("Environment variables: [AA_JAVA_RUNTIME_HOME"));
     }
 
     @Test

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.UUID;
 import org.aeonbits.owner.ConfigCache;
@@ -450,7 +451,12 @@ public class MainTest {
 
     @Test
     public void testInvokeBrokenGradle() throws Exception {
-        final File projectRoot = new File(MainTest.class.getClassLoader().getResource("broken-gradle").getPath());
+        final File projectRoot = tempDir.newFolder("broken-gradle-1");
+        FileUtils.copyDirectory(
+                Paths
+                        .get(MainTest.class.getClassLoader().getResource("broken-gradle").toURI())
+                        .toFile(),
+                projectRoot);
 
         Main m = new Main();
         String[] args = new String[] {
@@ -470,7 +476,12 @@ public class MainTest {
 
     @Test
     public void testFixWithGroovyBrokenGradle() throws Exception {
-        final File projectRoot = new File(MainTest.class.getClassLoader().getResource("broken-gradle").getPath());
+        final File projectRoot = tempDir.newFolder("broken-gradle-2");
+        FileUtils.copyDirectory(
+                Paths
+                        .get(MainTest.class.getClassLoader().getResource("broken-gradle").toURI())
+                        .toFile(),
+                projectRoot);
         final URL groovy = Thread.currentThread().getContextClassLoader().getResource("fixGradle810.groovy");
 
         Main m = new Main();
@@ -483,5 +494,8 @@ public class MainTest {
 
         int result = m.run(args);
         assertEquals(0, result);
+
+        // Verify gradle-daemon-jvm.properties is removed
+        assertThat(systemOutRule.getLinesNormalized()).contains("Removing gradle/gradle-daemon-jvm.properties");
     }
 }

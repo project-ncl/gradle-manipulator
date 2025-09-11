@@ -394,6 +394,12 @@ public class Main implements Callable<Void> {
 
         PluginUtils.pluginRemoval(logger, target, configuration.pluginRemoval());
 
+        File daemonJvm = new File(target, "gradle/gradle-daemon-jvm.properties");
+        if (daemonJvm.exists()) {
+            logger.info("Removing gradle/gradle-daemon-jvm.properties");
+            daemonJvm.delete();
+        }
+
         if (configuration.disableGME()) {
             logger.info("Gradle Manipulator disabled");
         } else {

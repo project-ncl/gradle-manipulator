@@ -69,14 +69,16 @@ tasks {
 
 // Implicit dependencies detected by Gradle 7
 // See <https://docs.gradle.org/7.0/userguide/validation_problems.html#implicit_dependency>
-tasks.getByName("test") {
+tasks.named("test") {
     dependsOn("shadowJar")
 }
 
-tasks.getByName("publishShadowPublicationToMavenLocal") {
-    dependsOn("shadowJar")
-}
+if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.0")) {
+    tasks.named("publishShadowPublicationToMavenLocal") {
+        dependsOn("shadowJar")
+    }
 
-tasks.getByName("generateMetadataFileForShadowPublication") {
-    dependsOn("jar")
+    tasks.named("generateMetadataFileForShadowPublication") {
+        dependsOn("jar")
+    }
 }

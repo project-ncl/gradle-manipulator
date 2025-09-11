@@ -41,8 +41,8 @@ public class SimpleProjectFunctionalTest {
 
     @Test
     public void ignoreMissingManipulationFile() throws IOException, URISyntaxException {
-        // NCL-6050: Could not get unknown property 'generatePomFileForPluginMavenPublication' for project
-        // ':build-tools' of type org.gradle.api.Project.
+        // XXX: NCL-6050: Could not get unknown property 'generatePomFileForPluginMavenPublication' for
+        // project ':build-tools' of type org.gradle.api.Project only available from Gradle 5.0
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
 
         final File simpleProjectRoot = tempDir.newFolder("simple-project");

@@ -1,6 +1,7 @@
 package org.jboss.gm.manipulation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import org.gradle.internal.Pair;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.TaskOutcome;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.junit.Rule;
@@ -33,6 +35,8 @@ public class SimpleProjectWithSpringDMAndMavenPublishPluginsFunctionalTest {
 
     @Test
     public void ensureProperPomGenerated() throws IOException, URISyntaxException, XmlPullParserException {
+        // XXX: Spring plugins uses org/gradle/api/tasks/Upload
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("9.0.0")) < 0);
         // this makes gradle use the set property as maven local directory
         // we do this in order to avoid polluting the maven local and also be absolutely sure
         // that no prior invocations affect the execution

@@ -344,7 +344,9 @@ public class MainTest {
                 "getGitVersion" };
         m.run(args);
 
-        assertTrue(systemOutRule.getLinesNormalized().contains("Process 'command 'git'' finished with exit value"));
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains("Process 'command '/usr/bin/git'' finished with exit value"));
     }
 
     @Test
@@ -425,7 +427,6 @@ public class MainTest {
     @Test
     public void testInvokeBrokenGradle() throws Exception {
         final File projectRoot = new File(MainTest.class.getClassLoader().getResource("broken-gradle").getPath());
-        final URL groovy = Thread.currentThread().getContextClassLoader().getResource("fixGradle810.groovy");
 
         Main m = new Main();
         String[] args = new String[] {

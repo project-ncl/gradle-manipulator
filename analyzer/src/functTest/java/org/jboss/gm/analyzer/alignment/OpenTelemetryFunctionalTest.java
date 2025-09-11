@@ -243,6 +243,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
             throws IOException, URISyntaxException, ManipulationException {
         // XXX: Use of pluginManagement.plugins{}
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.5")) >= 0);
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("9.0.0")) < 0);
         final Map<String, String> map = new HashMap<>();
         map.put("-DoverrideTransitive", "false");
         map.put("-Potel.stable", "true");

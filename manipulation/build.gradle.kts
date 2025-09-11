@@ -1,12 +1,21 @@
+@file:Suppress("UnstableApiUsage")
+
+import org.gradle.plugins.ide.idea.model.IdeaModule
+import kotlin.reflect.full.memberFunctions
+
 group = "org.jboss.gm"
 
-pluginBundle {
-    website = "https://project-ncl.github.io/gradle-manipulator/"
-    vcsUrl = "https://github.com/project-ncl/gradle-manipulator/tree/main/manipulation/tree/main/analyzer"
-    tags = listOf("versions", "manipulation")
-}
-
 gradlePlugin {
+    // According to https://plugins.gradle.org/docs/publish-plugin the simplifications in plugin publishing requires
+    // Gradle 7.6 or later. Therefore use reflection here.
+    if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("7.6")) {
+        var pluginPublishMethod = GradlePluginDevelopmentExtension::class.memberFunctions.find{it.name == "getWebsite"}
+        var wProperty = pluginPublishMethod?.call(this) as Property<String>
+        wProperty.set("https://project-ncl.github.io/gradle-manipulator")
+        pluginPublishMethod = GradlePluginDevelopmentExtension::class.memberFunctions.find{it.name == "getVcsUrl"}
+        wProperty = pluginPublishMethod?.call(this) as Property<String>
+        wProperty.set("https://github.com/project-ncl/gradle-manipulator.git")
+    }
     plugins {
         create("manipulationPlugin") {
             description = "Plugin that reads the alignment data from \${project.rootDir}/manipulation.json and " +
@@ -14,11 +23,19 @@ gradlePlugin {
             id = "org.jboss.gm.manipulation"
             implementationClass = "org.jboss.gm.manipulation.ManipulationPlugin"
             displayName = "GME Manipulation Plugin"
+
+            if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("7.6")) {
+                var getTagsMethod =
+                    PluginDeclaration::class.memberFunctions.find { it.name == "getTags" }
+                var sProperty = getTagsMethod?.call(this) as SetProperty<String>
+                sProperty.set(listOf("versions", "manipulation"))
+            }
         }
     }
 
+    // TODO: What to do here
     // Disable creation of the plugin marker pom.
-    this.isAutomatedPublishing = false
+    // this.isAutomatedPublishing = false
 }
 
 dependencies {
@@ -59,6 +76,13 @@ dependencies {
     testImplementation(gradleTestKit())
 }
 
+if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("9.0.0")) {
+    // Include a fake Upload purely for compilation purposes.
+    sourceSets.getByName ("main") {
+        java.srcDir("src/gradle9/java")
+    }
+}
+
 // Separate source set and task for functional tests
 val functionalTestSourceSet = sourceSets.create("functionalTest") {
     java.srcDir("src/functTest/java")
@@ -79,15 +103,20 @@ configurations.getByName("functionalTestRuntimeOnly") {
 gradlePlugin.testSourceSets(functionalTestSourceSet)
 
 idea.module {
-    val testSources = testSourceDirs
-    testSources.addAll(project.sourceSets.getByName("functionalTest").java.srcDirs)
-    val testResources = testResourceDirs
-    testResources.addAll(project.sourceSets.getByName("functionalTest").resources.srcDirs)
-    testSourceDirs = testSources
-    testResourceDirs = testResources
+    // testSources / testResources only available from 7.4 and greater so can't just do:
+    // testSources.from(sourceSets["functionalTest"].java.srcDirs).
+    // Not bothering to handle other versions as we're developing on later Gradle now.
+    if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("7.4")) {
+        var rTestSources = IdeaModule::class.memberFunctions.find{it.name == "getTestSources"}
+        var fileCollection = rTestSources?.call(this) as ConfigurableFileCollection
+        fileCollection.from(sourceSets["functionalTest"].java.srcDirs)
+        var rTestResources = IdeaModule::class.memberFunctions.find{it.name == "getTestResources"}
+        fileCollection = rTestResources?.call(this) as ConfigurableFileCollection
+        fileCollection.from(sourceSets["functionalTest"].resources.srcDirs)
+    }
 }
 
-val functionalTest = task<Test>("functionalTest") {
+val functionalTest = tasks.register<Test>("functionalTest") {
     description = "Runs functional tests"
     group = "verification"
     testClassesDirs = sourceSets["functionalTest"].output.classesDirs
@@ -97,7 +126,7 @@ val functionalTest = task<Test>("functionalTest") {
 
 // Implicit dependencies detected by Gradle 7
 // See <https://docs.gradle.org/7.0/userguide/validation_problems.html#implicit_dependency>
-tasks.getByName("check") {
+tasks.named("check") {
     dependsOn(functionalTest)
 }
 
@@ -107,22 +136,20 @@ tasks.configureEach {
     }
 }
 
-tasks.getByName("delombok") {
+tasks.named("delombok") {
     dependsOn("spotlessJava")
 }
 
-tasks.getByName("test") {
+tasks.named("test") {
     dependsOn("shadowJar")
 }
 
-tasks.getByName("functionalTest") {
+tasks.named("functionalTest") {
     dependsOn("shadowJar")
 }
 
-tasks.getByName("publishShadowPublicationToMavenLocal") {
-    dependsOn("publishPluginJavaDocsJar", "publishPluginJar")
-}
-
-tasks.getByName("generateMetadataFileForShadowPublication") {
-    dependsOn("jar")
+if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.0")) {
+    tasks.named("generateMetadataFileForShadowPublication") {
+        dependsOn("jar")
+    }
 }

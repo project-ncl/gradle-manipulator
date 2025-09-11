@@ -1,0 +1,22 @@
+
+publishing {
+    publications {
+        shadow(MavenPublication) { p ->
+            project.shadow.component(p)
+            artifact(sourcesJar)
+            artifact(javadocJar)
+
+            // we publish the init gradle file to make it easy for tools that use
+            // the plugin to set it up without having to create their own init gradle file
+            if (project.name == "analyzer") {
+                artifact("${sourceSets["main"].output.resourcesDir}/analyzer-init.gradle") {
+                    classifier = "init"
+                    extension = "gradle"
+                }
+            }
+            // Ideally we should generate the pom file but groovy can't call the kotlin function. Its not essential
+            // as we really only need it when publishing snapshots or releases in Gradle >= 8.3
+            // generatePom()
+        }
+    }
+}

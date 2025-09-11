@@ -88,6 +88,8 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
             throws IOException, URISyntaxException, XmlPullParserException, ManipulationException {
 
         final File projectRoot = tempDir.newFolder("multi-module");
+        new File(projectRoot, "subproject1/subproject11").mkdirs();
+        new File(projectRoot, "subproject2").mkdirs();
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
@@ -173,7 +175,8 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
     @Test
     public void verifyAlignmentReportJson() throws IOException, URISyntaxException {
         final Path projectRoot = tempDir.newFolder("multi-module").toPath();
-        assertThat(projectRoot).isDirectory();
+        new File(projectRoot.toFile(), "subproject1/subproject11").mkdirs();
+        new File(projectRoot.toFile(), "subproject2").mkdirs();
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot.toFile(),
                 projectRoot.getFileName().toString());
@@ -345,7 +348,8 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         final String reportNonAligned = System.getProperty("reportNonAligned");
         assertThat(reportNonAligned).isNull();
         final Path projectRoot = tempDir.newFolder("multi-module").toPath();
-        assertThat(projectRoot).isDirectory();
+        new File(projectRoot.toFile(), "subproject1/subproject11").mkdirs();
+        new File(projectRoot.toFile(), "subproject2").mkdirs();
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot.toFile(),
                 projectRoot.getFileName().toString());
@@ -403,7 +407,8 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         final String reportNonAligned = System.getProperty("reportNonAligned");
         assertThat(reportNonAligned).isNotEmpty().isEqualTo(Boolean.TRUE.toString());
         final Path projectRoot = tempDir.newFolder("multi-module").toPath();
-        assertThat(projectRoot).isDirectory();
+        new File(projectRoot.toFile(), "subproject1/subproject11").mkdirs();
+        new File(projectRoot.toFile(), "subproject2").mkdirs();
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot.toFile(),
                 projectRoot.getFileName().toString());

@@ -17,7 +17,9 @@ plugins {
     id 'java'
 }
 
-sourceCompatibility = 1.8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+}
 
 ext {
     customVersion = new CustomVersion( '1.0.1', project )

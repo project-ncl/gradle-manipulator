@@ -9,6 +9,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +21,7 @@ import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.commonjava.maven.ext.common.ManipulationException;
 import org.commonjava.maven.ext.io.rest.DefaultTranslator;
 import org.gradle.api.Project;
+import org.gradle.util.GradleVersion;
 import org.jboss.gm.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.utils.FileUtils;
@@ -71,6 +73,8 @@ public class GrpcLikeLayoutWithPartialGroupFunctionalTest
     @Test
     public void ensureAlignmentFileCreatedAndAlignmentTaskRun()
             throws IOException, URISyntaxException, ManipulationException {
+        // XXX: Spring plugins uses org/gradle/api/tasks/Upload
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("9.0.0")) < 0);
 
         final File projectRoot = tempDir.newFolder("grpc-like-layout-with-partial-group");
         final Map<String, String> props = Collections.singletonMap(

@@ -32,10 +32,6 @@ gradlePlugin {
             }
         }
     }
-
-    // TODO: What to do here
-    // Disable creation of the plugin marker pom.
-    // this.isAutomatedPublishing = false
 }
 
 dependencies {
@@ -146,10 +142,4 @@ tasks.named("test") {
 
 tasks.named("functionalTest") {
     dependsOn("shadowJar")
-}
-
-if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.0")) {
-    tasks.named("generateMetadataFileForShadowPublication") {
-        dependsOn("jar")
-    }
 }

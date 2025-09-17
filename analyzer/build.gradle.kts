@@ -32,10 +32,6 @@ gradlePlugin {
             }
         }
     }
-
-    // TODO: What to do here
-    // Disable creation of the plugin marker pom.
-    // this.isAutomatedPublishing = false
 }
 
 dependencies {
@@ -160,15 +156,16 @@ val testSourcesJar by tasks.registering(Jar::class) {
     from(sourceSets["functionalTest"].java.srcDirs)
 }
 
-configure<PublishingExtension> {
-    publications {
-        getByName<MavenPublication>("shadow") {
-            artifact(testJar.get())
-            artifact(testSourcesJar.get())
+afterEvaluate {
+    configure<PublishingExtension> {
+        publications {
+            getByName<MavenPublication>("pluginMaven") {
+                artifact(testJar.get())
+                artifact(testSourcesJar.get())
+            }
         }
     }
 }
-
 tasks {
     // This is done in order to use the proper version in the init gradle files
     "processResources"(ProcessResources::class) {
@@ -203,10 +200,4 @@ tasks.named("test") {
 
 tasks.named("functionalTest") {
     dependsOn("shadowJar")
-}
-
-if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.0")) {
-    tasks.named("generateMetadataFileForShadowPublication") {
-        dependsOn("jar")
-    }
 }

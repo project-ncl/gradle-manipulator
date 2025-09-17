@@ -415,23 +415,36 @@ subprojects {
         }
 
         // configure publishing of the shadowJar
+        var publicationComponent = "shadow"
         if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("8.3")) {
-            configure<PublishingExtension> {
-                publications {
-                    create<MavenPublication>("shadow") {
-                        from(components["shadow"])
-                        artifact(sourcesJar.get())
-                        artifact(javadocJar.get())
-
-                        // we publish the init gradle file to make it easy for tools that use
-                        // the plugin to set it up without having to create their own init gradle file
-                        if (project.name == "analyzer") {
-                            artifact("${sourceSets["main"].output.resourcesDir}/analyzer-init.gradle") {
-                                classifier = "init"
-                                extension = "gradle"
+            if (project.name == "cli") {
+                configure<PublishingExtension> {
+                    publications {
+                        create<MavenPublication>(publicationComponent) {
+                            from(components["shadow"])
+                            artifact(sourcesJar.get())
+                            artifact(javadocJar.get())
+                            generatePom()
+                        }
+                    }
+                }
+            } else {
+                publicationComponent = "pluginMaven"
+                afterEvaluate {
+                    configure<PublishingExtension> {
+                        publications {
+                            getByName<MavenPublication>(publicationComponent) {
+                                // we publish the init gradle file to make it easy for tools that use
+                                // the plugin to set it up without having to create their own init gradle file
+                                if (project.name == "analyzer") {
+                                    artifact("${sourceSets["main"].output.resourcesDir}/analyzer-init.gradle") {
+                                        classifier = "init"
+                                        extension = "gradle"
+                                    }
+                                }
+                                generatePom()
                             }
                         }
-                        generatePom()
                     }
                 }
             }
@@ -445,7 +458,7 @@ subprojects {
             apply(plugin = "signing")
             signing {
                 useGpgCmd()
-                sign(publishing.publications["shadow"])
+                sign(publishing.publications[publicationComponent])
             }
         }
     } else {

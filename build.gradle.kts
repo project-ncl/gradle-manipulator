@@ -444,6 +444,13 @@ subprojects {
                                         classifier = "init"
                                         extension = "gradle"
                                     }
+                                    tasks.configureEach {
+                                        if (name == "jar") {
+                                            if (isReleaseBuild) {
+                                                mustRunAfter("signPluginMavenPublication")
+                                            }
+                                        }
+                                    }
                                 }
                                 generatePom()
                             }

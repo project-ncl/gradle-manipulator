@@ -126,12 +126,6 @@ tasks.named("check") {
     dependsOn(functionalTest)
 }
 
-tasks.configureEach {
-    if (name == "publishPluginJar") {
-        dependsOn("spotlessJava")
-    }
-}
-
 tasks.named("delombok") {
     dependsOn("spotlessJava")
 }

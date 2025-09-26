@@ -433,6 +433,9 @@ subprojects {
                 afterEvaluate {
                     configure<PublishingExtension> {
                         publications {
+                            withType<MavenPublication> {
+                                generatePom()
+                            }
                             getByName<MavenPublication>(publicationComponent) {
                                 // we publish the init gradle file to make it easy for tools that use
                                 // the plugin to set it up without having to create their own init gradle file
@@ -448,17 +451,18 @@ subprojects {
                     }
                 }
             }
+            apply(plugin = "signing")
+            afterEvaluate {
+                signing {
+                    setRequired({ isReleaseBuild })
+                    useGpgCmd()
+                    sign(publishing.publications[publicationComponent])
+                }
+            }
         }
         else {
             apply {
                 from("$rootDir/gradle/publish.gradle")
-            }
-        }
-        if (isReleaseBuild) {
-            apply(plugin = "signing")
-            signing {
-                useGpgCmd()
-                sign(publishing.publications[publicationComponent])
             }
         }
     } else {
@@ -474,12 +478,11 @@ subprojects {
             }
         }
 
-        if (isReleaseBuild) {
-            apply(plugin = "signing")
-            signing {
-                useGpgCmd()
-                sign(publishing.publications["mavenJava"])
-            }
+        apply(plugin = "signing")
+        signing {
+            setRequired({ isReleaseBuild })
+            useGpgCmd()
+            sign(publishing.publications["mavenJava"])
         }
     }
 
@@ -621,10 +624,9 @@ fun loadSettings(extension: MavenSettingsPluginExtension, repository: String) {
 
 val isReleaseBuild = ("true" == System.getProperty("release", ""))
 if (isReleaseBuild && org.gradle.util.GradleVersion.current().version != "${project.extra.get("gradleReleaseVersion")}") {
-    logger.info ("Running as release build")
     throw GradleException("Gradle ${project.extra.get("gradleReleaseVersion")} is required to release this project")
 } else if (isReleaseBuild) {
-    logger.info ("Running as release build")
+    logger.lifecycle ("Running as release build")
 }
 
 if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("8.3") &&

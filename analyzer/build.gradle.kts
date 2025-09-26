@@ -156,16 +156,6 @@ val testSourcesJar by tasks.registering(Jar::class) {
     from(sourceSets["functionalTest"].java.srcDirs)
 }
 
-afterEvaluate {
-    configure<PublishingExtension> {
-        publications {
-            getByName<MavenPublication>("pluginMaven") {
-                artifact(testJar.get())
-                artifact(testSourcesJar.get())
-            }
-        }
-    }
-}
 tasks {
     // This is done in order to use the proper version in the init gradle files
     "processResources"(ProcessResources::class) {
@@ -184,12 +174,6 @@ tasks.named("check") {
     dependsOn(functionalTest)
 }
 
-tasks.configureEach {
-    if (name == "publishPluginJar") {
-        dependsOn("spotlessJava")
-    }
-}
-
 tasks.named("delombok") {
     dependsOn("spotlessJava")
 }
@@ -200,4 +184,15 @@ tasks.named("test") {
 
 tasks.named("functionalTest") {
     dependsOn("shadowJar")
+}
+
+afterEvaluate {
+    configure<PublishingExtension> {
+        publications {
+            getByName<MavenPublication>("pluginMaven") {
+                artifact(testJar.get())
+                artifact(testSourcesJar.get())
+            }
+        }
+    }
 }

@@ -197,7 +197,7 @@ The plugins can be released using the following command (from the main branch of
 
     # Optional command: ./gradlew clean
 
-    ./gradlew --info release -Drelease=true
+    ./gradlew --info publishToCentral -Drelease=true
 
 The command will both publish the plugin to the Gradle Plugin Portal and to Maven Central.
 

@@ -138,8 +138,7 @@ tasks.withType<Wrapper>().configureEach {
 
 tasks.getByName("afterReleaseBuild") {
     dependsOn(
-        ":common:publish", ":analyzer:publish", ":manipulation:publish", ":cli:publish", ":analyzer:publishPlugins",
-        ":manipulation:publishPlugins"
+        ":publishToCentral", ":analyzer:publishPlugins", ":manipulation:publishPlugins"
     )
 }
 
@@ -531,6 +530,10 @@ subprojects {
                 eclipseConfigXml?.call(eclipse(), arrayOf(formatter))
             }
         }
+    }
+
+    tasks.withType<Javadoc>().configureEach {
+        options.quiet()
     }
 
     tasks.withType<JavaCompile>().configureEach {

@@ -533,7 +533,8 @@ subprojects {
     }
 
     tasks.withType<Javadoc>().configureEach {
-        options.quiet()
+        // https://github.com/gradle/gradle/issues/7038
+        (options as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:none", true)
     }
 
     tasks.withType<JavaCompile>().configureEach {

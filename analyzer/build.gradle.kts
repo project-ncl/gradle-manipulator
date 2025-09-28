@@ -174,10 +174,6 @@ tasks.named("check") {
     dependsOn(functionalTest)
 }
 
-tasks.named("delombok") {
-    dependsOn("spotlessJava")
-}
-
 tasks.named("test") {
     dependsOn("shadowJar")
 }
@@ -186,12 +182,23 @@ tasks.named("functionalTest") {
     dependsOn("shadowJar")
 }
 
+// We publish the init gradle file to make it easy for tools that use the plugin to set it up
+// without having to create their own init gradle file.
+configurations { create("analyzerConf") }
+val analyzerFile = layout.buildDirectory.file("resources/main/analyzer-init.gradle")
+val prepareAnalyzerInit = artifacts.add("analyzerConf", analyzerFile.get().asFile) {
+    classifier = "init"
+    extension = "gradle"
+    builtBy("processResources")
+}
+
 afterEvaluate {
     configure<PublishingExtension> {
         publications {
             getByName<MavenPublication>("pluginMaven") {
                 artifact(testJar.get())
                 artifact(testSourcesJar.get())
+                artifact(prepareAnalyzerInit)
             }
         }
     }

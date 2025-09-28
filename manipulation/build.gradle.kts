@@ -126,10 +126,6 @@ tasks.named("check") {
     dependsOn(functionalTest)
 }
 
-tasks.named("delombok") {
-    dependsOn("spotlessJava")
-}
-
 tasks.named("test") {
     dependsOn("shadowJar")
 }

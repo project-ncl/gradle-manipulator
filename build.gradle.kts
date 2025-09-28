@@ -435,24 +435,6 @@ subprojects {
                             withType<MavenPublication> {
                                 generatePom()
                             }
-                            getByName<MavenPublication>(publicationComponent) {
-                                // we publish the init gradle file to make it easy for tools that use
-                                // the plugin to set it up without having to create their own init gradle file
-                                if (project.name == "analyzer") {
-                                    artifact("${sourceSets["main"].output.resourcesDir}/analyzer-init.gradle") {
-                                        classifier = "init"
-                                        extension = "gradle"
-                                    }
-                                    tasks.configureEach {
-                                        if (name == "jar") {
-                                            if (isReleaseBuild) {
-                                                mustRunAfter("signPluginMavenPublication")
-                                            }
-                                        }
-                                    }
-                                }
-                                generatePom()
-                            }
                         }
                     }
                 }
@@ -494,6 +476,10 @@ subprojects {
 
     tasks.withType<Sign> {
         onlyIf { isReleaseBuild }
+        // Force ordering to avoid
+        // Reason: Task ':analyzer:jar' uses this output of task ':analyzer:signPluginMavenPublication'
+        // without declaring an explicit or implicit dependency.
+        mustRunAfter(tasks["jar"])
     }
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8

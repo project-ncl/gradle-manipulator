@@ -112,24 +112,10 @@ idea.module {
     }
 }
 
-val functionalTest = tasks.register<Test>("functionalTest") {
+tasks.register<Test>("functionalTest") {
     description = "Runs functional tests"
     group = "verification"
     testClassesDirs = sourceSets["functionalTest"].output.classesDirs
     classpath = sourceSets["functionalTest"].runtimeClasspath
     mustRunAfter(tasks["test"])
-}
-
-// Implicit dependencies detected by Gradle 7
-// See <https://docs.gradle.org/7.0/userguide/validation_problems.html#implicit_dependency>
-tasks.named("check") {
-    dependsOn(functionalTest)
-}
-
-tasks.named("test") {
-    dependsOn("shadowJar")
-}
-
-tasks.named("functionalTest") {
-    dependsOn("shadowJar")
 }

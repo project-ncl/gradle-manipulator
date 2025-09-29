@@ -138,7 +138,7 @@ tasks.withType<Wrapper>().configureEach {
 
 tasks.getByName("afterReleaseBuild") {
     dependsOn(
-        ":publishToCentral", ":analyzer:publishPlugins", ":manipulation:publishPlugins"
+        ":analyzer:publishPlugins", ":manipulation:publishPlugins", ":publishToCentral"
     )
 }
 
@@ -369,7 +369,7 @@ subprojects {
         // TODO: ### shadow 9 doesn't need this?
         // Make assemble/build task depend on shadowJar
         tasks["assemble"].dependsOn(tasks["shadowJar"])
-        tasks["build"].dependsOn(tasks["shadowJar"])
+        // tasks["build"].dependsOn(tasks["shadowJar"])
 
         tasks.withType<ShadowJar>().configureEach {
             // ensure that a single jar is built which is the shadowed one
@@ -479,7 +479,9 @@ subprojects {
         // Force ordering to avoid
         // Reason: Task ':analyzer:jar' uses this output of task ':analyzer:signPluginMavenPublication'
         // without declaring an explicit or implicit dependency.
-        mustRunAfter(tasks["jar"])
+        // dependsOn(tasks["jar"])
+        dependsOn(tasks["assemble"])
+        mustRunAfter(tasks["test"])
     }
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8

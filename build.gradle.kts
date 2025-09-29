@@ -138,7 +138,7 @@ tasks.withType<Wrapper>().configureEach {
 
 tasks.getByName("afterReleaseBuild") {
     dependsOn(
-        ":publishToCentral", ":analyzer:publishPlugins", ":manipulation:publishPlugins"
+        ":analyzer:publishPlugins", ":manipulation:publishPlugins", ":publishToCentral"
     )
 }
 
@@ -369,7 +369,7 @@ subprojects {
         // TODO: ### shadow 9 doesn't need this?
         // Make assemble/build task depend on shadowJar
         tasks["assemble"].dependsOn(tasks["shadowJar"])
-        tasks["build"].dependsOn(tasks["shadowJar"])
+        // tasks["build"].dependsOn(tasks["shadowJar"])
 
         tasks.withType<ShadowJar>().configureEach {
             // ensure that a single jar is built which is the shadowed one
@@ -435,24 +435,6 @@ subprojects {
                             withType<MavenPublication> {
                                 generatePom()
                             }
-                            getByName<MavenPublication>(publicationComponent) {
-                                // we publish the init gradle file to make it easy for tools that use
-                                // the plugin to set it up without having to create their own init gradle file
-                                if (project.name == "analyzer") {
-                                    artifact("${sourceSets["main"].output.resourcesDir}/analyzer-init.gradle") {
-                                        classifier = "init"
-                                        extension = "gradle"
-                                    }
-                                    tasks.configureEach {
-                                        if (name == "jar") {
-                                            if (isReleaseBuild) {
-                                                mustRunAfter("signPluginMavenPublication")
-                                            }
-                                        }
-                                    }
-                                }
-                                generatePom()
-                            }
                         }
                     }
                 }
@@ -494,6 +476,12 @@ subprojects {
 
     tasks.withType<Sign> {
         onlyIf { isReleaseBuild }
+        // Force ordering to avoid
+        // Reason: Task ':analyzer:jar' uses this output of task ':analyzer:signPluginMavenPublication'
+        // without declaring an explicit or implicit dependency.
+        // dependsOn(tasks["jar"])
+        dependsOn(tasks["assemble"])
+        mustRunAfter(tasks["test"])
     }
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -533,7 +521,8 @@ subprojects {
     }
 
     tasks.withType<Javadoc>().configureEach {
-        options.quiet()
+        // https://github.com/gradle/gradle/issues/7038
+        (options as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:none", true)
     }
 
     tasks.withType<JavaCompile>().configureEach {

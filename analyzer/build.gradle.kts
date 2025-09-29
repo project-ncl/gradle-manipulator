@@ -131,7 +131,7 @@ idea.module {
     }
 }
 
-val functionalTest = tasks.register<Test>("functionalTest") {
+tasks.register<Test>("functionalTest") {
     description = "Runs functional tests"
     group = "verification"
     testClassesDirs = sourceSets["functionalTest"].output.classesDirs
@@ -168,22 +168,13 @@ tasks {
     }
 }
 
-// Implicit dependencies detected by Gradle 7
-// See <https://docs.gradle.org/7.0/userguide/validation_problems.html#implicit_dependency>
-tasks.named("check") {
-    dependsOn(functionalTest)
-}
-
-tasks.named("delombok") {
-    dependsOn("spotlessJava")
-}
-
-tasks.named("test") {
-    dependsOn("shadowJar")
-}
-
-tasks.named("functionalTest") {
-    dependsOn("shadowJar")
+// We publish the init gradle file to make it easy for tools that use the plugin to set it up
+// without having to create their own init gradle file.
+val analyzerFile = layout.buildDirectory.file("resources/main/analyzer-init.gradle")
+val prepareAnalyzerInit = artifacts.add("default", analyzerFile.get().asFile) {
+    classifier = "init"
+    extension = "gradle"
+    builtBy("processResources")
 }
 
 afterEvaluate {
@@ -192,6 +183,7 @@ afterEvaluate {
             getByName<MavenPublication>("pluginMaven") {
                 artifact(testJar.get())
                 artifact(testSourcesJar.get())
+                artifact(prepareAnalyzerInit)
             }
         }
     }

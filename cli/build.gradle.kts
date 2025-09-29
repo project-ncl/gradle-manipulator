@@ -61,10 +61,6 @@ tasks {
             attributes["Main-Class"] = "org.jboss.gm.cli.Main"
         }
     }
-
-    "test" {
-        dependsOn(":analyzer:assemble")
-    }
 }
 
 // Implicit dependencies detected by Gradle 7
@@ -74,10 +70,6 @@ tasks.named("test") {
 }
 
 if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.0")) {
-    tasks.named("publishShadowPublicationToMavenLocal") {
-        dependsOn("shadowJar")
-    }
-
     tasks.named("generateMetadataFileForShadowPublication") {
         dependsOn("jar")
     }

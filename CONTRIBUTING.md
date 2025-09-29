@@ -134,6 +134,17 @@ You may run only certain tests (e.g., the tests in a class named `TestClass`) us
 gradle test --tests TestClass
 ```
 
+
+### CI
+
+The CI runs over a multitude of versions using both JDK11 and JDK17. This is controlled by two workflows in the `.github/workflows/gradle.yml` file.
+
+Note that in order to handle using earlier versions of Gradle without making the build file incomprehensible we use `fix-build.sh`. This is run for all versions <8.3 (i.e. the first workflow). Currently this handles the following:
+
+* Gradle 4.10/5.0  : Modifies for use of archiveClassifier
+* Gradle 4.10      : Modifies for use of named tasks
+* Gradle 4/5/6/7.0 : Modifies for use of non-qualified GradleVersion API.
+
 ### Releasing
 
 The project has been configured to release both plugins to the Gradle Portal and to release to Maven Central.
@@ -204,7 +215,7 @@ The command will both publish the plugin to the Gradle Plugin Portal and to Mave
 Note: It is **very** important to execute this exact command when releasing. Adding other tasks (e.g., `clean`) can cause the release to fail, or even worse leave the release in an inconsistent state. If `clean` is needed, run it separately before the main command. If a release needs to be rolled back the following must be checked and cleaned up:
 
 * Gradle Plugins Portal (https://plugins.gradle.org/)
-* Sonatype Staging (https://oss.sonatype.org/#stagingRepositories)
+* Sonatype Deployments (https://central.sonatype.com/publishing/deployments)
 * Local and remote tags
 * Local and remote GIT commits for release
 
@@ -227,6 +238,7 @@ To change the version that will be deployed just add `-Pversion=whatever`.
 
 The artifacts can be pushed to the Sonatype snapshot repository (e.g., https://oss.sonatype.org/content/repositories/snapshots/org/jboss/gm/analyzer/analyzer/) with the following command:
 
-    gradle publishAllPublicationsToSonatype-nexus-snapshotsRepository
+    gradle publishAggregationToCentralPortalSnapshots
 
+Note that `publishToCentral` achieves the same for snapshot versions.
 Note that your username/password in `$HOME/.m2/settings.xml` for Sonatype must be setup.

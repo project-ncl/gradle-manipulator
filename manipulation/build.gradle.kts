@@ -8,7 +8,7 @@ group = "org.jboss.gm"
 gradlePlugin {
     // According to https://plugins.gradle.org/docs/publish-plugin the simplifications in plugin publishing requires
     // Gradle 7.6 or later. Therefore use reflection here.
-    if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("7.6")) {
+    if (GradleVersion.current() >= GradleVersion.version("7.6")) {
         var pluginPublishMethod = GradlePluginDevelopmentExtension::class.memberFunctions.find{it.name == "getWebsite"}
         @Suppress("UNCHECKED_CAST")
         var wProperty = pluginPublishMethod?.call(this) as Property<String>
@@ -26,7 +26,7 @@ gradlePlugin {
             implementationClass = "org.jboss.gm.manipulation.ManipulationPlugin"
             displayName = "GME Manipulation Plugin"
 
-            if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("7.6")) {
+            if (GradleVersion.current() >= GradleVersion.version("7.6")) {
                 var getTagsMethod = PluginDeclaration::class.memberFunctions.find { it.name == "getTags" }
                 @Suppress("UNCHECKED_CAST")
                 var sProperty = getTagsMethod?.call(this) as SetProperty<String>
@@ -74,7 +74,7 @@ dependencies {
     testImplementation(gradleTestKit())
 }
 
-if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("9.0.0")) {
+if (GradleVersion.current() >= GradleVersion.version("9.0.0")) {
     // Include a fake Upload purely for compilation purposes.
     sourceSets.getByName ("main") {
         java.srcDir("src/gradle9/java")
@@ -104,7 +104,7 @@ idea.module {
     // testSources / testResources only available from 7.4 and greater so can't just do:
     // testSources.from(sourceSets["functionalTest"].java.srcDirs).
     // Not bothering to handle other versions as we're developing on later Gradle now.
-    if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("7.4")) {
+    if (GradleVersion.current() >= GradleVersion.version("7.4")) {
         var rTestSources = IdeaModule::class.memberFunctions.find{it.name == "getTestSources"}
         var fileCollection = rTestSources?.call(this) as ConfigurableFileCollection
         fileCollection.from(sourceSets["functionalTest"].java.srcDirs)

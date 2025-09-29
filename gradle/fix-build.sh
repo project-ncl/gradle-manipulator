@@ -30,8 +30,19 @@ esac
 case "${VERSION}" in
     4.10*)
         echo "Modifying build for named tasks"
-        find ../ -name 'build.gradle.kts' ! -path '*/functTest/*' -print0 | xargs -0 -t sed -i \
+        find ../ -name 'build.gradle.kts' ! -path '*/functTest/*' -print0 | xargs -0 sed -i \
              -e 's|tasks.named[(]|tasks.getByName(|g;'
+        ;;
+    *)
+        echo "Not modifying build"
+        ;;
+esac
+
+case "${VERSION}" in
+    4.10*|5.*|6.*|7.0*)
+        echo "Modifying build for GradleVersion"
+        find ../ -name 'build.gradle.kts' -print0 | xargs -0 sed -i \
+             -e 's|GradleVersion|org.gradle.util.GradleVersion|g;'
         ;;
     *)
         echo "Not modifying build"

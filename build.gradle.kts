@@ -138,6 +138,7 @@ tasks.withType<Wrapper>().configureEach {
 
 tasks.getByName("afterReleaseBuild") {
     dependsOn(
+        ":common:publish", ":analyzer:publish", ":manipulation:publish", ":cli:publish",
         ":analyzer:publishPlugins", ":manipulation:publishPlugins", ":publishToCentral"
     )
 }
@@ -624,11 +625,14 @@ fun loadSettings(extension: MavenSettingsPluginExtension, repository: String) {
 }
 
 
-val isReleaseBuild = ("true" == System.getProperty("release", ""))
+val isReleaseBuild = ("true" == gradle.startParameter.projectProperties.getOrDefault("release", ""))
 if (isReleaseBuild && org.gradle.util.GradleVersion.current().version != "${project.extra.get("gradleReleaseVersion")}") {
     throw GradleException("Gradle ${project.extra.get("gradleReleaseVersion")} is required to release this project")
 } else if (isReleaseBuild) {
     logger.lifecycle ("Running as release build")
+}
+if (System.getProperty("release") != null) {
+    throw GradleException("Pass release=true as a -P parameter")
 }
 
 if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("8.3") &&

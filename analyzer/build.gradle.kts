@@ -8,11 +8,13 @@ group = "org.jboss.gm"
 // According to https://plugins.gradle.org/docs/publish-plugin the simplifications in plugin publishing requires
 // Gradle 7.6 or later. Therefore use reflection here.
 gradlePlugin {
-    if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("7.6")) {
+    if (GradleVersion.current() >= GradleVersion.version("7.6")) {
         var pluginPublishMethod = GradlePluginDevelopmentExtension::class.memberFunctions.find{it.name == "getWebsite"}
-        var wProperty = pluginPublishMethod?.call(this) as Property<String>
+        @Suppress("UNCHECKED_CAST")
+        var wProperty: Property<String> = pluginPublishMethod?.call(this) as Property<String>
         wProperty.set("https://project-ncl.github.io/gradle-manipulator")
         pluginPublishMethod = GradlePluginDevelopmentExtension::class.memberFunctions.find{it.name == "getVcsUrl"}
+        @Suppress("UNCHECKED_CAST")
         wProperty = pluginPublishMethod?.call(this) as Property<String>
         wProperty.set("https://github.com/project-ncl/gradle-manipulator.git")
     }
@@ -24,9 +26,9 @@ gradlePlugin {
             implementationClass = "org.jboss.gm.analyzer.alignment.AlignmentPlugin"
             displayName = "GME Manipulation Plugin"
 
-            if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("7.6")) {
-                var getTagsMethod =
-                    PluginDeclaration::class.memberFunctions.find { it.name == "getTags" }
+            if (GradleVersion.current() >= GradleVersion.version("7.6")) {
+                var getTagsMethod = PluginDeclaration::class.memberFunctions.find { it.name == "getTags" }
+                @Suppress("UNCHECKED_CAST")
                 var sProperty = getTagsMethod?.call(this) as SetProperty<String>
                 sProperty.set(listOf("versions", "alignment"))
             }
@@ -121,7 +123,7 @@ idea.module {
     // testSources / testResources only available from 7.4 and greater so can't just do:
     // testSources.from(sourceSets["functionalTest"].java.srcDirs)
     // Not bothering to handle other versions as we're developing on later Gradle now.
-    if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("7.4")) {
+    if (GradleVersion.current() >= GradleVersion.version("7.4")) {
         var rTestSources = IdeaModule::class.memberFunctions.find{it.name == "getTestSources"}
         var fileCollection = rTestSources?.call(this) as ConfigurableFileCollection
         fileCollection.from(sourceSets["functionalTest"].java.srcDirs)

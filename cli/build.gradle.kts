@@ -69,7 +69,7 @@ tasks.named("test") {
     dependsOn("shadowJar")
 }
 
-if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("5.0")) {
+if (GradleVersion.current() >= GradleVersion.version("5.0")) {
     tasks.named("generateMetadataFileForShadowPublication") {
         dependsOn("jar")
     }

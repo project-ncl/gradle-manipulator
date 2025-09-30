@@ -66,6 +66,7 @@ plugins {
         GradleVersion.current() >= GradleVersion.version("9.0.0") -> {
             id("com.adarshr.test-logger") version "4.0.0"
             id("com.gradleup.shadow") version "9.0.2" apply false
+            id("com.gradleup.nmcp.aggregation") version "1.2.0" apply false
         }
         // For all Gradle 8.x after 8.3 (which is used for release). Note when running with release
         // enabled we were encountering https://github.com/GradleUp/shadow/issues/875
@@ -74,7 +75,7 @@ plugins {
             id("com.adarshr.test-logger") version "4.0.0"
             id("com.gradleup.shadow") version "8.3.9" apply false
             // TODO: Can't reset wrapper with this so for IntelliJ might need to be commented out :-(
-            id("com.gradleup.nmcp.aggregation") version "1.1.0" apply false
+            id("com.gradleup.nmcp.aggregation") version "1.2.0" apply false
         }
     }
 
@@ -430,6 +431,7 @@ subprojects {
                 }
             } else {
                 publicationComponent = "pluginMaven"
+                // Using afterEvaluate : https://github.com/GradleUp/shadow/issues/1748
                 afterEvaluate {
                     configure<PublishingExtension> {
                         publications {
@@ -635,8 +637,8 @@ if (System.getProperty("release") != null) {
     throw GradleException("Pass release=true as a -P parameter")
 }
 
-if (GradleVersion.current() >= GradleVersion.version("8.3") &&
-    GradleVersion.current() < GradleVersion.version("9.0.0")) {
+if (GradleVersion.current() >= GradleVersion.version("8.3") )
+{
     // LinkageError: loader constraint violation from GMEFunctionalTest otherwise
     if (System.getProperty("gmeFunctionalTest") == null) {
         val mavenExtension =

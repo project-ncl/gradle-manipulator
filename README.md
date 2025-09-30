@@ -22,7 +22,7 @@ to the [Maven POM Manipulator Extension](https://github.com/release-engineering/
 Both plugins work in conjunction and therefore the same version is required for each. The analyzer plugin will inject a
 reference to the manipulation plugin.
 
-The plugins are compatible with Gradle versions 4.10 through 7.x. Both running and building have been tested on these
+The plugins are compatible with Gradle versions 4.10 through 9.x. Both running and building have been tested on these
 versions. It may be possible to run with a 4.x version older than 4.10. However, it is likely that version 4.10 will
 remain the oldest version that is officially supported due to major changes between that version and older versions.
 

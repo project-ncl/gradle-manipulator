@@ -179,6 +179,7 @@ val prepareAnalyzerInit = artifacts.add("default", analyzerFile.get().asFile) {
     builtBy("processResources")
 }
 
+// Using afterEvaluate : https://github.com/GradleUp/shadow/issues/1748
 afterEvaluate {
     configure<PublishingExtension> {
         publications {

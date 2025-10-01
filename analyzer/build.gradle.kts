@@ -1,19 +1,21 @@
 @file:Suppress("UnstableApiUsage")
 
-import org.gradle.plugins.ide.idea.model.IdeaModule
 import kotlin.reflect.full.memberFunctions
+import org.gradle.plugins.ide.idea.model.IdeaModule
 
 group = "org.jboss.gm"
 
-// According to https://plugins.gradle.org/docs/publish-plugin the simplifications in plugin publishing requires
+// According to https://plugins.gradle.org/docs/publish-plugin the simplifications in plugin
+// publishing requires
 // Gradle 7.6 or later. Therefore use reflection here.
 gradlePlugin {
     if (GradleVersion.current() >= GradleVersion.version("7.6")) {
-        var pluginPublishMethod = GradlePluginDevelopmentExtension::class.memberFunctions.find{it.name == "getWebsite"}
+        var pluginPublishMethod =
+            GradlePluginDevelopmentExtension::class.memberFunctions.find { it.name == "getWebsite" }
         @Suppress("UNCHECKED_CAST")
         var wProperty: Property<String> = pluginPublishMethod?.call(this) as Property<String>
         wProperty.set("https://project-ncl.github.io/gradle-manipulator")
-        pluginPublishMethod = GradlePluginDevelopmentExtension::class.memberFunctions.find{it.name == "getVcsUrl"}
+        pluginPublishMethod = GradlePluginDevelopmentExtension::class.memberFunctions.find { it.name == "getVcsUrl" }
         @Suppress("UNCHECKED_CAST")
         wProperty = pluginPublishMethod?.call(this) as Property<String>
         wProperty.set("https://github.com/project-ncl/gradle-manipulator.git")
@@ -28,8 +30,7 @@ gradlePlugin {
 
             if (GradleVersion.current() >= GradleVersion.version("7.6")) {
                 var getTagsMethod = PluginDeclaration::class.memberFunctions.find { it.name == "getTags" }
-                @Suppress("UNCHECKED_CAST")
-                var sProperty = getTagsMethod?.call(this) as SetProperty<String>
+                @Suppress("UNCHECKED_CAST") var sProperty = getTagsMethod?.call(this) as SetProperty<String>
                 sProperty.set(listOf("versions", "alignment"))
             }
         }
@@ -38,7 +39,8 @@ gradlePlugin {
 
 dependencies {
     implementation(project(":common"))
-    // The shadow configuration is used in order to avoid adding gradle and groovy stuff to the shadowed jar
+    // The shadow configuration is used in order to avoid adding gradle and groovy stuff to the
+    // shadowed jar
     shadow(localGroovy())
     shadow(gradleApi())
 
@@ -50,20 +52,19 @@ dependencies {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
-        }
+    }
 
     implementation("org.commonjava.maven.ext:pom-manipulation-io:${project.extra.get("pmeVersion")}") {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
-        }
+    }
 
     implementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}") {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
-        }
-
+    }
 
     implementation("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")
 
@@ -88,7 +89,7 @@ dependencies {
     testImplementation("uk.org.webcompere:system-stubs-junit4:${project.extra.get("systemStubsVersion")}")
     testImplementation("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
     testImplementation("org.jboss.byteman:byteman-bmunit:${project.extra.get("bytemanVersion")}")
-    testImplementation(files ("${System.getProperty("java.home")}/../lib/tools.jar") )
+    testImplementation(files("${System.getProperty("java.home")}/../lib/tools.jar"))
     testImplementation("org.mockito:mockito-core:2.27.0")
     testImplementation("com.github.tomakehurst:wiremock-jre8:2.26.3")
     testImplementation(gradleKotlinDsl())
@@ -96,27 +97,23 @@ dependencies {
     testImplementation("pl.pragmatists:JUnitParams:1.1.1")
 }
 
-tasks.withType<Test>().configureEach {
-    systemProperties["jdk.attach.allowAttachSelf"] = "true"
-}
+tasks.withType<Test>().configureEach { systemProperties["jdk.attach.allowAttachSelf"] = "true" }
 
 // Separate source set and task for functional tests
-val functionalTestSourceSet = sourceSets.create("functionalTest") {
-    java.srcDir("src/functTest/java")
-    resources.srcDir("src/functTest/resources")
-    compileClasspath += sourceSets["main"].output
-    runtimeClasspath += output + compileClasspath
-}
+val functionalTestSourceSet =
+    sourceSets.create("functionalTest") {
+        java.srcDir("src/functTest/java")
+        resources.srcDir("src/functTest/resources")
+        compileClasspath += sourceSets["main"].output
+        runtimeClasspath += output + compileClasspath
+    }
 
-configurations.getByName("functionalTestImplementation") {
-    extendsFrom(configurations["testImplementation"])
-}
+configurations.getByName("functionalTestImplementation") { extendsFrom(configurations["testImplementation"]) }
 
-configurations.getByName("functionalTestRuntimeOnly") {
-    extendsFrom(configurations["testRuntimeOnly"])
-}
+configurations.getByName("functionalTestRuntimeOnly") { extendsFrom(configurations["testRuntimeOnly"]) }
 
-// Previously had to force the addition of the plugin-under-test-metadata.properties but this seems to solve it.
+// Previously had to force the addition of the plugin-under-test-metadata.properties but this seems
+// to solve it.
 gradlePlugin.testSourceSets(functionalTestSourceSet)
 
 idea.module {
@@ -124,10 +121,10 @@ idea.module {
     // testSources.from(sourceSets["functionalTest"].java.srcDirs)
     // Not bothering to handle other versions as we're developing on later Gradle now.
     if (GradleVersion.current() >= GradleVersion.version("7.4")) {
-        var rTestSources = IdeaModule::class.memberFunctions.find{it.name == "getTestSources"}
+        var rTestSources = IdeaModule::class.memberFunctions.find { it.name == "getTestSources" }
         var fileCollection = rTestSources?.call(this) as ConfigurableFileCollection
         fileCollection.from(sourceSets["functionalTest"].java.srcDirs)
-        var rTestResources = IdeaModule::class.memberFunctions.find{it.name == "getTestResources"}
+        var rTestResources = IdeaModule::class.memberFunctions.find { it.name == "getTestResources" }
         fileCollection = rTestResources?.call(this) as ConfigurableFileCollection
         fileCollection.from(sourceSets["functionalTest"].resources.srcDirs)
     }
@@ -139,45 +136,45 @@ tasks.register<Test>("functionalTest") {
     testClassesDirs = sourceSets["functionalTest"].output.classesDirs
     classpath = sourceSets["functionalTest"].runtimeClasspath
     mustRunAfter(tasks["test"])
-    // This will be used in the Wiremock tests - the port needs to match what Wiremock is set up to use
+    // This will be used in the Wiremock tests - the port needs to match what Wiremock is set up to
+    // use
     environment("DA_ENDPOINT_URL", "http://localhost:8089/da/rest/v-1")
     systemProperties["jdk.attach.allowAttachSelf"] = "true"
 }
 
-val testJar by tasks.registering(Jar::class) {
-    mustRunAfter(tasks["functionalTest"])
-    archiveClassifier.set("tests")
-    from(sourceSets["functionalTest"].output)
-    from(sourceSets["test"].output)
-}
+val testJar by
+    tasks.registering(Jar::class) {
+        mustRunAfter(tasks["functionalTest"])
+        archiveClassifier.set("tests")
+        from(sourceSets["functionalTest"].output)
+        from(sourceSets["test"].output)
+    }
 
 // Publish test source jar so it can be reused by manipulator-groovy-examples.
-val testSourcesJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("test-sources")
-    from(sourceSets["test"].allSource)
-    from(sourceSets["functionalTest"].java.srcDirs)
-}
+val testSourcesJar by
+    tasks.registering(Jar::class) {
+        archiveClassifier.set("test-sources")
+        from(sourceSets["test"].allSource)
+        from(sourceSets["functionalTest"].java.srcDirs)
+    }
 
 tasks {
     // This is done in order to use the proper version in the init gradle files
     "processResources"(ProcessResources::class) {
-        filesMatching("gme.gradle") {
-            expand(project.properties)
-        }
-        filesMatching("analyzer-init.gradle") {
-            expand(project.properties)
-        }
+        filesMatching("gme.gradle") { expand(project.properties) }
+        filesMatching("analyzer-init.gradle") { expand(project.properties) }
     }
 }
 
 // We publish the init gradle file to make it easy for tools that use the plugin to set it up
 // without having to create their own init gradle file.
 val analyzerFile = layout.buildDirectory.file("resources/main/analyzer-init.gradle")
-val prepareAnalyzerInit = artifacts.add("default", analyzerFile.get().asFile) {
-    classifier = "init"
-    extension = "gradle"
-    builtBy("processResources")
-}
+val prepareAnalyzerInit =
+    artifacts.add("default", analyzerFile.get().asFile) {
+        classifier = "init"
+        extension = "gradle"
+        builtBy("processResources")
+    }
 
 // Using afterEvaluate : https://github.com/GradleUp/shadow/issues/1748
 afterEvaluate {

@@ -245,14 +245,9 @@ allprojects {
                 eclipseConfigXml?.call(eclipse(), arrayOf(formatter))
             }
         }
-        kotlinGradle {
-            ktfmt().kotlinlangStyle().configure {
-                it.setMaxWidth(120) // Same as project-ncl/ide-config java length
-                it.setManageTrailingCommas(false)
-                it.setContinuationIndent(4)
-                it.setBlockIndent(4)
-            }
-        }
+    }
+    if (GradleVersion.current() >= GradleVersion.version("${project.extra.get("gradleReleaseVersion")}")) {
+        apply { from("$rootDir/gradle/spotless.gradle") }
     }
 
     tasks.withType<JavaCompile>().configureEach {

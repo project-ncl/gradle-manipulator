@@ -20,19 +20,19 @@ dependencies {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
-        }
+    }
 
     implementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}") {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
-        }
+    }
 
     implementation("org.commonjava.maven.ext:pom-manipulation-io:${project.extra.get("pmeVersion")}") {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
-        }
+    }
 
     implementation("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
     implementation("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
@@ -55,22 +55,12 @@ dependencies {
     testImplementation("org.eclipse.jgit:org.eclipse.jgit:${project.extra.get("jgitVersion")}")
 }
 
-tasks {
-    "jar"(Jar::class) {
-        manifest {
-            attributes["Main-Class"] = "org.jboss.gm.cli.Main"
-        }
-    }
-}
+tasks { "jar"(Jar::class) { manifest { attributes["Main-Class"] = "org.jboss.gm.cli.Main" } } }
 
 // Implicit dependencies detected by Gradle 7
 // See <https://docs.gradle.org/7.0/userguide/validation_problems.html#implicit_dependency>
-tasks.named("test") {
-    dependsOn("shadowJar")
-}
+tasks.named("test") { dependsOn("shadowJar") }
 
 if (GradleVersion.current() >= GradleVersion.version("5.0")) {
-    tasks.named("generateMetadataFileForShadowPublication") {
-        dependsOn("jar")
-    }
+    tasks.named("generateMetadataFileForShadowPublication") { dependsOn("jar") }
 }

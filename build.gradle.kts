@@ -3,16 +3,16 @@
 import com.adarshr.gradle.testlogger.theme.ThemeType
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.freefair.gradle.plugins.lombok.LombokExtension
-import net.linguica.gradle.maven.settings.LocalMavenSettingsLoader
-import net.linguica.gradle.maven.settings.MavenSettingsPlugin.MAVEN_SETTINGS_EXTENSION_NAME
-import net.linguica.gradle.maven.settings.MavenSettingsPluginExtension
-import org.ajoberstar.grgit.Grgit
-import org.apache.maven.settings.building.SettingsBuildingException
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.text.SimpleDateFormat
 import java.util.Date
 import kotlin.reflect.full.memberFunctions
+import net.linguica.gradle.maven.settings.LocalMavenSettingsLoader
+import net.linguica.gradle.maven.settings.MavenSettingsPlugin.MAVEN_SETTINGS_EXTENSION_NAME
+import net.linguica.gradle.maven.settings.MavenSettingsPluginExtension
+import org.ajoberstar.grgit.Grgit
+import org.apache.maven.settings.building.SettingsBuildingException
 
 plugins {
     java
@@ -111,17 +111,19 @@ plugins {
     }
 }
 
-// XXX: Jacoco plugin only supports Gradle >= 5.3 ; create empty task on those Gradle versions so that build does not fail
-if (GradleVersion.current() < GradleVersion.version("5.3")
-    || GradleVersion.current() >= GradleVersion.version("9.0.0")
-    ) {
-    tasks.register("AggregateJacocoReport")
-}
+tasks.withType<Wrapper>().configureEach { distributionType = Wrapper.DistributionType.ALL }
 
 if (!JavaVersion.current().isJava11Compatible) {
     throw GradleException("This build must be run with at least Java 11")
 } else if (GradleVersion.current() < GradleVersion.version("4.10")) {
     throw GradleException("This build must be run with at least Gradle 4.10")
+}
+
+// XXX: Jacoco plugin only supports Gradle >= 5.3 ; create empty task on those Gradle versions so that build does not
+// fail
+if (GradleVersion.current() < GradleVersion.version("5.3") ||
+    GradleVersion.current() >= GradleVersion.version("9.0.0")) {
+    tasks.register("AggregateJacocoReport")
 }
 
 apply(plugin = "net.researchgate.release")
@@ -133,22 +135,11 @@ release {
     gitConfig.requireBranch = "main"
 }
 
-tasks.withType<Wrapper>().configureEach {
-    distributionType = Wrapper.DistributionType.ALL
-}
-
-tasks.getByName("afterReleaseBuild") {
-    dependsOn(
-        ":common:publish", ":analyzer:publish", ":manipulation:publish", ":cli:publish",
-        ":analyzer:publishPlugins", ":manipulation:publishPlugins", ":publishToCentral"
-    )
-}
-
 // This was tasks.beforeReleaseBuild to hook into the release plugin system, but we are manually handling the task
 // ordering
 tasks.register("fixupReadme") {
     doLast {
-        if ("true" == System.getProperty("release","") && project == project.rootProject) {
+        if ("true" == System.getProperty("release", "") && project == project.rootProject) {
             val tmp = File(System.getProperty("java.io.tmpdir"))
             val source = File(project.rootDir, "README.md")
             val searchString = "https://repo1.maven.org/maven2/org/jboss/gm/analyzer"
@@ -164,8 +155,7 @@ tasks.register("fixupReadme") {
                     if (line.contains(searchString)) {
                         line.replaceFirst(
                             "($searchString)(.*)".toRegex(),
-                            "$1/${project.version}/analyzer-${project.version}-init.gradle".replace("-SNAPSHOT", "")
-                        )
+                            "$1/${project.version}/analyzer-${project.version}-init.gradle".replace("-SNAPSHOT", ""))
                     } else line
                 }
             }
@@ -174,7 +164,7 @@ tasks.register("fixupReadme") {
             val grgit = Grgit.open(mapOf("currentDir" to project.rootDir))
             // Only commit README if there are any changes.
             if (!grgit.status().isClean) {
-                logger.info ("Committing README update")
+                logger.info("Committing README update")
                 grgit.commit(mapOf("message" to "Committing README Version Changes", "paths" to setOf("README.md")))
                 grgit.push()
             }
@@ -182,24 +172,38 @@ tasks.register("fixupReadme") {
     }
 }
 
-// In https://github.com/researchgate/gradle-release/blob/main/src/main/groovy/net/researchgate/release/ReleasePlugin.groovy#L116,
-// the list of task interdependencies is specified. However, as per https://github.com/researchgate/gradle-release/issues/298,
-// we want to ensure the tag is done before the build so the manifest (etc.) points to the correct SHA. As the beforeReleaseBuild
+// In
+// https://github.com/researchgate/gradle-release/blob/main/src/main/groovy/net/researchgate/release/ReleasePlugin.groovy#L116,
+// the list of task interdependencies is specified. However, as per
+// https://github.com/researchgate/gradle-release/issues/298,
+// we want to ensure the tag is done before the build so the manifest (etc.) points to the correct SHA. As the
+// beforeReleaseBuild
 // then runs at the wrong point with this change, we manually inject a task (fixupReadme) below.
 tasks.getByName("preTagCommit") {
     logger.info("Altering preTagCommit to run after checkSnapshotDependencies instead of runBuildTasks")
-    setMustRunAfter(listOf(tasks["checkSnapshotDependencies"]) )
+    setMustRunAfter(listOf(tasks["checkSnapshotDependencies"]))
     dependsOn("fixupReadme")
 }
 
 tasks.getByName("runBuildTasks") {
     logger.info("Altering runBuildTasks to run after createReleaseTag instead of checkSnapshotDependencies")
-    setMustRunAfter(listOf(tasks["createReleaseTag"]) )
+    setMustRunAfter(listOf(tasks["createReleaseTag"]))
 }
 
 tasks.getByName("checkoutMergeFromReleaseBranch") {
     logger.info("Altering checkoutMergeFromReleaseBranch to run after runBuildTasks instead of createReleaseTag")
     setMustRunAfter(listOf(tasks["runBuildTasks"]))
+}
+
+tasks.getByName("afterReleaseBuild") {
+    dependsOn(
+        ":common:publish",
+        ":analyzer:publish",
+        ":manipulation:publish",
+        ":cli:publish",
+        ":analyzer:publishPlugins",
+        ":manipulation:publishPlugins",
+        ":publishToCentral")
 }
 
 allprojects {
@@ -208,18 +212,50 @@ allprojects {
     repositories {
         mavenCentral()
         mavenLocal()
-        maven {
-            url = uri("https://repo.gradle.org/gradle/libs-releases-local/")
+        maven { url = uri("https://repo.gradle.org/gradle/libs-releases-local/") }
+        maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
+        maven { url = uri("https://maven.repository.redhat.com/ga/") }
+    }
+
+    if (GradleVersion.current() < GradleVersion.version("5.4")) {
+        apply(plugin = "com.diffplug.gradle.spotless")
+    } else {
+        apply(plugin = "com.diffplug.spotless")
+    }
+
+    val spotlessConfig by configurations.creating
+    dependencies { spotlessConfig("org.jboss.pnc:ide-config:1.1.0") }
+
+    spotless {
+        java {
+            // Can't use asFile (from
+            // https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.resources/-text-resource/index.html )
+            // as that creates and writes the File immediately ... which is then deleted
+            // by Gradle clean. configProperties was only available from Spotless 7.0 (which requires Gradle >= 6.1.1)
+            if (GradleVersion.current() >= GradleVersion.version("${project.extra.get("gradleReleaseVersion")}")) {
+                removeUnusedImports()
+                importOrder(resources.text.fromArchiveEntry(spotlessConfig, "java-import-order.txt").asString())
+                val formatter = resources.text.fromArchiveEntry(spotlessConfig, "java-formatter.xml").asString()
+                // Using reflection instead of 'eclipse().configXml(formatter)' to avoid issues when earlier spotless
+                // plugin versions are used.
+                val eclipseConfigXml =
+                    com.diffplug.gradle.spotless.JavaExtension.EclipseConfig::class.memberFunctions.find {
+                        it.name == "configXml"
+                    }
+                eclipseConfigXml?.call(eclipse(), arrayOf(formatter))
+            }
         }
-        maven {
-            url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-        }
-        maven {
-            url = uri("https://maven.repository.redhat.com/ga/")
+    }
+    if (GradleVersion.current() >= GradleVersion.version("${project.extra.get("gradleReleaseVersion")}")) {
+        apply { from("$rootDir/gradle/spotless.gradle") }
+    }
+
+    tasks.withType<JavaCompile>().configureEach {
+        if (GradleVersion.current() >= GradleVersion.version("${project.extra.get("gradleReleaseVersion")}")) {
+            dependsOn("spotlessApply")
         }
     }
 }
-
 
 subprojects {
     extra["assertjVersion"] = "3.19.0"
@@ -247,12 +283,6 @@ subprojects {
     extra["slf4jVersion"] = "2.0.17"
     extra["systemStubsVersion"] = "2.1.8"
 
-    if (GradleVersion.current() < GradleVersion.version("5.4")) {
-        apply(plugin = "com.diffplug.gradle.spotless")
-    } else {
-        apply(plugin = "com.diffplug.spotless")
-    }
-
     apply(plugin = "idea")
     apply(plugin = "com.adarshr.test-logger")
     apply(plugin = "io.freefair.lombok")
@@ -260,9 +290,10 @@ subprojects {
     extra["lombokVersion"] = extensions.findByType(LombokExtension::class)?.version
 
     // XXX: Lombok plugin 3.x < 3.6.1 suffers from <https://github.com/freefair/gradle-plugins/issues/31>
-    if (GradleVersion.current() < GradleVersion.version("5.0")
-        || GradleVersion.current() >= GradleVersion.version("5.2")) {
-        // Don't generate lombok.config files ( https://docs.freefair.io/gradle-plugins/3.6.6/reference/#_lombok_config_handling )
+    if (GradleVersion.current() < GradleVersion.version("5.0") ||
+        GradleVersion.current() >= GradleVersion.version("5.2")) {
+        // Don't generate lombok.config files (
+        // https://docs.freefair.io/gradle-plugins/3.6.6/reference/#_lombok_config_handling )
         tasks.findByName("generateLombokConfig")?.enabled = false
     }
 
@@ -275,8 +306,18 @@ subprojects {
                 attributes["Build-Timestamp"] = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(Date())
                 attributes["Scm-Revision"] = Grgit.open(mapOf("currentDir" to project.rootDir)).use { g -> g.head().id }
                 attributes["Created-By"] = "Gradle ${gradle.gradleVersion}"
-                attributes["Build-Jdk"] = System.getProperty("java.version") + " ; " + System.getProperty("java.vendor") + " ; " + System.getProperty("java.vm.version")
-                attributes["Build-OS"] = System.getProperty("os.name") + " ; " + System.getProperty("os.arch") + " ; " + System.getProperty("os.version")
+                attributes["Build-Jdk"] =
+                    System.getProperty("java.version") +
+                        " ; " +
+                        System.getProperty("java.vendor") +
+                        " ; " +
+                        System.getProperty("java.vm.version")
+                attributes["Build-OS"] =
+                    System.getProperty("os.name") +
+                        " ; " +
+                        System.getProperty("os.arch") +
+                        " ; " +
+                        System.getProperty("os.version")
                 attributes["Implementation-Version"] = "${project.version}"
             }
         }
@@ -286,43 +327,41 @@ subprojects {
         apply(plugin = "com.gradle.plugin-publish")
 
         tasks.withType<ShadowJar>().configureEach {
-            dependencies {
-                exclude(dependency("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}"))
-            }
+            dependencies { exclude(dependency("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")) }
         }
     }
     apply(plugin = "maven-publish")
 
-    val sourcesJar by tasks.registering(Jar::class) {
-        archiveClassifier.set("sources")
-        from(sourceSets["main"].allSource)
-    }
+    val sourcesJar by
+        tasks.registering(Jar::class) {
+            archiveClassifier.set("sources")
+            from(sourceSets["main"].allSource)
+        }
 
-    val javadocJar by tasks.registering(Jar::class) {
-        archiveClassifier.set("javadoc")
-        from(tasks["javadoc"])
-    }
+    val javadocJar by
+        tasks.registering(Jar::class) {
+            archiveClassifier.set("javadoc")
+            from(tasks["javadoc"])
+        }
 
     // XXX: The code below emulates test fixtures as this feature only exists in Gradle 5.6+
-    val outputDirectories by configurations.creating {
+    val outputDirectories by configurations.creating {}
 
-    }
-
-    val testFixturesCompile by configurations.creating {
-        extendsFrom(configurations["implementation"])
-    }
+    val testFixturesCompile by configurations.creating { extendsFrom(configurations["implementation"]) }
 
     configurations.create("testFixturesRuntime") {
         extendsFrom(configurations["runtimeOnly"], configurations["testFixturesCompile"])
     }
 
-    val testFixturesUsageImplementation by configurations.creating {
-        extendsFrom(configurations["testFixturesCompile"], configurations["outputDirectories"])
-    }
+    val testFixturesUsageImplementation by
+        configurations.creating {
+            extendsFrom(configurations["testFixturesCompile"], configurations["outputDirectories"])
+        }
 
-    val testFixturesUsageRuntimeOnly by configurations.creating {
-        extendsFrom(configurations["testFixturesRuntime"], configurations["testFixturesUsageImplementation"])
-    }
+    val testFixturesUsageRuntimeOnly by
+        configurations.creating {
+            extendsFrom(configurations["testFixturesRuntime"], configurations["testFixturesUsageImplementation"])
+        }
 
     configurations["testImplementation"].extendsFrom(testFixturesUsageImplementation)
     configurations["testRuntimeOnly"].extendsFrom(testFixturesUsageRuntimeOnly)
@@ -342,10 +381,11 @@ subprojects {
         testFixturesCompile(gradleApi())
     }
 
-    val testFixturesJar by tasks.registering(Jar::class) {
-        archiveClassifier.set("test-fixtures")
-        from(sourceSets["testFixtures"].output)
-    }
+    val testFixturesJar by
+        tasks.registering(Jar::class) {
+            archiveClassifier.set("test-fixtures")
+            from(sourceSets["testFixtures"].output)
+        }
 
     if (project.name == "common") {
         artifacts {
@@ -396,7 +436,8 @@ subprojects {
                 }
             }
 
-            // When running under Gradle 4.x (regardless of what Gradle version compiled this), the internal kotlin version
+            // When running under Gradle 4.x (regardless of what Gradle version compiled this), the internal kotlin
+            // version
             // clashes with the kotlin version required by okhttp/okio. Therefore relocate the bundled version.
             relocate("kotlin", "shadow.kotlin")
 
@@ -404,10 +445,21 @@ subprojects {
                 manifest {
                     attributes["Built-By"] = System.getProperty("user.name")
                     attributes["Build-Timestamp"] = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(Date())
-                    attributes["Scm-Revision"] = Grgit.open(mapOf("currentDir" to project.rootDir)).use { g -> g.head().id }
+                    attributes["Scm-Revision"] =
+                        Grgit.open(mapOf("currentDir" to project.rootDir)).use { g -> g.head().id }
                     attributes["Created-By"] = "Gradle ${gradle.gradleVersion}"
-                    attributes["Build-Jdk"] = System.getProperty("java.version") + " ; " + System.getProperty("java.vendor") + " ; " + System.getProperty("java.vm.version")
-                    attributes["Build-OS"] = System.getProperty("os.name") + " ; " + System.getProperty("os.arch") + " ; " + System.getProperty("os.version")
+                    attributes["Build-Jdk"] =
+                        System.getProperty("java.version") +
+                            " ; " +
+                            System.getProperty("java.vendor") +
+                            " ; " +
+                            System.getProperty("java.vm.version")
+                    attributes["Build-OS"] =
+                        System.getProperty("os.name") +
+                            " ; " +
+                            System.getProperty("os.arch") +
+                            " ; " +
+                            System.getProperty("os.version")
                     attributes["Implementation-Version"] = "${project.version}"
                 }
             }
@@ -433,13 +485,7 @@ subprojects {
                 publicationComponent = "pluginMaven"
                 // Using afterEvaluate : https://github.com/GradleUp/shadow/issues/1748
                 afterEvaluate {
-                    configure<PublishingExtension> {
-                        publications {
-                            withType<MavenPublication> {
-                                generatePom()
-                            }
-                        }
-                    }
+                    configure<PublishingExtension> { publications { withType<MavenPublication> { generatePom() } } }
                 }
             }
             apply(plugin = "signing")
@@ -450,11 +496,8 @@ subprojects {
                     sign(publishing.publications[publicationComponent])
                 }
             }
-        }
-        else {
-            apply {
-                from("$rootDir/gradle/publish.gradle")
-            }
+        } else {
+            apply { from("$rootDir/gradle/publish.gradle") }
         }
     } else {
         publishing {
@@ -501,49 +544,17 @@ subprojects {
         showSkippedStandardStreams = false
     }
 
-
-    val spotlessConfig by configurations.creating
-    dependencies {
-        spotlessConfig("org.jboss.pnc:ide-config:1.1.0")
-    }
-
-    spotless {
-        java {
-            // Can't use asFile (from https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.resources/-text-resource/index.html )
-            // as that creates and writes the File immediately ... which is then deleted
-            // by Gradle clean. configProperties was only available from Spotless 7.0 (which requires Gradle >= 6.1.1)
-            if (GradleVersion.current() >= GradleVersion.version("${project.extra.get("gradleReleaseVersion")}")) {
-                removeUnusedImports()
-                importOrder(resources.text.fromArchiveEntry(spotlessConfig, "java-import-order.txt").asString())
-                val formatter = resources.text.fromArchiveEntry(spotlessConfig, "java-formatter.xml").asString()
-                // Using reflection instead of 'eclipse().configXml(formatter)' to avoid issues when earlier spotless plugin versions are used.
-                val eclipseConfigXml = com.diffplug.gradle.spotless.JavaExtension.EclipseConfig::class.memberFunctions.find{it.name == "configXml"}
-                eclipseConfigXml?.call(eclipse(), arrayOf(formatter))
-            }
-        }
-    }
-
     tasks.withType<Javadoc>().configureEach {
         // https://github.com/gradle/gradle/issues/7038
         (options as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:none", true)
     }
 
-    tasks.withType<JavaCompile>().configureEach {
-        if (GradleVersion.current() >= GradleVersion.version("${project.extra.get("gradleReleaseVersion")}")) {
-            dependsOn("spotlessApply")
-        }
-    }
-
     if (project.name != "cli") {
         // Exclude logback from dependency tree.
         configurations {
-            "implementation" {
-                exclude(group = "ch.qos.logback", module = "logback-classic")
-            }
+            "implementation" { exclude(group = "ch.qos.logback", module = "logback-classic") }
 
-            "implementation" {
-                exclude(group = "ch.qos.logback", module = "logback-core")
-            }
+            "implementation" { exclude(group = "ch.qos.logback", module = "logback-core") }
         }
     }
 }
@@ -619,26 +630,26 @@ fun loadSettings(extension: MavenSettingsPluginExtension, repository: String) {
                 }
             }
         }
-    } catch (e : SettingsBuildingException) {
+    } catch (e: SettingsBuildingException) {
         throw GradleScriptException("Unable to read local Maven settings.", e)
     }
     project.ext.set("central_username", "")
     project.ext.set("central_password", "")
 }
 
-
 val isReleaseBuild = ("true" == gradle.startParameter.projectProperties.getOrDefault("release", ""))
+
 if (isReleaseBuild && GradleVersion.current().version != "${project.extra.get("gradleReleaseVersion")}") {
     throw GradleException("Gradle ${project.extra.get("gradleReleaseVersion")} is required to release this project")
 } else if (isReleaseBuild) {
-    logger.lifecycle ("Running as release build")
+    logger.lifecycle("Running as release build")
 }
+
 if (System.getProperty("release") != null) {
     throw GradleException("Pass release=true as a -P parameter")
 }
 
-if (GradleVersion.current() >= GradleVersion.version("8.3") )
-{
+if (GradleVersion.current() >= GradleVersion.version("8.3")) {
     // LinkageError: loader constraint violation from GMEFunctionalTest otherwise
     if (System.getProperty("gmeFunctionalTest") == null) {
         val mavenExtension =
@@ -652,9 +663,7 @@ if (GradleVersion.current() >= GradleVersion.version("8.3") )
         // 2. We can't use Kotlin types in external files (https://github.com/gradle/gradle/issues/30878) and we
         //    don't want them eagerly precompiled anyway.
         apply(plugin = "com.gradleup.nmcp.aggregation")
-        apply {
-            from("$rootDir/gradle/nmcp.gradle")
-        }
+        apply { from("$rootDir/gradle/nmcp.gradle") }
         project.rootProject.tasks.register("publishToCentral") {
             if (project.version.toString().endsWith("-SNAPSHOT")) {
                 dependsOn("publishAggregationToCentralPortalSnapshots")

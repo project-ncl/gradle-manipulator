@@ -1,6 +1,6 @@
 package org.jboss.gm.manipulation.actions;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.jboss.gm.manipulation.ManipulationPlugin.LEGACY_MAVEN_PLUGIN;
 import static org.jboss.gm.manipulation.actions.MavenPublishingRepositoryAction.REPO_NAME;
 

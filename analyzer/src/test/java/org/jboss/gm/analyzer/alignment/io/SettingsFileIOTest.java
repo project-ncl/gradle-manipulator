@@ -8,7 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.internal.impldep.com.google.api.client.googleapis.testing.TestUtils;

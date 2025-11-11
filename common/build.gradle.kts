@@ -6,8 +6,8 @@ dependencies {
     compileOnly(gradleApi())
 
     implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
-    implementation("commons-lang:commons-lang:${project.extra.get("commonsVersion")}")
-    implementation("commons-io:commons-io:${project.extra.get("commonsVersion")}")
+    implementation("org.apache.commons:commons-lang3:${project.extra.get("commonsLangVersion")}")
+    implementation("commons-io:commons-io:${project.extra.get("commonsIOVersion")}")
     implementation("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
 
     implementation("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")

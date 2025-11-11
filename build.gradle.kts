@@ -262,7 +262,8 @@ subprojects {
     extra["atlasVersion"] = "0.17.2"
     extra["bytemanVersion"] = "4.0.15"
     extra["commonsBeanVersion"] = "1.9.4"
-    extra["commonsVersion"] = "2.6"
+    extra["commonsLangVersion"] = "3.19.0"
+    extra["commonsIOVersion"] = "2.21.0"
     // Used in the CLI. Only limited version range available in repo.gradle.org/ui/native/libs-releases-local
     extra["gradleVersion"] = "5.6.4"
     extra["groovyVersion"] = "3.0.17"

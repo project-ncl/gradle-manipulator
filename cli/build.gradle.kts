@@ -44,7 +44,7 @@ dependencies {
     runtimeOnly("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
     runtimeOnly("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
 
-    testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsVersion")}")
+    testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsIOVersion")}")
     testImplementation(project(path = ":common", configuration = "testFixturesCompile"))
 
     testImplementation(project(":analyzer"))

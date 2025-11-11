@@ -1,6 +1,6 @@
 package org.jboss.gm.analyzer.alignment;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

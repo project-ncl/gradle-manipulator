@@ -1,6 +1,6 @@
 package org.jboss.gm.manipulation.actions;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
 
 import java.util.Map;
@@ -27,7 +27,7 @@ public class AlignedDependencyResolverAction implements Action<DependencyResolve
 
     /**
      * Creates a new aligned dependency resolver action with the given module and resolved dependencies repository.
-     * 
+     *
      * @param module the module
      * @param resolvedDependenciesRepository the resolved dependencies repository
      */

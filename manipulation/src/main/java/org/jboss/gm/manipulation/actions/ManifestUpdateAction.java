@@ -1,12 +1,12 @@
 package org.jboss.gm.manipulation.actions;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang.reflect.MethodUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Action;
 import org.gradle.api.Project;

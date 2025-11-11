@@ -2,7 +2,7 @@ package org.jboss.gm.common.utils;
 
 import java.lang.reflect.InvocationTargetException;
 import lombok.experimental.UtilityClass;
-import org.apache.commons.lang.reflect.FieldUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;

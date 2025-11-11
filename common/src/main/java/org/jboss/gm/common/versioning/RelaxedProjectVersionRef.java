@@ -1,6 +1,6 @@
 package org.jboss.gm.common.versioning;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectRef;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;

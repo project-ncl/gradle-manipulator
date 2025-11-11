@@ -44,7 +44,7 @@ dependencies {
     shadow(localGroovy())
     shadow(gradleApi())
 
-    implementation("commons-lang:commons-lang:${project.extra.get("commonsVersion")}")
+    implementation("org.apache.commons:commons-lang3:${project.extra.get("commonsLangVersion")}")
     implementation("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
 
     implementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}") {
@@ -64,7 +64,7 @@ dependencies {
     testImplementation("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
     testImplementation("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
 
-    testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsVersion")}")
+    testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsIOVersion")}")
     testImplementation("junit:junit:${project.extra.get("junitVersion")}")
     testImplementation("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
     testImplementation("uk.org.webcompere:system-stubs-junit4:${project.extra.get("systemStubsVersion")}")

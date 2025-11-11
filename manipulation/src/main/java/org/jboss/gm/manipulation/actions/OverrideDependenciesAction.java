@@ -5,7 +5,7 @@ import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
 import org.gradle.api.Action;
 import org.gradle.api.Project;

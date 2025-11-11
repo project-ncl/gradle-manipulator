@@ -75,13 +75,13 @@ dependencies {
     implementation("org.apache.maven:maven-settings-builder:${project.extra.get("mavenVersion")}")
     implementation("org.apache.maven:maven-settings:${project.extra.get("mavenVersion")}")
 
-    implementation("commons-lang:commons-lang:${project.extra.get("commonsVersion")}")
-    implementation("commons-io:commons-io:${project.extra.get("commonsVersion")}")
+    implementation("org.apache.commons:commons-lang3:${project.extra.get("commonsLangVersion")}")
+    implementation("commons-io:commons-io:${project.extra.get("commonsIOVersion")}")
     implementation("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
 
     implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
 
-    testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsVersion")}")
+    testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsIOVersion")}")
     testImplementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
     testImplementation(project(path = ":common", configuration = "testFixturesCompile"))
     testImplementation(gradleTestKit())

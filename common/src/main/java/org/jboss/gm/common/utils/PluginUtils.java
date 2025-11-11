@@ -1,6 +1,6 @@
 package org.jboss.gm.common.utils;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.File;
 import java.io.IOException;

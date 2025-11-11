@@ -1,8 +1,8 @@
 group = "org.jboss.gm"
 
 dependencies {
-    implementation("ch.qos.logback:logback-classic:${project.extra.get("logbackVersion")}")
-    implementation("ch.qos.logback:logback-core:${project.extra.get("logbackVersion")}")
+    implementation("ch.qos.logback:logback-classic") { version { strictly("${project.extra.get("logbackVersion")}") } }
+    implementation("ch.qos.logback:logback-core") { version { strictly("${project.extra.get("logbackVersion")}") } }
 
     // Minimum Gradle API to provide the Project. Not using gradleApi as that pulls in too much.
     implementation("org.gradle:gradle-core-api:${project.extra.get("gradleVersion")}")
@@ -16,19 +16,19 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-annotations:${project.extra.get("jacksonVersion")}")
     implementation("com.fasterxml.jackson.core:jackson-core:${project.extra.get("jacksonVersion")}")
 
-    implementation("org.commonjava.maven.ext:pom-manipulation-core:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-core:${project.extra.get("pmeVersion")}") {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
     }
 
-    implementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common:${project.extra.get("pmeVersion")}") {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
     }
 
-    implementation("org.commonjava.maven.ext:pom-manipulation-io:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-io:${project.extra.get("pmeVersion")}") {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")

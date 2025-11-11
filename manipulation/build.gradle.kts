@@ -47,12 +47,15 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:${project.extra.get("commonsLangVersion")}")
     implementation("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
 
-    implementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common:${project.extra.get("pmeVersion")}") {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
+        exclude(group = "ch.qos.logback")
     }
-    implementation("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")
+    implementation("org.commonjava.atlas:atlas-identities:${project.extra.get("atlasVersion")}") {
+        exclude(group = "ch.qos.logback")
+    }
 
     // Owner: Need Java8 dependency which pulls in owner itself.
     implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")

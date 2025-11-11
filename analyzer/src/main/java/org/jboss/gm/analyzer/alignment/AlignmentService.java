@@ -6,11 +6,11 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.commonjava.atlas.maven.ident.ref.ProjectRef;
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.gradle.api.Project;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
 
 /**
  * Used by {@link org.jboss.gm.analyzer.alignment.AlignmentTask} in order to perform the alignment.

@@ -12,16 +12,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
-import org.commonjava.maven.ext.core.impl.Version;
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
+import org.commonjava.atlas.maven.ident.ref.SimpleProjectVersionRef;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.PluginUtils.DokkaVersion;
 import org.jboss.gm.common.utils.ProjectUtils;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.core.impl.Version;
 
 /**
  * Cache that is stored in the root project extensions.

@@ -1,18 +1,18 @@
 package org.jboss.gm.common.versioning;
 
 import org.apache.commons.lang3.StringUtils;
-import org.commonjava.maven.atlas.ident.ref.ArtifactRef;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.TypeAndClassifier;
-import org.commonjava.maven.atlas.ident.ref.VersionlessArtifactRef;
-import org.commonjava.maven.atlas.ident.version.SingleVersion;
-import org.commonjava.maven.atlas.ident.version.VersionSpec;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.commonjava.atlas.maven.ident.ref.ArtifactRef;
+import org.commonjava.atlas.maven.ident.ref.ProjectRef;
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
+import org.commonjava.atlas.maven.ident.ref.SimpleProjectRef;
+import org.commonjava.atlas.maven.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.atlas.maven.ident.ref.TypeAndClassifier;
+import org.commonjava.atlas.maven.ident.ref.VersionlessArtifactRef;
+import org.commonjava.atlas.maven.ident.version.SingleVersion;
+import org.commonjava.atlas.maven.ident.version.VersionSpec;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ResolvedDependency;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
 
 /**
  * This is a special ProjectVersionRef that allows a null for a version and delegates to the
@@ -21,8 +21,8 @@ import org.gradle.api.artifacts.ResolvedDependency;
  * The majority of this is merely a wrapper and not implemented - just enough to store the
  * original mapping key in the {@link org.jboss.gm.common.ManipulationCache} and provide comparison functionality.
  *
- * @see org.commonjava.maven.atlas.ident.ref.SimpleProjectRef
- * @see org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef
+ * @see org.commonjava.atlas.maven.ident.ref.SimpleProjectRef
+ * @see org.commonjava.atlas.maven.ident.ref.SimpleProjectVersionRef
  *
  * @author ncross
  */

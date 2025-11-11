@@ -18,9 +18,9 @@ import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.Sources;
 import org.aeonbits.owner.Converter;
 import org.aeonbits.owner.Reloadable;
-import org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence;
-import org.commonjava.maven.ext.core.state.RESTState;
-import org.commonjava.maven.ext.io.rest.Translator;
+import org.jboss.pnc.mavenmanipulator.core.state.DependencyState.DependencyPrecedence;
+import org.jboss.pnc.mavenmanipulator.core.state.RESTState;
+import org.jboss.pnc.mavenmanipulator.io.rest.Translator;
 
 /**
  * This class is used to hold all configuration values for the two plugins. The configuration is processed

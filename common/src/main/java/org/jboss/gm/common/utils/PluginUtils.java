@@ -20,11 +20,11 @@ import lombok.Setter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.commonjava.maven.atlas.ident.util.VersionUtils;
-import org.commonjava.maven.atlas.ident.version.InvalidVersionSpecificationException;
-import org.commonjava.maven.atlas.ident.version.VersionSpec;
-import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.io.FileIO;
+import org.commonjava.atlas.maven.ident.util.VersionUtils;
+import org.commonjava.atlas.maven.ident.version.InvalidVersionSpecificationException;
+import org.commonjava.atlas.maven.ident.version.VersionSpec;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.io.FileIO;
 import org.slf4j.Logger;
 
 public class PluginUtils {

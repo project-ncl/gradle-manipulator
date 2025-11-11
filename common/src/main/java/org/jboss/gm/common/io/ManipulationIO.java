@@ -4,10 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.FileUtils;
-import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.SerializationUtils;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
 
 public final class ManipulationIO {
     public static final String MANIPULATION_FILE_NAME = "manipulation.json";

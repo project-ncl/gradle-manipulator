@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
-import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
@@ -26,6 +24,8 @@ import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
 
 public final class TestUtils {
 

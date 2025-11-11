@@ -5,11 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
-import org.commonjava.maven.ext.core.impl.VersionCalculator;
-import org.commonjava.maven.ext.core.state.VersioningState;
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.gradle.api.Project;
 import org.gradle.api.internal.project.DefaultProject;
 import org.gradle.api.logging.Logger;
@@ -18,11 +14,15 @@ import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.ManipulationCache;
 import org.jboss.gm.common.io.ManipulationIO;
 import org.jboss.gm.common.logging.GMLogger;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.core.impl.VersionCalculator;
+import org.jboss.pnc.mavenmanipulator.core.state.VersioningState;
 
 /**
  * {@link AlignmentService.Manipulator} that changes the project version.
  * <br>
- * The heavy lifting is actually done by {@link org.commonjava.maven.ext.core.impl.VersionCalculator}
+ * The heavy lifting is actually done by {@link org.jboss.pnc.mavenmanipulator.core.impl.VersionCalculator}
  */
 public class UpdateProjectVersionCustomizer implements AlignmentService.Manipulator {
     private final Configuration configuration;

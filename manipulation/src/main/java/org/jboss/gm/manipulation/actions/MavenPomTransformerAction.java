@@ -2,8 +2,8 @@ package org.jboss.gm.manipulation.actions;
 
 import static org.jboss.gm.common.versioning.ProjectVersionFactory.withGAV;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
+import org.commonjava.atlas.maven.ident.ref.SimpleProjectRef;
 import org.gradle.api.Action;
 import org.gradle.api.XmlProvider;
 import org.jboss.gm.common.model.ManipulationModel;

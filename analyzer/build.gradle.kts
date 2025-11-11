@@ -48,25 +48,30 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-annotations:${project.extra.get("jacksonVersion")}")
     implementation("com.fasterxml.jackson.core:jackson-core:${project.extra.get("jacksonVersion")}")
 
-    implementation("org.commonjava.maven.ext:pom-manipulation-core:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-core:${project.extra.get("pmeVersion")}") {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
+        exclude(group = "ch.qos.logback")
     }
 
-    implementation("org.commonjava.maven.ext:pom-manipulation-io:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-io:${project.extra.get("pmeVersion")}") {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
+        exclude(group = "ch.qos.logback")
     }
 
-    implementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common:${project.extra.get("pmeVersion")}") {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
+        exclude(group = "ch.qos.logback")
     }
 
-    implementation("org.commonjava.maven.atlas:atlas-identities:${project.extra.get("atlasVersion")}")
+    implementation("org.commonjava.atlas:atlas-identities:${project.extra.get("atlasVersion")}") {
+        exclude(group = "ch.qos.logback")
+    }
 
     runtimeOnly("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
     runtimeOnly("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
@@ -82,7 +87,7 @@ dependencies {
     implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
 
     testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsIOVersion")}")
-    testImplementation("org.commonjava.maven.ext:pom-manipulation-common:${project.extra.get("pmeVersion")}")
+    testImplementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common:${project.extra.get("pmeVersion")}")
     testImplementation(project(path = ":common", configuration = "testFixturesCompile"))
     testImplementation(gradleTestKit())
     testImplementation("junit:junit:${project.extra.get("junitVersion")}")

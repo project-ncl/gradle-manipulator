@@ -4,13 +4,14 @@
  *
  */
 
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef
+import org.commonjava.atlas.maven.ident.ref.SimpleProjectRef
+import org.commonjava.atlas.maven.ident.ref.SimpleProjectRef
+import org.commonjava.atlas.maven.ident.ref.SimpleProjectVersionRef
 import org.commonjava.maven.ext.core.groovy.GMEBaseScript
 import org.commonjava.maven.ext.core.groovy.InvocationPoint
 import org.commonjava.maven.ext.core.groovy.InvocationStage
-import org.commonjava.maven.ext.io.rest.Translator
+import org.jboss.pnc.mavenmanipulator.io.rest.Translator
 import org.jboss.gm.common.groovy.BaseScript
 
 // Use BaseScript annotation to set script for evaluating the DSL.

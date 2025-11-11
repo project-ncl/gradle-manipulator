@@ -2,12 +2,12 @@ package org.jboss.gm.common.versioning;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.DefaultVersionComparator;
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.DefaultVersionSelectorScheme;
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionParser;
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionSelector;
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.strategy.VersionSelectorScheme;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
 
 public class DynamicVersionParser {
 

@@ -213,7 +213,7 @@ allprojects {
         mavenCentral()
         mavenLocal()
         maven { url = uri("https://repo.gradle.org/gradle/libs-releases-local/") }
-        maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
+        maven { url = uri("https://central.sonatype.com/repository/maven-snapshots") }
         maven { url = uri("https://maven.repository.redhat.com/ga/") }
     }
 
@@ -259,7 +259,7 @@ allprojects {
 
 subprojects {
     extra["assertjVersion"] = "3.19.0"
-    extra["atlasVersion"] = "0.17.2"
+    extra["atlasVersion"] = "1.1.8"
     extra["bytemanVersion"] = "4.0.15"
     extra["commonsBeanVersion"] = "1.9.4"
     extra["commonsLangVersion"] = "3.19.0"
@@ -280,7 +280,7 @@ subprojects {
     extra["mavenVersion"] = "3.9.5"
     extra["opentelemetryVersion"] = "1.5.0"
     extra["ownerVersion"] = "1.0.12"
-    extra["pmeVersion"] = "4.21"
+    extra["pmeVersion"] = "4.23-SNAPSHOT"
     extra["slf4jVersion"] = "2.0.17"
     extra["systemStubsVersion"] = "2.1.8"
 
@@ -427,8 +427,8 @@ subprojects {
                     // Sometimes minimisation takes away too much ... ensure we keep these.
                     exclude(dependency("io.opentelemetry:.*"))
                     exclude(dependency("com.fasterxml.jackson.core:.*:.*"))
-                    exclude(dependency("org.commonjava.maven.ext:.*:.*"))
-                    exclude(dependency("org.commonjava.maven.atlas:.*:.*"))
+                    exclude(dependency("org.commonjava.atlas.maven:.*:.*"))
+                    exclude(dependency("org.jboss.pnc.maven-manipulator:.*:.*"))
                     exclude(dependency("org.aeonbits.owner:.*:.*"))
                     exclude(dependency("org.slf4j:.*:.*"))
                     exclude(dependency("org.apache.maven:.*:.*"))
@@ -550,12 +550,10 @@ subprojects {
         (options as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:none", true)
     }
 
-    if (project.name != "cli") {
-        // Exclude logback from dependency tree.
-        configurations {
-            "implementation" { exclude(group = "ch.qos.logback", module = "logback-classic") }
-
-            "implementation" { exclude(group = "ch.qos.logback", module = "logback-core") }
+    configurations {
+        compileClasspath {
+            resolutionStrategy.force("ch.qos.logback:logback-classic:${project.extra.get("logbackVersion")}")
+            resolutionStrategy.force("ch.qos.logback:logback-core:${project.extra.get("logbackVersion")}")
         }
     }
 }

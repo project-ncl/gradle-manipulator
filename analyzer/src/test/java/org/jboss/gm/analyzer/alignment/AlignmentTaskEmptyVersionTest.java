@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.io.FileUtils;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;

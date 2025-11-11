@@ -16,12 +16,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.io.FileUtils;
-import org.commonjava.maven.atlas.ident.ref.InvalidRefException;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.commonjava.atlas.maven.ident.ref.InvalidRefException;
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
+import org.commonjava.atlas.maven.ident.ref.SimpleProjectVersionRef;
 import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.versioning.DynamicVersionParser;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
 
 /**
  * Utility class for lock file I/O.

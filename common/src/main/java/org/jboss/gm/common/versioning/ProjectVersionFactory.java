@@ -1,7 +1,7 @@
 package org.jboss.gm.common.versioning;
 
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
+import org.commonjava.atlas.maven.ident.ref.SimpleProjectVersionRef;
 
 /**
  * @author <a href="claprun@redhat.com">Christophe Laprun</a>

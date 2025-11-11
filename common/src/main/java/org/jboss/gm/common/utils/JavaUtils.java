@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
-import org.commonjava.maven.ext.common.ManipulationException;
 import org.gradle.internal.jvm.JavaInfo;
 import org.gradle.internal.jvm.Jvm;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
 
 @UtilityClass
 public class JavaUtils {

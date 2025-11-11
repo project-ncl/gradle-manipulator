@@ -13,16 +13,15 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.experimental.UtilityClass;
 import org.codehaus.groovy.control.CompilerConfiguration;
-import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
-import org.commonjava.maven.ext.core.groovy.InvocationPoint;
-import org.commonjava.maven.ext.core.groovy.InvocationStage;
-import org.commonjava.maven.ext.io.FileIO;
-import org.commonjava.maven.ext.io.resolver.GalleyInfrastructure;
 import org.gradle.api.Project;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.groovy.BaseScript;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationPoint;
+import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationStage;
+import org.jboss.pnc.mavenmanipulator.io.FileIO;
 import org.slf4j.Logger;
 
 @UtilityClass
@@ -58,9 +57,7 @@ public class GroovyUtils {
             } catch (IOException e) {
                 throw new ManipulationUncheckedException("Unable to create temporary directory", e);
             }
-
-            GalleyInfrastructure galleyInfra = new GalleyInfrastructure(null, null).init(null, null, tmpDir);
-            FileIO fileIO = new FileIO(galleyInfra);
+            FileIO fileIO = new FileIO(tmpDir);
 
             for (String script : scripts) {
                 logger.info("Attempting to read URL {}", script);
@@ -106,8 +103,16 @@ public class GroovyUtils {
                 logger.debug("InvocationPoint is {}", invocationPoint.invocationPoint());
                 stage = invocationPoint.invocationPoint();
             } else {
-                throw new ManipulationException(
-                        "Mandatory annotation '@InvocationPoint(invocationPoint = ' not declared");
+                org.commonjava.maven.ext.core.groovy.InvocationPoint legacyInvocationPoint = script.getClass()
+                        .getAnnotation(org.commonjava.maven.ext.core.groovy.InvocationPoint.class);
+                if (legacyInvocationPoint != null) {
+                    logger.warn("Found legacy InvocationPoint {}", legacyInvocationPoint.invocationPoint());
+                    // While they are the 'same' values they are different classes.
+                    stage = InvocationStage.valueOf(legacyInvocationPoint.invocationPoint().getStageValue());
+                } else {
+                    throw new ManipulationException(
+                            "Mandatory annotation '@InvocationPoint(invocationPoint = ' not declared");
+                }
             }
 
             if (targetStage == stage || stage == InvocationStage.ALL) {

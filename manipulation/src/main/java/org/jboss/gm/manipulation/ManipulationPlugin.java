@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.beanutils.ContextClassLoaderLocal;
-import org.commonjava.maven.ext.common.util.ManifestUtils;
 import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -27,6 +26,7 @@ import org.jboss.gm.manipulation.actions.OverrideDependenciesAction;
 import org.jboss.gm.manipulation.actions.PublishTaskTransformerAction;
 import org.jboss.gm.manipulation.actions.PublishingArtifactsAction;
 import org.jboss.gm.manipulation.actions.UploadTaskTransformerAction;
+import org.jboss.pnc.mavenmanipulator.common.util.ManifestUtils;
 
 /**
  * The manipulation plugin.

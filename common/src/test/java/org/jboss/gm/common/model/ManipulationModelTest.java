@@ -6,10 +6,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.commonjava.atlas.maven.ident.ref.SimpleProjectVersionRef;
 import org.gradle.api.logging.LogLevel;
 import org.jboss.gm.common.rules.LoggingRule;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
 import org.junit.Rule;
 import org.junit.Test;
 import uk.org.webcompere.systemstubs.rules.SystemErrRule;

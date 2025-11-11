@@ -1,6 +1,6 @@
-import org.commonjava.maven.ext.core.groovy.GMEBaseScript
-import org.commonjava.maven.ext.core.groovy.InvocationPoint
-import org.commonjava.maven.ext.core.groovy.InvocationStage
+import org.jboss.pnc.mavenmanipulator.core.groovy.GMEBaseScript
+import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationPoint
+import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationStage
 import org.jboss.gm.common.groovy.BaseScript
 import org.jboss.gm.common.utils.PluginUtils
 

@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.reflect.MethodUtils;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.java.archives.Manifest;
@@ -15,6 +14,7 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.bundling.Jar;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
 
 /**
  * Overrides specified Manifest entries.

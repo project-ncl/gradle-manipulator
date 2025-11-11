@@ -10,7 +10,7 @@ import kong.unirest.Unirest;
 import org.apache.commons.lang3.SystemUtils;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.tar.TarGZipUnArchiver;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
 
 public class JVMTestSetup {
     public static final Path GRADLE_JDK_HOME = Paths.get(System.getProperty("user.home"), ".gradle", "jdks");

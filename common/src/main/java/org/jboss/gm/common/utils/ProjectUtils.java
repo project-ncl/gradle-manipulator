@@ -3,7 +3,6 @@ package org.jboss.gm.common.utils;
 import java.lang.reflect.InvocationTargetException;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.internal.artifacts.configurations.ConflictResolution;
@@ -12,6 +11,7 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.provider.Property;
 import org.gradle.util.GradleVersion;
 import org.jboss.gm.common.logging.GMLogger;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
 
 @UtilityClass
 public class ProjectUtils {

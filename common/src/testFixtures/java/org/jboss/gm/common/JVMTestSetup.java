@@ -10,8 +10,6 @@ import kong.unirest.Unirest;
 import org.apache.commons.lang3.SystemUtils;
 import org.codehaus.plexus.archiver.UnArchiver;
 import org.codehaus.plexus.archiver.tar.TarGZipUnArchiver;
-import org.codehaus.plexus.logging.LogEnabled;
-import org.codehaus.plexus.logging.console.ConsoleLoggerManager;
 import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 
 public class JVMTestSetup {
@@ -32,7 +30,8 @@ public class JVMTestSetup {
     /**
      * This method will, on Linux, download and cache if it doesn't exist JDK8 and 17 installations.
      * <br/>
-     * This location ($HOME/.gradle/jdks) was chosen to match https://docs.gradle.org/current/userguide/toolchains.html.
+     * This location ($HOME/.gradle/jdks) was chosen to match the
+     * <a href="https://docs.gradle.org/current/userguide/toolchains.html">Gradle toolchain default</a>.
      * It utilises the same directory structure and location thereby matching potential prior downloads.
      */
     public static void setupJVM() throws IOException {
@@ -55,7 +54,6 @@ public class JVMTestSetup {
                     "https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u272-b10/" + filename)
                     .asFile(destFile.toString());
 
-            ((LogEnabled) ua).enableLogging(new ConsoleLoggerManager().getLoggerForComponent("plexus-archiver"));
             ua.setSourceFile(destFile.toFile());
             ua.setDestDirectory(GRADLE_JDK_HOME.toFile());
 
@@ -76,7 +74,6 @@ public class JVMTestSetup {
                     "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.12%2B7/" + filename)
                     .asFile(destFile.toString());
 
-            ((LogEnabled) ua).enableLogging(new ConsoleLoggerManager().getLoggerForComponent("plexus-archiver"));
             ua.setSourceFile(destFile.toFile());
             ua.setDestDirectory(GRADLE_JDK_HOME.toFile());
 

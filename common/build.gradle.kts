@@ -10,12 +10,6 @@ dependencies {
     implementation("commons-io:commons-io:${project.extra.get("commonsIOVersion")}")
     implementation("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
 
-    // Ensure logback is not updated transitively.
-    //    implementation("ch.qos.logback:logback-classic") { version {
-    // strictly("${project.extra.get("logbackVersion")}") } }
-    //    implementation("ch.qos.logback:logback-core") { version { strictly("${project.extra.get("logbackVersion")}") }
-    // }
-
     implementation("org.commonjava.atlas:atlas-identities:${project.extra.get("atlasVersion")}") {
         exclude(group = "ch.qos.logback")
     }

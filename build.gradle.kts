@@ -277,8 +277,8 @@ subprojects {
     extra["junitVersion"] = "4.13.2"
     // Must use 1.3.x series as 1.4.x and above requires JDK11.
     extra["logbackVersion"] = "1.3.15"
-    extra["mavenVersion"] = "3.6.3"
-    extra["opentelemetryVersion"] = "1.2.0"
+    extra["mavenVersion"] = "3.9.5"
+    extra["opentelemetryVersion"] = "1.5.0"
     extra["ownerVersion"] = "1.0.12"
     extra["pmeVersion"] = "4.21"
     extra["slf4jVersion"] = "2.0.17"

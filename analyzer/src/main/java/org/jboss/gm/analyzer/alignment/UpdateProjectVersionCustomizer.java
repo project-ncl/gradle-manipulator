@@ -98,10 +98,6 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
     private class GradleVersionCalculator extends VersionCalculator {
         private Map<ProjectVersionRef, String> translationMap = null;
 
-        GradleVersionCalculator() {
-            super(null);
-        }
-
         public String calculate(
                 final String groupId,
                 final String artifactId,

@@ -26,13 +26,12 @@ dependencies {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
         exclude(group = "ch.qos.logback")
+        exclude(group = "org.commonjava.maven.galley")
     }
 
     implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-core:${project.extra.get("pmeVersion")}") {
-        exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
-        exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
-        exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
-        exclude(group = "ch.qos.logback")
+        // Only needed for the Groovy references
+        isTransitive = false
     }
 
     implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-io:${project.extra.get("pmeVersion")}") {
@@ -40,6 +39,7 @@ dependencies {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
         exclude(group = "ch.qos.logback")
+        exclude(group = "org.commonjava.maven.galley")
     }
 
     runtimeOnly("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")

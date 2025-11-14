@@ -425,22 +425,23 @@ subprojects {
                 // Minimise the resulting uber-jars to ensure we don't have massive jars
                 minimize {
                     // Sometimes minimisation takes away too much ... ensure we keep these.
-                    exclude(dependency("io.opentelemetry:.*"))
+                    exclude(dependency("ch.qos.logback:.*:.*"))
                     exclude(dependency("com.fasterxml.jackson.core:.*:.*"))
+                    exclude(dependency("com.konghq:.*:.*"))
+                    exclude(dependency("io.opentelemetry:.*"))
+                    exclude(dependency("org.aeonbits.owner:.*:.*"))
+                    exclude(dependency("org.apache.ivy:.*:.*"))
+                    exclude(dependency("org.apache.maven:.*:.*"))
                     exclude(dependency("org.commonjava.atlas.maven:.*:.*"))
                     exclude(dependency("org.jboss.pnc.maven-manipulator:.*:.*"))
-                    exclude(dependency("org.aeonbits.owner:.*:.*"))
                     exclude(dependency("org.slf4j:.*:.*"))
-                    exclude(dependency("org.apache.maven:.*:.*"))
-                    exclude(dependency("org.apache.ivy:.*:.*"))
-                    exclude(dependency("com.konghq:.*:.*"))
                 }
             }
 
-            // When running under Gradle 4.x (regardless of what Gradle version compiled this), the internal kotlin
-            // version
-            // clashes with the kotlin version required by okhttp/okio. Therefore relocate the bundled version.
-            relocate("kotlin", "shadow.kotlin")
+            // We used to relocate the kotlin dependency due to clashes with Gradle 4.x. Its likely that was
+            // because of the opentelemetry-java-cli module that had incorrect dependencies due to the Quarkus BOM
+            // overriding what OpenTelemtetry requires and bringing in ancient versions of kotlin.
+            // relocate("kotlin", "shadow.kotlin")
 
             doFirst {
                 manifest {
@@ -548,13 +549,6 @@ subprojects {
     tasks.withType<Javadoc>().configureEach {
         // https://github.com/gradle/gradle/issues/7038
         (options as StandardJavadocDocletOptions).addBooleanOption("Xdoclint:none", true)
-    }
-
-    configurations {
-        compileClasspath {
-            resolutionStrategy.force("ch.qos.logback:logback-classic:${project.extra.get("logbackVersion")}")
-            resolutionStrategy.force("ch.qos.logback:logback-core:${project.extra.get("logbackVersion")}")
-        }
     }
 }
 

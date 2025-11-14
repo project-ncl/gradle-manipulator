@@ -21,6 +21,7 @@ dependencies {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
         exclude(group = "ch.qos.logback")
+        exclude(group = "org.commonjava.maven.galley")
     }
 
     implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common:${project.extra.get("pmeVersion")}") {
@@ -28,6 +29,7 @@ dependencies {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
         exclude(group = "ch.qos.logback")
+        exclude(group = "org.commonjava.maven.galley")
     }
 
     implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-io:${project.extra.get("pmeVersion")}") {
@@ -35,6 +37,7 @@ dependencies {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
         exclude(group = "ch.qos.logback")
+        exclude(group = "org.commonjava.maven.galley")
     }
 
     implementation("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")

@@ -68,7 +68,7 @@ public class SimpleExistingManipulationProjectFunctionalTest extends AbstractWir
     @Test
     @BMRule(
             name = "override-inprocess-configuration",
-            targetClass = "org.jboss.common.pnc.Configuration",
+            targetClass = "org.jboss.pnc.gradlemanipulator.common.Configuration",
             isInterface = true,
             targetMethod = "dependencyConfiguration()",
             targetLocation = "AT ENTRY",
@@ -104,14 +104,14 @@ public class SimpleExistingManipulationProjectFunctionalTest extends AbstractWir
             rules = {
                     @BMRule(
                             name = "override-dependency-configuration",
-                            targetClass = "org.jboss.common.pnc.Configuration",
+                            targetClass = "org.jboss.pnc.gradlemanipulator.common.Configuration",
                             isInterface = true,
                             targetMethod = "dependencyConfiguration()",
                             targetLocation = "AT ENTRY",
                             action = "return DependencyState$DependencyPrecedence.NONE"),
                     @BMRule(
                             name = "override-version-configuration",
-                            targetClass = "org.jboss.common.pnc.Configuration",
+                            targetClass = "org.jboss.pnc.gradlemanipulator.common.Configuration",
                             isInterface = true,
                             targetMethod = "versionModificationEnabled()",
                             targetLocation = "AT ENTRY",

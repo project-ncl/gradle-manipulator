@@ -34,7 +34,7 @@ import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 @BMUnitConfig(verbose = true, bmunitVerbose = true)
 @BMRule(
         name = "override-inprocess-configuration",
-        targetClass = "org.jboss.common.pnc.Configuration",
+        targetClass = "org.jboss.pnc.gradlemanipulator.common.Configuration",
         isInterface = true,
         targetMethod = "ignoreUnresolvableDependencies()",
         targetLocation = "AT ENTRY",

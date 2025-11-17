@@ -22,18 +22,20 @@ gradlePlugin {
     }
 
     plugins {
-        create("alignmentPlugin") {
-            description = "Plugin that that generates alignment metadata at \${project.rootDir}/manipulation.json"
-            id = "org.jboss.pnc.gradle-manipulator.analyzer"
-            implementationClass = "org.jboss.pnc.gradle-manipulator.analyzer.alignment.AlignmentPlugin"
-            displayName = "GME Manipulation Plugin"
+        create(
+            "alignmentPlugin",
+            Action {
+                description = "Plugin that that generates alignment metadata at \${project.rootDir}/manipulation.json"
+                id = "org.jboss.pnc.gradle-manipulator.analyzer"
+                implementationClass = "org.jboss.pnc.gradlemanipulator.analyzer.alignment.AlignmentPlugin"
+                displayName = "GME Alignment Plugin"
 
-            if (GradleVersion.current() >= GradleVersion.version("7.6")) {
-                var getTagsMethod = PluginDeclaration::class.memberFunctions.find { it.name == "getTags" }
-                @Suppress("UNCHECKED_CAST") var sProperty = getTagsMethod?.call(this) as SetProperty<String>
-                sProperty.set(listOf("versions", "alignment"))
-            }
-        }
+                if (GradleVersion.current() >= GradleVersion.version("7.6")) {
+                    var getTagsMethod = PluginDeclaration::class.memberFunctions.find { it.name == "getTags" }
+                    @Suppress("UNCHECKED_CAST") var sProperty = getTagsMethod?.call(this) as SetProperty<String>
+                    sProperty.set(listOf("versions", "alignment"))
+                }
+            })
     }
 }
 
@@ -106,12 +108,14 @@ tasks.withType<Test>().configureEach { systemProperties["jdk.attach.allowAttachS
 
 // Separate source set and task for functional tests
 val functionalTestSourceSet =
-    sourceSets.create("functionalTest") {
-        java.srcDir("src/functTest/java")
-        resources.srcDir("src/functTest/resources")
-        compileClasspath += sourceSets["main"].output
-        runtimeClasspath += output + compileClasspath
-    }
+    sourceSets.create(
+        "functionalTest",
+        Action {
+            java.srcDir("src/functTest/java")
+            resources.srcDir("src/functTest/resources")
+            compileClasspath += sourceSets["main"].output
+            runtimeClasspath += output + compileClasspath
+        })
 
 configurations.getByName("functionalTestImplementation") { extendsFrom(configurations["testImplementation"]) }
 

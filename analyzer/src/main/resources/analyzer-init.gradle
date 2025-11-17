@@ -4,7 +4,7 @@ initscript {
         mavenLocal()
         mavenCentral()
         maven {
-            url "https://oss.sonatype.org/content/repositories/snapshots"
+            url "https://central.sonatype.com/repository/maven-snapshots"
         }
     }
     dependencies {
@@ -16,5 +16,5 @@ allprojects {
 
     ext.gmeAnalyse = true
 
-    apply plugin: org.jboss.pnc.gradle-manipulator.analyzer.alignment.AlignmentPlugin
+    apply plugin: org.jboss.pnc.gradlemanipulator.analyzer.alignment.AlignmentPlugin
 }

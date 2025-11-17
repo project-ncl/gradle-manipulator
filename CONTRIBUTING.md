@@ -239,7 +239,7 @@ To change the version that will be deployed just add `-Pversion=whatever`.
 
 #### Releasing SNAPSHOT version
 
-The artifacts can be pushed to the Sonatype snapshot repository (e.g., https://oss.sonatype.org/content/repositories/snapshots/org/jboss/gm/analyzer/analyzer/) with the following command:
+The artifacts can be pushed to the Sonatype snapshot repository with the following command:
 
     gradle publishAggregationToCentralPortalSnapshots
 

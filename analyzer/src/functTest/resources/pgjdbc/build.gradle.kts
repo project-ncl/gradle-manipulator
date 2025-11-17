@@ -6,7 +6,7 @@
 
 plugins {
     java
-    id("org.jboss.gm.analyzer")
+    id("org.jboss.pnc.gradle-manipulator.analyzer")
 
 }
 buildscript { // Empty block

@@ -1,7 +1,7 @@
 import org.jboss.pnc.mavenmanipulator.core.groovy.GMEBaseScript
 import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationPoint
 import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationStage
-import org.jboss.gm.common.groovy.BaseScript
+import org.jboss.pnc.gradlemanipulator.common.groovy.BaseScript
 
 @GrabResolver(name='gradle', root='https://repo.gradle.org/gradle/libs-releases/')
 @Grab("org.gradle:gradle-base-services:6.1.1")

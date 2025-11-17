@@ -2,7 +2,7 @@
   {
     "latestVersion": "1.0.1.redhat-00001",
     "version": "1.0.1",
-    "groupId": "org.jboss.gm.analyzer.functest",
+    "groupId": "org.jboss.pnc.gradle-manipulator.analyzer.functest",
     "artifactId": "invalid"
   }
 ]

@@ -30,15 +30,15 @@ buildscript {
     // just rerun the analyzer plugin
     if (!project.hasProperty("gmeAnalyse")) {
         dependencies {
-            classpath "org.jboss.gm:manipulation:${project.version}"
+            classpath "org.jboss.pnc.gradle-manipulator:manipulation:${project.version}"
         }
     }
 }
 
 allprojects {
     if (!project.hasProperty("gmeAnalyse")) {
-        logger.info("Applying plugin org.jboss.gm.manipulation.ManipulationPlugin to project in {}", project.getProjectDir())
-        apply plugin: org.jboss.gm.manipulation.ManipulationPlugin
+        logger.info("Applying plugin org.jboss.pnc.gradle-manipulator.manipulation.ManipulationPlugin to project in {}", project.getProjectDir())
+        apply plugin: org.jboss.pnc.gradle-manipulator.manipulation.ManipulationPlugin
     }
 
 }

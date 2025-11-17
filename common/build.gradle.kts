@@ -1,4 +1,4 @@
-group = "org.jboss.gm"
+group = "org.jboss.pnc.gradle-manipulator"
 
 dependencies {
     runtimeOnly("org.apache.ivy:ivy:${project.extra.get("ivyVersion")}")

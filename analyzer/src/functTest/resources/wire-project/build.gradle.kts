@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 
 plugins {
-    id("org.jboss.gm.analyzer")
+    id("org.jboss.pnc.gradle-manipulator.analyzer")
 }
 
 buildscript {
@@ -35,7 +35,7 @@ allprojects {
   group = project.property("GROUP") as String
   version = project.property("VERSION_NAME") as String
 
-  apply(plugin = "org.jboss.gm.analyzer")
+  apply(plugin = "org.jboss.pnc.gradle-manipulator.analyzer")
 
   repositories {
     mavenCentral()

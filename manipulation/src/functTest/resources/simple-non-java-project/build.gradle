@@ -4,7 +4,7 @@
 
 plugins {
     // including this plugin directly instead of by an init script, which allows to use the freshly build version
-    id 'org.jboss.gm.manipulation'
+    id 'org.jboss.pnc.gradle-manipulator.manipulation'
     id 'maven-publish'
 }
 

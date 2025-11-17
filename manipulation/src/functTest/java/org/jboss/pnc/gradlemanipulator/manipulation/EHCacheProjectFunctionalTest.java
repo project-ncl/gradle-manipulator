@@ -1,0 +1,95 @@
+package org.jboss.pnc.gradlemanipulator.manipulation;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.pnc.gradlemanipulator.common.JVMTestSetup.JDK8_DIR;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.gradle.testkit.runner.BuildResult;
+import org.gradle.testkit.runner.TaskOutcome;
+import org.gradle.util.GradleVersion;
+import org.jboss.pnc.gradlemanipulator.common.JVMTestSetup;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.rules.TestRule;
+import uk.org.webcompere.systemstubs.rules.SystemOutRule;
+import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
+
+public class EHCacheProjectFunctionalTest {
+
+    @Rule
+    public TemporaryFolder tempDir = new TemporaryFolder();
+
+    @Rule
+    public final SystemOutRule systemOutRule = new SystemOutRule();
+
+    @Rule
+    public final TestRule restoreSystemProperties = new SystemPropertiesRule();
+
+    @BeforeClass
+    public static void setupJVM() throws IOException {
+        JVMTestSetup.setupJVM();
+    }
+
+    @Test
+    public void ensurePublish()
+            throws IOException, URISyntaxException, GitAPIException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.1")) >= 0);
+        // XXX: JavaConvention.java fails to compile due to API changes
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.0")) < 0);
+
+        final File simpleProjectRoot = tempDir.newFolder("ehcache3");
+
+        try (Git ignored = Git.cloneRepository()
+                .setURI("https://github.com/ehcache/ehcache3.git")
+                .setDirectory(simpleProjectRoot)
+                .setBranch("v3.10.2")
+                .setBranchesToClone(Collections.singletonList("refs/tags/v3.10.2"))
+                .setDepth(1)
+                .setNoTags()
+                .call()) {
+            System.out.println("Cloned ehcache3 to " + simpleProjectRoot);
+        }
+
+        // Now copy in overrides to enable this subset of unit test to work:
+        //   Modify Maven repository
+        //   Modify docs generation
+        //   Add Manipulation plugin
+        TestUtils.copyDirectory("ehcache3", simpleProjectRoot);
+        assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
+
+        final File publishDirectory = tempDir.newFolder("publish");
+        System.setProperty("AProxDeployUrl", "file://" + publishDirectory.toString());
+
+        final BuildResult buildResult = TestUtils.createGradleRunner()
+                .withProjectDir(simpleProjectRoot)
+                .withArguments(
+                        "-Dorg.gradle.java.home=" + JDK8_DIR,
+                        "--info",
+                        "publish",
+                        "-x",
+                        "test")
+                // While we normally want to run with debug enabled to capture coverage we need to fork to change
+                // the JVM in use.
+                .withDebug(false)
+                .build();
+
+        assertThat(
+                buildResult.task(":clustered:server:ehcache-service:publishMavenJavaPublicationToGMERepository")
+                        .getOutcome())
+                .isEqualTo(TaskOutcome.SUCCESS);
+        assertThat(publishDirectory).exists();
+        assertTrue(
+                systemOutRule.getLinesNormalized()
+                        .contains("Detected use of conflict resolution strategy strict"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("Found signing plugin; disabling"));
+    }
+}

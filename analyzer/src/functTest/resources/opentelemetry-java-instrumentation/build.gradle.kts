@@ -6,7 +6,7 @@ plugins {
   id("com.github.ben-manes.versions")
 //  id("otel.spotless-conventions")
 
-  id("org.jboss.gm.analyzer")
+  id("org.jboss.pnc.gradle-manipulator.analyzer")
 }
 
 apply(from = "version.gradle.kts")
@@ -14,5 +14,5 @@ apply(from = "version.gradle.kts")
 description = "OpenTelemetry instrumentations for Java"
 
 subprojects {
-    apply(plugin = "org.jboss.gm.analyzer")
+    apply(plugin = "org.jboss.pnc.gradle-manipulator.analyzer")
 }

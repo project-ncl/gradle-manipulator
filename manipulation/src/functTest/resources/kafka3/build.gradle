@@ -35,7 +35,7 @@ buildscript {
 plugins {
 
   // including this plugin directly instead of by an init script, which allows to use the freshly build version
-  id 'org.jboss.gm.manipulation'
+  id 'org.jboss.pnc.gradle-manipulator.manipulation'
 
   id 'com.diffplug.spotless' version '5.12.5'
   id 'idea'
@@ -78,7 +78,7 @@ spotless {
 
 allprojects {
 
-  apply plugin: 'org.jboss.gm.manipulation'
+  apply plugin: 'org.jboss.pnc.gradle-manipulator.manipulation'
 
   repositories {
     maven { url 'https://maven.repository.redhat.com/ga/' }
@@ -866,7 +866,7 @@ project(':core') {
     into "$buildDir/dependant-libs-${versions.scala}"
     duplicatesStrategy 'exclude'
   }
-    
+
   task genProtocolErrorDocs(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'org.apache.kafka.common.protocol.Errors'

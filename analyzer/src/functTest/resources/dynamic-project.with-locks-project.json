@@ -2,7 +2,7 @@
   {
     "latestVersion": "1.0.0",
     "version": "1.0.0",
-    "groupId": "org.jboss.gm.analyzer.functest",
+    "groupId": "org.jboss.pnc.gradle-manipulator.analyzer.functest",
     "artifactId": "dynamic"
   }
 ]

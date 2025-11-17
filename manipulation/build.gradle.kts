@@ -3,7 +3,7 @@
 import kotlin.reflect.full.memberFunctions
 import org.gradle.plugins.ide.idea.model.IdeaModule
 
-group = "org.jboss.gm"
+group = "org.jboss.pnc.gradle-manipulator"
 
 gradlePlugin {
     // According to https://plugins.gradle.org/docs/publish-plugin the simplifications in plugin
@@ -24,8 +24,8 @@ gradlePlugin {
             description =
                 "Plugin that reads the alignment data from \${project.rootDir}/manipulation.json and " +
                     "configures build and publishing to use those versions"
-            id = "org.jboss.gm.manipulation"
-            implementationClass = "org.jboss.gm.manipulation.ManipulationPlugin"
+            id = "org.jboss.pnc.gradle-manipulator.manipulation"
+            implementationClass = "org.jboss.pnc.gradle-manipulator.manipulation.ManipulationPlugin"
             displayName = "GME Manipulation Plugin"
 
             if (GradleVersion.current() >= GradleVersion.version("7.6")) {

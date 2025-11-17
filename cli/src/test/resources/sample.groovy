@@ -1,8 +1,8 @@
 import org.jboss.pnc.mavenmanipulator.core.groovy.GMEBaseScript
 import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationPoint
 import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationStage
-import org.jboss.gm.common.groovy.BaseScript
-import org.jboss.gm.common.utils.PluginUtils
+import org.jboss.pnc.gradlemanipulator.common.groovy.BaseScript
+import org.jboss.pnc.gradlemanipulator.common.utils.PluginUtils
 
 @GrabResolver(name='private', root='https://maven.repository.redhat.com/techpreview/all/')
 @Grab('org.zeroturnaround:zt-exec:1.10')

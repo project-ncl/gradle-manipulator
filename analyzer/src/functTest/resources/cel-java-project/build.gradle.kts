@@ -24,11 +24,11 @@ plugins {
   alias(libs.plugins.testrerun)
   alias(libs.plugins.nexus.publish)
   `cel-conventions`
-   id("org.jboss.gm.analyzer")
+   id("org.jboss.pnc.gradle-manipulator.analyzer")
 }
 
 allprojects {
-    apply(plugin="org.jboss.gm.analyzer")
+    apply(plugin="org.jboss.pnc.gradle-manipulator.analyzer")
 }
 
 mapOf("versionJacoco" to libs.versions.jacoco.get(), "versionJandex" to libs.versions.jandex.get())

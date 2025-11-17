@@ -15,13 +15,13 @@
  */
 
 plugins {
-    id 'org.jboss.gm.manipulation'
+    id 'org.jboss.pnc.gradle-manipulator.manipulation'
 }
 
 allprojects {
   version = findProperty('overrideVersion') ?: ehcacheVersion
 
-  apply plugin: 'org.jboss.gm.manipulation'
+  apply plugin: 'org.jboss.pnc.gradle-manipulator.manipulation'
 }
 
 if (deployUrl.contains('nexus')) {

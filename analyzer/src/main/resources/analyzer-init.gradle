@@ -8,7 +8,7 @@ initscript {
         }
     }
     dependencies {
-        classpath "org.jboss.gm:analyzer:${project.version}"
+        classpath "org.jboss.pnc.gradle-manipulator:analyzer:${project.version}"
     }
 }
 
@@ -16,5 +16,5 @@ allprojects {
 
     ext.gmeAnalyse = true
 
-    apply plugin: org.jboss.gm.analyzer.alignment.AlignmentPlugin
+    apply plugin: org.jboss.pnc.gradle-manipulator.analyzer.alignment.AlignmentPlugin
 }

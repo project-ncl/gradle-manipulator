@@ -143,6 +143,10 @@ jobs:
                 "username": "${{ secrets.SONATYPE_USERNAME }}",
                 "password": "${{ secrets.SONATYPE_PASSWORD }}"
             }]
+    - name: Extract Project version
+      id: project-version
+      run: echo "version=$(cat gradle.properties | awk -F "=" 'BEGIN{ORS=""} /version/{print $NF}')" >> "$GITHUB_OUTPUT"
     - uses: gradle/gradle-build-action@v3
+      if:  ${{ endsWith(steps.project-version.outputs.version, '-SNAPSHOT') }}
       with:
         arguments: build publishToCentral -x test -x funcTest

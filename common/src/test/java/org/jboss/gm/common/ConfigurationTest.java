@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.aeonbits.owner.ConfigFactory;
-import org.commonjava.maven.ext.io.rest.Translator;
+import org.jboss.pnc.mavenmanipulator.io.rest.Translator;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;

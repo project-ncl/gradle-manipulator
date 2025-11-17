@@ -2,11 +2,11 @@ package org.jboss.gm.common.logging;
 
 import java.util.Arrays;
 import org.aeonbits.owner.ConfigCache;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.jboss.gm.common.Configuration;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
 import org.slf4j.Marker;
 
 @SuppressWarnings("unused")

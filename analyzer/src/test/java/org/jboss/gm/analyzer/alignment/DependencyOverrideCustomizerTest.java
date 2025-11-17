@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import org.aeonbits.owner.ConfigFactory;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.jboss.gm.analyzer.alignment.AlignmentService.Response;

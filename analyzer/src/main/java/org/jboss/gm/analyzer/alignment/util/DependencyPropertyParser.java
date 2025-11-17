@@ -2,8 +2,8 @@ package org.jboss.gm.analyzer.alignment.util;
 
 import java.util.function.Predicate;
 import lombok.experimental.UtilityClass;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef;
+import org.commonjava.atlas.maven.ident.ref.ProjectRef;
+import org.commonjava.atlas.maven.ident.ref.SimpleProjectRef;
 import org.gradle.api.InvalidUserDataException;
 
 /**

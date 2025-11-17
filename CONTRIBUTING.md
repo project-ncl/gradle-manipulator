@@ -21,6 +21,9 @@ Contributions to the project are very welcome! Please submit pull requests with 
    * [Releasing SNAPSHOT version](#releasing-snapshot-version)
 <!-- TocDown End -->
 
+### Requirements
+
+Under the default Gradle version (currently 8.3) this requires JDK17 to build and JDK8 to run.
 
 ### Documentation
 
@@ -30,7 +33,7 @@ The documentation for the project can be found [here](https://project-ncl.github
 
 ### IDE Config and Code Style
 
-This project has a strictly enforced code style. Code formatting is done by the Eclipse code formatter, using the config files from https://github.com/project-ncl/ide-config/. By default, when you run `./gradlew build` the code will be formatted automatically.
+This project has a strictly enforced code style. Code formatting is done by Spotless, using the config files from https://github.com/project-ncl/ide-config/. By default, when you run `./gradlew build` the code will be formatted automatically.
 
 #### IDEA Setup
 

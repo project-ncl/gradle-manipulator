@@ -2,9 +2,9 @@ package org.jboss.gm.common.utils;
 
 import lombok.experimental.UtilityClass;
 import org.apache.commons.beanutils.ContextClassLoaderLocal;
-import org.commonjava.maven.ext.io.rest.DefaultTranslator;
-import org.commonjava.maven.ext.io.rest.Translator;
 import org.jboss.gm.common.Configuration;
+import org.jboss.pnc.mavenmanipulator.io.rest.DefaultTranslator;
+import org.jboss.pnc.mavenmanipulator.io.rest.Translator;
 
 @UtilityClass
 public class RESTUtils {

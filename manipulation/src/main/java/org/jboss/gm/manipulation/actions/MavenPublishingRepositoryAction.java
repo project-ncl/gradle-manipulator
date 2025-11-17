@@ -5,7 +5,6 @@ import static org.jboss.gm.manipulation.ManipulationPlugin.MAVEN_PUBLISH_PLUGIN;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.aeonbits.owner.ConfigCache;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
@@ -16,6 +15,7 @@ import org.gradle.authentication.http.HttpHeaderAuthentication;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.manipulation.ManipulationPlugin;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
 
 /**
  * Adds a publishing repository specific to PNC environment.

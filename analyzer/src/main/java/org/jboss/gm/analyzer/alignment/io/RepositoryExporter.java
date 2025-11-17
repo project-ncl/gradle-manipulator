@@ -13,15 +13,15 @@ import org.apache.maven.settings.Repository;
 import org.apache.maven.settings.RepositoryPolicy;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.settings.building.DefaultSettingsBuilderFactory;
-import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
-import org.commonjava.maven.ext.io.SettingsIO;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.internal.artifacts.repositories.DefaultMavenLocalArtifactRepository;
 import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.logging.GMLogger;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.io.SettingsIO;
 
 /**
  * Exports artifact repositories in a maven settings format.

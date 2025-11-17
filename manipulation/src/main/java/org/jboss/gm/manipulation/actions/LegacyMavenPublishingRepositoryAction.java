@@ -5,7 +5,6 @@ import static org.jboss.gm.manipulation.ManipulationPlugin.LEGACY_MAVEN_PLUGIN;
 import static org.jboss.gm.manipulation.actions.MavenPublishingRepositoryAction.REPO_NAME;
 
 import org.aeonbits.owner.ConfigCache;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 import org.gradle.api.credentials.HttpHeaderCredentials;
@@ -16,6 +15,7 @@ import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.utils.ProjectUtils;
 import org.jboss.gm.manipulation.ManipulationPlugin;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
 
 /**
  * Adds a publication repository to the legacy maven plugin.

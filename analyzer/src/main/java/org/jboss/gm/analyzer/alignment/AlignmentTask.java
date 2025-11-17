@@ -40,16 +40,8 @@ import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.lang3.StringUtils;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationException;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
-import org.commonjava.maven.ext.common.json.GAV;
-import org.commonjava.maven.ext.common.json.ModulesItem;
-import org.commonjava.maven.ext.common.json.PME;
-import org.commonjava.maven.ext.common.util.JSONUtils;
-import org.commonjava.maven.ext.core.groovy.InvocationStage;
-import org.commonjava.maven.ext.core.state.DependencyState;
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
+import org.commonjava.atlas.maven.ident.ref.SimpleProjectVersionRef;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
@@ -90,6 +82,14 @@ import org.jboss.gm.common.utils.ProjectUtils;
 import org.jboss.gm.common.versioning.DynamicVersionParser;
 import org.jboss.gm.common.versioning.ProjectVersionFactory;
 import org.jboss.gm.common.versioning.RelaxedProjectVersionRef;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.json.GAV;
+import org.jboss.pnc.mavenmanipulator.common.json.ModulesItem;
+import org.jboss.pnc.mavenmanipulator.common.json.PME;
+import org.jboss.pnc.mavenmanipulator.common.util.JSONUtils;
+import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationStage;
+import org.jboss.pnc.mavenmanipulator.core.state.DependencyState;
 
 /**
  * The actual Gradle task that creates the {@code manipulation.json} file for the whole project

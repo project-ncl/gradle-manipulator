@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.io.IOException;
 import lombok.experimental.UtilityClass;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.jboss.gm.common.versioning.ProjectVersionFactory;
 
 @UtilityClass

@@ -2,12 +2,12 @@ package org.jboss.gm.common.logging;
 
 import java.util.Arrays;
 import java.util.List;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.logging.LogLevel;
 import org.gradle.internal.logging.events.LogEvent;
 import org.gradle.internal.logging.events.OutputEvent;
 import org.gradle.internal.logging.events.OutputEventListener;
 import org.gradle.internal.logging.slf4j.OutputEventListenerBackedLoggerContext;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ public class FilteringCustomLogger implements OutputEventListener {
     public void onOutput(OutputEvent event) {
         LogEvent logEvent = (LogEvent) event;
         if (ignoreCategories.stream().noneMatch(i -> logEvent.getCategory().startsWith(i))) {
-            if (logEvent.getCategory().startsWith("org.commonjava.maven.ext") ||
+            if (logEvent.getCategory().startsWith("org.jboss.pnc.mavenmanipulator") ||
                     logEvent.getCategory().startsWith("com.redhat")) {
                 delegate.onOutput(
                         new LogEvent(

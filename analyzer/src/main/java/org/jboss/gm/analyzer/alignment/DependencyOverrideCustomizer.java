@@ -5,10 +5,9 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import org.commonjava.maven.atlas.ident.ref.ProjectRef;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef;
-import org.commonjava.maven.ext.core.util.PropertiesUtils;
+import org.commonjava.atlas.maven.ident.ref.ProjectRef;
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
+import org.commonjava.atlas.maven.ident.ref.SimpleProjectVersionRef;
 import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
 import org.jboss.gm.analyzer.alignment.AlignmentService.Manipulator;
@@ -17,6 +16,7 @@ import org.jboss.gm.analyzer.alignment.util.DependencyPropertyParser;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.utils.ProjectUtils;
+import org.jboss.pnc.mavenmanipulator.core.util.PropertiesUtils;
 
 /**
  * {@link Manipulator} that changes the versions of aligned dependencies.

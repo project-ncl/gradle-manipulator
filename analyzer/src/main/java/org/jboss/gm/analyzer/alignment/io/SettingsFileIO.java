@@ -13,10 +13,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.io.FileUtils;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
 import org.gradle.api.logging.Logger;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.utils.PluginUtils;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
 
 /**
  * Utility class for settings file I/O.

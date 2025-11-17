@@ -3,8 +3,6 @@ package org.jboss.gm.analyzer.alignment;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.aeonbits.owner.ConfigCache;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
-import org.commonjava.maven.ext.common.util.ManifestUtils;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -16,6 +14,8 @@ import org.jboss.gm.common.logging.FilteringCustomLogger;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.model.ManipulationModel;
 import org.jboss.gm.common.utils.OTELUtils;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.util.ManifestUtils;
 
 /**
  * Results in adding a task with name {@value org.jboss.gm.analyzer.alignment.AlignmentTask#NAME}.

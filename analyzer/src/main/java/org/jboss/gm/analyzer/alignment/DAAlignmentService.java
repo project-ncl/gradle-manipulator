@@ -1,29 +1,29 @@
 package org.jboss.gm.analyzer.alignment;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.commonjava.maven.ext.core.state.DependencyState.DependencyPrecedence.NONE;
+import static org.jboss.pnc.mavenmanipulator.core.state.DependencyState.DependencyPrecedence.NONE;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef;
-import org.commonjava.maven.ext.common.ManipulationUncheckedException;
-import org.commonjava.maven.ext.core.state.DependencyState;
-import org.commonjava.maven.ext.io.rest.RestException;
-import org.commonjava.maven.ext.io.rest.Translator;
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.gradle.api.logging.LogLevel;
 import org.jboss.gm.common.Configuration;
 import org.jboss.gm.common.logging.FilteringCustomLogger;
 import org.jboss.gm.common.logging.GMLogger;
 import org.jboss.gm.common.utils.RESTUtils;
+import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.core.state.DependencyState;
+import org.jboss.pnc.mavenmanipulator.io.rest.RestException;
+import org.jboss.pnc.mavenmanipulator.io.rest.Translator;
 import org.slf4j.Logger;
 
 /**
  * An implementation of {@link AlignmentService} that uses the Dependency Analyzer service
  * in order to get the proper aligned versions of dependencies (as well as the version
  * of the project itself). The heavy lifting is done by
- * {@link org.commonjava.maven.ext.io.rest.DefaultTranslator}.
+ * {@link org.jboss.pnc.mavenmanipulator.io.rest.DefaultTranslator}.
  */
 public class DAAlignmentService implements AlignmentService {
 

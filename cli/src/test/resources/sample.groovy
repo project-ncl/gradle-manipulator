@@ -1,7 +1,7 @@
 import org.jboss.pnc.mavenmanipulator.core.groovy.GMEBaseScript
 import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationPoint
 import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationStage
-import org.jboss.pnc.gradlemanipulator.common.groovy.BaseScript
+import org.jboss.gm.common.groovy.BaseScript
 import org.jboss.pnc.gradlemanipulator.common.utils.PluginUtils
 
 @GrabResolver(name='private', root='https://maven.repository.redhat.com/techpreview/all/')
@@ -12,6 +12,8 @@ import org.jboss.pnc.gradlemanipulator.common.utils.PluginUtils
 
 println("Running Groovy script on " + gmeScript.getBaseDir())
 println("Known properties " + gmeScript.getUserProperties())
+println("FileIO " + gmeScript.getFileIO())
+println("InvocationStage " + gmeScript.getInvocationStage())
 
 println(PluginUtils.getSupportedPlugins())
 // Hack to avoid using imports and groovy script causing errors in IntelliJ.

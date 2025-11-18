@@ -198,6 +198,44 @@ public class MainTest {
     }
 
     @Test
+    public void testInvokeGroovyFails1() throws Exception {
+        final File projectRoot = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
+        final URL groovy = Thread.currentThread().getContextClassLoader().getResource("sample-bad1.groovy");
+
+        Main m = new Main();
+        String[] args = new String[] {
+                "-t",
+                projectRoot.getParentFile().getAbsolutePath(),
+                "tasks",
+                "-DgroovyScripts=" + groovy };
+        try {
+            m.run(args);
+            fail("No exception thrown");
+        } catch (ManipulationException e) {
+            assertTrue(e.getCause().getMessage().contains("Getting the project is not supported for Groovy in stage"));
+        }
+    }
+
+    @Test
+    public void testInvokeGroovyFails2() throws Exception {
+        final File projectRoot = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
+        final URL groovy = Thread.currentThread().getContextClassLoader().getResource("sample-bad2.groovy");
+
+        Main m = new Main();
+        String[] args = new String[] {
+                "-t",
+                projectRoot.getParentFile().getAbsolutePath(),
+                "tasks",
+                "-DgroovyScripts=" + groovy };
+        try {
+            m.run(args);
+            fail("No exception thrown");
+        } catch (ManipulationException e) {
+            assertTrue(e.getCause().getMessage().contains("Getting the model is not supported for Groovy in stage"));
+        }
+    }
+
+    @Test
     public void testDisableGME() throws Exception {
 
         final File projectRoot = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());

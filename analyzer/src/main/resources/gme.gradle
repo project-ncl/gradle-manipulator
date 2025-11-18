@@ -40,5 +40,4 @@ allprojects {
         logger.info("Applying plugin org.jboss.pnc.gradlemanipulator.manipulation.ManipulationPlugin to project in {}", project.getProjectDir())
         apply plugin: org.jboss.pnc.gradlemanipulator.manipulation.ManipulationPlugin
     }
-
 }

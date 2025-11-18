@@ -13,7 +13,6 @@ initscript {
 }
 
 allprojects {
-
     ext.gmeAnalyse = true
 
     apply plugin: org.jboss.pnc.gradlemanipulator.analyzer.alignment.AlignmentPlugin

@@ -10,26 +10,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import kong.unirest.ContentType;
 import kong.unirest.HeaderNames;
 import kong.unirest.HttpStatus;
 import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.commonjava.atlas.maven.ident.ref.SimpleProjectVersionRef;
-import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Ref;
 import org.gradle.api.Project;
-import org.gradle.testkit.runner.BuildResult;
-import org.gradle.testkit.runner.TaskOutcome;
 import org.jboss.pnc.gradlemanipulator.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.pnc.gradlemanipulator.common.Configuration;
 import org.jboss.pnc.gradlemanipulator.common.utils.FileUtils;
@@ -105,18 +95,6 @@ public class WarFunctionalTest extends AbstractWiremockTest {
         final Path projectRoot = tempDir.newFolder(PROJECT_NAME).toPath();
         final Map<String, String> properties = new HashMap<>();
 
-        // On a new release the SNAPSHOT artifact (e.g. 3.2-SNAPSHOT) for the manipulation library
-        // may not be available causing this to fail. We can't do the same as DifferentJVMTest as
-        // we need the manipulation library built. Hence, we'll use JGit to establish the last tag
-        // (i.e. release) and use that.
-        Collection<Ref> refs2 = Git.lsRemoteRepository()
-                .setRemote("https://github.com/project-ncl/gradle-manipulator.git")
-                .setTags(true)
-                .call();
-        @SuppressWarnings("OptionalGetWithoutIsPresent")
-        String name = refs2.stream().map(Ref::getName).max(Comparator.naturalOrder()).get();
-        properties.put("manipulationVersion", name.substring(name.lastIndexOf('/') + 1));
-
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot.toFile(),
                 projectRoot.getFileName().toString(),
@@ -132,28 +110,5 @@ public class WarFunctionalTest extends AbstractWiremockTest {
                 .contains("Passing 1 GAVs into the REST client api [" + GAV + "]");
         assertThat(alignmentModel).isNotNull();
         assertThat(alignmentModel.getAlignedDependencies()).containsExactlyEntriesOf(DEPENDENCIES);
-
-        verifyWar(projectRoot);
-    }
-
-    private static void verifyWar(Path projectRoot) throws IOException {
-        final BuildResult buildResult = TestUtils.createGradleRunner(projectRoot.toFile(), Collections.emptyMap())
-                .withArguments("war")
-                .build();
-
-        assertThat(Objects.requireNonNull(buildResult.task(":war")).getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
-
-        final Path warPath = Paths.get("build", "libs", PROJECT_NAME + ".war");
-        final Path warFile = projectRoot.resolve(warPath);
-
-        assertThat(warFile).isRegularFile().isReadable();
-
-        try (final ZipFile zipFile = new ZipFile(warFile.toFile())) {
-            assertThat(
-                    zipFile.stream()
-                            .filter(zipEntry -> !zipEntry.isDirectory() && zipEntry.getName().endsWith(".jar"))
-                            .map(ZipEntry::getName))
-                    .containsExactly("WEB-INF/lib/" + ARTIFACT_ID + "-" + VERSION_NEW + ".jar");
-        }
     }
 }

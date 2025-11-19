@@ -88,12 +88,14 @@ if (GradleVersion.current() >= GradleVersion.version("9.0.0")) {
 
 // Separate source set and task for functional tests
 val functionalTestSourceSet =
-    sourceSets.create("functionalTest") {
-        java.srcDir("src/functTest/java")
-        resources.srcDir("src/functTest/resources")
-        compileClasspath += sourceSets["main"].output
-        runtimeClasspath += output + compileClasspath
-    }
+    sourceSets.create(
+        "functionalTest",
+        Action {
+            java.srcDir("src/functTest/java")
+            resources.srcDir("src/functTest/resources")
+            compileClasspath += sourceSets["main"].output
+            runtimeClasspath += output + compileClasspath
+        })
 
 configurations.getByName("functionalTestImplementation") { extendsFrom(configurations["testImplementation"]) }
 

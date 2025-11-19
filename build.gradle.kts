@@ -443,7 +443,7 @@ subprojects {
                 }
             }
 
-            // We used to relocate the kotlin dependency due to clashes with Gradle 4.x. Its likely that was
+            // We used to relocate the kotlin dependency due to clashes with Gradle 4.x. It's likely that was
             // because of the opentelemetry-java-cli module that had incorrect dependencies due to the Quarkus BOM
             // overriding what OpenTelemtetry requires and bringing in ancient versions of kotlin.
             // relocate("kotlin", "shadow.kotlin")
@@ -604,7 +604,7 @@ fun MavenPublication.generatePom() {
         }
 
         scm {
-            connection.set("scm:git:http://github.com/project-ncl/gradle-manipulator.git")
+            connection.set("scm:git:https://github.com/project-ncl/gradle-manipulator.git")
             developerConnection.set("scm:git:git@github.com:project-ncl/gradle-manipulator.git")
             url.set("https://github.com/project-ncl/gradle-manipulator")
         }
@@ -663,6 +663,8 @@ if (GradleVersion.current() >= GradleVersion.version("8.3")) {
         apply(plugin = "com.gradleup.nmcp.aggregation")
         apply { from("$rootDir/gradle/nmcp.gradle") }
         project.rootProject.tasks.register("publishToCentral") {
+            description = "Wrapper task for NMCP to handling publishing snapshots or releases"
+            group = PublishingPlugin.PUBLISH_TASK_GROUP
             if (project.version.toString().endsWith("-SNAPSHOT")) {
                 dependsOn("publishAggregationToCentralPortalSnapshots")
             } else {

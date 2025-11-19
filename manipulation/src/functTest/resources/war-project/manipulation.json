@@ -1,0 +1,13 @@
+{
+  "group": "org.acme.gradle",
+  "name": "root",
+  "version": "1.0.2.redhat-00001",
+  "originalVersion" : "1.0.2",
+  "alignedDependencies": {
+    "org.jboss.spec.javax.servlet:jboss-servlet-api_2.5_spec:1.0.0.Final": {
+      "groupId": "org.jboss.spec.javax.servlet",
+      "artifactId": "jboss-servlet-api_2.5_spec",
+      "version": "1.0.1.Final"
+    }
+  }
+}

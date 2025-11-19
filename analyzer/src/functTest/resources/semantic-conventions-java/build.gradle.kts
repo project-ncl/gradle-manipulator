@@ -5,11 +5,11 @@ plugins {
   id("de.undercouch.download")
   id("io.github.gradle-nexus.publish-plugin")
 
-  id("org.jboss.gm.analyzer")
+  id("org.jboss.pnc.gradle-manipulator.analyzer")
 }
 
 subprojects {
-    apply(plugin = "org.jboss.gm.analyzer")
+    apply(plugin = "org.jboss.pnc.gradle-manipulator.analyzer")
 }
 
 // start - updated by ./.github/workflows/prepare-release-branch.yml

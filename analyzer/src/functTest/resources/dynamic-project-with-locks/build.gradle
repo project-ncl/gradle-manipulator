@@ -8,12 +8,12 @@ buildscript {
 
 plugins {
     // including this plugin directly instead of by an init script, which allows to use the freshly build version
-    id 'org.jboss.gm.analyzer'
+    id 'org.jboss.pnc.gradle-manipulator.analyzer'
     id 'java-library'
     id 'maven-publish'
 }
 
-group = 'org.jboss.gm.analyzer.functest'
+group = 'org.jboss.pnc.gradle-manipulator.analyzer.functest'
 version = '1.0.0'
 
 allprojects {

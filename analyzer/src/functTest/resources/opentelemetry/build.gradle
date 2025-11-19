@@ -6,7 +6,7 @@ plugins {
     id "net.ltgt.errorprone" apply false
     id "ru.vyarus.animalsniffer" apply false
     id "io.morethan.jmhreport" apply false
-    id 'org.jboss.gm.analyzer'
+    id 'org.jboss.pnc.gradle-manipulator.analyzer'
 }
 
 ext {
@@ -14,7 +14,7 @@ ext {
 }
 
 configure(subprojects) { project ->
-    apply plugin: 'org.jboss.gm.analyzer'
+    apply plugin: 'org.jboss.pnc.gradle-manipulator.analyzer'
 }
 
 subprojects {

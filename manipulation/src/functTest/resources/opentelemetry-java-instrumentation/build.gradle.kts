@@ -3,7 +3,7 @@ import java.time.Duration
 
 plugins {
   // including this plugin directly instead of by an init script, which allows to use the freshly build version
-  id("org.jboss.gm.manipulation")
+  id("org.jboss.pnc.gradle-manipulator.manipulation")
 
   id("idea")
 
@@ -20,7 +20,7 @@ plugins {
 }
 
 allprojects {
-    apply(plugin="org.jboss.gm.manipulation")
+    apply(plugin="org.jboss.pnc.gradle-manipulator.manipulation")
 }
 
 apply(from = "version.gradle.kts")

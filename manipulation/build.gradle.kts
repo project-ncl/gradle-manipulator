@@ -3,7 +3,7 @@
 import kotlin.reflect.full.memberFunctions
 import org.gradle.plugins.ide.idea.model.IdeaModule
 
-group = "org.jboss.gm"
+group = "org.jboss.pnc.gradle-manipulator"
 
 gradlePlugin {
     // According to https://plugins.gradle.org/docs/publish-plugin the simplifications in plugin
@@ -20,20 +20,22 @@ gradlePlugin {
         wProperty.set("https://github.com/project-ncl/gradle-manipulator.git")
     }
     plugins {
-        create("manipulationPlugin") {
-            description =
-                "Plugin that reads the alignment data from \${project.rootDir}/manipulation.json and " +
-                    "configures build and publishing to use those versions"
-            id = "org.jboss.gm.manipulation"
-            implementationClass = "org.jboss.gm.manipulation.ManipulationPlugin"
-            displayName = "GME Manipulation Plugin"
+        create(
+            "manipulationPlugin",
+            Action {
+                description =
+                    "Plugin that reads the alignment data from \${project.rootDir}/manipulation.json and " +
+                        "configures build and publishing to use those versions"
+                id = "org.jboss.pnc.gradle-manipulator.manipulation"
+                implementationClass = "org.jboss.pnc.gradlemanipulator.manipulation.ManipulationPlugin"
+                displayName = "GME Manipulation Plugin"
 
-            if (GradleVersion.current() >= GradleVersion.version("7.6")) {
-                var getTagsMethod = PluginDeclaration::class.memberFunctions.find { it.name == "getTags" }
-                @Suppress("UNCHECKED_CAST") var sProperty = getTagsMethod?.call(this) as SetProperty<String>
-                sProperty.set(listOf("versions", "manipulation"))
-            }
-        }
+                if (GradleVersion.current() >= GradleVersion.version("7.6")) {
+                    var getTagsMethod = PluginDeclaration::class.memberFunctions.find { it.name == "getTags" }
+                    @Suppress("UNCHECKED_CAST") var sProperty = getTagsMethod?.call(this) as SetProperty<String>
+                    sProperty.set(listOf("versions", "manipulation"))
+                }
+            })
     }
 }
 

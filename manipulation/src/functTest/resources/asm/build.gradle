@@ -33,14 +33,14 @@ buildscript {
 
 plugins {
     // including this plugin directly instead of by an init script, which allows to use the freshly build version
-    id 'org.jboss.gm.manipulation'
+    id 'org.jboss.pnc.gradle-manipulator.manipulation'
 }
 plugins { id 'com.github.sherter.google-java-format' version '0.9' apply false }
 plugins { id 'me.champeau.jmh' version '0.6.8' apply false }
 plugins { id 'org.sonarqube' version '3.5.0.2730' apply false }
 
 allprojects {
-    apply plugin: 'org.jboss.gm.manipulation'
+    apply plugin: 'org.jboss.pnc.gradle-manipulator.manipulation'
 }
 
 description = 'ASM, a very small and fast Java bytecode manipulation framework'

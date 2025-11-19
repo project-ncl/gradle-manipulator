@@ -1,0 +1,27 @@
+plugins {
+    // including this plugin directly instead of by an init script, which allows to use the freshly build version
+    id 'org.jboss.pnc.gradle-manipulator.manipulation'
+    id 'war'
+}
+
+apply plugin: 'org.jboss.pnc.gradle-manipulator.manipulation'
+apply plugin: 'maven-publish'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://maven.repository.redhat.com/ga/'
+    }
+}
+
+dependencies {
+    implementation 'org.jboss.spec.javax.servlet:jboss-servlet-api_2.5_spec:1.0.1.Final'
+}
+
+war {
+    archiveFileName = 'war-project.war'
+}

@@ -46,7 +46,7 @@ Follow instructions in https://github.com/project-ncl/ide-config/.
 The tooling overrides the logging to support integration into ProjectNCL. Therefore, to retrieve a standard Gradle logger instance, do:
 
 ```java
-     org.gradle.api.logging.Logger logger = org.jboss.gm.common.logging.GMLogger.getLogger(getClass());
+     org.gradle.api.logging.Logger logger = org.jboss.pnc.gradlemanipulator.common.logging.GMLogger.getLogger(getClass());
 ```
 The Gradle logger interface extends `org.slf4j.Logger`. It is recommended to use `info` and `debug` categories as appropriate.
 
@@ -239,7 +239,7 @@ To change the version that will be deployed just add `-Pversion=whatever`.
 
 #### Releasing SNAPSHOT version
 
-The artifacts can be pushed to the Sonatype snapshot repository (e.g., https://oss.sonatype.org/content/repositories/snapshots/org/jboss/gm/analyzer/analyzer/) with the following command:
+The artifacts can be pushed to the Sonatype snapshot repository with the following command:
 
     gradle publishAggregationToCentralPortalSnapshots
 

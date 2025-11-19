@@ -8,7 +8,7 @@ buildscript {
 plugins {
     id "io.spring.dependency-management" version "1.0.5.RELEASE" apply false
     id "org.jetbrains.kotlin.jvm" version "1.3.72" apply false
-    id 'org.jboss.gm.analyzer'
+    id 'org.jboss.pnc.gradle-manipulator.analyzer'
     id "org.jetbrains.dokka" version "0.9.17"
 }
 
@@ -17,7 +17,7 @@ configure(allprojects) { project ->
 
     apply plugin: 'java'
     apply plugin: "kotlin"
-    apply plugin: 'org.jboss.gm.analyzer'
+    apply plugin: 'org.jboss.pnc.gradle-manipulator.analyzer'
     apply plugin: "io.spring.dependency-management"
 
     dependencyManagement {

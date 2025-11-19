@@ -28,7 +28,7 @@ import org.gradle.util.DistributionLocator
 
 plugins {
     id 'base'
-    id 'org.jboss.gm.manipulation'
+    id 'org.jboss.pnc.gradle-manipulator.manipulation'
 }
 
 apply plugin: 'nebula.info-scm'
@@ -39,7 +39,7 @@ allprojects {
   version = VersionProperties.elasticsearch
   description = "Elasticsearch subproject ${project.path}"
 
-  apply plugin: 'org.jboss.gm.manipulation'
+  apply plugin: 'org.jboss.pnc.gradle-manipulator.manipulation'
 }
 
 BuildPlugin.configureRepositories(project)

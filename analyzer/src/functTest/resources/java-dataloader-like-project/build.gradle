@@ -1,7 +1,7 @@
 import java.text.SimpleDateFormat
 
 plugins {
-    id 'org.jboss.gm.analyzer'
+    id 'org.jboss.pnc.gradle-manipulator.analyzer'
 }
 
 apply plugin: 'maven-publish'

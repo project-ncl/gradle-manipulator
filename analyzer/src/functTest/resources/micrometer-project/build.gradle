@@ -32,7 +32,7 @@ buildscript {
 }
 
 plugins {
-    id 'org.jboss.gm.analyzer'
+    id 'org.jboss.pnc.gradle-manipulator.analyzer'
 }
 
 
@@ -61,7 +61,7 @@ apply from: 'dependencies.gradle'
 allprojects {
     group = 'io.micrometer'
     ext.'release.stage' = releaseStage ?: 'SNAPSHOT'
-    apply plugin: 'org.jboss.gm.analyzer'
+    apply plugin: 'org.jboss.pnc.gradle-manipulator.analyzer'
 
     afterEvaluate { project -> println "I'm configuring $project.name with version $project.version" }
 }

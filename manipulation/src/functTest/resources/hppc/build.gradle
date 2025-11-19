@@ -10,7 +10,7 @@ plugins {
   alias(deps.plugins.randomizedtesting) apply false
 
     // including this plugin directly instead of by an init script, which allows to use the freshly build version
-    id 'org.jboss.gm.manipulation'
+    id 'org.jboss.pnc.gradle-manipulator.manipulation'
 }
 
 rootProject.version = deps.versions.hppcVersion.get()
@@ -33,7 +33,7 @@ apply from: file('gradle/ide/idea.gradle')
 apply from: file('gradle/publishing/maven.gradle')
 
 allprojects {
-  apply plugin: 'org.jboss.gm.manipulation'
+  apply plugin: 'org.jboss.pnc.gradle-manipulator.manipulation'
 
   repositories {
     mavenCentral()

@@ -16,7 +16,7 @@ import com.github.vlsi.gradle.publishing.dsl.versionFromResolution
 
 plugins {
     // including this plugin directly instead of by an init script, which allows to use the freshly build version
-    id("org.jboss.gm.manipulation")
+    id("org.jboss.pnc.gradle-manipulator.manipulation")
     publishing
     // Verification
     checkstyle
@@ -34,7 +34,7 @@ plugins {
 }
 
 allprojects {
-    apply(plugin="org.jboss.gm.manipulation")
+    apply(plugin="org.jboss.pnc.gradle-manipulator.manipulation")
 }
 
 fun reportsForHumans() = !(System.getenv()["CI"]?.toBoolean() ?: props.bool("CI"))

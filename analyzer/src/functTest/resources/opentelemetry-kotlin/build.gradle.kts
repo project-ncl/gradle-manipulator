@@ -24,12 +24,12 @@ plugins {
     id("org.unbroken-dome.test-sets") version "3.0.1"
     id("ru.vyarus.animalsniffer") version "1.5.2" apply false
 
-    id("org.jboss.gm.analyzer")
+    id("org.jboss.pnc.gradle-manipulator.analyzer")
 }
 
 
 subprojects {
-    apply(plugin = "org.jboss.gm.analyzer")
+    apply(plugin = "org.jboss.pnc.gradle-manipulator.analyzer")
 }
 
 allprojects {

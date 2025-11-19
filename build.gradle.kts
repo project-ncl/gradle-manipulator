@@ -13,6 +13,7 @@ import net.linguica.gradle.maven.settings.MavenSettingsPlugin.MAVEN_SETTINGS_EXT
 import net.linguica.gradle.maven.settings.MavenSettingsPluginExtension
 import org.ajoberstar.grgit.Grgit
 import org.apache.maven.settings.building.SettingsBuildingException
+import org.gradle.kotlin.dsl.project
 
 plugins {
     java
@@ -142,7 +143,7 @@ tasks.register("fixupReadme") {
         if ("true" == System.getProperty("release", "") && project == project.rootProject) {
             val tmp = File(System.getProperty("java.io.tmpdir"))
             val source = File(project.rootDir, "README.md")
-            val searchString = "https://repo1.maven.org/maven2/org/jboss/gm/analyzer"
+            val searchString = "https://repo1.maven.org/maven2/org/jboss/pnc/gradle-manipulator/analyzer"
 
             if (!source.exists() || Files.readAllLines(source.toPath()).none { s -> s.contains(searchString) }) {
                 throw GradleException("Unable to find '$searchString' in README.md")
@@ -350,9 +351,9 @@ subprojects {
 
     val testFixturesCompile by configurations.creating { extendsFrom(configurations["implementation"]) }
 
-    configurations.create("testFixturesRuntime") {
-        extendsFrom(configurations["runtimeOnly"], configurations["testFixturesCompile"])
-    }
+    configurations.create(
+        "testFixturesRuntime",
+        Action { extendsFrom(configurations["runtimeOnly"], configurations["testFixturesCompile"]) })
 
     val testFixturesUsageImplementation by
         configurations.creating {
@@ -367,12 +368,14 @@ subprojects {
     configurations["testImplementation"].extendsFrom(testFixturesUsageImplementation)
     configurations["testRuntimeOnly"].extendsFrom(testFixturesUsageRuntimeOnly)
 
-    sourceSets.create("testFixtures") {
-        java.srcDir("src/testFixtures/java")
-        resources.srcDir("src/testFixtures/resources")
-        compileClasspath = sourceSets["main"].output + configurations["testFixturesCompile"]
-        runtimeClasspath = output + compileClasspath + configurations["testFixturesRuntime"]
-    }
+    sourceSets.create(
+        "testFixtures",
+        Action {
+            java.srcDir("src/testFixtures/java")
+            resources.srcDir("src/testFixtures/resources")
+            compileClasspath = sourceSets["main"].output + configurations["testFixturesCompile"]
+            runtimeClasspath = output + compileClasspath + configurations["testFixturesRuntime"]
+        })
 
     dependencies {
         outputDirectories(sourceSets["testFixtures"].output)
@@ -435,6 +438,8 @@ subprojects {
                     exclude(dependency("org.commonjava.atlas.maven:.*:.*"))
                     exclude(dependency("org.jboss.pnc.maven-manipulator:.*:.*"))
                     exclude(dependency("org.slf4j:.*:.*"))
+                    // Prevent org.jboss.gm.common.groovy.BaseScript from being removed.
+                    exclude(project(":common"))
                 }
             }
 

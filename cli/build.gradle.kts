@@ -1,4 +1,4 @@
-group = "org.jboss.gm"
+group = "org.jboss.pnc.gradle-manipulator"
 
 dependencies {
     implementation("ch.qos.logback:logback-classic") { version { strictly("${project.extra.get("logbackVersion")}") } }
@@ -61,7 +61,7 @@ dependencies {
     testImplementation("org.eclipse.jgit:org.eclipse.jgit:${project.extra.get("jgitVersion")}")
 }
 
-tasks { "jar"(Jar::class) { manifest { attributes["Main-Class"] = "org.jboss.gm.cli.Main" } } }
+tasks { "jar"(Jar::class) { manifest { attributes["Main-Class"] = "org.jboss.pnc.gradlemanipulator.cli.Main" } } }
 
 // Implicit dependencies detected by Gradle 7
 // See <https://docs.gradle.org/7.0/userguide/validation_problems.html#implicit_dependency>

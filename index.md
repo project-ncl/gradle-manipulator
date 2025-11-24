@@ -13,7 +13,7 @@ Two plugins make up the extension, the `analyzer` plugin and the `manipulation` 
 The job of the `analyzer` plugin is to generate a metadata file that contains altered dependencies for each project of a Gradle Project.
 The file is then meant to be used by the `manipulation` plugin to enforce the versions of the dependencies that are captured in the metadata file.
 
-The metadata file is named `manipulation.json` and is created by the `generateAlignmentMetadata` task of the `alignment` plugin in the root directory of the target Gradle project. The file is in JSON format, may be read and written through [this](https://www.javadoc.io/static/org.jboss.gm/common/2.8/org/jboss/gm/common/io/ManipulationIO.html) utility class. The Java source may be found [here](https://github.com/project-ncl/gradle-manipulator/blob/master/common/src/main/java/org/jboss/gm/common/model/ManipulationModel.java) and the documentation is [here](https://www.javadoc.io/doc/org.jboss.gm/common/latest/org/jboss/gm/common/model/ManipulationModel.html). An example from the functional tests of the `manipulation.json` is [here](https://github.com/project-ncl/gradle-manipulator/blob/master/manipulation/src/functTest/resources/simple-project/manipulation.json).
+The metadata file is named `manipulation.json` and is created by the `generateAlignmentMetadata` task of the `alignment` plugin in the root directory of the target Gradle project. The file is in JSON format, may be read and written through [this](https://www.javadoc.io/static/org.jboss.pnc.gradle-manipulator/common/5.0/org/jboss/pnc/gradlemanipulator/common/io/ManipulationIO.html) utility class. The Java source may be found [here](https://github.com/project-ncl/gradle-manipulator/blob/main/common/src/main/java/org/jboss/pnc/gradlemanipulator/common/model/ManipulationModel.java) and the documentation is [here](https://www.javadoc.io/doc/org.jboss.pnc.gradle-manipulator/common/latest/org/jboss/pnc/gradlemanipulator/common/model/ManipulationModel.html). An example from the functional tests of the `manipulation.json` is [here](https://github.com/project-ncl/gradle-manipulator/blob/main/manipulation/src/functTest/resources/simple-project/manipulation.json).
 
 ### Usage
 
@@ -82,14 +82,14 @@ It is possible to run the Gradle process using a different JDK by passing in the
     -Dorg.gradle.java.home=<JDK-Location>
 
 
-To obtain the CLI it may be downloaded from Maven Central [here](https://repo1.maven.org/maven2/org/jboss/gm/cli).
+To obtain the CLI it may be downloaded from Maven Central [here](https://repo1.maven.org/maven2/org/jboss/pnc/gradlemanipulator/cli).
 
 ##### Init Script
 
 If a development version is being used, the init script is placed during the build into
 `analyzer/build/resources/main/analyzer-init.gradle`. If a released version is being used, it is deployed as
 `analyzer-<version>-init.gradle`and may be found in Maven Central, i.e., for version 2.7,
-[https://repo1.maven.org/maven2/org/jboss/gm/analyzer/2.7/analyzer-2.7-init.gradle](https://repo1.maven.org/maven2/org/jboss/gm/analyzer/2.7/analyzer-2.7-init.gradle).
+[https://repo1.maven.org/maven2/org/jboss/pnc/gradlemanipulator/analyzer/2.7/analyzer-2.7-init.gradle](https://repo1.maven.org/maven2/org/jboss/pnc/gradlemanipulator/analyzer/2.7/analyzer-2.7-init.gradle).
 
 Now, by executing
 
@@ -184,8 +184,8 @@ file may be changed by setting the `reportJSONOutputFile` property to an alterna
         },
         ...
 
-This JSON file may be read as POJO by using the [JSONUtils](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/util/JSONUtils.java)
-class which utilises the [json](https://github.com/release-engineering/pom-manipulation-ext/blob/master/common/src/main/java/org/commonjava/maven/ext/common/json)
+This JSON file may be read as POJO by using the [JSONUtils](https://github.com/project-ncl/pom-manipulation-ext/blob/main/common/src/main/java/org/jboss/pnc/mavenmanipulator/common/util/JSONUtils.java)
+class which utilises the [json](https://github.com/project-ncl/pom-manipulation-ext/blob/main/common/src/main/java/org/jboss/pnc/mavenmanipulator/common/json)
 package.
 
 ### OpenTelemetry Instrumentation

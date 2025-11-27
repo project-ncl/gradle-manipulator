@@ -21,13 +21,21 @@ The argument should a comma separated list of HTTP / HTTPS URLs.
 
 Each groovy script will be run on the execution root (i.e. where Gradle is invoked).
 
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : As of GME 5.0 the API has changed: <i>org.jboss.pnc.gradlemanipulator.common.groovy.BaseScript</i> instead of <i>org.jboss.gm.common.groovy.BaseScript</i> and <i>org.jboss.pnc.mavenmanipulator.core.groovy</i> instead of <i>org.commonjava.maven.ext.core.groovy</i>.  The Atlas dependency has also changed its groupId from <i>org.commonjava.maven.atlas.ident.ref.SimpleProjectRef</i> to <i>org.commonjava.atlas.maven.ident.ref.SimpleProjectRef</i>
+</td>
+</tr>
+</table>
+
 Each script <b>must</b> use the following annotations:
 
 ```groovy
-import org.commonjava.maven.ext.core.groovy.GMEBaseScript
-import org.commonjava.maven.ext.core.groovy.InvocationPoint
-import org.commonjava.maven.ext.core.groovy.InvocationStage
-import org.jboss.gm.common.groovy.BaseScript
+import org.jboss.pnc.mavenmanipulator.core.groovy.GMEBaseScript
+import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationPoint
+import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationStage
+import org.jboss.pnc.gradlemanipulator.common.groovy.BaseScript
 
 @InvocationPoint(invocationPoint = InvocationStage.FIRST)
 @GMEBaseScript BaseScript gmeScript
@@ -82,13 +90,13 @@ gmeScript.getProject()
 A typical groovy script that alters a JSON file on disk might be:
 
 ```groovy
-import org.commonjava.maven.ext.core.groovy.GMEBaseScript
-import org.commonjava.maven.ext.core.groovy.InvocationPoint
-import org.commonjava.maven.ext.core.groovy.InvocationStage
-import org.jboss.gm.common.groovy.BaseScript
+import org.jboss.pnc.mavenmanipulator.core.groovy.GMEBaseScript
+import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationPoint
+import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationStage
+import org.jboss.pnc.gradlemanipulator.common.groovy.BaseScript
 import org.apache.commons.lang.StringUtils
-import org.jboss.gm.common.model.ManipulationModel
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef
+import org.jboss.pnc.mavenmanipulator.common.model.ManipulationModel
+import org.commonjava.atlas.maven.ident.ref.SimpleProjectRef
 
 @InvocationPoint(invocationPoint = InvocationStage.LAST)
 @GMEBaseScript BaseScript gmeScript
@@ -113,10 +121,10 @@ information.text = newContent
 It is possible to use the `Translator` API to call onto the Dependency Anlalyser to make adjustments beyond what GME already provides e.g.
 
 ```groovy
-import org.commonjava.maven.atlas.ident.ref.ProjectVersionRef
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectRef
-import org.commonjava.maven.atlas.ident.ref.SimpleProjectVersionRef
-import org.commonjava.maven.ext.io.rest.Translator
+import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef
+import org.commonjava.atlas.maven.ident.ref.SimpleProjectRef
+import org.commonjava.atlas.maven.ident.ref.SimpleProjectVersionRef
+import org.jboss.pnc.mavenmanipulator.io.rest.Translator
 ...
 Translator translator = gmeScript.getRESTAPI();
 ProjectVersionRef pvr = SimpleProjectVersionRef.parse("org.hibernate:hibernate-core:5.3.7.Final")

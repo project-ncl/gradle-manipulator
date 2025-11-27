@@ -262,7 +262,7 @@ subprojects {
     extra["assertjVersion"] = "3.19.0"
     extra["atlasVersion"] = "1.1.8"
     extra["bytemanVersion"] = "4.0.15"
-    extra["commonsBeanVersion"] = "1.9.4"
+    extra["commonsBeanVersion"] = "1.11.0"
     extra["commonsLangVersion"] = "3.19.0"
     extra["commonsIOVersion"] = "2.21.0"
     // Used in the CLI. Only limited version range available in repo.gradle.org/ui/native/libs-releases-local

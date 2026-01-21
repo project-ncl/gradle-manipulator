@@ -12,6 +12,7 @@ import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ExternalModuleDependency;
 import org.gradle.api.artifacts.ModuleVersionSelector;
+import org.gradle.api.internal.artifacts.DefaultModuleIdentifier;
 import org.gradle.api.internal.artifacts.DefaultModuleVersionSelector;
 import org.gradle.api.logging.Logger;
 import org.jboss.pnc.gradlemanipulator.common.logging.GMLogger;
@@ -76,9 +77,10 @@ public class OverrideDependenciesAction implements Action<Project> {
                         if (aligned != null) {
                             logger.info("Replacing force override of {} with {} ", requestedGAV, aligned);
                             forced.add(
-                                    new DefaultModuleVersionSelector(
-                                            m.getGroup(),
-                                            m.getName(),
+                                    DefaultModuleVersionSelector.newSelector(
+                                            DefaultModuleIdentifier.newId(
+                                                    m.getGroup(),
+                                                    m.getName()),
                                             aligned.getVersionString()));
                         } else {
                             forced.add(m);
@@ -108,9 +110,10 @@ public class OverrideDependenciesAction implements Action<Project> {
                                         requestedGAV,
                                         aligned);
                                 forced.add(
-                                        new DefaultModuleVersionSelector(
-                                                externalModuleDependency.getModule().getGroup(),
-                                                externalModuleDependency.getModule().getName(),
+                                        DefaultModuleVersionSelector.newSelector(
+                                                DefaultModuleIdentifier.newId(
+                                                        externalModuleDependency.getModule().getGroup(),
+                                                        externalModuleDependency.getModule().getName()),
                                                 aligned.getVersionString()));
                             }
                             configuration.getResolutionStrategy().setForcedModules(forced.toArray());

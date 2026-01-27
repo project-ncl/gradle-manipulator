@@ -43,7 +43,9 @@ public class ProjectUtils {
         String group = project.getGroup().toString();
         Project rootProject = project.getRootProject();
 
-        if (project != rootProject) {
+        // Note: equals was only implemented in Gradle >= 9.1.0 but before that we were
+        // comparing identity hash anyway.
+        if (!project.equals(rootProject)) {
             @SuppressWarnings("ConstantConditions")
             String gradleDefaultGroup = rootProject.getName()
                     + (project.getParent() == rootProject ? ""

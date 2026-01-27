@@ -1,0 +1,38 @@
+plugins {
+    id("checkstyle")
+}
+
+configurations {
+    checkstyle
+}
+
+dependencies {
+    checkstyle(libs.checkstyle)
+    checkstyle(libs.checkstyle.sevntu)
+}
+
+// This prevents error where checkstyle sometimes resolves its dependencies
+// to use google-collections instead of guava.
+configurations.checkstyle {
+    resolutionStrategy.capabilitiesResolution.withCapability("com.google.collections:google-collections") {
+        select("com.google.guava:guava:0")
+    }
+}
+
+checkstyle {
+    // Use the latest checkstyle version instead of default one
+    configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
+    maxWarnings = 0
+    maxErrors = 0
+}
+
+checkstyleMain.exclude("**/i18n/Messages*")
+
+// Create a single checkstyle task to make it easier to run the checkstyleMain
+// and checkstyleTest targets at once.
+tasks.register("checkstyle") {
+    dependsOn tasks.checkstyleMain
+    dependsOn tasks.checkstyleTest
+    description = 'Run checkstyle for the Main and Test targets at once'
+    group = 'Verification'
+}

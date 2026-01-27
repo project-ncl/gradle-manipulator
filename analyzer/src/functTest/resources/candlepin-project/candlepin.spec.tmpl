@@ -1,0 +1,235 @@
+%global _binary_filedigest_algorithm 8
+%global _source_filedigest_algorithm 8
+%global _binary_payload w9.gzdio
+%global _source_payload w9.gzdio
+
+%global selinux_variants mls minimum targeted
+%global modulename candlepin
+
+#if $artifacts
+%global tar_gz_filename $artifacts['.gz'][0]
+%global war_filename $artifacts['.war'][0]
+
+## Remove the '-project-sources.tar.gz' suffix from the tar.gz filename, to get the source dir name
+## e.g. candlepin-x.y.z.redhat-00000 from a file called candlepin-x.y.z.redhat-00000-project-sources.tar.gz
+%global source_top_directory_name %(echo %{tar_gz_filename} | sed s/"-project-sources.tar.gz"// )
+#end if
+
+## If you follow the Java packaging guidelines, you
+## only need to run brp-java-repack-jars on packages that include
+## arch-independent JAR files under /usr/share and that also include
+## GCJ-compiled .jar.so files.
+%global __jar_repack %{nil}
+
+Name: candlepin
+Version: 4.7.3
+Release: 1%{?dist}
+#if $epoch
+Epoch: $epoch
+#end if
+Summary: Candlepin is an open source entitlement management system
+
+Group: System Environment/Daemons
+URL: http://www.candlepinproject.org
+License: GPLv2
+Source0: %{tar_gz_filename}
+Source1: %{war_filename}
+
+Suggests: %{name}-selinux = %{version}-%{release}
+
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
+BuildArch: noarch
+
+BuildRequires: selinux-policy-doc
+
+Requires: java-17 >= 1:17.0.0
+Requires: wget
+# TODO: remove the version restriction on Tomcat once CP supports the Java EE namespace changes
+Requires: tomcat < 1:10.0.0
+Requires: javapackages-tools
+
+%description
+Candlepin is an open source entitlement management system.
+
+## %package tomcat
+## Summary: Candlepin web application for tomcat
+## Requires: candlepin = %{version}
+
+## %description tomcat
+## Candlepin web application for tomcat
+
+## %package devel
+## Summary: Development libraries for candlepin integration
+## Group: Development/Libraries
+##
+## %description devel
+## Development libraries for candlepin integration
+##
+## %package certgen-lib
+## Summary: candlepin certgen library for use by other apps
+##
+## %description certgen-lib
+## candlepin library for use by other apps
+
+%package selinux
+Summary:        SELinux policy module supporting candlepin
+Group:          System Environment/Base
+BuildRequires:  checkpolicy
+BuildRequires:  selinux-policy-devel
+BuildRequires:  util-linux
+%if (0%{?rhel} && 0%{?rhel} < 9)
+BuildRequires:  hardlink
+%endif
+%{?selinux_requires}
+
+Requires(post):   /usr/sbin/semodule
+Requires(post):   /sbin/restorecon
+Requires(post):   /usr/sbin/semanage
+Requires(postun): /usr/sbin/semodule
+Requires(postun): /sbin/restorecon
+Requires(postun): /usr/sbin/semanage
+
+%description selinux
+SELinux policy module supporting candlepin
+
+%prep
+%setup -n %{source_top_directory_name}
+
+%build
+cd selinux
+#raw
+for selinuxvariant in %{selinux_variants}
+do
+  make NAME=$selinuxvariant -f /usr/share/selinux/devel/Makefile
+  mv %{modulename}.pp %{modulename}.pp.$selinuxvariant
+  make NAME=$selinuxvariant -f /usr/share/selinux/devel/Makefile clean
+done
+#end raw
+cd -
+
+%install
+rm -rf %{buildroot}
+
+## Create the directory structure required to lay down our files
+## common
+%{__install} -d -m 755 %{buildroot}/%{_sysconfdir}/%{name}/certs/upstream/
+%{__install} -m 644 config/candlepin/candlepin-redhat-ca.crt %{buildroot}%{_sysconfdir}/%{name}/certs/upstream/
+
+%{__install} -d 755 %{buildroot}%{_sysconfdir}/logrotate.d/
+%{__install} -m 644 config/candlepin/logrotate.conf %{buildroot}%{_sysconfdir}/logrotate.d/%{name}
+
+%{__install} -d -m 755 %{buildroot}/%{_datadir}/%{name}/
+%{__install} -m 755 bin/scripts/code/setup/cpsetup %{buildroot}/%{_datadir}/%{name}/cpsetup
+%{__install} -m 755 bin/scripts/code/setup/cpdb %{buildroot}/%{_datadir}/%{name}/cpdb
+%{__install} -m 755 bin/deployment/liquibase.sh %{buildroot}/%{_datadir}/%{name}/liquibase.sh
+
+%{__install} -d -m 755 %{buildroot}/%{_sysconfdir}/%{name}/
+touch %{buildroot}/%{_sysconfdir}/%{name}/%{name}.conf
+
+## tomcat
+%{__install} -d -m 755 %{buildroot}/%{_sharedstatedir}/tomcat/webapps/%{name}
+%{__install} -d -m 755 %{buildroot}/%{_sysconfdir}/tomcat/
+%{__unzip} %{SOURCE1} -d %{buildroot}/%{_sharedstatedir}/tomcat/webapps/%{name}
+
+%{__ln_s} /etc/candlepin/certs/keystore %{buildroot}/%{_sysconfdir}/tomcat/keystore
+
+## /var/lib dir for hornetq state
+%{__install} -d -m 755 %{buildroot}/%{_sharedstatedir}/%{name}
+
+%{__install} -d -m 755 %{buildroot}/%{_localstatedir}/log/%{name}
+%{__install} -d -m 755 %{buildroot}/%{_localstatedir}/cache/%{name}
+
+cd selinux
+#raw
+for selinuxvariant in %{selinux_variants}
+do
+  %{__install} -d %{buildroot}/%{_datadir}/selinux/packages/$selinuxvariant
+  %{__install} -p -m 644 %{modulename}.pp.$selinuxvariant %{buildroot}/%{_datadir}/selinux/packages/$selinuxvariant/%{modulename}.pp
+done
+%{__install} -D -p -m 0644 %{modulename}.if %{buildroot}%{_datadir}/selinux/devel/include/distributed/%{modulename}.if
+#end raw
+cd -
+hardlink -cv %{buildroot}/%{_datadir}/selinux
+
+%clean
+rm -rf %{buildroot}
+
+%post selinux
+#raw
+for selinuxvariant in %{selinux_variants}
+do
+  /usr/sbin/semodule -X 400 -s $selinuxvariant -r %{modulename} &> /dev/null || :
+  /usr/sbin/semodule -X 200 -s $selinuxvariant -i %{_datadir}/selinux/packages/$selinuxvariant/%{modulename}.pp &> /dev/null || :
+done
+/usr/sbin/semanage port -a -t candlepin_activemq_port_t -p tcp 61613 &> /dev/null || :
+#end raw
+
+%posttrans selinux
+#raw
+/sbin/restorecon %{_localstatedir}/cache/thumbslug &> /dev/null || :
+/sbin/restorecon -R %{_sysconfdir}/%{name}/ &> /dev/null || :
+/sbin/restorecon -R %{_localstatedir}/cache/%{name}/ &> /dev/null || :
+/sbin/restorecon -R %{_localstatedir}/lib/%{name}/ &> /dev/null || :
+/sbin/restorecon -R %{_localstatedir}/log/%{name}/ &> /dev/null || :
+#end raw
+
+%postun selinux
+#raw
+if [ $1 -eq 0 ] ; then
+  /usr/sbin/semanage port -d 61613 -p tcp &> /dev/null || :
+
+  for selinuxvariant in %{selinux_variants}
+  do
+     /usr/sbin/semodule -X 200 -s $selinuxvariant -r %{modulename} &> /dev/null || :
+  done
+  /sbin/restorecon %{_localstatedir}/cache/thumbslug &> /dev/null || :
+  /sbin/restorecon -R %{_sysconfdir}/%{name}/ &> /dev/null || :
+  /sbin/restorecon -R %{_localstatedir}/cache/%{name}/ &> /dev/null || :
+  /sbin/restorecon -R %{_localstatedir}/lib/%{name}/ &> /dev/null || :
+  /sbin/restorecon -R %{_localstatedir}/log/%{name}/ &> /dev/null || :
+fi
+#end raw
+
+%files
+%defattr(-,root,root)
+%doc LICENSE
+%doc README.md
+%dir %{_datadir}/%{name}
+
+%{_datadir}/%{name}/cpsetup
+%{_datadir}/%{name}/cpdb
+%{_datadir}/%{name}/liquibase.sh
+%ghost %attr(644, root, root) %{_sysconfdir}/%{name}/certs/candlepin-ca.crt
+## Default is to track the rpm version of this cert for manifest signatures.
+## If a deployment is managing their own, they will need to restore from the
+## .rpmsave backup after upgrading the candlepin rpm.
+%config %attr(644, root, root) %{_sysconfdir}/%{name}/certs/upstream/candlepin-redhat-ca.crt
+%config(noreplace) %attr(644,root,root) %{_sysconfdir}/logrotate.d/candlepin
+
+%defattr(644, tomcat, tomcat, 775)
+%{_sharedstatedir}/tomcat/webapps/%{name}/*
+%{_sharedstatedir}/%{name}
+%{_localstatedir}/cache/%{name}
+%config(noreplace) %{_sysconfdir}/tomcat/keystore
+
+%defattr(600,tomcat,tomcat,-)
+%config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
+## log dir needs to be group root or not group writeable
+## else logroate fails
+%attr(750, tomcat, tomcat) %{_localstatedir}/log/%{name}
+
+## logback.xml should not be overridden during rpm upgrade/install
+%config(noreplace) %{_sharedstatedir}/tomcat/webapps/%{name}/WEB-INF/classes/logback.xml
+
+%files selinux
+%defattr(-,root,root,0755)
+%doc selinux/*
+%{_datadir}/selinux/packages/*/%{modulename}.pp
+%{_datadir}/selinux/devel/include/distributed/%{modulename}.if
+%ghost %verify(not md5 size mode mtime) %{_sharedstatedir}/selinux/minimum/active/modules/200/%{modulename}
+
+#raw
+%changelog
+* Fri Dec 19 2025 candlepin-bot 4.7.3-1
+- Add new translations using Weblate (hosted@weblate.org)
+- <TRIMMED>

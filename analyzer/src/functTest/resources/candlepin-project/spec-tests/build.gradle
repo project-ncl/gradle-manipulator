@@ -1,0 +1,81 @@
+plugins {
+    id "java"
+    id "checkstyle-conventions"
+    id "test-logging-conventions"
+}
+
+repositories {
+    mavenCentral()
+}
+
+description = "Candlepin Spec Tests"
+
+dependencies {
+    implementation project(":client")
+
+    implementation(libs.assertj)
+    implementation(libs.bouncycastle.prov)
+    implementation(libs.bouncycastle.pkix)
+    implementation(libs.commons.codec)
+    implementation(libs.commons.io)
+    implementation(libs.commons.lang)
+    implementation(libs.gson)
+    implementation(libs.jackson.databind)
+    implementation(platform(libs.junit.bom))
+    implementation(libs.junit.jupiter.api)
+    implementation(libs.junit.jupiter.params)
+    implementation(libs.oauth)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.tls)
+    implementation(libs.slf4j)
+
+    testImplementation(libs.jimfs)
+
+    testRuntimeOnly(libs.junit.jupiter.engine)
+    testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+testlogger {
+    theme = "standard-parallel"
+}
+
+// Disable empty test task
+test {
+    enabled = false
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+}
+
+tasks.register('spec', Test) {
+    description = 'Run Java based spec tests'
+    group = 'Verification'
+    outputs.upToDateWhen { false }
+
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+
+    debugOptions {
+        host = '*'
+    }
+
+    useJUnitPlatform()
+    // maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
+    reports.html.required = false
+    reports.junitXml.required = false
+
+    // We have to propagate the -D params if we want them available in tests
+    System.properties.keys().each { key ->
+        def properyKey = key.toString()
+        // Propagate spec config
+        if (properyKey.startsWith("spec.test.client")) {
+            systemProperty properyKey, System.getProperty(properyKey)
+        }
+
+        // Propagate current working directory
+        if (properyKey == "user.dir") {
+            systemProperty properyKey, System.getProperty(properyKey)
+        }
+    }
+}

@@ -1,0 +1,8 @@
+[
+  {
+    "latestVersion": "4.7.3.redhat-00001",
+    "version": "4.7.3",
+    "groupId": "org.candlepin",
+    "artifactId": "candlepin-bom"
+  }
+]

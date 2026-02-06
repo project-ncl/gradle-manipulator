@@ -399,6 +399,17 @@ subprojects {
         }
     }
 
+    // Avoid guava problems with Android and standard jre selection when updating Maven from 3.9.5 to 3.9.12
+    // See https://github.com/google/guava/issues/6612
+    // Note: After Gradle 7 org.gradle.api.attributes.java.TargetJvmEnvironment is available.
+    configurations.all {
+        if (GradleVersion.current() < GradleVersion.version("7.0")) {
+            attributes {
+                attribute(Attribute.of("org.gradle.jvm.environment", "".javaClass), "standard-jvm")
+            }
+        }
+    }
+
     if (project.name != "common") {
         /*
          * The configuration below has been created by reading the documentation at:

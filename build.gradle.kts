@@ -404,9 +404,7 @@ subprojects {
     // Note: After Gradle 7 org.gradle.api.attributes.java.TargetJvmEnvironment is available.
     configurations.all {
         if (GradleVersion.current() < GradleVersion.version("7.0")) {
-            attributes {
-                attribute(Attribute.of("org.gradle.jvm.environment", "".javaClass), "standard-jvm")
-            }
+            attributes { attribute(Attribute.of("org.gradle.jvm.environment", "".javaClass), "standard-jvm") }
         }
     }
 

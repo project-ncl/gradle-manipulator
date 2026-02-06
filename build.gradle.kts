@@ -259,7 +259,7 @@ allprojects {
 }
 
 subprojects {
-    extra["assertjVersion"] = "3.19.0"
+    extra["assertjVersion"] = "3.27.7"
     extra["atlasVersion"] = "1.1.8"
     extra["bytemanVersion"] = "4.0.15"
     extra["commonsBeanVersion"] = "1.11.0"
@@ -268,20 +268,21 @@ subprojects {
     // Used in the CLI. Only limited version range available in repo.gradle.org/ui/native/libs-releases-local
     extra["gradleVersion"] = "5.6.4"
     extra["groovyVersion"] = "3.0.17"
-    extra["ivyVersion"] = "2.5.0"
+    extra["ivyVersion"] = "2.5.1"
     // Note - this *downgrades* Jackson from what is used in PME. This is due to
     // https://github.com/gradle/gradle/issues/24390
     // https://github.com/FasterXML/jackson-core/issues/955
     // This exclusion isn't required on 7.6.1 and above.
     extra["jacksonVersion"] = "2.14.3"
-    extra["jgitVersion"] = "6.3.0.202209071007-r"
+    // Must use 6.x series as 7.x and above require JDK17
+    extra["jgitVersion"] = "6.10.1.202505221210-r"
     extra["junitVersion"] = "4.13.2"
     // Must use 1.3.x series as 1.4.x and above requires JDK11.
-    extra["logbackVersion"] = "1.3.15"
-    extra["mavenVersion"] = "3.9.5"
+    extra["logbackVersion"] = "1.3.16"
+    extra["mavenVersion"] = "3.9.12"
     extra["opentelemetryVersion"] = "1.5.0"
     extra["ownerVersion"] = "1.0.12"
-    extra["pmeVersion"] = "5.0"
+    extra["pmeVersion"] = "5.1"
     extra["slf4jVersion"] = "2.0.17"
     extra["systemStubsVersion"] = "2.1.8"
 

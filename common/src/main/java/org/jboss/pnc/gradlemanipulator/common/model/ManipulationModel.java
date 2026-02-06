@@ -11,10 +11,10 @@ import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.gradle.api.Project;
-import org.gradle.api.logging.Logger;
 import org.jboss.pnc.gradlemanipulator.common.logging.GMLogger;
 import org.jboss.pnc.gradlemanipulator.common.utils.ProjectUtils;
 import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.slf4j.Logger;
 
 /**
  * Contains the information extracted from a gradle project and its sub-project required to perform model and version

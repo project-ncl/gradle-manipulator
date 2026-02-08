@@ -158,7 +158,7 @@ public class ManipulationCache {
     public void addGAV(Project project, ProjectVersionRef gav) {
         // Null check for some tests.
         if (project != null && model != null) {
-            model.findCorrespondingChild(project).setGroup(ProjectUtils.getRealGroupId(project));
+            model.findCorrespondingChild(project.getPath()).setGroup(ProjectUtils.getRealGroupId(project));
         }
         this.projectVersionRefs.add(gav);
     }

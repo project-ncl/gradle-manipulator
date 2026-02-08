@@ -27,11 +27,12 @@ public class ManipulationModelTest {
 
     @Test
     public void findCorrespondingChildWithName() {
-        ManipulationModel model = new ManipulationModel("root", "root", "bar");
-        final ManipulationModel child = new ManipulationModel("child1", "child1", "bar");
+        ManipulationModel model = ManipulationModel.Builder.build("root", "root", "bar");
+        final ManipulationModel child = ManipulationModel.Builder.build("child1", "child1", "bar");
         model.addChild(child);
-        model.addChild(new ManipulationModel("child2", "child2", "bar"));
-        final ManipulationModel child11 = new ManipulationModel("child11", "child11-custom-artifactId", "bar");
+        model.addChild(ManipulationModel.Builder.build("child2", "child2", "bar"));
+        final ManipulationModel child11 = ManipulationModel.Builder
+                .build("child11", "child11-custom-artifactId", "bar");
         child.addChild(child11);
 
         assertThat(model.findCorrespondingChild(model.getName())).isEqualTo(model);
@@ -50,13 +51,13 @@ public class ManipulationModelTest {
 
     @Test
     public void findCorrespondingChildWithPath() {
-        ManipulationModel model = new ManipulationModel("root", "root", "bar");
-        final ManipulationModel child = new ManipulationModel("child1", "child1", "bar");
+        ManipulationModel model = ManipulationModel.Builder.build("root", "root", "bar");
+        final ManipulationModel child = ManipulationModel.Builder.build("child1", "child1", "bar");
         model.addChild(child);
-        model.addChild(new ManipulationModel("child2", "child2", "bar"));
-        final ManipulationModel child11 = new ManipulationModel("child11", "child11", "bar");
+        model.addChild(ManipulationModel.Builder.build("child2", "child2", "bar"));
+        final ManipulationModel child11 = ManipulationModel.Builder.build("child11", "child11", "bar");
         child.addChild(child11);
-        final ManipulationModel child111 = new ManipulationModel("child111", "child111", "bar");
+        final ManipulationModel child111 = ManipulationModel.Builder.build("child111", "child111", "bar");
         child11.addChild(child111);
 
         assertThat(model.findCorrespondingChild(":")).isEqualTo(model);
@@ -74,7 +75,7 @@ public class ManipulationModelTest {
 
     @Test
     public void getAllAlignedDependencies() {
-        final ManipulationModel root = new ManipulationModel("root", "root", "bar");
+        final ManipulationModel root = ManipulationModel.Builder.build("root", "root", "bar");
         root.getAlignedDependencies()
                 .put(
                         "org.jboss.resteasy:resteasy-jaxrs:3.6.3.Final",
@@ -82,14 +83,14 @@ public class ManipulationModelTest {
                                 "org.jboss.resteasy",
                                 "resteasy-jaxrs",
                                 "3.6.3.Final-redhat-000001"));
-        final ManipulationModel child = new ManipulationModel("child1", "child1", "bar");
+        final ManipulationModel child = ManipulationModel.Builder.build("child1", "child1", "bar");
         child.getAlignedDependencies()
                 .put(
                         "org.hibernate:hibernate-core:5.3.7.Final",
                         new SimpleProjectVersionRef("org.hibernate", "hibernate-core", "5.3.7.Final-redhat-000001"));
         root.addChild(child);
-        root.addChild(new ManipulationModel("child2", "child2", "bar"));
-        final ManipulationModel child11 = new ManipulationModel("child11", "child11", "bar");
+        root.addChild(ManipulationModel.Builder.build("child2", "child2", "bar"));
+        final ManipulationModel child11 = ManipulationModel.Builder.build("child11", "child11", "bar");
         child.addChild(child11);
         child11.getAlignedDependencies()
                 .put(
@@ -124,11 +125,12 @@ public class ManipulationModelTest {
 
     @Test
     public void findCorrespondingChildWithDuplicateName() {
-        ManipulationModel model = new ManipulationModel("root-foo", "foo", "org.hibernate");
-        final ManipulationModel child = new ManipulationModel("foo", "foo", "org.hibernate");
+        ManipulationModel model = ManipulationModel.Builder.build("root-foo", "foo", "org.hibernate");
+        final ManipulationModel child = ManipulationModel.Builder.build("foo", "foo", "org.hibernate");
         model.addChild(child);
-        model.addChild(new ManipulationModel("child2", "child2", "childgroup2"));
-        final ManipulationModel child11 = new ManipulationModel("child11", "child11-custom-artifactId", "bar");
+        model.addChild(ManipulationModel.Builder.build("child2", "child2", "childgroup2"));
+        final ManipulationModel child11 = ManipulationModel.Builder
+                .build("child11", "child11-custom-artifactId", "bar");
         child.addChild(child11);
 
         assertNotEquals(System.identityHashCode(model.findCorrespondingChild(":foo")), System.identityHashCode(model));

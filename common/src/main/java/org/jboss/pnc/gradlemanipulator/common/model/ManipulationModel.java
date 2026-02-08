@@ -87,35 +87,6 @@ public class ManipulationModel {
     @JsonProperty
     protected Map<String, ManipulationModel> children = new HashMap<>(7);
 
-    public ManipulationModel(Project project) {
-        this.name = project.getName();
-        this.projectPathName = project.getName();
-        this.group = ProjectUtils.getRealGroupId(project);
-
-        /*
-         * If a project has been configured like
-         * <code>
-         * project(':streams') {
-         * archivesBaseName = "my-streams"
-         * </code>
-         * then that applies to any Task that has an archive base type.
-         */
-        String archiveName = ProjectUtils.getArchivesBaseName(project);
-        if (archiveName != null) {
-            getLogger().warn("For project {} found archiveName: {}", project.getName(), archiveName);
-            this.name = archiveName;
-        }
-
-        getLogger().debug("Created manipulation model for project ({}) with path {}", name, projectPathName);
-    }
-
-    // Test use only ; avoids having to create a Project to test this class.
-    ManipulationModel(String projectPathName, String name, String group) {
-        this.name = name;
-        this.projectPathName = projectPathName;
-        this.group = group;
-    }
-
     @Override
     public String toString() {
         return getGroup() + ':' + getName() + ':' + getVersion();
@@ -157,12 +128,7 @@ public class ManipulationModel {
         children.put(child.projectPathName, child);
     }
 
-    public ManipulationModel findCorrespondingChild(Project name) {
-        return findCorrespondingChild(name.getPath());
-    }
-
-    // Only test access.
-    protected ManipulationModel findCorrespondingChild(String path) {
+    public ManipulationModel findCorrespondingChild(String path) {
         if (StringUtils.isBlank(path)) {
             throw new ManipulationUncheckedException("Supplied child name cannot be empty");
         }
@@ -238,5 +204,49 @@ public class ManipulationModel {
             logger = GMLogger.getLogger(getClass());
         }
         return logger;
+    }
+
+    /**
+     * Move any org.gradle.api.Project processing to a Builder class to avoid
+     * any ClassNotFound issues processing JSON in a project that does not have
+     * access to the Gradle API.
+     */
+    public static class Builder {
+        // Test use only ; avoids having to create a Project to test this class.
+        static ManipulationModel build(String projectPathName, String name, String group) {
+            ManipulationModel result = new ManipulationModel();
+            result.name = name;
+            result.projectPathName = projectPathName;
+            result.group = group;
+            return result;
+        }
+
+        public static ManipulationModel build(Project project) {
+            ManipulationModel model = new ManipulationModel();
+            model.name = project.getName();
+            model.projectPathName = project.getName();
+            model.group = ProjectUtils.getRealGroupId(project);
+
+            /*
+             * If a project has been configured like
+             * <code>
+             * project(':streams') {
+             * archivesBaseName = "my-streams"
+             * </code>
+             * then that applies to any Task that has an archive base type.
+             */
+            String archiveName = ProjectUtils.getArchivesBaseName(project);
+            if (archiveName != null) {
+                model.getLogger().warn("For project {} found archiveName: {}", project.getName(), archiveName);
+                model.name = archiveName;
+            }
+
+            model.getLogger()
+                    .debug(
+                            "Created manipulation model for project ({}) with path {}",
+                            model.name,
+                            model.projectPathName);
+            return model;
+        }
     }
 }

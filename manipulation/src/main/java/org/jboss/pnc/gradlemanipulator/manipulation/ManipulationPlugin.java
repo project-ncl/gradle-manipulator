@@ -92,7 +92,7 @@ public class ManipulationPlugin implements Plugin<Project> {
 
         // get the previously performed alignment
         final ManipulationModel correspondingModule = ManipulationIO.readManipulationModel(project.getRootDir())
-                .findCorrespondingChild(project);
+                .findCorrespondingChild(project.getPath());
 
         if (!project.getVersion().equals(correspondingModule.getVersion())) {
             // we need to change the project version early so various tasks that ready early and create other vars based on it

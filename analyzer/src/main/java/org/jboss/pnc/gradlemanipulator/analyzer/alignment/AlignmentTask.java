@@ -234,7 +234,7 @@ public class AlignmentTask extends DefaultTask {
         }
         Optional<Map.Entry<String, MavenPublication>> entry = publications.entrySet().stream().findFirst();
         if (entry.isPresent()) {
-            ManipulationModel childModel = alignmentModel.findCorrespondingChild(project);
+            ManipulationModel childModel = alignmentModel.findCorrespondingChild(project.getPath());
             MavenPublication p = entry.get().getValue();
             if (!project.getGroup().equals(p.getGroupId())) {
                 logger.warn(
@@ -429,7 +429,7 @@ public class AlignmentTask extends DefaultTask {
 
         // Iterate through all modules and set their version
         projectDependencies.forEach((project, value) -> {
-            final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project);
+            final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(project.getPath());
             if (configuration.versionModificationEnabled()) {
                 String newVersion = alignmentResponse.getProjectOverrides().get(project);
                 if (newVersion == null) {
@@ -1083,7 +1083,7 @@ public class AlignmentTask extends DefaultTask {
         // If there is an existing manipulation file, also use this as potential candidates.
         final ManipulationModel manipulationModel = ManipulationIO
                 .readManipulationModel(project.getRootProject().getRootDir())
-                .findCorrespondingChild(project);
+                .findCorrespondingChild(project.getPath());
 
         Map<String, ProjectVersionRef> aligned = manipulationModel.getAlignedDependencies();
 
@@ -1156,7 +1156,7 @@ public class AlignmentTask extends DefaultTask {
         for (Map.Entry<Project, Map<RelaxedProjectVersionRef, ProjectVersionRef>> entry : entrySet) {
             final Project name = entry.getKey();
             final Map<RelaxedProjectVersionRef, ProjectVersionRef> allModuleDependencies = entry.getValue();
-            final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(name);
+            final ManipulationModel correspondingModule = alignmentModel.findCorrespondingChild(name.getPath());
             final String group = correspondingModule.getGroup().isEmpty() ? alignmentModel.getGroup()
                     : correspondingModule.getGroup();
             final String ga = group + ":" + correspondingModule.getName();

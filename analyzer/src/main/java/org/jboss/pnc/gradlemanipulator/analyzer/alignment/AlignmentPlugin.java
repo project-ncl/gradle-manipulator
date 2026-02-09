@@ -71,7 +71,7 @@ public class AlignmentPlugin implements Plugin<Project> {
 
     private ManipulationModel getManipulationModel(Project project) {
         final ManipulationCache cache = ManipulationCache.getCache(project);
-        final ManipulationModel alignmentModel = new ManipulationModel(project);
+        final ManipulationModel alignmentModel = ManipulationModel.Builder.build(project);
 
         cache.addProject(project);
         project.getChildProjects().forEach((n, p) -> alignmentModel.addChild(getManipulationModel(p)));

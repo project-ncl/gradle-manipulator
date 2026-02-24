@@ -476,6 +476,13 @@ public class PluginUtils {
                     if (content.charAt(i + 1) == eol.charAt(0)) {
                         inComment = false;
                     }
+                } else if (current == '"') {
+                    // If we're in a quote increment to the closing quote to avoid clashing with e.g. comments.
+                    do {
+                        i++;
+                        endIndex++;
+                    } while (content.charAt(i) != '"' ||
+                            (content.charAt(i - 1) == '\\' && content.charAt(i) == '"'));
                 } else if (current == '/' && content.charAt(i + 1) == '/') {
                     inComment = true;
                 } else if (current == '{') {

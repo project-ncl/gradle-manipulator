@@ -532,7 +532,6 @@ public class PluginUtilsTest {
                 systemOutRule.getLinesNormalized()
                         .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
 
-        System.out.println(FileUtils.readFileToString(target, Charset.defaultCharset()));
         assertTrue(
                 FileUtils.readFileToString(target, Charset.defaultCharset())
                         .contains(
@@ -1029,7 +1028,6 @@ public class PluginUtilsTest {
 
         String result = FileUtils.readFileToString(target, Charset.defaultCharset());
 
-        System.out.println(result);
         assertFalse(result.contains("update.DependencyUpdatesTask"));
         assertFalse(result.contains("<DependencyUpdatesTask>"));
     }
@@ -1077,6 +1075,79 @@ public class PluginUtilsTest {
         assertFalse(result.contains("mojo.signature"));
         assertTrue(result.contains("signature signature"));
         assertFalse(result.contains("animalsniffer"));
+    }
+
+    @Test
+    public void testRemoval19()
+            throws IOException, ManipulationException {
+
+        File target = folder.newFile("build.gradle");
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
+                "import java.text.SimpleDateFormat\n" +
+                        "\n" +
+                        "\n" +
+                        "plugins {\n" +
+                        "    id 'java'\n" +
+                        "    id \"io.github.gradle-nexus.publish-plugin\" version \"2.0.0\"\n" +
+                        "    id \"biz.aQute.bnd.builder\" version \"6.4.0\"\n" +
+                        "}\n" +
+                        "\n" +
+                        "nexusPublishing {\n" +
+                        "    repositories {\n" +
+                        "        sonatype {\n" +
+                        "            username = System.env.MAVEN_CENTRAL_USER_NEW\n" +
+                        "            password = System.env.MAVEN_CENTRAL_PASSWORD_NEW\n" +
+                        "            // https://central.sonatype.org/publish/publish-portal-ossrh-staging-api/#configuration\n"
+                        +
+                        "            nexusUrl.set(uri(\"https://ossrh-staging-api.central.sonatype.com/service/local/\"))\n"
+                        +
+                        "            // GraphQL Java does not publish snapshots, but adding this URL for completeness\n"
+                        +
+                        "            System.out.println (\"in here \\\"\");" +
+                        "            snapshotRepositoryUrl.set(uri(\"https://central.sonatype.com/repository/maven-snapshots/\"))        }\n"
+                        +
+                        "    }\n" +
+                        "}\n" +
+                        "\n" +
+                        "signing {\n" +
+                        "    def signingKey = System.env.MAVEN_CENTRAL_PGP_KEY\n" +
+                        "    useInMemoryPgpKeys(signingKey, \"\")\n" +
+                        "    sign publishing.publications\n" +
+                        "}\n" +
+                        "jar {\n" +
+                        "    manifest {\n" +
+                        "        attributes('Automatic-Module-Name': 'com.graphqljava.extendedscalars',\n" +
+                        "                '-exportcontents': 'graphql.scalars.*',\n" +
+                        "                '-removeheaders': 'Private-Package')\n" +
+                        "    }\n" +
+                        "}\n",
+                Charset.defaultCharset());
+
+        HashSet<String> plugins = new LinkedHashSet<>();
+        plugins.add("io.github.gradle-nexus.publish-plugin");
+        plugins.add("signing");
+        PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
+
+        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+
+        assertFalse(result.contains("nexusPublishing"));
+        assertEquals(
+                "import java.text.SimpleDateFormat\n" +
+                        "\n" +
+                        "\n" +
+                        "plugins {\n" +
+                        "    id 'java'\n" +
+                        "    id \"biz.aQute.bnd.builder\" version \"6.4.0\"\n" +
+                        "}\n" +
+                        "jar {\n" +
+                        "    manifest {\n" +
+                        "        attributes('Automatic-Module-Name': 'com.graphqljava.extendedscalars',\n" +
+                        "                '-exportcontents': 'graphql.scalars.*',\n" +
+                        "                '-removeheaders': 'Private-Package')\n" +
+                        "    }\n" +
+                        "}\n",
+                result);
     }
 
     @Test

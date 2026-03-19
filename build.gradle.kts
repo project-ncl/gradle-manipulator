@@ -260,15 +260,15 @@ allprojects {
 
 subprojects {
     extra["assertjVersion"] = "3.27.7"
-    extra["atlasVersion"] = "1.1.8"
-    extra["bytemanVersion"] = "4.0.15"
+    extra["atlasVersion"] = "1.2.1"
+    extra["bytemanVersion"] = "4.0.26"
     extra["commonsBeanVersion"] = "1.11.0"
-    extra["commonsLangVersion"] = "3.19.0"
+    extra["commonsLangVersion"] = "3.20.0"
     extra["commonsIOVersion"] = "2.21.0"
     // Used in the CLI. Only limited version range available in repo.gradle.org/ui/native/libs-releases-local
     extra["gradleVersion"] = "5.6.4"
     extra["groovyVersion"] = "3.0.17"
-    extra["ivyVersion"] = "2.5.1"
+    extra["ivyVersion"] = "2.5.3"
     // Note - this *downgrades* Jackson from what is used in PME. This is due to
     // https://github.com/gradle/gradle/issues/24390
     // https://github.com/FasterXML/jackson-core/issues/955

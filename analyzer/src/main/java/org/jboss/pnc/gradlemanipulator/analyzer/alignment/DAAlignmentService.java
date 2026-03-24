@@ -115,6 +115,9 @@ public class DAAlignmentService implements AlignmentService {
             logger.info("Retrieving project version {} and returning {}", projectVersion, newProjectVersion);
 
             response.getTranslationMap().putAll(pMap);
+            // Equivalent to versionModification && pParams.isEmpty()
+        } else if (versionModification) {
+            logger.warn("Version modification enabled but no project GAVs found");
         }
 
         return response;

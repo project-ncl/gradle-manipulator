@@ -19,6 +19,8 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.gradle.api.Project;
 import org.gradle.util.GradleVersion;
@@ -78,7 +80,10 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
 
         final File projectRoot = tempDir.newFolder("spring-like-layout");
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
+        final TestManipulationModel alignmentModel = TestUtils.align(
+                projectRoot,
+                projectRoot.getName(),
+                Collections.singletonMap("scanProjectsWithNoPublications", "true"));
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));
@@ -144,11 +149,14 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
         // XXX: Caused by: java.lang.ClassNotFoundException: org.gradle.api.artifacts.maven.PomFilterContainer
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
 
+        final Map<String, String> alignProps = new HashMap<>();
+        alignProps.put("scanProjectsWithNoPublications", "true");
+        alignProps.put("dokkaPlugin", "false");
         final File projectRoot = tempDir.newFolder("spring-like-layout");
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot,
                 projectRoot.getName(),
-                Collections.singletonMap("dokkaPlugin", "false"));
+                alignProps);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));

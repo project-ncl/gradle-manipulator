@@ -73,6 +73,7 @@ public class VersionConflictProjectFunctionalTest extends AbstractWiremockTest {
 
         final Map<String, String> map = new HashMap<>();
         map.put("overrideTransitive", "false");
+        map.put("scanProjectsWithNoPublications", "true");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), map);
 
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
@@ -129,6 +130,7 @@ public class VersionConflictProjectFunctionalTest extends AbstractWiremockTest {
 
         final Map<String, String> map = new HashMap<>();
         map.put("overrideTransitive", "true");
+        map.put("scanProjectsWithNoPublications", "true");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), map);
 
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();

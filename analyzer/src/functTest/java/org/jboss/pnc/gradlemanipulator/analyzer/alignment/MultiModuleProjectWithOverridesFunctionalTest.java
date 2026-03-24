@@ -63,7 +63,8 @@ public class MultiModuleProjectWithOverridesFunctionalTest
             .of(
                     Pair.of("dependencyOverride.junit:*@org.acme:subproject2", ""),
                     Pair.of("dependencyOverride.org.apache.commons:*@org.acme.subproject:*", "3.12.0.redhat-00002"),
-                    Pair.of("dependencyOverride.io.netty:netty-*@*", "4.1.72.Final-redhat-00001"))
+                    Pair.of("dependencyOverride.io.netty:netty-*@*", "4.1.72.Final-redhat-00001"),
+                    Pair.of("scanProjectsWithNoPublications", "true"))
             .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
 
     @Before

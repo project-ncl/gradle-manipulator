@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.gradle.util.GradleVersion;
@@ -75,7 +76,7 @@ public class IvyDependencyFunctionalTest extends AbstractWiremockTest {
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot,
                 projectRoot.getName(),
-                Collections.emptyMap());
+                Collections.singletonMap("scanProjectsWithNoPublications", "true"));
 
         assertThat(alignmentModel.findCorrespondingChild("root")).satisfies(root -> {
             assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00002");
@@ -96,11 +97,11 @@ public class IvyDependencyFunctionalTest extends AbstractWiremockTest {
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
 
         final File projectRoot = tempDir.newFolder("ivy-dependency");
-
+        final Map<String, String> properties = new HashMap<>();
+        properties.put("scanProjectsWithNoPublications", "true");
+        properties.put("repoRemovalBackup", "");
         final File settings = new File(projectRoot, "settings.xml");
-        final Map<String, String> props = Collections.singletonMap("repoRemovalBackup", "");
-
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), props);
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), properties);
 
         assertThat(alignmentModel.findCorrespondingChild("root")).satisfies(root -> {
             assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00002");

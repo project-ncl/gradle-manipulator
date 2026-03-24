@@ -37,13 +37,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-import uk.org.webcompere.systemstubs.rules.SystemOutRule;
 import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class WireProjectFunctionalTest extends AbstractWiremockTest {
-
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
     public final TestRule restoreSystemProperties = new SystemPropertiesRule();
@@ -107,6 +103,7 @@ public class WireProjectFunctionalTest extends AbstractWiremockTest {
         parameters.put("overrideTransitive", "true");
         parameters.put("org.gradle.java.home", JDK17_DIR.toString());
         parameters.put("ignoreUnresolvableDependencies", "true");
+        parameters.put("scanProjectsWithNoPublications", "true");
         parameters.put("kjs", "false");
         parameters.put("knative", "false");
         parameters.put("-Pswift", "false");

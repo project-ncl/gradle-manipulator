@@ -34,13 +34,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
-import uk.org.webcompere.systemstubs.rules.SystemOutRule;
 import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 public class MicrometerProjectFunctionalTest extends AbstractWiremockTest {
-
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
     public final TestRule restoreSystemProperties = new SystemPropertiesRule();

@@ -272,7 +272,7 @@ subprojects {
     // Note - this *downgrades* Jackson from what is used in PME. This is due to
     // https://github.com/gradle/gradle/issues/24390
     // https://github.com/FasterXML/jackson-core/issues/955
-    // This exclusion isn't required on 7.6.1 and above.
+    // This exclusion isn't required on 7.6.4 and above.
     extra["jacksonVersion"] = "2.14.3"
     // Must use 6.x series as 7.x and above require JDK17
     extra["jgitVersion"] = "6.10.1.202505221210-r"
@@ -556,7 +556,8 @@ subprojects {
         slowThreshold = 120000
         // Nicer looking theme than default.
         theme = ThemeType.MOCHA
-        showStandardStreams = true
+        // Ensure everything goes to log files not console.
+        showStandardStreams = false
         showPassedStandardStreams = false
         showSkippedStandardStreams = false
     }

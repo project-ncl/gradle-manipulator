@@ -88,11 +88,24 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
             }
         }
 
-        // Set any that are 'unspecified' to the default project version.
+        // Previously this set any modules that are 'unspecified' to the default project
+        // version. With NCLSUP1402 the AlignmentTask::perform now updates project
+        // versions while also handling those projects with no publications. This check
+        // should therefore no longer be required.
+        // However, as its theoretically possible to disable the changes via the
+        // "scanProjectsWithNoPublications" property I'll keep this check as it should be
+        // harmless.
         rootProject.getAllprojects()
                 .stream()
                 .filter(f -> DefaultProject.DEFAULT_VERSION.equals(f.getVersion()))
-                .forEach(p -> projectsToVersions.put(p, newVersion[0]));
+                .forEach(project -> {
+                    // This should not happen but update the version anyway.
+                    logger.error(
+                            "Found project with unspecified version. Project: {} in directory {}",
+                            project,
+                            project.getProjectDir().getPath());
+                    projectsToVersions.put(project, newVersion[0]);
+                });
     }
 
     private class GradleVersionCalculator extends VersionCalculator {

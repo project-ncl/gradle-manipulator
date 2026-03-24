@@ -189,6 +189,17 @@ public interface Configuration extends Accessible, Reloadable {
     Boolean useLegacyConfigurationCopy();
 
     /**
+     * This is primarily used by the tests. Since NCLSUP-1402 we skip projects with no publication when scanning
+     * for alignment. However, many integration tests predate that and the publications have not been added. This
+     * allows those projects to be scanned for alignment even if they don't publish anything. Defaults to false.
+     *
+     * @return a boolean denoting whether to allow scanning for GAV changes on non-published projects
+     */
+    @Key("scanProjectsWithNoPublications")
+    @DefaultValue("false")
+    boolean scanProjectsWithNoPublications();
+
+    /**
      * Whether to explicitly override all transitive dependencies as well. Defaults to false.
      * <p>
      * This method is purposely <b>not</b> annotated with a <code>DefaultValue</code> so that

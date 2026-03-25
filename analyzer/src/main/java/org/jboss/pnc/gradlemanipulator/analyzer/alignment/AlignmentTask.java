@@ -206,7 +206,7 @@ public class AlignmentTask extends DefaultTask {
             if (DefaultProject.DEFAULT_VERSION.equals(project.getVersion())) {
                 currentProjectVersion = project.getRootProject().getVersion().toString();
                 logger.warn(
-                        "Project {} is using an unspecified version; default to root project version of {}",
+                        "Module {} is using an unspecified version; default to root project version of {}",
                         project,
                         currentProjectVersion);
                 project.setVersion(currentProjectVersion);

@@ -101,7 +101,7 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
                 .forEach(project -> {
                     // This should not happen but update the version anyway.
                     logger.error(
-                            "Found project with unspecified version. Project: {} in directory {}",
+                            "Found project with unspecified version. Module: {} in directory {}",
                             project,
                             project.getProjectDir().getPath());
                     projectsToVersions.put(project, newVersion[0]);

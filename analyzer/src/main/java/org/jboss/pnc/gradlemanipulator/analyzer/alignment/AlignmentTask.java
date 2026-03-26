@@ -59,6 +59,7 @@ import org.gradle.api.attributes.Attribute;
 import org.gradle.api.internal.GradleInternal;
 import org.gradle.api.internal.artifacts.result.DefaultResolvedDependencyResult;
 import org.gradle.api.internal.plugins.DefaultPluginManager;
+import org.gradle.api.internal.project.DefaultProject;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.plugins.AppliedPlugin;
 import org.gradle.api.publish.PublishingExtension;
@@ -188,6 +189,7 @@ public class AlignmentTask extends DefaultTask {
         final ManipulationCache cache = ManipulationCache.getCache(project);
         final Path root = project.getRootDir().toPath();
         final ManipulationModel alignmentModel = cache.getModel();
+        boolean skipProject = false;
 
         // Only output the config once to avoid noisy logging.
         if (logger.isInfoEnabled() && !configOutput.get().getAndSet(true)) {
@@ -196,16 +198,26 @@ public class AlignmentTask extends DefaultTask {
 
         String groupId = ProjectUtils.getRealGroupId(project);
         String projectName = project.getName();
-
         final String currentProjectVersion;
+
         if (configuration.versionOverride() != null) {
             currentProjectVersion = configuration.versionOverride();
         } else {
-            currentProjectVersion = project.getVersion().toString();
+            if (DefaultProject.DEFAULT_VERSION.equals(project.getVersion())) {
+                currentProjectVersion = project.getRootProject().getVersion().toString();
+                logger.warn(
+                        "Module {} is using an unspecified version; default to root project version of {}",
+                        project,
+                        currentProjectVersion);
+                project.setVersion(currentProjectVersion);
+            } else {
+                currentProjectVersion = project.getVersion().toString();
+            }
         }
         logger.info(
-                "Starting alignment task for project in directory '{}' with GAV {}:{}:{}",
-                project.getProjectDir().getName(),
+                "Starting alignment task for project {} with path '{}' with GAV {}:{}:{}",
+                project,
+                project.getProjectDir().getPath(),
                 groupId,
                 projectName,
                 currentProjectVersion);
@@ -231,6 +243,13 @@ public class AlignmentTask extends DefaultTask {
                         .getAsMap());
         if (publications.size() > 1) {
             logger.error("Multiple publications for a single project. Found {}", publications);
+        } else if (publications.isEmpty()) {
+            // Only skip a module with no publications if the configuration flag is not enabled. This
+            // flag is primarily useful for regression tests where handcrafted build files might not
+            // have publications defined yet we still want to align them to test various scenarios.
+            if (!configuration.scanProjectsWithNoPublications()) {
+                skipProject = true;
+            }
         }
         Optional<Map.Entry<String, MavenPublication>> entry = publications.entrySet().stream().findFirst();
         if (entry.isPresent()) {
@@ -296,10 +315,15 @@ public class AlignmentTask extends DefaultTask {
                                     org.jboss.pnc.gradlemanipulator.common.utils.FileUtils
                                             .relativize(root, project.getProjectDir().toPath())));
 
-            if (StringUtils.isBlank(groupId) ||
-                    DEFAULT_VERSION.equals(currentProjectVersion)) {
+            if (StringUtils.isBlank(groupId)) {
                 logger.warn(
-                        "Project '{}:{}:{}' is not fully defined ; skipping. ",
+                        "Project '{}:{}:{}' is not fully defined ; skipping.",
+                        groupId,
+                        projectName,
+                        currentProjectVersion);
+            } else if (skipProject) {
+                logger.warn(
+                        "Project '{}:{}:{}' is defined but no publication ; skipping.",
                         groupId,
                         projectName,
                         currentProjectVersion);
@@ -383,6 +407,7 @@ public class AlignmentTask extends DefaultTask {
                 .sorted(comparingInt(AlignmentService.Manipulator::order))
                 .collect(Collectors.toList());
 
+        // Call the alignment service
         final Response alignmentResponse = alignmentService.align(
                 new AlignmentService.Request(
                         cache.getProjectVersionRefs(configuration.versionSuffixSnapshot()),

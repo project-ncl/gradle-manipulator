@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import org.apache.maven.settings.Repository;
 import org.apache.maven.settings.Settings;
@@ -90,7 +91,10 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         final File projectRoot = tempDir.newFolder("multi-module");
         new File(projectRoot, "subproject1/subproject11").mkdirs();
         new File(projectRoot, "subproject2").mkdirs();
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
+        final TestManipulationModel alignmentModel = TestUtils.align(
+                projectRoot,
+                projectRoot.getName(),
+                Collections.singletonMap("scanProjectsWithNoPublications", "true"));
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot));
@@ -179,7 +183,8 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         new File(projectRoot.toFile(), "subproject2").mkdirs();
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot.toFile(),
-                projectRoot.getFileName().toString());
+                projectRoot.getFileName().toString(),
+                Collections.singletonMap("scanProjectsWithNoPublications", "true"));
         assertThat(alignmentModel).isNotNull();
         final Path buildRoot = projectRoot.resolve("build");
         assertThat(buildRoot).isDirectory();
@@ -352,7 +357,8 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         new File(projectRoot.toFile(), "subproject2").mkdirs();
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot.toFile(),
-                projectRoot.getFileName().toString());
+                projectRoot.getFileName().toString(),
+                Collections.singletonMap("scanProjectsWithNoPublications", "true"));
         assertThat(alignmentModel).isNotNull();
         final Path buildRoot = projectRoot.resolve("build");
         assertThat(buildRoot).isDirectory();
@@ -411,7 +417,8 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         new File(projectRoot.toFile(), "subproject2").mkdirs();
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot.toFile(),
-                projectRoot.getFileName().toString());
+                projectRoot.getFileName().toString(),
+                Collections.singletonMap("scanProjectsWithNoPublications", "true"));
         assertThat(alignmentModel).isNotNull();
         final Path buildRoot = projectRoot.resolve("build");
         assertThat(buildRoot).isDirectory();

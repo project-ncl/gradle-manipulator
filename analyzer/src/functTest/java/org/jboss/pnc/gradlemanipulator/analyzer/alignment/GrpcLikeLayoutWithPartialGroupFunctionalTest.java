@@ -15,7 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.gradle.api.Project;
@@ -77,10 +77,12 @@ public class GrpcLikeLayoutWithPartialGroupFunctionalTest
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("9.0.0")) < 0);
 
         final File projectRoot = tempDir.newFolder("grpc-like-layout-with-partial-group");
-        final Map<String, String> props = Collections.singletonMap(
+        Map<String, String> alignProps = new HashMap<>();
+        alignProps.put("scanProjectsWithNoPublications", "true");
+        alignProps.put(
                 "dependencyOverride.io.netty:*@*",
                 "4.1.42.Final-redhat-00001");
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), props);
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), alignProps);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));

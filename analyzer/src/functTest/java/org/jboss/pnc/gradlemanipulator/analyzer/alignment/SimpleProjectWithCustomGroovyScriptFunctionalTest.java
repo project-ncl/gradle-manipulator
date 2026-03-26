@@ -14,8 +14,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.assertj.core.api.StringAssert;
 import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
@@ -71,10 +72,13 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
     public void verifyGroovyInjection() throws IOException, URISyntaxException, ManipulationException {
         final File projectRoot = tempDir.newFolder("simple-project-with-custom-groovy-script");
 
+        Map<String, String> alignProps = new HashMap<>();
+        alignProps.put("scanProjectsWithNoPublications", "true");
+        alignProps.put("groovyScripts", "file://" + projectRoot.getAbsolutePath() + "/gme.groovy");
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot,
                 projectRoot.getName(),
-                Collections.singletonMap("groovyScripts", "file://" + projectRoot.getAbsolutePath() + "/gme.groovy"));
+                alignProps);
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertTrue(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS).exists());

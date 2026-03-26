@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
@@ -80,10 +81,13 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
     public void ensureAlignmentFileCreated() throws IOException, URISyntaxException, ManipulationException {
         final File projectRoot = tempDir.newFolder("simple-project");
 
+        Map<String, String> alignProps = new HashMap<>();
+        alignProps.put("scanProjectsWithNoPublications", "true");
+        alignProps.put("dependencyOverride.com.yammer.metrics:*@org.acme.gradle:root", "");
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot,
                 projectRoot.getName(),
-                Collections.singletonMap("dependencyOverride.com.yammer.metrics:*@org.acme.gradle:root", ""));
+                alignProps);
 
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
         assertThat(new File(projectRoot, AlignmentTask.GRADLE + File.separator + AlignmentTask.GME_REPOS)).exists();
@@ -190,7 +194,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    // @BMUnitConfig(verbose = true, bmunitVerbose = true)
+    //@BMUnitConfig(verbose = true, bmunitVerbose = true)
     @BMRule(
             name = "override-inprocess-configuration",
             targetClass = "org.jboss.pnc.gradlemanipulator.common.Configuration",
@@ -201,7 +205,10 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
     public void verifySingleGMEInjection() throws IOException, URISyntaxException, ManipulationException {
         final File projectRoot = tempDir.newFolder("simple-project");
 
-        TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
+        TestManipulationModel alignmentModel = TestUtils.align(
+                projectRoot,
+                projectRoot.getName(),
+                Collections.singletonMap("scanProjectsWithNoPublications", "true"));
 
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
         assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot));
@@ -249,7 +256,10 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                                 "version=1.0.1-SNAPSHOT"),
                 Charset.defaultCharset());
 
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, false);
+        final TestManipulationModel alignmentModel = TestUtils.align(
+                projectRoot,
+                false,
+                Collections.singletonMap("scanProjectsWithNoPublications", "true"));
 
         verify(
                 postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
@@ -280,7 +290,8 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(projectRoot).isDirectory();
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot.toFile(),
-                projectRoot.getFileName().toString());
+                projectRoot.getFileName().toString(),
+                Collections.singletonMap("scanProjectsWithNoPublications", "true"));
         assertThat(alignmentModel).isNotNull();
         final Path buildRoot = projectRoot.resolve("build");
         assertThat(buildRoot).isDirectory();
@@ -475,7 +486,8 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(projectRoot).isDirectory();
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot.toFile(),
-                projectRoot.getFileName().toString());
+                projectRoot.getFileName().toString(),
+                Collections.singletonMap("scanProjectsWithNoPublications", "true"));
         assertThat(alignmentModel).isNotNull();
         final Path buildRoot = projectRoot.resolve("build");
         assertThat(buildRoot).isDirectory();
@@ -519,7 +531,8 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(projectRoot).isDirectory();
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot.toFile(),
-                projectRoot.getFileName().toString());
+                projectRoot.getFileName().toString(),
+                Collections.singletonMap("scanProjectsWithNoPublications", "true"));
         assertThat(alignmentModel).isNotNull();
         final Path buildRoot = projectRoot.resolve("build");
         assertThat(buildRoot).isDirectory();
@@ -562,7 +575,9 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                                 "version=0.1"),
                 Charset.defaultCharset());
 
-        final Map<String, String> gmeProps = Collections.singletonMap("versionOverride", "1.0.1");
+        final Map<String, String> gmeProps = new HashMap<>();
+        gmeProps.put("versionOverride", "1.0.1");
+        gmeProps.put("scanProjectsWithNoPublications", "true");
         final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName(), gmeProps);
 
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();

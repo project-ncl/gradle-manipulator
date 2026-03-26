@@ -84,7 +84,10 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.0")) < 0);
 
         final File projectRoot = tempDir.newFolder("grpc-like-layout");
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
+        final TestManipulationModel alignmentModel = TestUtils.align(
+                projectRoot,
+                projectRoot.getName(),
+                Collections.singletonMap("scanProjectsWithNoPublications", "true"));
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START, TestUtils.getLine(projectRoot));

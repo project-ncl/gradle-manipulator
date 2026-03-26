@@ -12,9 +12,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Collections;
 import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.jboss.byteman.contrib.bmunit.BMRule;
-import org.jboss.byteman.contrib.bmunit.BMUnitConfig;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.jboss.pnc.gradlemanipulator.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.pnc.gradlemanipulator.common.Configuration;
@@ -26,12 +26,11 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
-import uk.org.webcompere.systemstubs.rules.SystemOutRule;
 import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 // See ensureInvalidNoException method for explanation of this rule.
 @RunWith(BMUnitRunner.class)
-@BMUnitConfig(verbose = true, bmunitVerbose = true)
+//@BMUnitConfig(verbose = true, bmunitVerbose = true)
 @BMRule(
         name = "override-inprocess-configuration",
         targetClass = "org.jboss.pnc.gradlemanipulator.common.Configuration",
@@ -40,9 +39,6 @@ import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
         targetLocation = "AT ENTRY",
         action = "RETURN true")
 public class InvalidProjectPassFunctionalTest extends AbstractWiremockTest {
-
-    @Rule
-    public final SystemOutRule systemOutRule = new SystemOutRule();
 
     @Rule
     public final TestRule restoreSystemProperties = new SystemPropertiesRule();
@@ -79,7 +75,10 @@ public class InvalidProjectPassFunctionalTest extends AbstractWiremockTest {
         // System.setProperty("ignoreUnresolvableDependencies", "true");
 
         final File projectRoot = tempDir.newFolder("invalid-project");
-        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
+        final TestManipulationModel alignmentModel = TestUtils.align(
+                projectRoot,
+                projectRoot.getName(),
+                Collections.singletonMap("scanProjectsWithNoPublications", "true"));
 
         assertTrue(new File(projectRoot, AlignmentTask.GME).exists());
         assertEquals(AlignmentTask.INJECT_GME_START + " }", TestUtils.getLine(projectRoot));

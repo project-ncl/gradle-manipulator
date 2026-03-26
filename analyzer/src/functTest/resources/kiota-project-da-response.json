@@ -1,0 +1,14 @@
+[
+  {
+    "bestMatchVersion": "2.0.17.redhat-00001",
+    "version": "2.0.17",
+    "groupId" : "org.slf4j",
+    "artifactId" : "slf4j-simple"
+  },
+  {
+    "bestMatchVersion": "2.1.1.redhat-00005",
+    "version": "2.1.1",
+    "groupId" : "jakarta.annotation",
+    "artifactId" : "jakarta.annotation-api"
+  }
+]

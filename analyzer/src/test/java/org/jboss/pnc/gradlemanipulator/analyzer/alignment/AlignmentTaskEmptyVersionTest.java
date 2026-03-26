@@ -33,7 +33,6 @@ import org.gradle.internal.service.ServiceRegistry;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.gradle.util.GradleVersion;
 import org.jboss.byteman.contrib.bmunit.BMRule;
-import org.jboss.byteman.contrib.bmunit.BMUnitConfig;
 import org.jboss.byteman.contrib.bmunit.BMUnitRunner;
 import org.jboss.pnc.gradlemanipulator.analyzer.alignment.io.SettingsFileIO;
 import org.jboss.pnc.gradlemanipulator.common.Configuration;
@@ -49,7 +48,7 @@ import uk.org.webcompere.systemstubs.rules.SystemOutRule;
 import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
 @RunWith(BMUnitRunner.class)
-@BMUnitConfig(bmunitVerbose = true)
+//@BMUnitConfig(bmunitVerbose = true)
 @BMRule(
         name = "handle-injectIntoNewInstance",
         targetClass = "org.gradle.api.internal.AbstractTask",

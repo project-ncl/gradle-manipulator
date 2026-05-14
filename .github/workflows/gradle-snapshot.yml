@@ -1,0 +1,17 @@
+name: Build snapshot version and upload to Gradle Central
+
+permissions: {}
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  call-snapshot-job:
+    uses: project-ncl/shared-github-actions/.github/workflows/gradle-snapshot.yml@302f28d7e903c08812ade0ec86fa90784fbe9e79 # main
+    with:
+      project_name: "project-ncl/gradle-manipulator"
+      java_version: "17"
+    secrets:
+      SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+      SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}

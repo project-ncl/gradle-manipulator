@@ -35,11 +35,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17
-      - name: Remove default github maven configuration
-        # This step is a workaround to avoid a decryption issue of Beam's
-        # net.linguica.gradle.maven.settings plugin and github's provided maven
-        # settings.xml file
-        run: rm ~/.m2/settings.xml
       - name: Check Java formatting
         uses: gradle/gradle-build-action@v3
         with:
@@ -62,20 +57,12 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: 11
-    - name: Remove default github maven configuration
-      # This step is a workaround to avoid a decryption issue of Beam's
-      # net.linguica.gradle.maven.settings plugin and github's provided maven
-      # settings.xml file
-      run: rm ~/.m2/settings.xml
     - name: Fix build for Gradle ${{ matrix.gradle }}
       run: ./gradle/fix-build.sh ${{ matrix.gradle }}
     - uses: gradle/gradle-build-action@v3
       with:
         gradle-version: ${{ matrix.gradle }}
         arguments: --no-daemon --stacktrace clean build AggregateJacocoReport
-    # - name: Setup tmate session
-    #   uses: mxschmitt/action-tmate@v3
-    #   if: ${{ failure() }}
     - name: Codecov
       uses: codecov/codecov-action@v6
       with:
@@ -97,18 +84,10 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17
-      - name: Remove default github maven configuration
-        # This step is a workaround to avoid a decryption issue of Beam's
-        # net.linguica.gradle.maven.settings plugin and github's provided maven
-        # settings.xml file
-        run: rm ~/.m2/settings.xml
       - uses: gradle/gradle-build-action@v3
         with:
           gradle-version: ${{ matrix.gradle }}
           arguments: --no-daemon --stacktrace clean build AggregateJacocoReport
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
-      #   if: ${{ failure() }}
       - name: Codecov
         uses: codecov/codecov-action@v6
         with:
@@ -126,23 +105,9 @@ jobs:
       with:
         distribution: 'temurin'
         java-version: 17
-    - name: Remove default github maven configuration
-      # This step is a workaround to avoid a decryption issue of Beam's
-      # net.linguica.gradle.maven.settings plugin and github's provided maven
-      # settings.xml file
-      run: rm ~/.m2/settings.xml
-    # https://github.com/marketplace/actions/maven-setings-action
-    - name: Maven Settings
-      uses: s4u/maven-settings-action@v4.0.0
-      with:
-        sonatypeSnapshots: true
-        githubServer: false
-        servers: |
-            [{
-                "id": "central",
-                "username": "${{ secrets.SONATYPE_USERNAME }}",
-                "password": "${{ secrets.SONATYPE_PASSWORD }}"
-            }]
+        server-id: central-publisher      # we use this in our pom.xml
+        server-username: MAVEN_USERNAME   # env var name for username
+        server-password:  MAVEN_PASSWORD  # env var name for password
     - name: Extract Project version
       id: project-version
       run: echo "version=$(cat gradle.properties | awk -F "=" 'BEGIN{ORS=""} /version/{print $NF}')" >> "$GITHUB_OUTPUT"
@@ -150,3 +115,6 @@ jobs:
       if:  ${{ endsWith(steps.project-version.outputs.version, '-SNAPSHOT') }}
       with:
         arguments: build publishToCentral -x test -x funcTest
+      env:
+        MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+        MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}

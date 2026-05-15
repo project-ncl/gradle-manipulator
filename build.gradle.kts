@@ -8,11 +8,7 @@ import java.nio.file.StandardCopyOption
 import java.text.SimpleDateFormat
 import java.util.Date
 import kotlin.reflect.full.memberFunctions
-import net.linguica.gradle.maven.settings.LocalMavenSettingsLoader
-import net.linguica.gradle.maven.settings.MavenSettingsPlugin.MAVEN_SETTINGS_EXTENSION_NAME
-import net.linguica.gradle.maven.settings.MavenSettingsPluginExtension
 import org.ajoberstar.grgit.Grgit
-import org.apache.maven.settings.building.SettingsBuildingException
 import org.gradle.kotlin.dsl.project
 
 plugins {
@@ -37,10 +33,6 @@ plugins {
     }
     id("net.researchgate.release") version "2.8.1"
     id("org.ajoberstar.grgit") version "4.1.1"
-    // Were using mark-vieira/gradle-maven-settings-plugin but due to
-    // https://github.com/mark-vieira/gradle-maven-settings-plugin/issues/29 it doesn't work with Gradle >= 8.2
-    // We really only need minimal code from it anyway
-    id("io.github.rmanibus.maven-settings") version "0.8" apply false
 
     when {
         GradleVersion.current() < GradleVersion.version("5.0") -> {
@@ -622,30 +614,6 @@ fun MavenPublication.generatePom() {
     }
 }
 
-fun loadSettings(extension: MavenSettingsPluginExtension, repository: String) {
-    val settingsLoader = LocalMavenSettingsLoader(extension)
-    try {
-        val settings = settingsLoader.loadSettings()
-        for (server in settings.servers) {
-            logger.debug("Settings parser examining server {}", server.id)
-            if (repository == server.id) {
-                if (server.username != null && server.password != null) {
-                    logger.info("Found valid credentials for publishing")
-                    // As the nmcp configuration has been moved to a separate groovy file
-                    // instead of returning a Pair<String,String> store the values in the ext.
-                    project.ext.set("central_username", server.username)
-                    project.ext.set("central_password", server.password)
-                    return
-                }
-            }
-        }
-    } catch (e: SettingsBuildingException) {
-        throw GradleScriptException("Unable to read local Maven settings.", e)
-    }
-    project.ext.set("central_username", "")
-    project.ext.set("central_password", "")
-}
-
 val isReleaseBuild = ("true" == gradle.startParameter.projectProperties.getOrDefault("release", ""))
 
 if (isReleaseBuild && GradleVersion.current().version != "${project.extra.get("gradleReleaseVersion")}") {
@@ -661,16 +629,11 @@ if (System.getProperty("release") != null) {
 if (GradleVersion.current() >= GradleVersion.version("8.3")) {
     // LinkageError: loader constraint violation from GMEFunctionalTest otherwise
     if (System.getProperty("gmeFunctionalTest") == null) {
-        val mavenExtension =
-            project.extensions.create(MAVEN_SETTINGS_EXTENSION_NAME, MavenSettingsPluginExtension::class, project)
-        // Previously was encoding the repository name into repositories that were attached to the
-        // publications. As those aren't needed now due to Central portal upload changes, just
-        // hardcode the name here. This should match the name in $HOME/.m2/settings.xml
-        loadSettings(mavenExtension, "central")
         // We have to delay applying the plugin and load the extension configuration from a groovy file as:
         // 1. We can't use the plugin on other JDK/Gradle combinations
         // 2. We can't use Kotlin types in external files (https://github.com/gradle/gradle/issues/30878) and we
         //    don't want them eagerly precompiled anyway.
+        // 3. The MavenSettingsPlugin is applied in nmcp.gradle to load credentials from Maven settings.xml
         apply(plugin = "com.gradleup.nmcp.aggregation")
         apply { from("$rootDir/gradle/nmcp.gradle") }
         project.rootProject.tasks.register("publishToCentral") {

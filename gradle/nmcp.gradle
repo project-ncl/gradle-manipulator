@@ -1,5 +1,12 @@
-// Configuration for https://github.com/GradleUp/nmcp
 
+// Apply the Maven settings plugin to load credentials
+apply plugin: MavenSettingsPlugin
+
+// Load credentials from Maven settings.xml
+// This should match the name in $HOME/.m2/settings.xml
+rootProject.extensions.getByType(MavenSettingsExtension).loadSettings("central-publisher")
+
+// Configuration for https://github.com/GradleUp/nmcp
 nmcpAggregation {
     centralPortal {
         // publish manually from the portal

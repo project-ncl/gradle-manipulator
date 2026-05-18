@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths-ignore: ["CONTRIBUTING.md", "LICENSE", "README.md"]
 
+permissions:
+  contents: read
+
 jobs:
   check-java-formatting:
     uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@302f28d7e903c08812ade0ec86fa90784fbe9e79 # main

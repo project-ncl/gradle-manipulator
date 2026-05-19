@@ -1,0 +1,78 @@
+name: Java CI with Gradle
+
+on:
+  pull_request:
+    branches: [main]
+    paths-ignore: ["CONTRIBUTING.md", "LICENSE", "README.md"]
+
+permissions:
+  contents: read
+
+jobs:
+  check-java-formatting:
+    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@302f28d7e903c08812ade0ec86fa90784fbe9e79 # main
+    with:
+      java_version: "17"
+      gradle_version: "8.3"
+      build_args: "--no-daemon --stacktrace spotlessJavaCheck"
+
+  build-gradle-1:
+    needs: [check-java-formatting]
+    strategy:
+      fail-fast: false
+      matrix:
+        gradle:
+          [
+            4.10.3,
+            "5.0",
+            5.1.1,
+            5.2.1,
+            5.3.1,
+            5.4.1,
+            5.5.1,
+            5.6.4,
+            6.0.1,
+            6.1.1,
+            6.2.2,
+            6.3,
+            6.4.1,
+            6.5.1,
+            6.6.1,
+            6.7.1,
+            6.8.3,
+            6.9.4,
+            7.0.2,
+            7.1.1,
+            7.2,
+            7.3.3,
+            7.4.2,
+            7.5.1,
+            7.6.6,
+            8.0.2,
+            8.1.1,
+            8.2.1,
+          ]
+    if: github.repository == 'project-ncl/gradle-manipulator'
+    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@302f28d7e903c08812ade0ec86fa90784fbe9e79 # main
+    with:
+      java_version: "11"
+      gradle_version: ${{ matrix.gradle }}
+      build_args: "--no-daemon --stacktrace clean build AggregateJacocoReport"
+      pre_build_script: "./gradle/fix-build.sh ${{ matrix.gradle }}"
+      upload_coverage: true
+      coverage_files: "./build/reports/jacoco/aggregate/jacocoTestReport.xml"
+
+  build-gradle-2:
+    needs: [check-java-formatting]
+    strategy:
+      fail-fast: false
+      matrix:
+        gradle: [8.3, 8.4, 8.5, 8.8, "8.10.2", "8.12.1", "8.13", "8.14.3", "9.0.0", "9.1.0", "9.2.1", "9.3.0"]
+    if: github.repository == 'project-ncl/gradle-manipulator'
+    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@302f28d7e903c08812ade0ec86fa90784fbe9e79 # main
+    with:
+      java_version: "17"
+      gradle_version: ${{ matrix.gradle }}
+      build_args: "--no-daemon --stacktrace clean build AggregateJacocoReport"
+      upload_coverage: true
+      coverage_files: "./build/reports/jacoco/aggregate/jacocoTestReport.xml"

@@ -17,20 +17,25 @@ open class MavenSettingsPlugin : Plugin<Project> {
 }
 
 open class MavenSettingsExtension(private val project: Project) {
-    
+
     fun loadSettings(repository: String) {
         try {
             val settingsBuildingRequest: SettingsBuildingRequest = DefaultSettingsBuildingRequest()
             settingsBuildingRequest.userSettingsFile = project.file(File(System.getProperty("user.home"), ".m2/settings.xml"))
-            settingsBuildingRequest.systemProperties = System.getProperties()
+
+            // Add system properties and environment variables for interpolation
+            val properties = java.util.Properties()
+            properties.putAll(System.getProperties())
+            properties.putAll(System.getenv())
+            settingsBuildingRequest.systemProperties = properties
 
             val factory = DefaultSettingsBuilderFactory()
             val settingsBuilder: DefaultSettingsBuilder = factory.newInstance()
             val settingsBuildingResult: SettingsBuildingResult = settingsBuilder.build(settingsBuildingRequest)
             val settings: Settings = settingsBuildingResult.effectiveSettings
-            
+
             for (server in settings.servers) {
-                project.logger.debug("Settings parser examining server {}", server.id)
+                project.logger.info("Settings parser examining server {}", server.id)
                 if (repository == server.id) {
                     if (server.username != null && server.password != null) {
                         project.logger.info("Found valid credentials for publishing")
@@ -44,6 +49,7 @@ open class MavenSettingsExtension(private val project: Project) {
         } catch (e: SettingsBuildingException) {
             throw GradleScriptException("Unable to read local Maven settings.", e)
         }
+        project.logger.warn("Unable to find settings for repository {}  ", repository)
         project.extensions.extraProperties.set("central_username", "")
         project.extensions.extraProperties.set("central_password", "")
     }

@@ -53,7 +53,7 @@ jobs:
             8.2.1,
           ]
     if: github.repository == 'project-ncl/gradle-manipulator'
-    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@302f28d7e903c08812ade0ec86fa90784fbe9e79 # main
+    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@e101f216c3c303a534bd676c818f12c0f207f3ef # main
     with:
       java_version: "11"
       gradle_version: ${{ matrix.gradle }}
@@ -67,12 +67,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gradle: [8.3, 8.4, 8.5, 8.8, "8.10.2", "8.12.1", "8.13", "8.14.3", "9.0.0", "9.1.0", "9.2.1", "9.3.0"]
+        gradle: [8.3, 8.4, 8.5, 8.8, "8.10.2", "8.12.1", "8.13", "8.14.3", "9.0.0", "9.1.0", "9.2.1"]
+        upload_artifacts: [false]
+        include:
+          - gradle: 9.3.0
+            upload_artifacts: true
     if: github.repository == 'project-ncl/gradle-manipulator'
-    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@302f28d7e903c08812ade0ec86fa90784fbe9e79 # main
+    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@e101f216c3c303a534bd676c818f12c0f207f3ef # main
     with:
       java_version: "17"
       gradle_version: ${{ matrix.gradle }}
       build_args: "--no-daemon --stacktrace clean build AggregateJacocoReport"
       upload_coverage: true
       coverage_files: "./build/reports/jacoco/aggregate/jacocoTestReport.xml"
+      upload_artifacts: ${{ matrix.upload_artifacts }}

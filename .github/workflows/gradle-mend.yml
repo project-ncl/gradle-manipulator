@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   build:
-    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@e101f216c3c303a534bd676c818f12c0f207f3ef # main
+    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@b31335d128fec7e29305eeea0b5dc7221829e1a4 # main
     with:
       java_version: "17"
       gradle_version: "9.3.0"

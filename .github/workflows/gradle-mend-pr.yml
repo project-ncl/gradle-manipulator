@@ -19,10 +19,12 @@ concurrency:
 jobs:
   scan:
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request'
-    uses: project-ncl/shared-github-actions/.github/workflows/mend-ci.yml@b31335d128fec7e29305eeea0b5dc7221829e1a4 # main
+    uses: project-ncl/shared-github-actions/.github/workflows/mend-ci.yml@51306b121a5682b56c30bca0837821284b760a51 # main
     with:
       SCA: true
       SAST: true
+      SCA_EXCLUDES: "analyzer/src/functTest/**,manipulation/src/functTest/**"
+      SAST_EXCLUDES: "analyzer/src/functTest/**,manipulation/src/functTest/**"
       triggering_run_id: ${{ github.event.workflow_run.id }}
       pr_feedback: true
     secrets:

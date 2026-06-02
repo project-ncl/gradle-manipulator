@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   check-java-formatting:
-    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@b31335d128fec7e29305eeea0b5dc7221829e1a4 # main
+    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@51306b121a5682b56c30bca0837821284b760a51 # main
     with:
       java_version: "17"
       gradle_version: "8.3"

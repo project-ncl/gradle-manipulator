@@ -24,7 +24,7 @@ jobs:
       SCA: true
       SAST: true
       SCA_EXCLUDES: "analyzer/src/functTest/**,manipulation/src/functTest/**"
-      SAST_EXCLUDES: "analyzer/src/functTest/**,manipulation/src/functTest/**"
+      SAST_EXCLUDES: "analyzer/src/functTest/,manipulation/src/functTest/"
       triggering_run_id: ${{ github.event.workflow_run.id }}
       pr_feedback: true
     secrets:

@@ -721,7 +721,19 @@ public class AlignmentTask extends DefaultTask {
                 DirectoryFileFilter.DIRECTORY);
         for (File extraGradleScript : extraGradleScripts) {
             final List<String> lines = FileUtils.readLines(extraGradleScript, Charset.defaultCharset());
-            if (!APPLY_GME_REPOS.equals(org.jboss.pnc.gradlemanipulator.common.utils.FileUtils.getFirstLine(lines))) {
+            if (extraGradleScript.getName().startsWith("settings")) {
+                if (!APPLY_GME_REPOS
+                        .equals(
+                                org.jboss.pnc.gradlemanipulator.common.utils.FileUtils.getLastLine(
+                                        extraGradleScript))) {
+                    final List<String> result = new ArrayList<>(lines.size() + 2);
+                    result.addAll(lines);
+                    result.add(System.lineSeparator());
+                    result.add(APPLY_GME_REPOS);
+                    FileUtils.writeLines(extraGradleScript, result);
+                }
+            } else if (!APPLY_GME_REPOS
+                    .equals(org.jboss.pnc.gradlemanipulator.common.utils.FileUtils.getFirstLine(lines))) {
                 final List<String> result = new ArrayList<>(lines.size() + 2);
                 result.add(APPLY_GME_REPOS);
                 result.add(System.lineSeparator());

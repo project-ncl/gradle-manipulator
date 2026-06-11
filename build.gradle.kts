@@ -299,7 +299,7 @@ subprojects {
             manifest {
                 attributes["Built-By"] = System.getProperty("user.name")
                 attributes["Build-Timestamp"] = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(Date())
-                attributes["Scm-Revision"] = Grgit.open(mapOf("currentDir" to project.rootDir)).use { g -> g.head().id }
+                attributes["Scm-Revision"] = getGitRevision()
                 attributes["Created-By"] = "Gradle ${gradle.gradleVersion}"
                 attributes["Build-Jdk"] =
                     System.getProperty("java.version") +
@@ -454,8 +454,7 @@ subprojects {
                 manifest {
                     attributes["Built-By"] = System.getProperty("user.name")
                     attributes["Build-Timestamp"] = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(Date())
-                    attributes["Scm-Revision"] =
-                        Grgit.open(mapOf("currentDir" to project.rootDir)).use { g -> g.head().id }
+                    attributes["Scm-Revision"] = getGitRevision()
                     attributes["Created-By"] = "Gradle ${gradle.gradleVersion}"
                     attributes["Build-Jdk"] =
                         System.getProperty("java.version") +
@@ -645,5 +644,15 @@ if (GradleVersion.current() >= GradleVersion.version("8.3")) {
                 dependsOn("publishAggregationToCentralPortal")
             }
         }
+    }
+}
+
+// Gets the git revision ID, returning "unknown" if not in a git repository.
+fun Project.getGitRevision(): String {
+    return try {
+        Grgit.open(mapOf("currentDir" to project.rootDir)).use { g -> g.head().id }
+    } catch (e: Exception) {
+        logger.warn("Unable to open git repository: ${e.message}. Using 'unknown' for Scm-Revision.")
+        "unknown"
     }
 }

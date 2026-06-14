@@ -126,6 +126,16 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                 .filteredOn(l -> l.trim().equals(AlignmentTask.APPLY_GME_REPOS))
                 .hasSize(1);
 
+        // verify that settings.gradle in gradle/plugins has injection appended (not prepended)
+        extraGradleFile = projectRoot.toPath().resolve("gradle/plugins/settings.gradle").toFile();
+        assertThat(extraGradleFile).exists();
+        List<String> settingsLines = FileUtils.readLines(extraGradleFile, Charset.defaultCharset());
+        assertThat(settingsLines)
+                .filteredOn(l -> l.trim().equals(AlignmentTask.APPLY_GME_REPOS))
+                .hasSize(1);
+        assertThat(settingsLines.get(0).trim()).startsWith("pluginManagement");
+        assertThat(settingsLines.get(settingsLines.size() - 1).trim()).isEqualTo(AlignmentTask.APPLY_GME_REPOS);
+
         // Verify the org.gradle.caching has been removed.
         File properties = new File(projectRoot, "gradle.properties");
         assertThat(linesOf(properties)).anyMatch(value -> !value.contains("org.gradle.caching"));

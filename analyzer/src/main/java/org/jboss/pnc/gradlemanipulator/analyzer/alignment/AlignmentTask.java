@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 import org.aeonbits.owner.ConfigCache;
 import org.apache.commons.beanutils.ContextClassLoaderLocal;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.NameFileFilter;
@@ -721,7 +722,19 @@ public class AlignmentTask extends DefaultTask {
                 DirectoryFileFilter.DIRECTORY);
         for (File extraGradleScript : extraGradleScripts) {
             final List<String> lines = FileUtils.readLines(extraGradleScript, Charset.defaultCharset());
-            if (!APPLY_GME_REPOS.equals(org.jboss.pnc.gradlemanipulator.common.utils.FileUtils.getFirstLine(lines))) {
+            if (FilenameUtils.getBaseName(extraGradleScript.getName()).equals("settings")) {
+                if (!APPLY_GME_REPOS
+                        .equals(
+                                org.jboss.pnc.gradlemanipulator.common.utils.FileUtils.getLastLine(
+                                        extraGradleScript))) {
+                    final List<String> result = new ArrayList<>(lines.size() + 2);
+                    result.addAll(lines);
+                    result.add(System.lineSeparator());
+                    result.add(APPLY_GME_REPOS);
+                    FileUtils.writeLines(extraGradleScript, result);
+                }
+            } else if (!APPLY_GME_REPOS
+                    .equals(org.jboss.pnc.gradlemanipulator.common.utils.FileUtils.getFirstLine(lines))) {
                 final List<String> result = new ArrayList<>(lines.size() + 2);
                 result.add(APPLY_GME_REPOS);
                 result.add(System.lineSeparator());

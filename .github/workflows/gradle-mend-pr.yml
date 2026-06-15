@@ -19,7 +19,7 @@ concurrency:
 jobs:
   scan:
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request'
-    uses: project-ncl/shared-github-actions/.github/workflows/mend-ci.yml@70502d0c707f7d7abb41b02af80fb094a022a760 # main
+    uses: project-ncl/shared-github-actions/.github/workflows/mend-ci.yml@c7838776470f26e02d24f80215d5a407735fbc31 # main
     with:
       SCA: true
       SAST: true

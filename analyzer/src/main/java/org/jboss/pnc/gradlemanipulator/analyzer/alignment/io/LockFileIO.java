@@ -21,7 +21,7 @@ import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.commonjava.atlas.maven.ident.ref.SimpleProjectVersionRef;
 import org.gradle.api.logging.Logger;
 import org.jboss.pnc.gradlemanipulator.common.versioning.DynamicVersionParser;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 
 /**
  * Utility class for lock file I/O.

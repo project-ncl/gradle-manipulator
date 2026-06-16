@@ -7,7 +7,7 @@ import org.gradle.internal.logging.events.LogEvent;
 import org.gradle.internal.logging.events.OutputEvent;
 import org.gradle.internal.logging.events.OutputEventListener;
 import org.gradle.internal.logging.slf4j.OutputEventListenerBackedLoggerContext;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 

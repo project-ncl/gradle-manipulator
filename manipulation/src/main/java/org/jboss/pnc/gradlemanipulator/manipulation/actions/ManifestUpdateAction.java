@@ -14,7 +14,7 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.bundling.Jar;
 import org.jboss.pnc.gradlemanipulator.common.logging.GMLogger;
 import org.jboss.pnc.gradlemanipulator.common.model.ManipulationModel;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 
 /**
  * Overrides specified Manifest entries.

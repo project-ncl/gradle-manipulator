@@ -16,7 +16,7 @@ import org.apache.commons.io.FileUtils;
 import org.gradle.api.logging.Logger;
 import org.jboss.pnc.gradlemanipulator.common.logging.GMLogger;
 import org.jboss.pnc.gradlemanipulator.common.utils.PluginUtils;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 
 /**
  * Utility class for settings file I/O.

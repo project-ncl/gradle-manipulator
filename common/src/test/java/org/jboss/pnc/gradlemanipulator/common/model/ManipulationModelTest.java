@@ -9,7 +9,7 @@ import static org.junit.Assert.assertTrue;
 import org.commonjava.atlas.maven.ident.ref.SimpleProjectVersionRef;
 import org.gradle.api.logging.LogLevel;
 import org.jboss.pnc.gradlemanipulator.common.rules.LoggingRule;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 import org.junit.Rule;
 import org.junit.Test;
 import uk.org.webcompere.systemstubs.rules.SystemErrRule;

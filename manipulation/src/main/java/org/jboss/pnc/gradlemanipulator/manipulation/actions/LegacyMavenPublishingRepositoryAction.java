@@ -15,7 +15,7 @@ import org.jboss.pnc.gradlemanipulator.common.Configuration;
 import org.jboss.pnc.gradlemanipulator.common.logging.GMLogger;
 import org.jboss.pnc.gradlemanipulator.common.utils.ProjectUtils;
 import org.jboss.pnc.gradlemanipulator.manipulation.ManipulationPlugin;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 
 /**
  * Adds a publication repository to the legacy maven plugin.

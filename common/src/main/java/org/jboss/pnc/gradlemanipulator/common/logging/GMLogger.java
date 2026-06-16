@@ -6,7 +6,7 @@ import org.gradle.api.logging.LogLevel;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.jboss.pnc.gradlemanipulator.common.Configuration;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 import org.slf4j.Marker;
 
 @SuppressWarnings("unused")

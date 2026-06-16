@@ -21,7 +21,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
     implementation("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common-lite:${project.extra.get("pmeVersion")}") {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")

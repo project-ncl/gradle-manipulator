@@ -23,7 +23,7 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.commonjava.atlas.maven.ident.util.VersionUtils;
 import org.commonjava.atlas.maven.ident.version.InvalidVersionSpecificationException;
 import org.commonjava.atlas.maven.ident.version.VersionSpec;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException;
 import org.jboss.pnc.mavenmanipulator.io.FileIO;
 import org.slf4j.Logger;
 

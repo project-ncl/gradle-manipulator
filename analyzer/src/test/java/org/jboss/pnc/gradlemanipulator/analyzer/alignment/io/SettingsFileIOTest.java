@@ -13,7 +13,7 @@ import org.gradle.api.logging.LogLevel;
 import org.gradle.internal.impldep.com.google.api.client.googleapis.testing.TestUtils;
 import org.jboss.pnc.gradlemanipulator.common.rules.LoggingRule;
 import org.jboss.pnc.gradlemanipulator.common.utils.PluginUtils;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;

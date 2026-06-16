@@ -19,8 +19,8 @@ import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.internal.artifacts.repositories.DefaultMavenLocalArtifactRepository;
 import org.gradle.api.logging.Logger;
 import org.jboss.pnc.gradlemanipulator.common.logging.GMLogger;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 import org.jboss.pnc.mavenmanipulator.io.SettingsIO;
 
 /**

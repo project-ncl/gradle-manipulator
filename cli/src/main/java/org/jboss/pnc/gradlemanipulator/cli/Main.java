@@ -41,7 +41,7 @@ import org.jboss.pnc.gradlemanipulator.common.Configuration;
 import org.jboss.pnc.gradlemanipulator.common.utils.GroovyUtils;
 import org.jboss.pnc.gradlemanipulator.common.utils.JavaUtils;
 import org.jboss.pnc.gradlemanipulator.common.utils.PluginUtils;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException;
 import org.jboss.pnc.mavenmanipulator.common.util.ManifestUtils;
 import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationStage;
 import org.slf4j.Logger;

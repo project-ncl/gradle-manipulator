@@ -5,7 +5,7 @@ import java.util.Properties;
 import lombok.Getter;
 import org.gradle.api.Project;
 import org.jboss.pnc.gradlemanipulator.common.model.ManipulationModel;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 import org.jboss.pnc.mavenmanipulator.core.groovy.GradleBaseScript;
 import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationStage;
 import org.jboss.pnc.mavenmanipulator.io.FileIO;

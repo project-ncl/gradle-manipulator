@@ -33,7 +33,7 @@ import org.jboss.byteman.contrib.bmunit.BMRule;
 import org.jboss.pnc.gradlemanipulator.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.pnc.gradlemanipulator.common.Configuration;
 import org.jboss.pnc.gradlemanipulator.common.io.ManipulationIO;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException;
 import org.jboss.pnc.mavenmanipulator.common.json.GAV;
 import org.jboss.pnc.mavenmanipulator.common.json.ModulesItem;
 import org.jboss.pnc.mavenmanipulator.common.json.PME;

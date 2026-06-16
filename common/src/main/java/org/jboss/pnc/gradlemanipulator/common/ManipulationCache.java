@@ -20,7 +20,7 @@ import org.jboss.pnc.gradlemanipulator.common.model.ManipulationModel;
 import org.jboss.pnc.gradlemanipulator.common.utils.PluginUtils.DokkaVersion;
 import org.jboss.pnc.gradlemanipulator.common.utils.ProjectUtils;
 import org.jboss.pnc.gradlemanipulator.common.versioning.RelaxedProjectVersionRef;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 import org.jboss.pnc.mavenmanipulator.core.impl.Version;
 
 /**

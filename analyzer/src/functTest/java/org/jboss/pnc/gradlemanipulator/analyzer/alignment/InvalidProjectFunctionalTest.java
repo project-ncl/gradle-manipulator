@@ -13,7 +13,7 @@ import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jboss.pnc.gradlemanipulator.common.Configuration;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 import org.jboss.pnc.mavenmanipulator.io.rest.DefaultTranslator;
 import org.junit.Before;
 import org.junit.Rule;

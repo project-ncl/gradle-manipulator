@@ -55,6 +55,8 @@ dependencies {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
         exclude(group = "ch.qos.logback")
+        // Exclude until new release due to Quarkus bom
+        exclude(group = "org.jboss.pnc.otel")
     }
 
     implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-io:${project.extra.get("pmeVersion")}") {
@@ -62,13 +64,17 @@ dependencies {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
         exclude(group = "ch.qos.logback")
+        // Exclude until new release due to Quarkus bom
+        exclude(group = "org.jboss.pnc.otel")
     }
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common-lite:${project.extra.get("pmeVersion")}") {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
         exclude(group = "ch.qos.logback")
+        // Exclude until new release due to Quarkus bom
+        exclude(group = "org.jboss.pnc.otel")
     }
 
     implementation("org.commonjava.atlas:atlas-identities:${project.extra.get("atlasVersion")}") {
@@ -88,8 +94,6 @@ dependencies {
 
     implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
 
-    testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsIOVersion")}")
-    testImplementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common:${project.extra.get("pmeVersion")}")
     testImplementation(project(path = ":common", configuration = "testFixturesCompile"))
     testImplementation(gradleTestKit())
     testImplementation("junit:junit:${project.extra.get("junitVersion")}")
@@ -99,7 +103,6 @@ dependencies {
     testImplementation(files("${System.getProperty("java.home")}/../lib/tools.jar"))
     testImplementation("org.mockito:mockito-core:2.27.0")
     testImplementation("com.github.tomakehurst:wiremock-jre8:2.35.1")
-    testImplementation(gradleKotlinDsl())
     testImplementation("org.eclipse.jgit:org.eclipse.jgit:${project.extra.get("jgitVersion")}")
     testImplementation("pl.pragmatists:JUnitParams:1.1.1")
 }

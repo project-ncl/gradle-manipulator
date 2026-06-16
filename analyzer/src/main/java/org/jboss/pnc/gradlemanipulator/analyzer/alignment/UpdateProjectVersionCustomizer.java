@@ -14,8 +14,8 @@ import org.jboss.pnc.gradlemanipulator.common.Configuration;
 import org.jboss.pnc.gradlemanipulator.common.ManipulationCache;
 import org.jboss.pnc.gradlemanipulator.common.io.ManipulationIO;
 import org.jboss.pnc.gradlemanipulator.common.logging.GMLogger;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 import org.jboss.pnc.mavenmanipulator.core.impl.VersionCalculator;
 import org.jboss.pnc.mavenmanipulator.core.state.VersioningState;
 

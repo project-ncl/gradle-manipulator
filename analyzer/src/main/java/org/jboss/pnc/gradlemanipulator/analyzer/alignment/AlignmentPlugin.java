@@ -14,7 +14,7 @@ import org.jboss.pnc.gradlemanipulator.common.logging.FilteringCustomLogger;
 import org.jboss.pnc.gradlemanipulator.common.logging.GMLogger;
 import org.jboss.pnc.gradlemanipulator.common.model.ManipulationModel;
 import org.jboss.pnc.gradlemanipulator.common.utils.OTELUtils;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 import org.jboss.pnc.mavenmanipulator.common.util.ManifestUtils;
 
 /**

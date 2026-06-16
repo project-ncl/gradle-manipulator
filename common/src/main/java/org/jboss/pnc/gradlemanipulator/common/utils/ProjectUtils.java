@@ -11,11 +11,11 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.provider.Property;
 import org.gradle.util.GradleVersion;
 import org.jboss.pnc.gradlemanipulator.common.logging.GMLogger;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 
 @UtilityClass
 public class ProjectUtils {
-    private final Logger logger = GMLogger.getLogger(OTELUtils.class);
+    private final Logger logger = GMLogger.getLogger(ProjectUtils.class);
 
     /**
      * Gradle annoyingly sets a default group using the following code:

@@ -6,8 +6,8 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.FileUtils;
 import org.jboss.pnc.gradlemanipulator.common.model.ManipulationModel;
 import org.jboss.pnc.gradlemanipulator.common.utils.SerializationUtils;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 
 public final class ManipulationIO {
     public static final String MANIPULATION_FILE_NAME = "manipulation.json";

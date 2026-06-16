@@ -14,7 +14,7 @@ import org.gradle.testfixtures.ProjectBuilder;
 import org.jboss.pnc.gradlemanipulator.analyzer.alignment.AlignmentService.Response;
 import org.jboss.pnc.gradlemanipulator.common.Configuration;
 import org.jboss.pnc.gradlemanipulator.common.ManipulationCache;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;

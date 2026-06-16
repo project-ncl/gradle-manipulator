@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import org.gradle.internal.jvm.JavaInfo;
 import org.gradle.internal.jvm.Jvm;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException;
 
 @UtilityClass
 public class JavaUtils {

@@ -18,7 +18,7 @@ import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.Project;
 import org.gradle.testfixtures.ProjectBuilder;
 import org.jboss.pnc.gradlemanipulator.common.Configuration;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

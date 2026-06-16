@@ -29,7 +29,7 @@ import org.jboss.pnc.gradlemanipulator.analyzer.alignment.AlignmentTask;
 import org.jboss.pnc.gradlemanipulator.common.Configuration;
 import org.jboss.pnc.gradlemanipulator.common.model.ManipulationModel;
 import org.jboss.pnc.gradlemanipulator.common.rules.LoggingRule;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

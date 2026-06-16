@@ -14,7 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.logging.LogLevel;
 import org.jboss.pnc.gradlemanipulator.common.rules.LoggingRule;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;

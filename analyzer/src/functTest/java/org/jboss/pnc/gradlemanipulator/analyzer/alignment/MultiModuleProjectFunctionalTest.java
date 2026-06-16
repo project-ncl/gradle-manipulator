@@ -34,7 +34,7 @@ import org.gradle.api.Project;
 import org.jboss.pnc.gradlemanipulator.analyzer.alignment.TestUtils.TestManipulationModel;
 import org.jboss.pnc.gradlemanipulator.common.Configuration;
 import org.jboss.pnc.gradlemanipulator.common.utils.FileUtils;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException;
 import org.jboss.pnc.mavenmanipulator.common.json.GAV;
 import org.jboss.pnc.mavenmanipulator.common.json.ModulesItem;
 import org.jboss.pnc.mavenmanipulator.common.json.PME;

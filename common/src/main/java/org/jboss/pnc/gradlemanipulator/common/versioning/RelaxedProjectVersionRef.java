@@ -13,7 +13,7 @@ import org.commonjava.atlas.maven.ident.version.VersionSpec;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.jboss.pnc.gradlemanipulator.common.ManipulationCache;
-import org.jboss.pnc.mavenmanipulator.common.ManipulationUncheckedException;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
 
 /**
  * This is a special ProjectVersionRef that allows a null for a version and delegates to the

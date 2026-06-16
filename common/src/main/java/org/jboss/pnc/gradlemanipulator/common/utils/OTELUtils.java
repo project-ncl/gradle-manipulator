@@ -1,6 +1,5 @@
 package org.jboss.pnc.gradlemanipulator.common.utils;
 
-import com.redhat.resilience.otel.OTelCLIHelper;
 import lombok.experimental.UtilityClass;
 import org.aeonbits.owner.ConfigCache;
 import org.gradle.api.logging.LogLevel;
@@ -8,6 +7,7 @@ import org.gradle.api.logging.Logger;
 import org.jboss.pnc.gradlemanipulator.common.Configuration;
 import org.jboss.pnc.gradlemanipulator.common.logging.FilteringCustomLogger;
 import org.jboss.pnc.gradlemanipulator.common.logging.GMLogger;
+import org.jboss.pnc.otel.OTelCLIHelper;
 
 @UtilityClass
 public class OTELUtils {

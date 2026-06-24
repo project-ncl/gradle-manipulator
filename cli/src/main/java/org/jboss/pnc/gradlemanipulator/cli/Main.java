@@ -242,7 +242,19 @@ public class Main implements Callable<Void> {
             // Can't use build.addJvmArguments as it wasn't fixed till 8.13
             // https://github.com/gradle/gradle/issues/31462
             // https://github.com/gradle/gradle/issues/25155
-            Collections.addAll(jvmArgs, javaEnvironment.getJvmArguments().toArray(new String[0]));
+
+            // The Gradle build environment may include JVM arguments (e.g. -XX:MaxPermSize,
+            // -XX:+UseConcMarkSweepGC) that were removed in later Java versions. Passing these
+            // to the daemon causes it to fail with "Unrecognized VM option". Filter them based
+            // on the target JDK version.
+            int javaMajorVersion = JavaUtils.getMajorVersion(javaHome);
+            List<String> envJvmArgs = new ArrayList<>(javaEnvironment.getJvmArguments());
+            List<String> filteredArgs = JavaUtils.filterUnsupportedJvmArgs(envJvmArgs, javaMajorVersion);
+            if (filteredArgs.size() != envJvmArgs.size()) {
+                envJvmArgs.removeAll(filteredArgs);
+                logger.warn("Filtering out unsupported JVM arguments: {}", envJvmArgs);
+            }
+            jvmArgs.addAll(filteredArgs);
 
             if (!quiet && colour && StringUtils.isEmpty(System.getenv("NO_COLOR"))) {
                 build.setColorOutput(true);

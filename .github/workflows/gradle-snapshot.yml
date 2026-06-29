@@ -8,7 +8,7 @@ on:
 
 jobs:
   call-snapshot-job:
-    uses: project-ncl/shared-github-actions/.github/workflows/gradle-snapshot.yml@c32f5377788ce8ee9dd823babd583c2dd18604da # v0.0.20
+    uses: project-ncl/shared-github-actions/.github/workflows/gradle-snapshot.yml@0fd979fcdd90cf1b62e6410221d64efd6b470865 # v0.0.21
     with:
       project_name: "project-ncl/gradle-manipulator"
       java_version: "17"

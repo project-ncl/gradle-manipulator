@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   build:
-    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@c32f5377788ce8ee9dd823babd583c2dd18604da # v0.0.20
+    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@0fd979fcdd90cf1b62e6410221d64efd6b470865 # v0.0.21
     with:
       java_version: "17"
       gradle_version: "9.3.0"
@@ -25,8 +25,9 @@ jobs:
 
   call-mend-ci:
     needs: build
-    uses: project-ncl/shared-github-actions/.github/workflows/mend-ci.yml@c32f5377788ce8ee9dd823babd583c2dd18604da # v0.0.20
+    uses: project-ncl/shared-github-actions/.github/workflows/mend-ci.yml@0fd979fcdd90cf1b62e6410221d64efd6b470865 # v0.0.21
     with:
+      project_name: 'project-ncl/gradle-manipulator'
       SCA: true
       SAST: true
       SCA_EXCLUDES: "analyzer/src/functTest/**,manipulation/src/functTest/**"

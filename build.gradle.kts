@@ -247,6 +247,11 @@ allprojects {
         if (GradleVersion.current() >= GradleVersion.version("${project.extra.get("gradleReleaseVersion")}")) {
             dependsOn("spotlessApply")
         }
+        if (name.contains("Test")) {
+            logger.debug("Setting JDK11 for $name")
+            sourceCompatibility = JavaVersion.VERSION_11.toString()
+            targetCompatibility = JavaVersion.VERSION_11.toString()
+        }
     }
 }
 

@@ -15,7 +15,7 @@ dependencies {
     }
 
     implementation("com.fasterxml.jackson.core:jackson-databind:${project.extra.get("jacksonVersion")}")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:${project.extra.get("jacksonVersion")}")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:${project.extra.get("jacksonAnnotationsVersion")}")
     implementation("com.fasterxml.jackson.core:jackson-core:${project.extra.get("jacksonVersion")}")
 
     implementation("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")

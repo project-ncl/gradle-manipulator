@@ -47,7 +47,7 @@ dependencies {
     shadow(gradleApi())
 
     implementation("com.fasterxml.jackson.core:jackson-databind:${project.extra.get("jacksonVersion")}")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:${project.extra.get("jacksonVersion")}")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:${project.extra.get("jacksonAnnotationsVersion")}")
     implementation("com.fasterxml.jackson.core:jackson-core:${project.extra.get("jacksonVersion")}")
 
     implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-core:${project.extra.get("pmeVersion")}") {

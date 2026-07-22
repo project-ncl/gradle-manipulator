@@ -7,9 +7,11 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.concurrent.Callable
 import kotlin.reflect.full.memberFunctions
 import org.ajoberstar.grgit.Grgit
 import org.gradle.kotlin.dsl.project
+import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata
 
 plugins {
     java
@@ -261,11 +263,14 @@ subprojects {
     extra["gradleVersion"] = "5.6.4"
     extra["groovyVersion"] = "3.0.25"
     extra["ivyVersion"] = "2.6.0"
-    // Note - this *downgrades* Jackson from what is used in PME. This is due to
+    // Note - jackson-core 2.15 and above is a multi-release jar containing Java 11/17/21 class files
+    // Gradle prior to 7.6.4 fails to load such a jar:
     // https://github.com/gradle/gradle/issues/24390
     // https://github.com/FasterXML/jackson-core/issues/955
-    // This exclusion isn't required on 7.6.4 and above.
-    extra["jacksonVersion"] = "2.14.3"
+    // as target is Java 8, nothing under META-INF/versions is ever loaded,
+    // so those are dropped below, in both the ShadowJar and pluginUnderTestMetadata configurations
+    extra["jacksonVersion"] = "2.22.1"
+    extra["jacksonAnnotationsVersion"] = "2.22"
     // Must use 6.x series as 7.x and above require JDK17
     extra["jgitVersion"] = "6.10.1.202505221210-r"
     extra["junitVersion"] = "4.13.2"
@@ -323,6 +328,27 @@ subprojects {
 
         tasks.withType<ShadowJar>().configureEach {
             dependencies { exclude(dependency("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")) }
+        }
+
+        // META-INF/versions is unused on Java 8, and Gradle before 7.6.4 fails to load jars containing them
+        // see the jacksonVersion note above
+        val jacksonCore by configurations.creating { isTransitive = false }
+
+        dependencies { jacksonCore("com.fasterxml.jackson.core:jackson-core:${project.extra.get("jacksonVersion")}") }
+
+        val jacksonCoreJava8 =
+            tasks.register(
+                "jacksonCoreJava8",
+                Sync::class.java,
+                Action {
+                    from(Callable { jacksonCore.map { zipTree(it) } })
+                    exclude("META-INF/versions/**")
+                    into(File(project.layout.buildDirectory.get().asFile, "jackson-core-java8"))
+                })
+
+        tasks.withType(PluginUnderTestMetadata::class.java).configureEach {
+            val original = files(LinkedHashSet(pluginClasspath.from))
+            pluginClasspath.setFrom(original.filter { !it.name.startsWith("jackson-core-") }, jacksonCoreJava8)
         }
     }
     apply(plugin = "maven-publish")
@@ -424,6 +450,9 @@ subprojects {
             archiveClassifier.set("")
             // no need to add analyzer.init.gradle in the jar since it will never be used from inside the plugin itself
             exclude("analyzer-init.gradle")
+            // META-INF/versions is unused on Java 8, and Gradle before 7.6.4 fails to load jars containing them
+            // see the jacksonVersion note above
+            exclude("META-INF/versions/**")
 
             // XXX: Skip minimization for Gradle 4.10 (ShadowJar 4.0.1) due to missing classes
             if (GradleVersion.current() >= GradleVersion.version("5.0")) {

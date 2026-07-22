@@ -260,7 +260,7 @@ subprojects {
     // Used in the CLI. Only limited version range available in repo.gradle.org/ui/native/libs-releases-local
     extra["gradleVersion"] = "5.6.4"
     extra["groovyVersion"] = "3.0.25"
-    extra["ivyVersion"] = "2.5.3"
+    extra["ivyVersion"] = "2.6.0"
     // Note - this *downgrades* Jackson from what is used in PME. This is due to
     // https://github.com/gradle/gradle/issues/24390
     // https://github.com/FasterXML/jackson-core/issues/955

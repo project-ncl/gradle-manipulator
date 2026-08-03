@@ -270,7 +270,6 @@ subprojects {
     // as target is Java 8, nothing under META-INF/versions is ever loaded,
     // so those are dropped below, in both the ShadowJar and pluginUnderTestMetadata configurations
     extra["jacksonVersion"] = "2.22.1"
-    extra["jacksonAnnotationsVersion"] = "2.22"
     // Must use 6.x series as 7.x and above require JDK17
     extra["jgitVersion"] = "6.10.1.202505221210-r"
     extra["junitVersion"] = "4.13.2"
@@ -279,7 +278,7 @@ subprojects {
     extra["mavenVersion"] = "3.9.15"
     extra["opentelemetryVersion"] = "2.1.0"
     extra["ownerVersion"] = "1.0.12"
-    extra["pmeVersion"] = "5.4"
+    extra["pmeVersion"] = "5.5"
     extra["slf4jVersion"] = "2.0.17"
     extra["systemStubsVersion"] = "2.1.8"
 

@@ -14,17 +14,10 @@ dependencies {
         exclude(group = "ch.qos.logback")
     }
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:${project.extra.get("jacksonVersion")}")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:${project.extra.get("jacksonAnnotationsVersion")}")
-    implementation("com.fasterxml.jackson.core:jackson-core:${project.extra.get("jacksonVersion")}")
-
     implementation("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
     implementation("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
 
     implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common-lite:${project.extra.get("pmeVersion")}") {
-        exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
-        exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
-        exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
         exclude(group = "ch.qos.logback")
         exclude(group = "org.commonjava.maven.galley")
         // Exclude until new release due to Quarkus bom
@@ -37,9 +30,6 @@ dependencies {
     }
 
     implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-io:${project.extra.get("pmeVersion")}") {
-        exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
-        exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
-        exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
         exclude(group = "ch.qos.logback")
         exclude(group = "org.commonjava.maven.galley")
         // Exclude until new release due to Quarkus bom

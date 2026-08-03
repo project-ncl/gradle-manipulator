@@ -263,13 +263,6 @@ subprojects {
     extra["gradleVersion"] = "5.6.4"
     extra["groovyVersion"] = "3.0.25"
     extra["ivyVersion"] = "2.6.0"
-    // Note - jackson-core 2.15 and above is a multi-release jar containing Java 11/17/21 class files
-    // Gradle prior to 7.6.4 fails to load such a jar:
-    // https://github.com/gradle/gradle/issues/24390
-    // https://github.com/FasterXML/jackson-core/issues/955
-    // as target is Java 8, nothing under META-INF/versions is ever loaded,
-    // so those are dropped below, in both the ShadowJar and pluginUnderTestMetadata configurations
-    extra["jacksonVersion"] = "2.22.1"
     // Must use 6.x series as 7.x and above require JDK17
     extra["jgitVersion"] = "6.10.1.202505221210-r"
     extra["junitVersion"] = "4.13.2"
@@ -330,17 +323,34 @@ subprojects {
         }
 
         // META-INF/versions is unused on Java 8, and Gradle before 7.6.4 fails to load jars containing them
-        // see the jacksonVersion note above
-        val jacksonCore by configurations.creating { isTransitive = false }
-
-        dependencies { jacksonCore("com.fasterxml.jackson.core:jackson-core:${project.extra.get("jacksonVersion")}") }
-
+        // jackson-core 2.15+ is a multi-release jar; Gradle prior to 7.6.4 fails to load such jars:
+        // https://github.com/gradle/gradle/issues/24390
+        // https://github.com/FasterXML/jackson-core/issues/955
+        // The version is derived from runtimeClasspath (via PME's transitive dependency) at execution
+        // time, so it never needs to be hardcoded here.
         val jacksonCoreJava8 =
             tasks.register(
                 "jacksonCoreJava8",
                 Sync::class.java,
                 Action {
-                    from(Callable { jacksonCore.map { zipTree(it) } })
+                    from(
+                        // This was just a reference to a separate explicitly specified jackson
+                        // configuration but by using this we just use the existing jackson dependency
+                        // rather than redeclaring it.
+                        // The Callable is only evaluated when the jacksonCoreJava8 task actually executes, by which
+                        // time the full dependency graph has been resolved — the subproject's dependencies {} block has
+                        // long since been evaluated, runtimeClasspath is fully populated, and resolvedArtifacts returns
+                        // the concrete JAR.
+                        Callable {
+                            configurations["runtimeClasspath"]
+                                .resolvedConfiguration
+                                .resolvedArtifacts
+                                .filter {
+                                    it.moduleVersion.id.module.group == "com.fasterxml.jackson.core" &&
+                                        it.moduleVersion.id.module.name == "jackson-core"
+                                }
+                                .map { zipTree(it.file) }
+                        })
                     exclude("META-INF/versions/**")
                     into(File(project.layout.buildDirectory.get().asFile, "jackson-core-java8"))
                 })
@@ -450,7 +460,7 @@ subprojects {
             // no need to add analyzer.init.gradle in the jar since it will never be used from inside the plugin itself
             exclude("analyzer-init.gradle")
             // META-INF/versions is unused on Java 8, and Gradle before 7.6.4 fails to load jars containing them
-            // see the jacksonVersion note above
+            // jackson-core 2.15+ is a multi-release jar; see the jacksonCoreJava8 task above
             exclude("META-INF/versions/**")
 
             // XXX: Skip minimization for Gradle 4.10 (ShadowJar 4.0.1) due to missing classes

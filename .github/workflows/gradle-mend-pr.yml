@@ -19,7 +19,7 @@ concurrency:
 jobs:
   scan:
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'pull_request'
-    uses: project-ncl/shared-github-actions/.github/workflows/mend-ci.yml@813d47acc2d2a4db567368b3c5335402bf1bb987 # main
+    uses: project-ncl/shared-github-actions/.github/workflows/mend-ci.yml@a27e6fba6b28bbb96881ec096e9c8ea5a538f481 # v0.0.22
     with:
       project_name: 'project-ncl/gradle-manipulator'
       SCA: true

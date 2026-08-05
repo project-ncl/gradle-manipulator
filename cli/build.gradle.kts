@@ -8,7 +8,13 @@ dependencies {
     implementation("org.gradle:gradle-core-api:${project.extra.get("gradleVersion")}")
     implementation("org.gradle:gradle-base-services:${project.extra.get("gradleVersion")}")
 
-    api(project(":common"))
+    // XXX: Versions 4.x > 4.0.1 suffer from <https://github.com/johnrengelman/shadow/issues/425>
+    // To avoid this the CLI module for Gradle 4 avoids using api using implementation instead.
+    if (GradleVersion.current() < GradleVersion.version("5.0.0")) {
+        implementation(project(":common"))
+    } else {
+        api(project(":common"))
+    }
     implementation("org.gradle:gradle-tooling-api:${project.extra.get("gradleVersion")}")
     implementation("info.picocli:picocli:4.7.7")
 

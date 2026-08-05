@@ -170,8 +170,8 @@ tasks {
 val analyzerFile = layout.buildDirectory.file("resources/main/analyzer-init.gradle")
 val prepareAnalyzerInit =
     artifacts.add("default", analyzerFile.get().asFile) {
-        classifier = "init"
-        extension = "gradle"
+        setClassifier("init")
+        setExtension("gradle")
         builtBy("processResources")
     }
 

@@ -10,8 +10,8 @@ publishing {
             // the plugin to set it up without having to create their own init gradle file
             if (project.name == "analyzer") {
                 artifact("${sourceSets["main"].output.resourcesDir}/analyzer-init.gradle") {
-                    classifier = "init"
-                    extension = "gradle"
+                    setClassifier("init")
+                    setExtension("gradle")
                 }
             }
             // Ideally we should generate the pom file but groovy can't call the kotlin function. Its not essential

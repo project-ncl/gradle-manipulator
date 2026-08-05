@@ -48,6 +48,11 @@ dependencies {
     testImplementation("org.eclipse.jgit:org.eclipse.jgit:${project.extra.get("jgitVersion")}")
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
 tasks { "jar"(Jar::class) { manifest { attributes["Main-Class"] = "org.jboss.pnc.gradlemanipulator.cli.Main" } } }
 
 // Implicit dependencies detected by Gradle 7

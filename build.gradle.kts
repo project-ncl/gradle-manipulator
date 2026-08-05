@@ -268,7 +268,7 @@ subprojects {
     extra["jgitVersion"] = "6.10.1.202505221210-r"
     extra["junitVersion"] = "4.13.2"
     // CLI targets JDK11, so 1.5.x is fine (1.4.x+ requires JDK11).
-    extra["logbackVersion"] = "1.5.18"
+    extra["logbackVersion"] = "1.5.38"
     extra["mavenVersion"] = "3.9.15"
     extra["opentelemetryVersion"] = "2.1.0"
     extra["ownerVersion"] = "1.0.12"

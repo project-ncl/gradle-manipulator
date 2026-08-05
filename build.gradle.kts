@@ -40,7 +40,8 @@ plugins {
         GradleVersion.current() < GradleVersion.version("5.0") -> {
             id("com.adarshr.test-logger") version "1.7.1"
             // XXX: Versions 4.x > 4.0.1 suffer from <https://github.com/johnrengelman/shadow/issues/425>
-            id("com.github.johnrengelman.shadow") version "4.0.1" apply false
+            // To avoid this the CLI module for Gradle 4 avoids using api using implementation instead.
+            id("com.github.johnrengelman.shadow") version "4.0.4" apply false
         }
         GradleVersion.current() < GradleVersion.version("6.0") -> {
             id("com.adarshr.test-logger") version "2.1.1"
@@ -174,23 +175,23 @@ tasks.register("fixupReadme") {
 // we want to ensure the tag is done before the build so the manifest (etc.) points to the correct SHA. As the
 // beforeReleaseBuild
 // then runs at the wrong point with this change, we manually inject a task (fixupReadme) below.
-tasks.getByName("preTagCommit") {
+tasks.named("preTagCommit") {
     logger.info("Altering preTagCommit to run after checkSnapshotDependencies instead of runBuildTasks")
     setMustRunAfter(listOf(tasks["checkSnapshotDependencies"]))
     dependsOn("fixupReadme")
 }
 
-tasks.getByName("runBuildTasks") {
+tasks.named("runBuildTasks") {
     logger.info("Altering runBuildTasks to run after createReleaseTag instead of checkSnapshotDependencies")
     setMustRunAfter(listOf(tasks["createReleaseTag"]))
 }
 
-tasks.getByName("checkoutMergeFromReleaseBranch") {
+tasks.named("checkoutMergeFromReleaseBranch") {
     logger.info("Altering checkoutMergeFromReleaseBranch to run after runBuildTasks instead of createReleaseTag")
     setMustRunAfter(listOf(tasks["runBuildTasks"]))
 }
 
-tasks.getByName("afterReleaseBuild") {
+tasks.named("afterReleaseBuild") {
     dependsOn(
         ":common:publish",
         ":analyzer:publish",
@@ -463,7 +464,7 @@ subprojects {
             // jackson-core 2.15+ is a multi-release jar; see the jacksonCoreJava8 task above
             exclude("META-INF/versions/**")
 
-            // XXX: Skip minimization for Gradle 4.10 (ShadowJar 4.0.1) due to missing classes
+            // XXX: Skip minimization for Gradle 4.10 (ShadowJar) due to missing classes
             if (GradleVersion.current() >= GradleVersion.version("5.0")) {
                 // Minimise the resulting uber-jars to ensure we don't have massive jars
                 minimize {

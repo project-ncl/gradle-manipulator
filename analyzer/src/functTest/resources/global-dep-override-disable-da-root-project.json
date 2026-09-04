@@ -1,0 +1,14 @@
+[
+  {
+    "latestVersion": "1.0.0-redhat-00001",
+    "version": "1.0.0",
+    "groupId": "org.acme",
+    "artifactId": "root"
+  },
+  {
+    "latestVersion": "1.0.0-redhat-00001",
+    "version": "1.0.0",
+    "groupId": "org.acme",
+    "artifactId": "grouped-sub"
+  }
+]

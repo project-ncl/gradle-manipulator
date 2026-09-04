@@ -54,6 +54,10 @@ tasks {
       release.set(11)
     }
   }
+
+  withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions.jvmTarget = "11"
+  }
 }
 
 pluginBundle {
@@ -76,9 +80,10 @@ gradlePlugin {
 }
 
 java {
-  toolchain {
-    languageVersion.set(JavaLanguageVersion.of(11))
-  }
+  // toolchain removed: languageVersion.set(JavaLanguageVersion.of(11)) calls
+  // DefaultBuildPlatform.getArchitecture() via SystemInfo which is not available
+  // on all Linux kernels. The alignment test only needs the project to configure
+  // successfully, not to compile against a specific JDK.
   withJavadocJar()
   withSourcesJar()
 }

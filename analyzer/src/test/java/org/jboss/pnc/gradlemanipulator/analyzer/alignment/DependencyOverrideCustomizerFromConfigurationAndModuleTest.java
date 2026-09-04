@@ -43,14 +43,27 @@ public class DependencyOverrideCustomizerFromConfigurationAndModuleTest {
 
     @Before
     public final void before() throws IOException {
-        final File simpleProjectRoot = tempDir.newFolder("test");
+        final File rootProjectDir = tempDir.newFolder("root");
         System.setProperty("ignoreUnresolvableDependencies", "true");
-        Project p = ProjectBuilder.builder().withProjectDir(simpleProjectRoot).build();
+        Project root = ProjectBuilder.builder().withName("root").withProjectDir(rootProjectDir).build();
+
+        final File simpleProjectRoot = new File(rootProjectDir, "test");
+        simpleProjectRoot.mkdirs();
+        Project p = ProjectBuilder.builder()
+                .withName("test")
+                .withProjectDir(simpleProjectRoot)
+                .withParent(root)
+                .build();
         p.setVersion(PROJECT.getVersionString());
         p.setGroup(PROJECT.getGroupId());
 
-        final File ungroupedProjectRoot = tempDir.newFolder("ungrouped-test");
-        ungroupedProject = ProjectBuilder.builder().withProjectDir(ungroupedProjectRoot).build();
+        final File ungroupedProjectRoot = new File(rootProjectDir, "ungrouped-test");
+        ungroupedProjectRoot.mkdirs();
+        ungroupedProject = ProjectBuilder.builder()
+                .withName("ungrouped-test")
+                .withProjectDir(ungroupedProjectRoot)
+                .withParent(root)
+                .build();
         ungroupedProject.setVersion("2.0.0-redhat-00001");
         // group deliberately left empty to simulate Ehcache-style ungrouped modules
 

@@ -39,9 +39,11 @@ public class DependencyPropertyParser {
                             + "' is not a properly formatted key since it is not properly split by '@' and '*");
         }
 
+        final boolean globalModule = "*".equals(artifactAndModule[1]);
         return new ResultImpl(
                 SimpleProjectRef.parse(artifactAndModule[0]),
-                createMatchesModulePredicate(artifactAndModule[1]));
+                createMatchesModulePredicate(artifactAndModule[1]),
+                globalModule);
     }
 
     private static Predicate<ProjectRef> createMatchesModulePredicate(String moduleValue) {
@@ -65,6 +67,15 @@ public class DependencyPropertyParser {
         ProjectRef getDependency();
 
         /**
+         * Returns whether the module selector is the global wildcard ({@code @*}),
+         * meaning the rule applies to every project regardless of whether it has
+         * group or version coordinates.
+         *
+         * @return {@code true} when the module selector was exactly {@code *}
+         */
+        boolean matchesAllModules();
+
+        /**
          * Returns whether the given module matches.
          *
          * @param projectRef the module
@@ -76,15 +87,22 @@ public class DependencyPropertyParser {
     private static class ResultImpl implements Result {
         private final ProjectRef dependency;
         private final Predicate<ProjectRef> matchesModulePredicate;
+        private final boolean globalModule;
 
-        ResultImpl(ProjectRef dependency, Predicate<ProjectRef> matchesModulePredicate) {
+        ResultImpl(ProjectRef dependency, Predicate<ProjectRef> matchesModulePredicate, boolean globalModule) {
             this.dependency = dependency;
             this.matchesModulePredicate = matchesModulePredicate;
+            this.globalModule = globalModule;
         }
 
         @Override
         public ProjectRef getDependency() {
             return dependency;
+        }
+
+        @Override
+        public boolean matchesAllModules() {
+            return globalModule;
         }
 
         @Override

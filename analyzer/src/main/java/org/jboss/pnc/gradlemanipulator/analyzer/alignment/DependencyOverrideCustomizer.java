@@ -25,6 +25,12 @@ import org.jboss.pnc.mavenmanipulator.core.util.PropertiesUtils;
  * parsing out the dependencyOverride to check if a dependency matches.
  * If so, the map's value is used as the new version (which may be empty,
  * functioning as an exclusion)
+ * <p>
+ * Global module selectors ({@code @*}) are applied before scoped selectors so that
+ * a global rule dominates when both a global and a specific rule match the same
+ * dependency. {@code Response.matchingProjectRef()} returns the first matching key
+ * from the per-project {@link java.util.LinkedHashMap}, so insertion order determines
+ * precedence: global (wildcard) keys are inserted first.
  */
 public class DependencyOverrideCustomizer implements Manipulator {
 
@@ -48,32 +54,52 @@ public class DependencyOverrideCustomizer implements Manipulator {
                 DEPENDENCY_OVERRIDE);
 
         if (!prefixed.isEmpty()) {
-            for (Map.Entry<String, String> entry : prefixed.entrySet()) {
-                final String key = entry.getKey();
-                final String overrideVersion = entry.getValue();
-                final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
+            // Two-pass processing: global (@*) rules first, then scoped rules.
+            // This ensures that a global rule's dependency key is in the LinkedHashMap
+            // before any scoped key, so it is returned first by matchingProjectRef().
+            for (boolean globalPass : new boolean[] { true, false }) {
+                for (Map.Entry<String, String> entry : prefixed.entrySet()) {
+                    final String key = entry.getKey();
+                    final String overrideVersion = entry.getValue();
+                    final DependencyPropertyParser.Result keyParseResult = DependencyPropertyParser.parse(key);
 
-                for (Project project : projects) {
-                    Map<ProjectRef, String> overrideMap = dependencyOverrides
-                            .getOrDefault(project, new LinkedHashMap<>());
-                    String group = ProjectUtils.getRealGroupId(project);
-                    if (isNotEmpty(project.getVersion().toString()) &&
-                            isNotEmpty(group) &&
-                            isNotEmpty(project.getName())) {
-                        final ProjectVersionRef projectRef = new SimpleProjectVersionRef(
-                                group,
-                                project.getName(),
-                                project.getVersion().toString());
-                        if (keyParseResult.matchesModule(projectRef)) {
+                    if (keyParseResult.matchesAllModules() != globalPass) {
+                        continue;
+                    }
+
+                    for (Project project : projects) {
+                        Map<ProjectRef, String> overrideMap = dependencyOverrides
+                                .getOrDefault(project, new LinkedHashMap<>());
+                        if (keyParseResult.matchesAllModules()) {
+                            // @* selector applies to every project regardless of whether it has
+                            // group or version coordinates; no module GAV construction is needed.
                             logger.debug(
-                                    "Overriding dependency {} in module {} with version '{}'",
+                                    "Overriding dependency {} in module '{}' (global rule) with version '{}'",
                                     keyParseResult.getDependency(),
-                                    projectRef,
+                                    project.getName(),
                                     overrideVersion);
                             overrideMap.put(keyParseResult.getDependency(), overrideVersion);
+                        } else {
+                            String group = ProjectUtils.getRealGroupId(project);
+                            if (isNotEmpty(project.getVersion().toString()) &&
+                                    isNotEmpty(group) &&
+                                    isNotEmpty(project.getName())) {
+                                final ProjectVersionRef projectRef = new SimpleProjectVersionRef(
+                                        group,
+                                        project.getName(),
+                                        project.getVersion().toString());
+                                if (keyParseResult.matchesModule(projectRef)) {
+                                    logger.debug(
+                                            "Overriding dependency {} in module {} with version '{}'",
+                                            keyParseResult.getDependency(),
+                                            projectRef,
+                                            overrideVersion);
+                                    overrideMap.put(keyParseResult.getDependency(), overrideVersion);
+                                }
+                            }
                         }
+                        dependencyOverrides.put(project, overrideMap);
                     }
-                    dependencyOverrides.put(project, overrideMap);
                 }
             }
         }

@@ -1,0 +1,39 @@
+plugins {
+    id 'org.jboss.pnc.gradle-manipulator.analyzer'
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.jboss.pnc.gradle-manipulator.analyzer'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+// Root project has a group set
+group = 'org.acme'
+version = '1.0.0'
+
+dependencies {
+    implementation group: 'junit', name: 'junit', version: '4.12'
+    implementation group: 'org.hamcrest', name: 'hamcrest-core', version: '1.3'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+}
+
+// grouped-sub also has a group
+project(':grouped-sub') {
+    group = 'org.acme'
+    dependencies {
+        implementation group: 'junit', name: 'junit', version: '4.12'
+        implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
+    }
+}
+
+// ungrouped-sub intentionally has no group set — mimics Ehcache utility/test modules
+project(':ungrouped-sub') {
+    dependencies {
+        implementation group: 'junit', name: 'junit', version: '4.12'
+        implementation group: 'org.hamcrest', name: 'hamcrest-core', version: '1.3'
+    }
+}

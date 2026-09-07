@@ -384,15 +384,13 @@ subprojects {
         "testFixturesRuntime",
         Action { extendsFrom(configurations["runtimeOnly"], configurations["testFixturesCompile"]) })
 
-    val testFixturesUsageImplementation by
-        configurations.creating {
-            extendsFrom(configurations["testFixturesCompile"], configurations["outputDirectories"])
-        }
+    val testFixturesUsageImplementation by configurations.creating {
+        extendsFrom(configurations["testFixturesCompile"], configurations["outputDirectories"])
+    }
 
-    val testFixturesUsageRuntimeOnly by
-        configurations.creating {
-            extendsFrom(configurations["testFixturesRuntime"], configurations["testFixturesUsageImplementation"])
-        }
+    val testFixturesUsageRuntimeOnly by configurations.creating {
+        extendsFrom(configurations["testFixturesRuntime"], configurations["testFixturesUsageImplementation"])
+    }
 
     configurations["testImplementation"].extendsFrom(testFixturesUsageImplementation)
     configurations["testRuntimeOnly"].extendsFrom(testFixturesUsageRuntimeOnly)

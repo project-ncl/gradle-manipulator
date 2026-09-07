@@ -1,8 +1,10 @@
 spotless {
     kotlinGradle {
         ktfmt().kotlinlangStyle().configure {
+            def strategy = Class.forName('com.diffplug.spotless.kotlin.KtfmtStep$TrailingCommaManagementStrategy',
+                    true, it.class.classLoader).getField('NONE').get(null)
             it.setMaxWidth(120) // Same as project-ncl/ide-config java length
-            it.setManageTrailingCommas(false)
+            it.setTrailingCommaManagementStrategy(strategy)
             it.setContinuationIndent(4)
             it.setBlockIndent(4)
         }

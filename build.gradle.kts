@@ -71,7 +71,7 @@ plugins {
         // so have switched to using 8.3.9 instead of 8.3.6
         else -> {
             id("com.adarshr.test-logger") version "4.0.0"
-            id("com.gradleup.shadow") version "9.6.1" apply false
+            id("com.gradleup.shadow") version "8.3.11" apply false
             // TODO: Can't reset wrapper with this so for IntelliJ might need to be commented out :-(
             id("com.gradleup.nmcp.aggregation") version "1.2.0" apply false
         }

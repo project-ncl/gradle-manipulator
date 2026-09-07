@@ -61,9 +61,15 @@ plugins {
             id("com.adarshr.test-logger") version "3.2.0"
             id("com.github.johnrengelman.shadow") version "8.1.1" apply false
         }
-        GradleVersion.current() >= GradleVersion.version("9.0.0") -> {
+        GradleVersion.current() >= GradleVersion.version("9.2.0") -> {
             id("com.adarshr.test-logger") version "4.0.0"
             id("com.gradleup.shadow") version "9.6.1" apply false
+            id("com.gradleup.nmcp.aggregation") version "1.2.0" apply false
+        }
+        GradleVersion.current() >= GradleVersion.version("9.0.0") -> {
+            id("com.adarshr.test-logger") version "4.0.0"
+            // shadow 9.1+ uses Provider<ConsumableConfiguration> overload not available until Gradle 9.2
+            id("com.gradleup.shadow") version "9.0.2" apply false
             id("com.gradleup.nmcp.aggregation") version "1.2.0" apply false
         }
         // For all Gradle 8.x after 8.3 (which is used for release). Note when running with release
@@ -321,8 +327,9 @@ subprojects {
         apply(plugin = "java-gradle-plugin")
         apply(plugin = "com.gradle.plugin-publish")
 
+        val slf4jVersion = project.extra.get("slf4jVersion")
         tasks.withType<ShadowJar>().configureEach {
-            dependencies { exclude(dependency("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")) }
+            dependencies { exclude(dependency("org.slf4j:slf4j-api:$slf4jVersion")) }
         }
 
         // META-INF/versions is unused on Java 8, and Gradle before 7.6.4 fails to load jars containing them

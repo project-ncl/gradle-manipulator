@@ -54,7 +54,7 @@ dependencies {
     // This is to prevent compilation errors in conjunction with Lombok due to use of PME code.
     compileOnly("org.apache.maven:maven-compat:${project.extra.get("mavenVersion")}")
 
-    testFixturesCompile("org.codehaus.plexus:plexus-archiver:4.10.4")
+    testFixturesCompile("org.codehaus.plexus:plexus-archiver:4.14.0")
     testFixturesCompile("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
     testImplementation("junit:junit:${project.extra.get("junitVersion")}")
     testImplementation("uk.org.webcompere:system-stubs-junit4:${project.extra.get("systemStubsVersion")}")

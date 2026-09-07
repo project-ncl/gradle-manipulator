@@ -21,6 +21,10 @@ updates:
         - "org.jboss.da:*"
         - "org.jboss.pnc*:*"        # match org.jboss.pnc:xyz and org.jboss.pnc.group:xyz
         - "org.commonjava*:*"       # match org.commonjava:xyz and org.commonjava.group:xyz
+    ignore:
+      - dependency-name: "org.kordamp.gradle.jacoco"
+        versions: ["0.46.0", "0.47.0"]
+
   # - package-ecosystem: "sbt"
   #   directory: "/" # Location of package manifests
   #   schedule:

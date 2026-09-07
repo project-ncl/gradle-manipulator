@@ -33,7 +33,7 @@ ext {
     pmeVersion              = "5.8"
     slf4jVersion            = "2.0.18"
     systemStubsVersion      = "2.1.8"
-    wiremockVersion         = "2.35.1"
+    wiremockVersion         = "3.0.1"
 
     // Full coordinate strings — Dependabot reads these directly from this file
     // and updates the version variable above when a new release is available.

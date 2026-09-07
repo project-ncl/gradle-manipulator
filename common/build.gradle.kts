@@ -46,7 +46,7 @@ dependencies {
     //  an exclusion for kotlin but none worked.
     if (GradleVersion.current() == GradleVersion.version("6.5.1")) {
         logger.warn("Using older opentelemetry-ext-cli-java for 6.5.1")
-        implementation("org.jboss.pnc.otel:opentelemetry-ext-cli-java:2.0.0")
+        implementation("org.jboss.pnc.otel:opentelemetry-ext-cli-java:2.1.0")
     } else {
         implementation("org.jboss.pnc.otel:opentelemetry-ext-cli-java:${project.extra.get("opentelemetryVersion")}")
     }

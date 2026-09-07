@@ -30,6 +30,8 @@ updates:
         versions: [">= 4.0.0, < 5.0.0"]   # frozen: Gradle <5.4 pin
       - dependency-name: "com.diffplug.spotless"
         versions: [">= 5.0.0, < 6.0.0"]   # frozen: Gradle 5.4-6.8.2 pin
+      - dependency-name: "com.diffplug.spotless"
+        versions: [">= 7.0.0, < 8.0.0"]   # frozen: Gradle 6.8.3-8.2 pin
   # - package-ecosystem: "sbt"
   #   directory: "/" # Location of package manifests
   #   schedule:

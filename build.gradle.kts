@@ -20,8 +20,10 @@ plugins {
     idea
 
     // Note spotless is only active for Gradle >= 6.1.1. Using 6.8.3 for the extra fixes.
-    if (GradleVersion.current() >= GradleVersion.version("6.8.3")) {
+    if (GradleVersion.current() >= GradleVersion.version("8.3")) {
         id("com.diffplug.spotless") version "8.10.1"
+    } else if (GradleVersion.current() >= GradleVersion.version("6.8.3")) {
+        id("com.diffplug.spotless") version "7.2.1"
     } else if (GradleVersion.current() < GradleVersion.version("5.4")) {
         id("com.diffplug.gradle.spotless") version "4.5.1"
     } else {

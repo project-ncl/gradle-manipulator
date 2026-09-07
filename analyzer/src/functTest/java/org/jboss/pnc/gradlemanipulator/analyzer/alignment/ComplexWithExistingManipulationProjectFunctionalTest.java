@@ -1,9 +1,12 @@
 package org.jboss.pnc.gradlemanipulator.analyzer.alignment;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -80,17 +83,35 @@ public class ComplexWithExistingManipulationProjectFunctionalTest extends Abstra
                 AlignmentTask.INJECT_GME_END,
                 FileUtils.getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
 
+        // The project-version request must carry the prior manipulated version from manipulation.json,
+        // not the current Gradle-declared version.
+        verify(
+                1,
+                postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                        .withRequestBody(containing("1.0.0.redhat-00004"))
+                        .withRequestBody(containing("complex-existing")));
+
+        // The dependency request must still carry the previously aligned dependency versions.
+        verify(
+                1,
+                postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
+                        .withRequestBody(containing("2.0.21.Final-redhat-00001"))
+                        .withRequestBody(containing("3.8-redhat-00001")));
+
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getGroup()).isEqualTo("org.jboss.pnc.gradle-manipulator.analyzer.functest");
             assertThat(am.getName()).isEqualTo("complex-existing");
             assertThat(am.findCorrespondingChild("complex-existing")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("1.0.0.redhat-00005");
                 assertThat(root.getName()).isEqualTo("complex-existing");
+                assertThat(root.getGroup()).isEqualTo("org.jboss.pnc.gradle-manipulator.analyzer.functest");
+                // The original Gradle-declared version must be preserved in the written file.
+                assertThat(root.getOriginalVersion()).isEqualTo("1.0.0");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
                 assertThat(alignedDependencies)
                         .extracting("artifactId", "versionString")
                         .containsOnly(
-                                // ensure that the aligned versions as are always used for dynamic and regular dependencies
+                                // ensure that the aligned versions are always used for dynamic and regular dependencies
                                 tuple("undertow-core", "2.0.21.Final-redhat-00002"),
                                 tuple("commons-lang3", "3.8-redhat-00002"));
 

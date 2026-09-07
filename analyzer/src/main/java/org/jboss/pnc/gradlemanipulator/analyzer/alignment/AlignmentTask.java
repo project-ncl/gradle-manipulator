@@ -192,6 +192,16 @@ public class AlignmentTask extends DefaultTask {
         final ManipulationModel alignmentModel = cache.getModel();
         boolean skipProject = false;
 
+        // Read the existing manipulation.json at most once per perform() invocation so that
+        // both the dependency-reuse helper and the project-GAV reuse logic share a single
+        // deserialized model rather than each triggering an independent disk read.
+        final File manipulationFile = new File(
+                project.getRootProject().getRootDir(),
+                ManipulationIO.MANIPULATION_FILE_NAME);
+        final ManipulationModel existingRootModel = manipulationFile.exists()
+                ? ManipulationIO.readManipulationModel(project.getRootProject().getRootDir())
+                : null;
+
         // Only output the config once to avoid noisy logging.
         if (logger.isInfoEnabled() && !configOutput.get().getAndSet(true)) {
             logger.info("Configuration now has properties {}", configuration.dumpCurrentConfig());
@@ -284,6 +294,7 @@ public class AlignmentTask extends DefaultTask {
                     .allProjectVersionRefsFromLockfiles(project.getProjectDir());
             final Map<RelaxedProjectVersionRef, ProjectVersionRef> dependencies = processAnyExistingManipulationFile(
                     project,
+                    existingRootModel,
                     getDependencies(project, cache, configuration, lockFileDeps));
 
             logger.debug("For project {} adding to the cache the dependencies {}", project, dependencies); // TODO: Trace level?
@@ -333,6 +344,48 @@ public class AlignmentTask extends DefaultTask {
                         groupId,
                         projectName,
                         currentProjectVersion);
+
+                // If a prior manipulation.json exists, replace the project version sent to the
+                // REST endpoint with the previously manipulated version so that DA can compute
+                // the correct next increment from the already-aligned base.
+                if (existingRootModel != null) {
+                    ManipulationModel existingNode = existingRootModel.findCorrespondingChild(project.getPath());
+                    if (existingNode != null) {
+                        String existingVersion = existingNode.getVersion();
+                        if (StringUtils.isBlank(existingVersion)) {
+                            logger.warn(
+                                    "Existing manipulation model node for '{}' has a blank version; "
+                                            + "using current Gradle version '{}' for REST request.",
+                                    project.getPath(),
+                                    currentProjectVersion);
+                        } else if (!existingNode.getGroup().equals(groupId)
+                                || !existingNode.getName().equals(projectName)) {
+                            throw new ManipulationUncheckedException(
+                                    "Existing manipulation model node for path '{}' has GA '{}:{}' but current "
+                                            + "build has GA '{}:{}'; the existing manipulation.json does not match "
+                                            + "the current build and cannot be reused.",
+                                    project.getPath(),
+                                    existingNode.getGroup(),
+                                    existingNode.getName(),
+                                    groupId,
+                                    projectName);
+                        } else {
+                            logger.info(
+                                    "Reusing existing manipulation version '{}' (instead of '{}') "
+                                            + "as the project REST input version for '{}'.",
+                                    existingVersion,
+                                    currentProjectVersion,
+                                    project.getPath());
+                            current = ProjectVersionFactory.withGAV(groupId, projectName, existingVersion);
+                        }
+                    } else {
+                        logger.warn(
+                                "No existing manipulation model node found for project path '{}'; "
+                                        + "using current Gradle version '{}' for REST request.",
+                                project.getPath(),
+                                currentProjectVersion);
+                    }
+                }
 
                 logger.debug("Adding {} to cache for scanning.", current);
                 cache.addGAV(project, current);
@@ -1110,18 +1163,15 @@ public class AlignmentTask extends DefaultTask {
 
     private Map<RelaxedProjectVersionRef, ProjectVersionRef> processAnyExistingManipulationFile(
             Project project,
+            ManipulationModel existingRootModel,
             Map<RelaxedProjectVersionRef, ProjectVersionRef> allDependencies) {
 
-        File m = new File(project.getRootDir(), ManipulationIO.MANIPULATION_FILE_NAME);
-
-        if (!m.exists()) {
+        if (existingRootModel == null) {
             return allDependencies;
         }
 
         // If there is an existing manipulation file, also use this as potential candidates.
-        final ManipulationModel manipulationModel = ManipulationIO
-                .readManipulationModel(project.getRootProject().getRootDir())
-                .findCorrespondingChild(project.getPath());
+        final ManipulationModel manipulationModel = existingRootModel.findCorrespondingChild(project.getPath());
 
         Map<String, ProjectVersionRef> aligned = manipulationModel.getAlignedDependencies();
 

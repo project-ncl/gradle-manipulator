@@ -32,6 +32,18 @@ updates:
         versions: [">= 5.0.0, < 6.0.0"]   # frozen: Gradle 5.4-6.8.2 pin
       - dependency-name: "com.diffplug.spotless"
         versions: [">= 7.0.0, < 8.0.0"]   # frozen: Gradle 6.8.3-8.2 pin
+      - dependency-name: "com.github.johnrengelman.shadow"
+        versions: [">= 4.0.0, < 5.0.0"]   # frozen: Gradle <5.0 pin (4.0.4)
+      - dependency-name: "com.github.johnrengelman.shadow"
+        versions: [">= 5.0.0, < 6.0.0"]   # frozen: Gradle 5.x pin (5.2.0)
+      - dependency-name: "com.github.johnrengelman.shadow"
+        versions: [">= 6.0.0, < 7.0.0"]   # frozen: Gradle 6.x pin (6.1.0)
+      - dependency-name: "com.github.johnrengelman.shadow"
+        versions: [">= 7.0.0, < 8.0.0"]   # frozen: Gradle 7.x pin (7.1.2)
+      - dependency-name: "com.github.johnrengelman.shadow"
+        versions: [">= 8.0.0, < 9.0.0"]   # frozen: Gradle 8.0-8.2 pin (8.1.1)
+      - dependency-name: "com.gradleup.shadow"
+        versions: [">= 8.0.0, < 9.0.0"]   # frozen: Gradle 8.3-8.x pin (8.3.11)
   # - package-ecosystem: "sbt"
   #   directory: "/" # Location of package manifests
   #   schedule:

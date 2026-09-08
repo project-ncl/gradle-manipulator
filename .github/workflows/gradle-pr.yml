@@ -3,7 +3,7 @@ name: Java CI with Gradle
 on:
   pull_request:
     branches: [main]
-    paths-ignore: ["CONTRIBUTING.md", "LICENSE", "README.md"]
+    paths-ignore: ["CONTRIBUTING.md", "LICENSE", "README.md", ".github/**"]
 
 permissions:
   contents: read

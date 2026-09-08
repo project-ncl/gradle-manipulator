@@ -1,0 +1,6 @@
+{
+  "group" : "org.acme.gradle",
+  "name" : "root",
+  "version" : "1.0.1.redhat-00001",
+  "alignedDependencies" : {}
+}

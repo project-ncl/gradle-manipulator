@@ -61,7 +61,9 @@ public class SimpleExistingManipulationProjectFunctionalTest extends AbstractWir
                                 aResponse()
                                         .withStatus(200)
                                         .withHeader("Content-Type", "application/json;charset=utf-8")
-                                        .withBody(readSampleDAResponse("simple-project-da-response-project.json"))));
+                                        .withBody(
+                                                readSampleDAResponse(
+                                                        "simple-existing-manipulation-da-response-project.json"))));
         System.setProperty(Configuration.DA, "http://127.0.0.1:" + wireMockRule.port() + "/da/rest/v-1");
     }
 
@@ -90,6 +92,7 @@ public class SimpleExistingManipulationProjectFunctionalTest extends AbstractWir
             assertThat(am.findCorrespondingChild("root")).satisfies(root -> {
                 assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00002");
                 assertThat(root.getName()).isEqualTo("root");
+                assertThat(root.getOriginalVersion()).isEqualTo("1.0.1");
                 final Collection<ProjectVersionRef> alignedDependencies = root.getAlignedDependencies().values();
                 assertThat(alignedDependencies).isEmpty();
             });

@@ -1,6 +1,7 @@
 package org.jboss.pnc.gradlemanipulator.analyzer.alignment;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.notMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -97,6 +98,12 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                 AlignmentTask.INJECT_GME_END,
                 org.jboss.pnc.gradlemanipulator.common.utils.FileUtils
                         .getLastLine(new File(projectRoot, Project.DEFAULT_BUILD_FILE)));
+
+        // No manipulation.json exists, so the Gradle-declared version must be sent to LOOKUP_LATEST.
+        verify(
+                postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                        .withRequestBody(containing("\"version\":\"1.0.1\""))
+                        .withRequestBody(containing("root")));
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
             assertThat(am.getOriginalVersion()).isEqualTo("1.0.1");

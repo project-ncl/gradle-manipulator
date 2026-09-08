@@ -349,7 +349,19 @@ public class AlignmentTask extends DefaultTask {
                 // REST endpoint with the previously manipulated version so that DA can compute
                 // the correct next increment from the already-aligned base.
                 if (existingRootModel != null) {
-                    ManipulationModel existingNode = existingRootModel.findCorrespondingChild(project.getPath());
+                    ManipulationModel existingNode;
+                    try {
+                        existingNode = existingRootModel.findCorrespondingChild(project.getPath());
+                    } catch (ManipulationUncheckedException e) {
+                        // The existing model has no node for this project path (e.g. a newly added module).
+                        // Fall back to the current Gradle version rather than failing the build.
+                        logger.warn(
+                                "No existing manipulation model node found for project path '{}'; "
+                                        + "using current Gradle version '{}' for REST request.",
+                                project.getPath(),
+                                currentProjectVersion);
+                        existingNode = null;
+                    }
                     if (existingNode != null) {
                         String existingVersion = existingNode.getVersion();
                         if (StringUtils.isBlank(existingVersion)) {
@@ -378,12 +390,6 @@ public class AlignmentTask extends DefaultTask {
                                     project.getPath());
                             current = ProjectVersionFactory.withGAV(groupId, projectName, existingVersion);
                         }
-                    } else {
-                        logger.warn(
-                                "No existing manipulation model node found for project path '{}'; "
-                                        + "using current Gradle version '{}' for REST request.",
-                                project.getPath(),
-                                currentProjectVersion);
                     }
                 }
 
@@ -1171,7 +1177,18 @@ public class AlignmentTask extends DefaultTask {
         }
 
         // If there is an existing manipulation file, also use this as potential candidates.
-        final ManipulationModel manipulationModel = existingRootModel.findCorrespondingChild(project.getPath());
+        final ManipulationModel manipulationModel;
+        try {
+            manipulationModel = existingRootModel.findCorrespondingChild(project.getPath());
+        } catch (ManipulationUncheckedException e) {
+            // No node in the existing model for this project path (e.g. a newly added module).
+            // Skip dependency reuse for this project; it has no prior aligned dependency entries.
+            logger.warn(
+                    "No existing manipulation model node found for project path '{}'; "
+                            + "skipping dependency reuse for this project.",
+                    project.getPath());
+            return allDependencies;
+        }
 
         Map<String, ProjectVersionRef> aligned = manipulationModel.getAlignedDependencies();
 

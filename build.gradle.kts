@@ -104,7 +104,7 @@ plugins {
             id("io.freefair" + ".lombok") version "5.3.3.3" apply false // frozen: Gradle 6.0-7.x
         }
         else -> {
-            id("io.freefair.lombok") version "6.6.3" apply false
+            id("io.freefair.lombok") version "9.5.0" apply false
         }
     }
 

@@ -21,55 +21,10 @@ updates:
         - "org.jboss.da:*"
         - "org.jboss.pnc*:*"        # match org.jboss.pnc:xyz and org.jboss.pnc.group:xyz
         - "org.commonjava*:*"       # match org.commonjava:xyz and org.commonjava.group:xyz
-    ignore:
-      # The build script uses a conditional if/else block. Dependabot cannot evaluate it and
-      # treats all three declarations as the same dependency, updating every branch to the
-      # latest version. The two frozen branches must be pinned by exact version so that only
-      # the Gradle 8+ branch (0.54.0) receives updates.
-      - dependency-name: "org.kordamp.gradle.jacoco"
-        versions: ["= 0.46.0"]   # frozen: Gradle 5.3-6.x pin — do not update
-      - dependency-name: "org.kordamp.gradle.jacoco"
-        versions: ["= 0.47.0"]   # frozen: Gradle 7.x pin — do not update
-      - dependency-name: "com.diffplug.gradle.spotless"
-        versions: ["= 4.5.1"]   # frozen: Gradle <5.4 pin — do not update
-      - dependency-name: "com.diffplug.spotless"
-        versions: ["= 5.14.2"] # frozen: Gradle 5.4-6.8.2 pin — do not update
-      - dependency-name: "com.diffplug.spotless"
-        versions: ["= 7.2.1"]  # frozen: Gradle 6.8.3-8.2 pin — do not update
-      - dependency-name: "com.adarshr.test-logger"
-        versions: ["= 1.7.1"]  # frozen: Gradle <5.0 pin — do not update
-      - dependency-name: "com.adarshr.test-logger"
-        versions: ["= 2.1.1"]  # frozen: Gradle 5.x-6.x pin — do not update
-      - dependency-name: "com.adarshr.test-logger"
-        versions: ["= 3.2.0"]  # frozen: Gradle 7.x-8.2 pin — do not update
-      - dependency-name: "com.gradle.plugin-publish"
-        versions: ["= 0.21.0"] # frozen: Gradle <6.0 pin — do not update
-      # The build script uses a when(GradleVersion) block with five branches. Dependabot
-      # cannot evaluate that block and treats all five declarations as the same dependency,
-      # updating every branch to the latest version. The four frozen branches must be ignored
-      # by pinning their exact versions so only the else branch (Gradle 8+) receives updates.
-      - dependency-name: "io.freefair.lombok"
-        versions: ["= 2.9.5"]   # frozen: Gradle <5.0 pin — do not update
-      - dependency-name: "io.freefair.lombok"
-        versions: ["= 3.0.0"]   # frozen: Gradle 5.0-5.1 pin — do not update
-      - dependency-name: "io.freefair.lombok"
-        versions: ["= 4.1.6"]   # frozen: Gradle 5.2-5.x pin — do not update
-      - dependency-name: "io.freefair.lombok"
-        versions: ["= 5.3.3.3"] # frozen: Gradle 6.0-7.x pin — do not update
-      - dependency-name: "com.github.johnrengelman.shadow"
-        versions: ["= 4.0.4"] # frozen: Gradle <5.0 pin — do not update
-      - dependency-name: "com.github.johnrengelman.shadow"
-        versions: ["= 5.2.0"] # frozen: Gradle 5.x pin — do not update
-      - dependency-name: "com.github.johnrengelman.shadow"
-        versions: ["= 6.1.0"] # frozen: Gradle 6.x pin — do not update
-      - dependency-name: "com.github.johnrengelman.shadow"
-        versions: ["= 7.1.2"] # frozen: Gradle 7.x pin — do not update
-      - dependency-name: "com.github.johnrengelman.shadow"
-        versions: ["= 8.1.1"] # frozen: Gradle 8.0-8.2 pin — do not update
-      - dependency-name: "com.gradleup.shadow"
-        versions: ["= 8.3.11"] # frozen: Gradle 8.3-8.x (release) pin — do not update
-      - dependency-name: "com.gradleup.shadow"
-        versions: ["= 9.0.2"]  # frozen: Gradle 9.0-9.1 pin — do not update
+    # Frozen branches use string concatenation in build.gradle.kts to hide their version
+    # literals from Dependabot's static parser (VALUE_REGEX requires a single quoted token).
+    # Only the active/highest-Gradle branch of each plugin uses a plain literal and receives
+    # updates. No ignore rules are needed for frozen branches as Dependabot cannot see them.
   # - package-ecosystem: "sbt"
   #   directory: "/" # Location of package manifests
   #   schedule:

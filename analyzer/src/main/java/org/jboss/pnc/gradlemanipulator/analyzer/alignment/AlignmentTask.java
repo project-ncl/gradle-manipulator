@@ -245,10 +245,16 @@ public class AlignmentTask extends DefaultTask {
         if (publications.size() > 1) {
             logger.error("Multiple publications for a single project. Found {}", publications);
         } else if (publications.isEmpty()) {
-            // Only skip a module with no publications if the configuration flag is not enabled. This
-            // flag is primarily useful for regression tests where handcrafted build files might not
-            // have publications defined yet we still want to align them to test various scenarios.
-            if (!configuration.scanProjectsWithNoPublications()) {
+            // No maven-publish MavenPublication found. Check whether the legacy 'maven' plugin
+            // (uploadArchives / mavenDeployer) is applied — those projects still publish and must
+            // be aligned. GAV is read from project metadata as normal; the MavenPublication
+            // reconciliation block below is simply skipped (publications is empty so
+            // entry.isPresent() will be false).
+            // Only skip entirely if neither publishing mechanism is present. The
+            // scanProjectsWithNoPublications flag is reserved for test fixtures that genuinely
+            // have no publishing at all.
+            boolean hasLegacyMavenPlugin = project.getPluginManager().hasPlugin("maven");
+            if (!hasLegacyMavenPlugin && !configuration.scanProjectsWithNoPublications()) {
                 skipProject = true;
             }
         }

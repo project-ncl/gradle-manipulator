@@ -189,11 +189,20 @@ public interface Configuration extends Accessible, Reloadable {
     Boolean useLegacyConfigurationCopy();
 
     /**
-     * This is primarily used by the tests. Since NCLSUP-1402 we skip projects with no publication when scanning
-     * for alignment. However, many integration tests predate that and the publications have not been added. This
-     * allows those projects to be scanned for alignment even if they don't publish anything. Defaults to false.
+     * This is intended only for test fixtures that have no publishing mechanism at all (neither
+     * {@code maven-publish} nor the legacy {@code maven} plugin). Since NCLSUP-1402 we skip
+     * projects with no publication when scanning for alignment; however many functional test
+     * fixtures predate that change and have no {@code publishing {}} block. This flag allows those
+     * fixtures to be scanned for alignment even though they publish nothing.
+     * <p>
+     * Projects using the legacy {@code maven} plugin ({@code apply plugin: 'maven'} /
+     * {@code uploadArchives}) do <em>not</em> need this flag — they are detected automatically
+     * and aligned without any configuration.
+     * <p>
+     * Defaults to {@code false}.
      *
-     * @return a boolean denoting whether to allow scanning for GAV changes on non-published projects
+     * @return a boolean denoting whether to allow scanning for GAV changes on projects with no
+     *         publishing mechanism whatsoever (test fixtures only)
      */
     @Key("scanProjectsWithNoPublications")
     @DefaultValue("false")

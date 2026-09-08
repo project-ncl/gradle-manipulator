@@ -1,0 +1,8 @@
+[
+  {
+    "latestVersion": "1.0.0.redhat-00001",
+    "version": "1.0.0",
+    "groupId": "com.example.legacy",
+    "artifactId": "legacy-maven-plugin-project"
+  }
+]

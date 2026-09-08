@@ -1,0 +1,8 @@
+[
+  {
+    "bestMatchVersion": "3.8.1.redhat-00001",
+    "version": "3.8.1",
+    "groupId": "org.apache.commons",
+    "artifactId": "commons-lang3"
+  }
+]

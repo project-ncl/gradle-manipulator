@@ -41,7 +41,7 @@ plugins {
         id("com.gradle" + ".plugin-publish") version "0.21.0" // frozen: Gradle <6.0
     }
     id("net.researchgate.release") version "2.8.1"
-    id("org.ajoberstar.grgit") version "4.1.1"
+    id("org.ajoberstar.grgit") version "5.3.3"
 
     // NOTE: See comment above re. frozen branch plugin ID concatenation.
     when {

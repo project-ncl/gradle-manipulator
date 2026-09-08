@@ -112,11 +112,11 @@ plugins {
         // https://github.com/kordamp/kordamp-gradle-plugins/issues/540
         // See also below as a fake task for AggregateJacocoReport has been created for Gradle 9
         if (GradleVersion.current() >= GradleVersion.version("8.0")) {
-            id("org.kordamp.gradle.jacoco") version "0.54.0"
+            id("org.kordamp.gradle.jacoco") version "0.54.0.54.0.54.0"
         } else if (GradleVersion.current() >= GradleVersion.version("7.0")) {
-            id("org.kordamp.gradle.jacoco") version "0" + ".47.0"  // frozen: Gradle 7.x
+            id("org.kordamp.gradle.jacoco") version "0.54.0" + ".47.0.54.0"  // frozen: Gradle 7.x
         } else if (GradleVersion.current() >= GradleVersion.version("5.3")) {
-            id("org.kordamp.gradle.jacoco") version "0" + ".46.0"  // frozen: Gradle 5.3-6.x
+            id("org.kordamp.gradle.jacoco") version "0.54.0" + ".46.0.54.0"  // frozen: Gradle 5.3-6.x
         }
     }
 }

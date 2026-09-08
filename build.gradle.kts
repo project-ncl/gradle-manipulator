@@ -19,94 +19,96 @@ plugins {
     `maven-publish`
     idea
 
-    // NOTE: Frozen branches use string concatenation (e.g. "7" + ".2.1") to prevent Dependabot
-    // from seeing them as updatable version literals. Only the active branch uses a plain literal
-    // so that Dependabot can propose updates for it. See: https://github.com/dependabot/dependabot-core
-    // blob/main/gradle/lib/dependabot/gradle/file_parser/property_value_finder.rb (VALUE_REGEX)
+    // NOTE: Frozen branches concatenate the plugin ID (not the version) so Dependabot's
+    // PLUGIN_ID_REGEX (which requires a single quoted string literal) cannot match the declaration.
+    // The entire line is then skipped by the parser (next unless name && version).
+    // Only the active branch uses a plain string literal plugin ID so Dependabot sees exactly
+    // one occurrence per plugin and proposes updates only for the active version.
+    // See: https://github.com/dependabot/dependabot-core/blob/main/gradle/lib/dependabot/gradle/file_parser.rb
     if (GradleVersion.current() >= GradleVersion.version("8.3")) {
         id("com.diffplug.spotless") version "8.10.1"
     } else if (GradleVersion.current() >= GradleVersion.version("6.8.3")) {
-        id("com.diffplug.spotless") version "7" + ".2.1"         // frozen: Gradle 6.8.3-8.2
+        id("com.diffplug" + ".spotless") version "7.2.1" // frozen: Gradle 6.8.3-8.2
     } else if (GradleVersion.current() < GradleVersion.version("5.4")) {
-        id("com.diffplug.gradle.spotless") version "4" + ".5.1"  // frozen: Gradle <5.4
+        id("com.diffplug.gradle" + ".spotless") version "4.5.1" // frozen: Gradle <5.4
     } else {
-        id("com.diffplug.spotless") version "5" + ".14.2"        // frozen: Gradle 5.4-6.8.2
+        id("com.diffplug" + ".spotless") version "5.14.2" // frozen: Gradle 5.4-6.8.2
     }
 
     if (GradleVersion.current() >= GradleVersion.version("6.0")) {
         id("com.gradle.plugin-publish") version "1.3.1" apply false
     } else {
-        id("com.gradle.plugin-publish") version "0" + ".21.0"    // frozen: Gradle <6.0
+        id("com.gradle" + ".plugin-publish") version "0.21.0" // frozen: Gradle <6.0
     }
     id("net.researchgate.release") version "2.8.1"
     id("org.ajoberstar.grgit") version "4.1.1"
 
-    // NOTE: See comment above re. frozen branch string concatenation.
+    // NOTE: See comment above re. frozen branch plugin ID concatenation.
     when {
         GradleVersion.current() < GradleVersion.version("5.0") -> {
-            id("com.adarshr.test-logger") version "1" + ".7.1"   // frozen: Gradle <5.0
+            id("com.adarshr" + ".test-logger") version "1.7.1" // frozen: Gradle <5.0
             // XXX: Versions 4.x > 4.0.1 suffer from <https://github.com/johnrengelman/shadow/issues/425>
             // To avoid this the CLI module for Gradle 4 avoids using api using implementation instead.
-            id("com.github.johnrengelman.shadow") version "4" + ".0.4" apply false  // frozen: Gradle <5.0
+            id("com.github.johnrengelman" + ".shadow") version "4.0.4" apply false // frozen: Gradle <5.0
         }
         GradleVersion.current() < GradleVersion.version("6.0") -> {
-            id("com.adarshr.test-logger") version "2" + ".1.1"   // frozen: Gradle 5.x
-            id("com.github.johnrengelman.shadow") version "5" + ".2.0" apply false  // frozen: Gradle 5.x
+            id("com.adarshr" + ".test-logger") version "2.1.1" // frozen: Gradle 5.x
+            id("com.github.johnrengelman" + ".shadow") version "5.2.0" apply false // frozen: Gradle 5.x
         }
         GradleVersion.current() < GradleVersion.version("7.0") -> {
-            id("com.adarshr.test-logger") version "2" + ".1.1"   // frozen: Gradle 6.x
-            id("com.github.johnrengelman.shadow") version "6" + ".1.0" apply false  // frozen: Gradle 6.x
+            id("com.adarshr" + ".test-logger") version "2.1.1" // frozen: Gradle 6.x
+            id("com.github.johnrengelman" + ".shadow") version "6.1.0" apply false // frozen: Gradle 6.x
         }
         GradleVersion.current() < GradleVersion.version("8.0") -> {
-            id("com.adarshr.test-logger") version "3" + ".2.0"   // frozen: Gradle 7.x
-            id("com.github.johnrengelman.shadow") version "7" + ".1.2" apply false  // frozen: Gradle 7.x
+            id("com.adarshr" + ".test-logger") version "3.2.0" // frozen: Gradle 7.x
+            id("com.github.johnrengelman" + ".shadow") version "7.1.2" apply false // frozen: Gradle 7.x
         }
         GradleVersion.current() < GradleVersion.version("8.3") -> {
-            id("com.adarshr.test-logger") version "3" + ".2.0"   // frozen: Gradle 8.0-8.2
-            id("com.github.johnrengelman.shadow") version "8" + ".1.1" apply false  // frozen: Gradle 8.0-8.2
+            id("com.adarshr" + ".test-logger") version "3.2.0" // frozen: Gradle 8.0-8.2
+            id("com.github.johnrengelman" + ".shadow") version "8.1.1" apply false // frozen: Gradle 8.0-8.2
         }
         // For all Gradle 8.x after 8.3 (which is used for release). Note when running with release
         // enabled we were encountering https://github.com/GradleUp/shadow/issues/875
         // so have switched to using 8.3.9 instead of 8.3.6
-        GradleVersion.current() < GradleVersion.version("9.0") -> {    // frozen: Gradle 8.3-8.x
-            id("com.adarshr.test-logger") version "4" + ".0.0"
-            id("com.gradleup.shadow") version "8" + ".3.11" apply false
+        GradleVersion.current() < GradleVersion.version("9.0") -> { // frozen: Gradle 8.3-8.x
+            id("com.adarshr" + ".test-logger") version "4.0.0"
+            id("com.gradleup" + ".shadow") version "8.3.11" apply false
             // TODO: Can't reset wrapper with this so for IntelliJ might need to be commented out :-(
-            id("com.gradleup.nmcp.aggregation") version "1.2.0" apply false
+            id("com.gradleup" + ".nmcp.aggregation") version "1.2.0" apply false
         }
-        GradleVersion.current() < GradleVersion.version("9.2") -> {    // frozen: Gradle 9.0-9.1
-            id("com.adarshr.test-logger") version "4" + ".0.0"
+        GradleVersion.current() < GradleVersion.version("9.2") -> { // frozen: Gradle 9.0-9.1
+            id("com.adarshr" + ".test-logger") version "4.0.0"
             // shadow 9.1+ uses Provider<ConsumableConfiguration> overload not available until Gradle 9.2
-            id("com.gradleup.shadow") version "9" + ".0.2" apply false
-            id("com.gradleup.nmcp.aggregation") version "1.2.0" apply false
+            id("com.gradleup" + ".shadow") version "9.0.2" apply false
+            id("com.gradleup" + ".nmcp.aggregation") version "1.2.0" apply false
         }
-        else -> {  // Gradle >= 9.2 (active)
+        else -> { // Gradle >= 9.2 (active)
             id("com.adarshr.test-logger") version "4.0.0"
             id("com.gradleup.shadow") version "9.6.1" apply false
             id("com.gradleup.nmcp.aggregation") version "1.2.0" apply false
         }
     }
 
-    // NOTE: See comment above re. frozen branch string concatenation.
+    // NOTE: See comment above re. frozen branch plugin ID concatenation.
     when {
         GradleVersion.current() < GradleVersion.version("5.0") -> {
-            id("io.freefair.lombok") version "2" + ".9.5" apply false    // frozen: Gradle <5.0
+            id("io.freefair" + ".lombok") version "2.9.5" apply false // frozen: Gradle <5.0
         }
         GradleVersion.current() < GradleVersion.version("5.2") -> {
-            id("io.freefair.lombok") version "3" + ".0.0" apply false    // frozen: Gradle 5.0-5.1
+            id("io.freefair" + ".lombok") version "3.0.0" apply false // frozen: Gradle 5.0-5.1
         }
         GradleVersion.current() < GradleVersion.version("6.0") -> {
-            id("io.freefair.lombok") version "4" + ".1.6" apply false    // frozen: Gradle 5.2-5.x
+            id("io.freefair" + ".lombok") version "4.1.6" apply false // frozen: Gradle 5.2-5.x
         }
         GradleVersion.current() < GradleVersion.version("8.0") -> {
-            id("io.freefair.lombok") version "5" + ".3.3.3" apply false  // frozen: Gradle 6.0-7.x
+            id("io.freefair" + ".lombok") version "5.3.3.3" apply false // frozen: Gradle 6.0-7.x
         }
         else -> {
             id("io.freefair.lombok") version "6.6.3" apply false
         }
     }
 
-    // NOTE: See comment above re. frozen branch string concatenation.
+    // NOTE: See comment above re. frozen branch plugin ID concatenation.
     if (GradleVersion.current() < GradleVersion.version("9.0.0")) {
         // Not compatible with Gradle 9 yet.
         // https://github.com/kordamp/kordamp-gradle-plugins/issues/540
@@ -114,9 +116,9 @@ plugins {
         if (GradleVersion.current() >= GradleVersion.version("8.0")) {
             id("org.kordamp.gradle.jacoco") version "0.54.0"
         } else if (GradleVersion.current() >= GradleVersion.version("7.0")) {
-            id("org.kordamp.gradle.jacoco") version "0" + ".47.0"  // frozen: Gradle 7.x
+            id("org.kordamp.gradle" + ".jacoco") version "0.47.0" // frozen: Gradle 7.x
         } else if (GradleVersion.current() >= GradleVersion.version("5.3")) {
-            id("org.kordamp.gradle.jacoco") version "0" + ".46.0"  // frozen: Gradle 5.3-6.x
+            id("org.kordamp.gradle" + ".jacoco") version "0.46.0" // frozen: Gradle 5.3-6.x
         }
     }
 }

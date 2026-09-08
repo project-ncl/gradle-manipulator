@@ -1,0 +1,25 @@
+plugins {
+    // including this plugin directly instead of by an init script, which allows to use the freshly built version
+    id 'org.jboss.pnc.gradle-manipulator.analyzer'
+    id 'java'
+}
+
+// Legacy maven plugin — no maven-publish / MavenPublication.
+// This is the scenario that previously triggered "is defined but no publication ; skipping".
+apply plugin: 'maven'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.apache.commons:commons-lang3:3.8.1'
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "file://${buildDir}/repo")
+        }
+    }
+}

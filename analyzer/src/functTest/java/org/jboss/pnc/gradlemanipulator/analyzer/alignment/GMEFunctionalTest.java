@@ -110,8 +110,8 @@ public class GMEFunctionalTest extends AbstractWiremockTest {
         try (Stream<String> lines = Files.lines(rootBuildFile.toPath())) {
             final List<String> linesList = lines.map(
                     l -> l.replaceAll(
-                            "(id[(]\"com.adarshr.test-logger)",
-                            "id(\"org.jboss.pnc.gradle-manipulator.analyzer\") \n $1"))
+                            "(plugins \\{)",
+                            "$1\n    id(\"org.jboss.pnc.gradle-manipulator.analyzer\")"))
                     .map(
                             l -> l.replaceAll(
                                     "(apply[(]plugin = \"idea\")",

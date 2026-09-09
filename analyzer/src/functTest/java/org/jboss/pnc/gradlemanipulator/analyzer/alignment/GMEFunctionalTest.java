@@ -89,6 +89,7 @@ public class GMEFunctionalTest extends AbstractWiremockTest {
                 projectRoot,
                 FileFilterUtils.or(
                         DirectoryFileFilter.DIRECTORY,
+                        FileFilterUtils.nameFileFilter("dependencies.gradle"),
                         FileFilterUtils.nameFileFilter("spotless.gradle"),
                         FileFilterUtils.nameFileFilter("publish.gradle"),
                         FileFilterUtils.nameFileFilter("gradle.properties"),

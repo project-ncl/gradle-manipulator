@@ -148,6 +148,11 @@ plugins {
 
 tasks.withType<Wrapper>().configureEach { distributionType = Wrapper.DistributionType.ALL }
 
+// Dependency versions are defined in gradle/dependencies.gradle (Groovy ext {} block).
+// Dependabot fetches any apply(from:) file whose name contains "dependencies" and parses
+// the ext { key = "value" } declarations directly. Subprojects read them via project.extra.get("x").
+apply(from = "$rootDir/gradle/dependencies.gradle")
+
 if (!JavaVersion.current().isJava11Compatible) {
     throw GradleException("This build must be run with at least Java 11")
 } else if (GradleVersion.current() < GradleVersion.version("4.10")) {
@@ -297,9 +302,6 @@ allprojects {
 }
 
 subprojects {
-    val slf4jVersion: String by project
-    val junitVersion: String by project
-
     apply(plugin = "idea")
     apply(plugin = "com.adarshr.test-logger")
     apply(plugin = "io.freefair.lombok")
@@ -343,7 +345,7 @@ subprojects {
         apply(plugin = "java-gradle-plugin")
         apply(plugin = "com.gradle.plugin-publish")
 
-        val slf4jVersion = project.extra.get("slf4jVersion")
+        val slf4jVersion = project.property("slf4jVersion") as String
         tasks.withType<ShadowJar>().configureEach {
             dependencies { exclude(dependency("org.slf4j:slf4j-api:$slf4jVersion")) }
         }
@@ -432,8 +434,10 @@ subprojects {
     dependencies {
         outputDirectories(sourceSets["testFixtures"].output)
         testFixturesUsageImplementation(project(project.path))
-        testFixturesCompile("org.slf4j:slf4j-api:$slf4jVersion")
-        testFixturesCompile("junit:junit:$junitVersion")
+        val slf4jVer = project.property("slf4jVersion") as String
+        val junitVer = project.property("junitVersion") as String
+        testFixturesCompile("org.slf4j:slf4j-api:$slf4jVer")
+        testFixturesCompile("junit:junit:$junitVer")
         testFixturesCompile(gradleApi())
     }
 

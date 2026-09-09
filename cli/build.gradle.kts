@@ -1,18 +1,17 @@
 group = "org.jboss.pnc.gradle-manipulator"
 
-// Versions are defined in gradle.properties — Dependabot can update them there.
-val assertjVersion: String by project
-val commonsIOVersion: String by project
-val gradleVersion: String by project
-val groovyVersion: String by project
-val jgitVersion: String by project
-val junitVersion: String by project
-val logbackVersion: String by project
-val mavenVersion: String by project
-val ownerVersion: String by project
-val pmeVersion: String by project
-val slf4jVersion: String by project
-val systemStubsVersion: String by project
+val assertjVersion = project.property("assertjVersion") as String
+val commonsIOVersion = project.property("commonsIOVersion") as String
+val gradleVersion = project.property("gradleVersion") as String
+val groovyVersion = project.property("groovyVersion") as String
+val jgitVersion = project.property("jgitVersion") as String
+val junitVersion = project.property("junitVersion") as String
+val logbackVersion = project.property("logbackVersion") as String
+val mavenVersion = project.property("mavenVersion") as String
+val ownerVersion = project.property("ownerVersion") as String
+val pmeVersion = project.property("pmeVersion") as String
+val slf4jVersion = project.property("slf4jVersion") as String
+val systemStubsVersion = project.property("systemStubsVersion") as String
 
 dependencies {
     implementation("ch.qos.logback:logback-classic") { version { strictly(logbackVersion) } }

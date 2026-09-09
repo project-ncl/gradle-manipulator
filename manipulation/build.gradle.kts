@@ -39,6 +39,19 @@ gradlePlugin {
     }
 }
 
+// Versions are defined in gradle.properties — Dependabot can update them there.
+val assertjVersion: String by project
+val atlasVersion: String by project
+val commonsBeanVersion: String by project
+val commonsIOVersion: String by project
+val commonsLangVersion: String by project
+val jgitVersion: String by project
+val junitVersion: String by project
+val mavenVersion: String by project
+val ownerVersion: String by project
+val pmeVersion: String by project
+val systemStubsVersion: String by project
+
 dependencies {
     implementation(project(":common"))
     // the shadow configuration is used in order to avoid adding gradle and groovy stuff to the
@@ -46,34 +59,34 @@ dependencies {
     shadow(localGroovy())
     shadow(gradleApi())
 
-    implementation("org.apache.commons:commons-lang3:${project.extra.get("commonsLangVersion")}")
-    implementation("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
+    implementation("org.apache.commons:commons-lang3:$commonsLangVersion")
+    implementation("commons-beanutils:commons-beanutils:$commonsBeanVersion")
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common:$pmeVersion") {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
         exclude(group = "ch.qos.logback")
     }
-    implementation("org.commonjava.atlas:atlas-identities:${project.extra.get("atlasVersion")}") {
+    implementation("org.commonjava.atlas:atlas-identities:$atlasVersion") {
         exclude(group = "ch.qos.logback")
     }
 
     // Owner: Need Java8 dependency which pulls in owner itself.
-    implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
+    implementation("org.aeonbits.owner:owner-java8:$ownerVersion")
 
-    runtimeOnly("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
-    runtimeOnly("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
-    runtimeOnly("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
-    testImplementation("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
-    testImplementation("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
-    testImplementation("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
+    runtimeOnly("org.apache.maven:maven-core:$mavenVersion")
+    runtimeOnly("org.apache.maven:maven-model:$mavenVersion")
+    runtimeOnly("org.apache.maven:maven-artifact:$mavenVersion")
+    testImplementation("org.apache.maven:maven-core:$mavenVersion")
+    testImplementation("org.apache.maven:maven-model:$mavenVersion")
+    testImplementation("org.apache.maven:maven-artifact:$mavenVersion")
 
-    testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsIOVersion")}")
-    testImplementation("junit:junit:${project.extra.get("junitVersion")}")
-    testImplementation("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
-    testImplementation("uk.org.webcompere:system-stubs-junit4:${project.extra.get("systemStubsVersion")}")
-    testImplementation("org.eclipse.jgit:org.eclipse.jgit:${project.extra.get("jgitVersion")}")
+    testRuntimeOnly("commons-io:commons-io:$commonsIOVersion")
+    testImplementation("junit:junit:$junitVersion")
+    testImplementation("org.assertj:assertj-core:$assertjVersion")
+    testImplementation("uk.org.webcompere:system-stubs-junit4:$systemStubsVersion")
+    testImplementation("org.eclipse.jgit:org.eclipse.jgit:$jgitVersion")
     testImplementation(project(path = ":common", configuration = "testFixturesCompile"))
 
     // GradleAPI in test compile to get access to org.gradle.internal.Pair

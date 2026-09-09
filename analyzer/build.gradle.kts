@@ -39,6 +39,20 @@ gradlePlugin {
     }
 }
 
+// Versions are defined in gradle.properties — Dependabot can update them there.
+val assertjVersion: String by project
+val atlasVersion: String by project
+val bytemanVersion: String by project
+val commonsBeanVersion: String by project
+val commonsIOVersion: String by project
+val commonsLangVersion: String by project
+val jgitVersion: String by project
+val junitVersion: String by project
+val mavenVersion: String by project
+val ownerVersion: String by project
+val pmeVersion: String by project
+val systemStubsVersion: String by project
+
 dependencies {
     implementation(project(":common"))
     // The shadow configuration is used in order to avoid adding gradle and groovy stuff to the
@@ -46,51 +60,51 @@ dependencies {
     shadow(localGroovy())
     shadow(gradleApi())
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-core:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-core:$pmeVersion") {
         exclude(group = "ch.qos.logback")
         // Exclude until new release due to Quarkus bom
         exclude(group = "org.jboss.pnc.otel")
     }
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-io:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-io:$pmeVersion") {
         exclude(group = "ch.qos.logback")
         // Exclude until new release due to Quarkus bom
         exclude(group = "org.jboss.pnc.otel")
     }
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common-lite:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common-lite:$pmeVersion") {
         exclude(group = "ch.qos.logback")
         // Exclude until new release due to Quarkus bom
         exclude(group = "org.jboss.pnc.otel")
     }
 
-    implementation("org.commonjava.atlas:atlas-identities:${project.extra.get("atlasVersion")}") {
+    implementation("org.commonjava.atlas:atlas-identities:$atlasVersion") {
         exclude(group = "ch.qos.logback")
     }
 
-    runtimeOnly("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
-    runtimeOnly("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
-    runtimeOnly("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
+    runtimeOnly("org.apache.maven:maven-artifact:$mavenVersion")
+    runtimeOnly("org.apache.maven:maven-core:$mavenVersion")
+    runtimeOnly("org.apache.maven:maven-model:$mavenVersion")
 
-    implementation("org.apache.maven:maven-settings-builder:${project.extra.get("mavenVersion")}")
-    implementation("org.apache.maven:maven-settings:${project.extra.get("mavenVersion")}")
+    implementation("org.apache.maven:maven-settings-builder:$mavenVersion")
+    implementation("org.apache.maven:maven-settings:$mavenVersion")
 
-    implementation("org.apache.commons:commons-lang3:${project.extra.get("commonsLangVersion")}")
-    implementation("commons-io:commons-io:${project.extra.get("commonsIOVersion")}")
-    implementation("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
+    implementation("org.apache.commons:commons-lang3:$commonsLangVersion")
+    implementation("commons-io:commons-io:$commonsIOVersion")
+    implementation("commons-beanutils:commons-beanutils:$commonsBeanVersion")
 
-    implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
+    implementation("org.aeonbits.owner:owner-java8:$ownerVersion")
 
     testImplementation(project(path = ":common", configuration = "testFixturesCompile"))
     testImplementation(gradleTestKit())
-    testImplementation("junit:junit:${project.extra.get("junitVersion")}")
-    testImplementation("uk.org.webcompere:system-stubs-junit4:${project.extra.get("systemStubsVersion")}")
-    testImplementation("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
-    testImplementation("org.jboss.byteman:byteman-bmunit:${project.extra.get("bytemanVersion")}")
+    testImplementation("junit:junit:$junitVersion")
+    testImplementation("uk.org.webcompere:system-stubs-junit4:$systemStubsVersion")
+    testImplementation("org.assertj:assertj-core:$assertjVersion")
+    testImplementation("org.jboss.byteman:byteman-bmunit:$bytemanVersion")
     testImplementation(files("${System.getProperty("java.home")}/../lib/tools.jar"))
     testImplementation("org.mockito:mockito-core:5.23.0")
     testImplementation("com.github.tomakehurst:wiremock-jre8:2.35.1")
-    testImplementation("org.eclipse.jgit:org.eclipse.jgit:${project.extra.get("jgitVersion")}")
+    testImplementation("org.eclipse.jgit:org.eclipse.jgit:$jgitVersion")
     testImplementation("pl.pragmatists:JUnitParams:1.1.1")
 }
 

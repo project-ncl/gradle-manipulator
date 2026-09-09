@@ -1,44 +1,60 @@
 group = "org.jboss.pnc.gradle-manipulator"
 
+// Versions are defined in gradle.properties — Dependabot can update them there.
+val assertjVersion: String by project
+val atlasVersion: String by project
+val commonsBeanVersion: String by project
+val commonsIOVersion: String by project
+val commonsLangVersion: String by project
+val groovyVersion: String by project
+val ivyVersion: String by project
+val junitVersion: String by project
+val mavenVersion: String by project
+val opentelemetryVersion: String by project
+val ownerVersion: String by project
+val pmeVersion: String by project
+val slf4jVersion: String by project
+val systemStubsVersion: String by project
+
 dependencies {
-    runtimeOnly("org.apache.ivy:ivy:${project.extra.get("ivyVersion")}")
+    runtimeOnly("org.apache.ivy:ivy:$ivyVersion")
     compileOnly(localGroovy())
     compileOnly(gradleApi())
 
-    implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
-    implementation("org.apache.commons:commons-lang3:${project.extra.get("commonsLangVersion")}")
-    implementation("commons-io:commons-io:${project.extra.get("commonsIOVersion")}")
-    implementation("commons-beanutils:commons-beanutils:${project.extra.get("commonsBeanVersion")}")
+    implementation("org.aeonbits.owner:owner-java8:$ownerVersion")
+    implementation("org.apache.commons:commons-lang3:$commonsLangVersion")
+    implementation("commons-io:commons-io:$commonsIOVersion")
+    implementation("commons-beanutils:commons-beanutils:$commonsBeanVersion")
 
-    implementation("org.commonjava.atlas:atlas-identities:${project.extra.get("atlasVersion")}") {
+    implementation("org.commonjava.atlas:atlas-identities:$atlasVersion") {
         exclude(group = "ch.qos.logback")
     }
 
-    implementation("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
-    implementation("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation("org.codehaus.groovy:groovy:$groovyVersion")
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common-lite:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common-lite:$pmeVersion") {
         exclude(group = "ch.qos.logback")
         exclude(group = "org.commonjava.maven.galley")
         // Exclude until new release due to Quarkus bom
         exclude(group = "org.jboss.pnc.otel")
     }
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-core:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-core:$pmeVersion") {
         // Only needed for the Groovy references
         isTransitive = false
     }
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-io:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-io:$pmeVersion") {
         exclude(group = "ch.qos.logback")
         exclude(group = "org.commonjava.maven.galley")
         // Exclude until new release due to Quarkus bom
         exclude(group = "org.jboss.pnc.otel")
     }
 
-    runtimeOnly("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
-    runtimeOnly("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
-    runtimeOnly("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
+    runtimeOnly("org.apache.maven:maven-core:$mavenVersion")
+    runtimeOnly("org.apache.maven:maven-model:$mavenVersion")
+    runtimeOnly("org.apache.maven:maven-artifact:$mavenVersion")
 
     // This is a gigantic hack to avoid "Protocol message contained an invalid tag (zero).". The otel dependency
     // contains kotlin-stdlib:2.x which conflicts horribly with the TestKit.
@@ -48,14 +64,14 @@ dependencies {
         logger.warn("Using older opentelemetry-ext-cli-java for 6.5.1")
         implementation("org.jboss.pnc.otel:opentelemetry-ext-cli-java:2.0.0")
     } else {
-        implementation("org.jboss.pnc.otel:opentelemetry-ext-cli-java:${project.extra.get("opentelemetryVersion")}")
+        implementation("org.jboss.pnc.otel:opentelemetry-ext-cli-java:$opentelemetryVersion")
     }
 
     // This is to prevent compilation errors in conjunction with Lombok due to use of PME code.
-    compileOnly("org.apache.maven:maven-compat:${project.extra.get("mavenVersion")}")
+    compileOnly("org.apache.maven:maven-compat:$mavenVersion")
 
     testFixturesCompile("org.codehaus.plexus:plexus-archiver:4.14.0")
-    testFixturesCompile("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
-    testImplementation("junit:junit:${project.extra.get("junitVersion")}")
-    testImplementation("uk.org.webcompere:system-stubs-junit4:${project.extra.get("systemStubsVersion")}")
+    testFixturesCompile("org.assertj:assertj-core:$assertjVersion")
+    testImplementation("junit:junit:$junitVersion")
+    testImplementation("uk.org.webcompere:system-stubs-junit4:$systemStubsVersion")
 }

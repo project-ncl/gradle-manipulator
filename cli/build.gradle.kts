@@ -1,12 +1,26 @@
 group = "org.jboss.pnc.gradle-manipulator"
 
+// Versions are defined in gradle.properties — Dependabot can update them there.
+val assertjVersion: String by project
+val commonsIOVersion: String by project
+val gradleVersion: String by project
+val groovyVersion: String by project
+val jgitVersion: String by project
+val junitVersion: String by project
+val logbackVersion: String by project
+val mavenVersion: String by project
+val ownerVersion: String by project
+val pmeVersion: String by project
+val slf4jVersion: String by project
+val systemStubsVersion: String by project
+
 dependencies {
-    implementation("ch.qos.logback:logback-classic") { version { strictly("${project.extra.get("logbackVersion")}") } }
-    implementation("ch.qos.logback:logback-core") { version { strictly("${project.extra.get("logbackVersion")}") } }
+    implementation("ch.qos.logback:logback-classic") { version { strictly(logbackVersion) } }
+    implementation("ch.qos.logback:logback-core") { version { strictly(logbackVersion) } }
 
     // Minimum Gradle API to provide the Project. Not using gradleApi as that pulls in too much.
-    implementation("org.gradle:gradle-core-api:${project.extra.get("gradleVersion")}")
-    implementation("org.gradle:gradle-base-services:${project.extra.get("gradleVersion")}")
+    implementation("org.gradle:gradle-core-api:$gradleVersion")
+    implementation("org.gradle:gradle-base-services:$gradleVersion")
 
     // XXX: Versions 4.x > 4.0.1 suffer from <https://github.com/johnrengelman/shadow/issues/425>
     // To avoid this the CLI module for Gradle 4 avoids using api using implementation instead.
@@ -15,43 +29,43 @@ dependencies {
     } else {
         api(project(":common"))
     }
-    implementation("org.gradle:gradle-tooling-api:${project.extra.get("gradleVersion")}")
+    implementation("org.gradle:gradle-tooling-api:$gradleVersion")
     implementation("info.picocli:picocli:4.7.7")
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-core:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-core:$pmeVersion") {
         exclude(group = "ch.qos.logback")
         exclude(group = "org.commonjava.maven.galley")
     }
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common:$pmeVersion") {
         exclude(group = "ch.qos.logback")
         exclude(group = "org.commonjava.maven.galley")
     }
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-io:${project.extra.get("pmeVersion")}") {
+    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-io:$pmeVersion") {
         exclude(group = "ch.qos.logback")
         exclude(group = "org.commonjava.maven.galley")
     }
 
-    implementation("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
-    implementation("org.codehaus.groovy:groovy:${project.extra.get("groovyVersion")}")
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation("org.codehaus.groovy:groovy:$groovyVersion")
 
     // Owner: Need Java8 dependency which pulls in owner itself.
-    implementation("org.aeonbits.owner:owner-java8:${project.extra.get("ownerVersion")}")
+    implementation("org.aeonbits.owner:owner-java8:$ownerVersion")
 
-    runtimeOnly("org.apache.maven:maven-core:${project.extra.get("mavenVersion")}")
-    runtimeOnly("org.apache.maven:maven-model:${project.extra.get("mavenVersion")}")
-    runtimeOnly("org.apache.maven:maven-artifact:${project.extra.get("mavenVersion")}")
+    runtimeOnly("org.apache.maven:maven-core:$mavenVersion")
+    runtimeOnly("org.apache.maven:maven-model:$mavenVersion")
+    runtimeOnly("org.apache.maven:maven-artifact:$mavenVersion")
 
-    testRuntimeOnly("commons-io:commons-io:${project.extra.get("commonsIOVersion")}")
+    testRuntimeOnly("commons-io:commons-io:$commonsIOVersion")
     testImplementation(project(path = ":common", configuration = "testFixturesCompile"))
 
     testImplementation(project(":analyzer"))
-    testImplementation("junit:junit:${project.extra.get("junitVersion")}")
-    testImplementation("org.assertj:assertj-core:${project.extra.get("assertjVersion")}")
-    testImplementation("uk.org.webcompere:system-stubs-junit4:${project.extra.get("systemStubsVersion")}")
+    testImplementation("junit:junit:$junitVersion")
+    testImplementation("org.assertj:assertj-core:$assertjVersion")
+    testImplementation("uk.org.webcompere:system-stubs-junit4:$systemStubsVersion")
     testImplementation("org.codehaus.plexus:plexus-archiver:4.14.0")
-    testImplementation("org.eclipse.jgit:org.eclipse.jgit:${project.extra.get("jgitVersion")}")
+    testImplementation("org.eclipse.jgit:org.eclipse.jgit:$jgitVersion")
 }
 
 java {

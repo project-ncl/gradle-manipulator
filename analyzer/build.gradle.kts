@@ -39,19 +39,18 @@ gradlePlugin {
     }
 }
 
-// Versions are defined in gradle.properties — Dependabot can update them there.
-val assertjVersion: String by project
-val atlasVersion: String by project
-val bytemanVersion: String by project
-val commonsBeanVersion: String by project
-val commonsIOVersion: String by project
-val commonsLangVersion: String by project
-val jgitVersion: String by project
-val junitVersion: String by project
-val mavenVersion: String by project
-val ownerVersion: String by project
-val pmeVersion: String by project
-val systemStubsVersion: String by project
+val assertjVersion = project.property("assertjVersion") as String
+val atlasVersion = project.property("atlasVersion") as String
+val bytemanVersion = project.property("bytemanVersion") as String
+val commonsBeanVersion = project.property("commonsBeanVersion") as String
+val commonsIOVersion = project.property("commonsIOVersion") as String
+val commonsLangVersion = project.property("commonsLangVersion") as String
+val jgitVersion = project.property("jgitVersion") as String
+val junitVersion = project.property("junitVersion") as String
+val mavenVersion = project.property("mavenVersion") as String
+val ownerVersion = project.property("ownerVersion") as String
+val pmeVersion = project.property("pmeVersion") as String
+val systemStubsVersion = project.property("systemStubsVersion") as String
 
 dependencies {
     implementation(project(":common"))

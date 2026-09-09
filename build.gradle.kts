@@ -35,7 +35,7 @@ plugins {
         id("com.diffplug.spotless") version "8.10.1"
     }
 
-    if (GradleVersion.current() < GradleVersion.version("6.0")) {
+    if (GradleVersion.current() < GradleVersion.version("7.4")) {
         id("com.gradle" + ".plugin-publish") version "0.21.0" apply false // frozen: Gradle <6.0
     } else {
         id("com.gradle.plugin-publish") version "2.1.1" apply false

@@ -71,22 +71,23 @@ plugins {
         // enabled we were encountering https://github.com/GradleUp/shadow/issues/875
         // so have switched to using 8.3.9 instead of 8.3.6
         GradleVersion.current() < GradleVersion.version("9.0") -> { // frozen: Gradle 8.3-8.x
-            id("com.adarshr" + ".test-logger") version "4.0.0"
-            id("com.gradleup" + ".shadow") version "8.3.11" apply false
             // TODO: Can't reset wrapper with this so for IntelliJ might need to be commented out :-(
-            id("com.gradleup" + ".nmcp.aggregation") version "1.2.0" apply false
+            id("com.gradleup" + ".shadow") version "8.3.11" apply false
         }
         GradleVersion.current() < GradleVersion.version("9.2") -> { // frozen: Gradle 9.0-9.1
-            id("com.adarshr" + ".test-logger") version "4.0.0"
             // shadow 9.1+ uses Provider<ConsumableConfiguration> overload not available until Gradle 9.2
             id("com.gradleup" + ".shadow") version "9.0.2" apply false
-            id("com.gradleup" + ".nmcp.aggregation") version "1.2.0" apply false
         }
         else -> { // Gradle >= 9.2 (active)
-            id("com.adarshr.test-logger") version "4.0.0"
             id("com.gradleup.shadow") version "9.6.1" apply false
-            id("com.gradleup.nmcp.aggregation") version "1.6.2" apply false
         }
+    }
+    // test-logger and nmcp.aggregation are only compatible with Gradle >= 8.3 and use the same
+    // version across all supported Gradle versions from 8.3 onwards; declared once here so
+    // Dependabot sees a single entry per plugin.
+    if (GradleVersion.current() >= GradleVersion.version("8.3")) {
+        id("com.adarshr.test-logger") version "4.0.0"
+        id("com.gradleup.nmcp.aggregation") version "1.6.2" apply false
     }
 
     // NOTE: See comment above re. frozen branch plugin ID concatenation.

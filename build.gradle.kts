@@ -104,7 +104,9 @@ plugins {
             id("io.freefair" + ".lombok") version "5.3.3.3" apply false // frozen: Gradle 6.0-7.x
         }
         GradleVersion.current() < GradleVersion.version("8.3") -> {
-            id("io.freefair" + ".lombok") version "8.10.2" apply false // frozen: Gradle 8.0-8.2 (last version compatible with Java 11)
+            id("io.freefair" + ".lombok") version
+                "8.10.2" apply
+                false // frozen: Gradle 8.0-8.2 (last version compatible with Java 11)
         }
         else -> {
             id("io.freefair.lombok") version "9.5.0" apply false
@@ -273,27 +275,8 @@ allprojects {
 }
 
 subprojects {
-    extra["assertjVersion"] = "3.27.7"
-    extra["atlasVersion"] = "1.2.2"
-    extra["bytemanVersion"] = "4.0.26"
-    extra["commonsBeanVersion"] = "1.11.0"
-    extra["commonsLangVersion"] = "3.20.0"
-    extra["commonsIOVersion"] = "2.21.0"
-    // Used in the CLI. Only limited version range available in repo.gradle.org/ui/native/libs-releases-local
-    extra["gradleVersion"] = "5.6.4"
-    extra["groovyVersion"] = "3.0.25"
-    extra["ivyVersion"] = "2.6.0"
-    // Must use 6.x series as 7.x and above require JDK17
-    extra["jgitVersion"] = "6.10.1.202505221210-r"
-    extra["junitVersion"] = "4.13.2"
-    // CLI targets JDK11, so 1.5.x is fine (1.4.x+ requires JDK11).
-    extra["logbackVersion"] = "1.5.38"
-    extra["mavenVersion"] = "3.9.15"
-    extra["opentelemetryVersion"] = "2.1.0"
-    extra["ownerVersion"] = "1.0.12"
-    extra["pmeVersion"] = "5.5"
-    extra["slf4jVersion"] = "2.0.17"
-    extra["systemStubsVersion"] = "2.1.8"
+    val slf4jVersion: String by project
+    val junitVersion: String by project
 
     apply(plugin = "idea")
     apply(plugin = "com.adarshr.test-logger")
@@ -427,8 +410,8 @@ subprojects {
     dependencies {
         outputDirectories(sourceSets["testFixtures"].output)
         testFixturesUsageImplementation(project(project.path))
-        testFixturesCompile("org.slf4j:slf4j-api:${project.extra.get("slf4jVersion")}")
-        testFixturesCompile("junit:junit:${project.extra.get("junitVersion")}")
+        testFixturesCompile("org.slf4j:slf4j-api:$slf4jVersion")
+        testFixturesCompile("junit:junit:$junitVersion")
         testFixturesCompile(gradleApi())
     }
 

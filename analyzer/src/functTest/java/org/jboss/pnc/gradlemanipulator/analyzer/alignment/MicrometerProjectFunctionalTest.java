@@ -99,7 +99,7 @@ public class MicrometerProjectFunctionalTest extends AbstractWiremockTest {
         parameters.put("-Prelease.disableGitChecks", "true");
         parameters.put("ignoreUnresolvableDependencies", "true");
         parameters.put("--quiet", "");
-        parameters.put("org.gradle.jvmargs", "-Xmx512m");
+        parameters.put("org.gradle.jvmargs", "-Xmx1g");
 
         final GradleRunner runner = TestUtils
                 .createGradleRunner(projectRoot, parameters)

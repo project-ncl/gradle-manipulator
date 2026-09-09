@@ -40,7 +40,13 @@ plugins {
     } else {
         id("com.gradle.plugin-publish") version "2.1.1" apply false
     }
-    id("net.researchgate.release") version "3.1.0"
+    // net.researchgate.release 3.x migrated all config fields to Gradle Property<T>, which requires
+    // Gradle >= 8.2.  On older Gradle versions we freeze to 2.8.1 which uses plain Groovy fields.
+    if (GradleVersion.current() < GradleVersion.version("8.2")) {
+        id("net.researchgate" + ".release") version "2.8.1" // frozen: Gradle <8.2
+    } else {
+        id("net.researchgate.release") version "3.1.0"
+    }
     // grgit 5.x requires Groovy 4, which is only bundled with Gradle >= 7.0.
     // Gradle < 7.0 ships Groovy 3 and fails with AbstractMethodError on GroovyObject.
     if (GradleVersion.current() < GradleVersion.version("7.0")) {
@@ -158,6 +164,10 @@ apply(plugin = "net.researchgate.release")
 release {
     // https://github.com/researchgate/gradle-release/issues/340
     // https://github.com/researchgate/gradle-release/issues/281
+    // On Gradle < 8.2 the classpath carries 2.8.1 (plain String field); on >= 8.2 it carries 3.1.0
+    // (Property<String>). In both cases the Groovy dynamic setProperty dispatch makes the plain
+    // assignment work at runtime, and the compiler sees a compatible type from whichever jar is
+    // actually on the classpath for that Gradle version.
     val gitConfig = getProperty("git") as net.researchgate.release.GitAdapter.GitConfig
     gitConfig.requireBranch = "main"
 }

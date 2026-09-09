@@ -38,7 +38,7 @@ plugins {
     if (GradleVersion.current() < GradleVersion.version("6.0")) {
         id("com.gradle" + ".plugin-publish") version "0.21.0" apply false // frozen: Gradle <6.0
     } else {
-        id("com.gradle.plugin-publish") version "1.3.1" apply false
+        id("com.gradle.plugin-publish") version "2.1.1" apply false
     }
     id("net.researchgate.release") version "2.8.1"
     // grgit 5.x requires Groovy 4, which is only bundled with Gradle >= 7.0.

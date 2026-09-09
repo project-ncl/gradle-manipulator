@@ -25,23 +25,29 @@ plugins {
     // Only the active branch uses a plain string literal plugin ID so Dependabot sees exactly
     // one occurrence per plugin and proposes updates only for the active version.
     // See: https://github.com/dependabot/dependabot-core/blob/main/gradle/lib/dependabot/gradle/file_parser.rb
-    if (GradleVersion.current() >= GradleVersion.version("8.3")) {
-        id("com.diffplug.spotless") version "8.10.1"
-    } else if (GradleVersion.current() >= GradleVersion.version("6.8.3")) {
-        id("com.diffplug" + ".spotless") version "7.2.1" // frozen: Gradle 6.8.3-8.2
-    } else if (GradleVersion.current() < GradleVersion.version("5.4")) {
+    if (GradleVersion.current() < GradleVersion.version("5.4")) {
         id("com.diffplug.gradle" + ".spotless") version "4.5.1" // frozen: Gradle <5.4
-    } else {
+    } else if (GradleVersion.current() < GradleVersion.version("6.8.3")) {
         id("com.diffplug" + ".spotless") version "5.14.2" // frozen: Gradle 5.4-6.8.2
+    } else if (GradleVersion.current() < GradleVersion.version("8.3")) {
+        id("com.diffplug" + ".spotless") version "7.2.1" // frozen: Gradle 6.8.3-8.2
+    } else {
+        id("com.diffplug.spotless") version "8.10.1"
     }
 
-    if (GradleVersion.current() >= GradleVersion.version("6.0")) {
-        id("com.gradle.plugin-publish") version "1.3.1" apply false
+    if (GradleVersion.current() < GradleVersion.version("6.0")) {
+        id("com.gradle" + ".plugin-publish") version "0.21.0" apply false // frozen: Gradle <6.0
     } else {
-        id("com.gradle" + ".plugin-publish") version "0.21.0" // frozen: Gradle <6.0
+        id("com.gradle.plugin-publish") version "1.3.1" apply false
     }
     id("net.researchgate.release") version "2.8.1"
-    id("org.ajoberstar.grgit") version "5.3.3"
+    // grgit 5.x requires Groovy 4, which is only bundled with Gradle >= 7.0.
+    // Gradle < 7.0 ships Groovy 3 and fails with AbstractMethodError on GroovyObject.
+    if (GradleVersion.current() < GradleVersion.version("7.0")) {
+        id("org.ajoberstar" + ".grgit") version "4.1.1" // frozen: Gradle <7.0
+    } else {
+        id("org.ajoberstar.grgit") version "5.3.3"
+    }
 
     // NOTE: See comment above re. frozen branch plugin ID concatenation.
     when {
@@ -109,16 +115,21 @@ plugins {
     }
 
     // NOTE: See comment above re. frozen branch plugin ID concatenation.
-    if (GradleVersion.current() < GradleVersion.version("9.0.0")) {
-        // Not compatible with Gradle 9 yet.
-        // https://github.com/kordamp/kordamp-gradle-plugins/issues/540
-        // See also below as a fake task for AggregateJacocoReport has been created for Gradle 9
-        if (GradleVersion.current() >= GradleVersion.version("8.0")) {
-            id("org.kordamp.gradle.jacoco") version "0.54.0"
-        } else if (GradleVersion.current() >= GradleVersion.version("7.0")) {
-            id("org.kordamp.gradle" + ".jacoco") version "0.47.0" // frozen: Gradle 7.x
-        } else if (GradleVersion.current() >= GradleVersion.version("5.3")) {
+    // Not compatible with Gradle 9 yet.
+    // https://github.com/kordamp/kordamp-gradle-plugins/issues/540
+    // See also below as a fake task for AggregateJacocoReport has been created for Gradle 9
+    when {
+        GradleVersion.current() < GradleVersion.version("5.3") -> {
+            /* not supported; do not apply */
+        }
+        GradleVersion.current() < GradleVersion.version("7.0") -> {
             id("org.kordamp.gradle" + ".jacoco") version "0.46.0" // frozen: Gradle 5.3-6.x
+        }
+        GradleVersion.current() < GradleVersion.version("8.0") -> {
+            id("org.kordamp.gradle" + ".jacoco") version "0.47.0" // frozen: Gradle 7.x
+        }
+        GradleVersion.current() < GradleVersion.version("9.0") -> {
+            id("org.kordamp.gradle.jacoco") version "0.54.0"
         }
     }
 }

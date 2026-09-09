@@ -68,10 +68,34 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
             if (!DefaultProject.DEFAULT_VERSION.equals(project.getVersion())) {
                 if (configuration.versionModificationEnabled()) {
                     vc.translationMap = response.getTranslationMap();
+                    // Use the version that was actually sent to DA for this project. When a prior
+                    // manipulation.json exists, AlignmentTask replaces the project GAV in the cache
+                    // with the file version (e.g. 1.0.1.rhlw-00001) rather than the raw Gradle
+                    // version (e.g. 1.0.1). Using the cache PVR version here ensures the calculator
+                    // receives the same base that DA used, so the suffix is appended on top of the
+                    // full prior version rather than the clean source version.
+                    final String groupId = project.getGroup().toString();
+                    final String artifactId = project.getName();
+                    final String calculatorInput = cache.getProjectVersionRefs(state.isPreserveSnapshot())
+                            .stream()
+                            .filter(
+                                    pvr -> pvr.getGroupId().equals(groupId)
+                                            && pvr.getArtifactId().equals(artifactId))
+                            .map(ProjectVersionRef::getVersionString)
+                            .findFirst()
+                            .orElse(project.getVersion().toString());
+                    if (!calculatorInput.equals(project.getVersion().toString())) {
+                        logger.info(
+                                "Using cached REST input version '{}' (instead of Gradle version '{}') "
+                                        + "as calculator input for '{}'.",
+                                calculatorInput,
+                                project.getVersion(),
+                                project.getPath());
+                    }
                     String version = vc.calculate(
-                            project.getGroup().toString(),
-                            project.getName(),
-                            project.getVersion().toString(),
+                            groupId,
+                            artifactId,
+                            calculatorInput,
                             state);
                     projectsToVersions.put(project, version);
                     if (newVersion[0] == null) {

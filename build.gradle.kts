@@ -111,7 +111,9 @@ plugins {
             id("io.freefair" + ".lombok") version "5.3.3.3" apply false // frozen: Gradle 6.0-7.x
         }
         GradleVersion.current() < GradleVersion.version("8.3") -> {
-            id("io.freefair" + ".lombok") version "8.10.2" apply false // frozen: Gradle 8.0-8.2 (last version compatible with Java 11)
+            id("io.freefair" + ".lombok") version
+                "8.10.2" apply
+                false // frozen: Gradle 8.0-8.2 (last version compatible with Java 11)
         }
         else -> {
             id("io.freefair.lombok") version "9.5.0" apply false

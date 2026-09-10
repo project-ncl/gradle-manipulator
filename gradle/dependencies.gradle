@@ -20,7 +20,7 @@ ext {
     groovyVersion           = "3.0.25"
     ivyVersion              = "2.6.0"
     // Must use 6.x series as 7.x and above require JDK17
-    jgitVersion             = "6.10.1.202505221210-r"
+    jgitVersion             = "7.7.1.202607240634-r"
     junitVersion            = "4.13.2"
     // CLI targets JDK11, so 1.5.x is fine (1.4.x+ requires JDK11).
     logbackVersion          = "1.5.38"

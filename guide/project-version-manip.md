@@ -72,6 +72,28 @@ it will change to
 
 This is controlled by the property `versionOsgi`. The default is true (i.e., make the versions OSGi compliant).
 
+### Enforce Version Prefix
+
+<table bgcolor="#ffff00">
+<tr>
+<td>
+    <b>NOTE</b> : Available from version 5.5
+</td>
+</tr>
+</table>
+
+When rebuilding projects with a vendor-specific suffix scheme it is sometimes necessary to guarantee that every project version carries a known reference string (e.g. `acme`) before the incremental suffix is appended. The property `enforceVersionPrefix` addresses this: when set, any version that does **not** already contain the configured reference (preceded by `.` or `-` and followed by `-` and one or more digits) has the reference appended before the REST look-up and version calculation take place.
+
+    gradle generateAlignmentMetadata -DenforceVersionPrefix=acme -DversionIncrementalSuffix=rebuild -DversionIncrementalSuffixPadding=5
+
+For example, if the current project version is `1.0.0.Final` and the REST service has never seen it before, the result will be:
+
+    1.0.0.Final-acme-00000-rebuild-00001
+
+If the version already contains the reference — for instance `1.0.0.Final-acme-00001` — it is left unchanged and normal incremental-suffix processing continues.
+
+**Note** - <code>versionOverride</code> takes precedence; when it is set, <code>enforceVersionPrefix</code> is skipped.
+
 ### Version suffix alternatives
 
 It is possible to pass in a comma separated list of alternate suffixes via the property `versionSuffixAlternatives`. The

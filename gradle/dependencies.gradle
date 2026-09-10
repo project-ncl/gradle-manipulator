@@ -31,7 +31,7 @@ ext {
     picocliVersion          = "4.7.7"
     plexusArchiverVersion   = "4.14.0"
     pmeVersion              = "5.5"
-    slf4jVersion            = "2.0.17"
+    slf4jVersion            = "2.0.18"
     systemStubsVersion      = "2.1.8"
     wiremockVersion         = "2.35.1"
 

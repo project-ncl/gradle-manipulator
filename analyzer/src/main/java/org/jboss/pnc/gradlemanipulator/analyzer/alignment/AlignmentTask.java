@@ -91,7 +91,9 @@ import org.jboss.pnc.mavenmanipulator.common.json.ModulesItem;
 import org.jboss.pnc.mavenmanipulator.common.json.PME;
 import org.jboss.pnc.mavenmanipulator.common.util.JSONUtils;
 import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationStage;
+import org.jboss.pnc.mavenmanipulator.core.impl.VersionCalculator;
 import org.jboss.pnc.mavenmanipulator.core.state.DependencyState;
+import org.jboss.pnc.mavenmanipulator.core.state.VersioningState;
 
 /**
  * The actual Gradle task that creates the {@code manipulation.json} file for the whole project
@@ -396,6 +398,25 @@ public class AlignmentTask extends DefaultTask {
                                     project.getPath());
                             current = ProjectVersionFactory.withGAV(groupId, projectName, existingVersion);
                         }
+                    }
+                }
+
+                // Enforce version prefix if configured: normalise the project version sent to DA
+                // so the REST lookup uses the same enforced base that VersionCalculator will use.
+                if (configuration.enforceVersionPrefix() != null) {
+                    VersioningState prefixState = new VersioningState(configuration.getProperties());
+                    String normalised = VersionCalculator.enforceVersionPrefix(
+                            prefixState,
+                            current.getVersionString());
+                    if (!normalised.equals(current.getVersionString())) {
+                        logger.info(
+                                "enforceVersionPrefix: normalising project version '{}' to '{}' for REST lookup.",
+                                current.getVersionString(),
+                                normalised);
+                        current = ProjectVersionFactory.withGAV(
+                                current.getGroupId(),
+                                current.getArtifactId(),
+                                normalised);
                     }
                 }
 

@@ -22,6 +22,9 @@ import org.junit.rules.TestRule;
 import uk.org.webcompere.systemstubs.rules.SystemOutRule;
 import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
+// Tests for enforceVersionPrefix (Step 4 of the enforce-version-prefix plan)
+// All scenarios use ignoreUnresolvableDependencies=true unless a translation map is provided.
+
 public class UpdateProjectVersionCustomizerTest {
 
     @Rule
@@ -313,5 +316,181 @@ public class UpdateProjectVersionCustomizerTest {
 
         assertThat(originalResp).isNotNull()
                 .satisfies(r -> assertThat(r.getProjectOverrides().get(p)).isEqualTo("1.1.0.redhat-00002"));
+    }
+
+    // -------------------------------------------------------------------------
+    // enforceVersionPrefix tests
+    // -------------------------------------------------------------------------
+
+    /** Scenario 1: property absent — existing behaviour unchanged. */
+    @Test
+    public void enforceVersionPrefix_absent_defaultBehaviour() throws IOException, ManipulationException {
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final Response resp = new Response(Collections.emptyMap());
+        final File dir = tempDir.newFolder("evp-absent");
+        final Project p = ProjectBuilder.builder().withProjectDir(dir).build();
+        p.setVersion("1.2.0.Final");
+        p.setGroup("org");
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
+        new UpdateProjectVersionCustomizer(configuration, p).customize(resp);
+
+        // PME uses a dash delimiter before the suffix when the base version has a qualifier.
+        assertThat(resp.getProjectOverrides().get(p)).isEqualTo("1.2.0.Final-redhat-00001");
+    }
+
+    /** Scenario 2: prefix missing, qualified version — dash delimiter expected. */
+    @Test
+    public void enforceVersionPrefix_qualifiedVersionMissingPrefix() throws IOException, ManipulationException {
+        System.setProperty("enforceVersionPrefix", "rhlw");
+        System.setProperty("versionIncrementalSuffix", "n");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final Response resp = new Response(Collections.emptyMap());
+        final File dir = tempDir.newFolder("evp-qualified");
+        final Project p = ProjectBuilder.builder().withProjectDir(dir).build();
+        p.setVersion("1.2.0.Final");
+        p.setGroup("org");
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
+        new UpdateProjectVersionCustomizer(configuration, p).customize(resp);
+
+        assertThat(resp.getProjectOverrides().get(p)).isEqualTo("1.2.0.Final-rhlw-00000-n-00001");
+    }
+
+    /** Scenario 3: prefix missing, numeric-only version — dot delimiter expected. */
+    @Test
+    public void enforceVersionPrefix_numericVersionMissingPrefix() throws IOException, ManipulationException {
+        System.setProperty("enforceVersionPrefix", "rhlw");
+        System.setProperty("versionIncrementalSuffix", "n");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final Response resp = new Response(Collections.emptyMap());
+        final File dir = tempDir.newFolder("evp-numeric");
+        final Project p = ProjectBuilder.builder().withProjectDir(dir).build();
+        p.setVersion("1.2.0");
+        p.setGroup("org");
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
+        new UpdateProjectVersionCustomizer(configuration, p).customize(resp);
+
+        assertThat(resp.getProjectOverrides().get(p)).isEqualTo("1.2.0.rhlw-00000-n-00001");
+    }
+
+    /** Scenario 4: prefix already present (5-digit form) — no duplication. */
+    @Test
+    public void enforceVersionPrefix_alreadyPresent() throws IOException, ManipulationException {
+        System.setProperty("enforceVersionPrefix", "rhlw");
+        System.setProperty("versionIncrementalSuffix", "n");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final Response resp = new Response(Collections.emptyMap());
+        final File dir = tempDir.newFolder("evp-present");
+        final Project p = ProjectBuilder.builder().withProjectDir(dir).build();
+        p.setVersion("1.2.0.Final-rhlw-00003");
+        p.setGroup("org");
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
+        new UpdateProjectVersionCustomizer(configuration, p).customize(resp);
+
+        assertThat(resp.getProjectOverrides().get(p)).isEqualTo("1.2.0.Final-rhlw-00003-n-00001");
+    }
+
+    /** Scenario 5: version already has both prefix and incremental suffix — increments suffix only. */
+    @Test
+    public void enforceVersionPrefix_alreadyComplete() throws IOException, ManipulationException {
+        System.setProperty("enforceVersionPrefix", "rhlw");
+        System.setProperty("versionIncrementalSuffix", "n");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final ProjectVersionRef pvr = SimpleProjectVersionRef.parse("org:test:1.2.5.rhlw-00000-n-00001");
+        final Response resp = new Response(Collections.singletonMap(pvr, pvr.getVersionString()));
+        final File dir = tempDir.newFolder("evp-complete");
+        final Project p = ProjectBuilder.builder().withProjectDir(dir).build();
+        p.setVersion("1.2.5.rhlw-00000-n-00001");
+        p.setGroup("org");
+        final ManipulationCache cache = ManipulationCache.getCache(p);
+        cache.addGAV(null, pvr);
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
+        new UpdateProjectVersionCustomizer(configuration, p).customize(resp);
+
+        assertThat(resp.getProjectOverrides().get(p)).isEqualTo("1.2.5.rhlw-00000-n-00002");
+    }
+
+    /**
+     * Scenario 6: versionOverride sets the base; the incremental suffix is still appended on top.
+     * enforceVersionPrefix is irrelevant once versionOverride is set.
+     */
+    @Test
+    public void enforceVersionPrefix_overrideWins() throws IOException, ManipulationException {
+        System.setProperty("enforceVersionPrefix", "rhlw");
+        System.setProperty("versionOverride", "9.9.9.override");
+        System.setProperty("versionIncrementalSuffix", "redhat");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final Response resp = new Response(Collections.emptyMap());
+        final File dir = tempDir.newFolder("evp-override");
+        final Project p = ProjectBuilder.builder().withProjectDir(dir).build();
+        p.setVersion("1.2.0.Final");
+        p.setGroup("org");
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
+        new UpdateProjectVersionCustomizer(configuration, p).customize(resp);
+
+        assertThat(resp.getProjectOverrides().get(p)).isEqualTo("9.9.9.override-redhat-00001");
+    }
+
+    /** Scenario 7: property alone (no other suffix) activates versioning — enforced base returned. */
+    @Test
+    public void enforceVersionPrefix_aloneActivatesVersioning() throws IOException, ManipulationException {
+        System.setProperty("enforceVersionPrefix", "rhlw");
+        // Suppress the default versionIncrementalSuffix so only prefix enforcement runs.
+        System.setProperty("versionIncrementalSuffix", "");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final Response resp = new Response(Collections.emptyMap());
+        final File dir = tempDir.newFolder("evp-alone");
+        final Project p = ProjectBuilder.builder().withProjectDir(dir).build();
+        p.setVersion("1.0.0");
+        p.setGroup("org");
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
+        new UpdateProjectVersionCustomizer(configuration, p).customize(resp);
+
+        // With empty versionIncrementalSuffix, PME uses rhlw as the sole suffix token and
+        // produces the first build counter: 1.0.0.rhlw-00001.
+        assertThat(resp.getProjectOverrides().get(p)).isEqualTo("1.0.0.rhlw-00001");
+    }
+
+    /**
+     * Scenario 8: REST candidate found via normalised project version — increment applied.
+     *
+     * <p>
+     * The cache PVR is registered as the normalised form (the version that {@link AlignmentTask}
+     * stores after prefix enforcement). The translation map maps that normalised PVR to the existing
+     * candidate version, so the calculator should produce the next increment.
+     */
+    @Test
+    public void enforceVersionPrefix_restCandidateIncrements() throws IOException, ManipulationException {
+        System.setProperty("enforceVersionPrefix", "rhlw");
+        System.setProperty("versionIncrementalSuffix", "n");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final File dir = tempDir.newFolder("evp-rest");
+        final Project p = ProjectBuilder.builder().withProjectDir(dir).build();
+        p.setVersion("1.0.0.Final");
+        p.setGroup("org");
+
+        // The project name is the temp-folder name; use it in the PVRs so the cache lookup
+        // in UpdateProjectVersionCustomizer (which filters by groupId + artifactId) finds a match.
+        final String projectName = p.getName();
+        final ProjectVersionRef normalisedPvr = new SimpleProjectVersionRef(
+                "org",
+                projectName,
+                "1.0.0.Final-rhlw-00000");
+        // Translation map: normalised base PVR → already-aligned candidate version string.
+        final Response resp = new Response(
+                Collections.singletonMap(normalisedPvr, "1.0.0.Final-rhlw-00000-n-00001"));
+        final ManipulationCache cache = ManipulationCache.getCache(p);
+        cache.addGAV(null, normalisedPvr);
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
+        new UpdateProjectVersionCustomizer(configuration, p).customize(resp);
+
+        assertThat(resp.getProjectOverrides().get(p)).isEqualTo("1.0.0.Final-rhlw-00000-n-00002");
     }
 }

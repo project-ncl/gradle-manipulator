@@ -85,6 +85,9 @@ public interface Configuration extends Accessible, Reloadable {
     @DefaultValue("true")
     boolean versionOsgi();
 
+    @Key("enforceVersionPrefix")
+    String enforceVersionPrefix();
+
     @Key("versionOverride")
     String versionOverride();
 

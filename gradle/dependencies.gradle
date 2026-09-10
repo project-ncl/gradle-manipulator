@@ -13,7 +13,7 @@ ext {
     atlasVersion            = "1.2.2"
     bytemanVersion          = "4.0.26"
     commonsBeanVersion      = "1.11.0"
-    commonsIOVersion        = "2.21.0"
+    commonsIOVersion        = "2.22.0"
     commonsLangVersion      = "3.20.0"
     // Used in the CLI. Only limited version range available in repo.gradle.org/ui/native/libs-releases-local
     gradleVersion           = "5.6.4"

@@ -151,7 +151,7 @@ tasks.withType<Wrapper>().configureEach { distributionType = Wrapper.Distributio
 // Dependency versions are defined in gradle/dependencies.gradle (Groovy ext {} block).
 // Dependabot fetches any apply(from:) file whose name contains "dependencies" and parses
 // the ext { key = "value" } declarations directly. Subprojects read them via project.extra.get("x").
-apply(from = "$rootDir/gradle/dependencies.gradle")
+apply(from = "gradle/dependencies.gradle")
 
 if (!JavaVersion.current().isJava11Compatible) {
     throw GradleException("This build must be run with at least Java 11")

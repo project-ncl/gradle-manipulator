@@ -67,10 +67,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gradle: [8.3, 8.4, 8.5, 8.8, "8.10.2", "8.12.1", "8.13", "8.14.3", "9.0.0", "9.1.0", "9.2.1"]
+        gradle: [8.3, 8.4, 8.5, 8.8, "8.10.2", "8.12.1", "8.13", "8.14.5", "9.0.0", "9.1.0", "9.2.1"]
         upload_artifacts: [false]
         include:
-          - gradle: 9.3.0
+          - gradle: 9.3.1
             upload_artifacts: true
     if: github.repository == 'project-ncl/gradle-manipulator'
     uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@646d9b629925d6405fb06ed1476aefd6b2cdca86 # v0.0.23

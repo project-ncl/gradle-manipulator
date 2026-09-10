@@ -1,59 +1,65 @@
 group = "org.jboss.pnc.gradle-manipulator"
 
-val assertjVersion = project.property("assertjVersion") as String
-val atlasVersion = project.property("atlasVersion") as String
-val commonsBeanVersion = project.property("commonsBeanVersion") as String
-val commonsIOVersion = project.property("commonsIOVersion") as String
-val commonsLangVersion = project.property("commonsLangVersion") as String
-val groovyVersion = project.property("groovyVersion") as String
-val ivyVersion = project.property("ivyVersion") as String
-val junitVersion = project.property("junitVersion") as String
-val mavenVersion = project.property("mavenVersion") as String
-val opentelemetryVersion = project.property("opentelemetryVersion") as String
-val ownerVersion = project.property("ownerVersion") as String
-val pmeVersion = project.property("pmeVersion") as String
-val slf4jVersion = project.property("slf4jVersion") as String
-val systemStubsVersion = project.property("systemStubsVersion") as String
+val ivy = project.property("ivy").toString()
+val ownerJava8 = project.property("ownerJava8").toString()
+val commonsLang3 = project.property("commonsLang3").toString()
+val commonsIO = project.property("commonsIO").toString()
+val commonsBeanutils = project.property("commonsBeanutils").toString()
+val atlasIdentities = project.property("atlasIdentities").toString()
+val slf4jApi = project.property("slf4jApi").toString()
+val groovy = project.property("groovy").toString()
+val pmeCommonLite = project.property("pmeCommonLite").toString()
+val pmeCore = project.property("pmeCore").toString()
+val pmeIO = project.property("pmeIO").toString()
+val mavenCore = project.property("mavenCore").toString()
+val mavenModel = project.property("mavenModel").toString()
+val mavenArtifact = project.property("mavenArtifact").toString()
+val opentelemetryExtCli = project.property("opentelemetryExtCli").toString()
+val mavenCompat = project.property("mavenCompat").toString()
+val plexusArchiver = project.property("plexusArchiver").toString()
+val assertjCore = project.property("assertjCore").toString()
+val junit = project.property("junit").toString()
+val systemStubsJunit4 = project.property("systemStubsJunit4").toString()
 
 dependencies {
-    runtimeOnly("org.apache.ivy:ivy:$ivyVersion")
+    runtimeOnly(ivy)
     compileOnly(localGroovy())
     compileOnly(gradleApi())
 
-    implementation("org.aeonbits.owner:owner-java8:$ownerVersion")
-    implementation("org.apache.commons:commons-lang3:$commonsLangVersion")
-    implementation("commons-io:commons-io:$commonsIOVersion")
-    implementation("commons-beanutils:commons-beanutils:$commonsBeanVersion")
+    implementation(ownerJava8)
+    implementation(commonsLang3)
+    implementation(commonsIO)
+    implementation(commonsBeanutils)
 
-    implementation("org.commonjava.atlas:atlas-identities:$atlasVersion") {
+    implementation(atlasIdentities) {
         exclude(group = "ch.qos.logback")
     }
 
-    implementation("org.slf4j:slf4j-api:$slf4jVersion")
-    implementation("org.codehaus.groovy:groovy:$groovyVersion")
+    implementation(slf4jApi)
+    implementation(groovy)
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common-lite:$pmeVersion") {
+    implementation(pmeCommonLite) {
         exclude(group = "ch.qos.logback")
         exclude(group = "org.commonjava.maven.galley")
         // Exclude until new release due to Quarkus bom
         exclude(group = "org.jboss.pnc.otel")
     }
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-core:$pmeVersion") {
+    implementation(pmeCore) {
         // Only needed for the Groovy references
         isTransitive = false
     }
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-io:$pmeVersion") {
+    implementation(pmeIO) {
         exclude(group = "ch.qos.logback")
         exclude(group = "org.commonjava.maven.galley")
         // Exclude until new release due to Quarkus bom
         exclude(group = "org.jboss.pnc.otel")
     }
 
-    runtimeOnly("org.apache.maven:maven-core:$mavenVersion")
-    runtimeOnly("org.apache.maven:maven-model:$mavenVersion")
-    runtimeOnly("org.apache.maven:maven-artifact:$mavenVersion")
+    runtimeOnly(mavenCore)
+    runtimeOnly(mavenModel)
+    runtimeOnly(mavenArtifact)
 
     // This is a gigantic hack to avoid "Protocol message contained an invalid tag (zero).". The otel dependency
     // contains kotlin-stdlib:2.x which conflicts horribly with the TestKit.
@@ -63,14 +69,14 @@ dependencies {
         logger.warn("Using older opentelemetry-ext-cli-java for 6.5.1")
         implementation("org.jboss.pnc.otel:opentelemetry-ext-cli-java:2.0.0")
     } else {
-        implementation("org.jboss.pnc.otel:opentelemetry-ext-cli-java:$opentelemetryVersion")
+        implementation(opentelemetryExtCli)
     }
 
     // This is to prevent compilation errors in conjunction with Lombok due to use of PME code.
-    compileOnly("org.apache.maven:maven-compat:$mavenVersion")
+    compileOnly(mavenCompat)
 
-    testFixturesCompile("org.codehaus.plexus:plexus-archiver:4.14.0")
-    testFixturesCompile("org.assertj:assertj-core:$assertjVersion")
-    testImplementation("junit:junit:$junitVersion")
-    testImplementation("uk.org.webcompere:system-stubs-junit4:$systemStubsVersion")
+    testFixturesCompile(plexusArchiver)
+    testFixturesCompile(assertjCore)
+    testImplementation(junit)
+    testImplementation(systemStubsJunit4)
 }

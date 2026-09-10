@@ -39,17 +39,19 @@ gradlePlugin {
     }
 }
 
-val assertjVersion = project.property("assertjVersion") as String
-val atlasVersion = project.property("atlasVersion") as String
-val commonsBeanVersion = project.property("commonsBeanVersion") as String
-val commonsIOVersion = project.property("commonsIOVersion") as String
-val commonsLangVersion = project.property("commonsLangVersion") as String
-val jgitVersion = project.property("jgitVersion") as String
-val junitVersion = project.property("junitVersion") as String
-val mavenVersion = project.property("mavenVersion") as String
-val ownerVersion = project.property("ownerVersion") as String
-val pmeVersion = project.property("pmeVersion") as String
-val systemStubsVersion = project.property("systemStubsVersion") as String
+val commonsLang3 = project.property("commonsLang3").toString()
+val commonsBeanutils = project.property("commonsBeanutils").toString()
+val pmeCommon = project.property("pmeCommon").toString()
+val atlasIdentities = project.property("atlasIdentities").toString()
+val ownerJava8 = project.property("ownerJava8").toString()
+val mavenCore = project.property("mavenCore").toString()
+val mavenModel = project.property("mavenModel").toString()
+val mavenArtifact = project.property("mavenArtifact").toString()
+val commonsIO = project.property("commonsIO").toString()
+val junit = project.property("junit").toString()
+val assertjCore = project.property("assertjCore").toString()
+val systemStubsJunit4 = project.property("systemStubsJunit4").toString()
+val jgit = project.property("jgit").toString()
 
 dependencies {
     implementation(project(":common"))
@@ -58,34 +60,34 @@ dependencies {
     shadow(localGroovy())
     shadow(gradleApi())
 
-    implementation("org.apache.commons:commons-lang3:$commonsLangVersion")
-    implementation("commons-beanutils:commons-beanutils:$commonsBeanVersion")
+    implementation(commonsLang3)
+    implementation(commonsBeanutils)
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common:$pmeVersion") {
+    implementation(pmeCommon) {
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-core")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-annotations")
         exclude(group = "com.fasterxml.jackson.core", module = "jackson-databind")
         exclude(group = "ch.qos.logback")
     }
-    implementation("org.commonjava.atlas:atlas-identities:$atlasVersion") {
+    implementation(atlasIdentities) {
         exclude(group = "ch.qos.logback")
     }
 
     // Owner: Need Java8 dependency which pulls in owner itself.
-    implementation("org.aeonbits.owner:owner-java8:$ownerVersion")
+    implementation(ownerJava8)
 
-    runtimeOnly("org.apache.maven:maven-core:$mavenVersion")
-    runtimeOnly("org.apache.maven:maven-model:$mavenVersion")
-    runtimeOnly("org.apache.maven:maven-artifact:$mavenVersion")
-    testImplementation("org.apache.maven:maven-core:$mavenVersion")
-    testImplementation("org.apache.maven:maven-model:$mavenVersion")
-    testImplementation("org.apache.maven:maven-artifact:$mavenVersion")
+    runtimeOnly(mavenCore)
+    runtimeOnly(mavenModel)
+    runtimeOnly(mavenArtifact)
+    testImplementation(mavenCore)
+    testImplementation(mavenModel)
+    testImplementation(mavenArtifact)
 
-    testRuntimeOnly("commons-io:commons-io:$commonsIOVersion")
-    testImplementation("junit:junit:$junitVersion")
-    testImplementation("org.assertj:assertj-core:$assertjVersion")
-    testImplementation("uk.org.webcompere:system-stubs-junit4:$systemStubsVersion")
-    testImplementation("org.eclipse.jgit:org.eclipse.jgit:$jgitVersion")
+    testRuntimeOnly(commonsIO)
+    testImplementation(junit)
+    testImplementation(assertjCore)
+    testImplementation(systemStubsJunit4)
+    testImplementation(jgit)
     testImplementation(project(path = ":common", configuration = "testFixturesCompile"))
 
     // GradleAPI in test compile to get access to org.gradle.internal.Pair

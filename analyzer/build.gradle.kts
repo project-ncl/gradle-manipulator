@@ -39,18 +39,27 @@ gradlePlugin {
     }
 }
 
-val assertjVersion = project.property("assertjVersion") as String
-val atlasVersion = project.property("atlasVersion") as String
-val bytemanVersion = project.property("bytemanVersion") as String
-val commonsBeanVersion = project.property("commonsBeanVersion") as String
-val commonsIOVersion = project.property("commonsIOVersion") as String
-val commonsLangVersion = project.property("commonsLangVersion") as String
-val jgitVersion = project.property("jgitVersion") as String
-val junitVersion = project.property("junitVersion") as String
-val mavenVersion = project.property("mavenVersion") as String
-val ownerVersion = project.property("ownerVersion") as String
-val pmeVersion = project.property("pmeVersion") as String
-val systemStubsVersion = project.property("systemStubsVersion") as String
+val pmeCore = project.property("pmeCore").toString()
+val pmeIO = project.property("pmeIO").toString()
+val pmeCommonLite = project.property("pmeCommonLite").toString()
+val atlasIdentities = project.property("atlasIdentities").toString()
+val mavenArtifact = project.property("mavenArtifact").toString()
+val mavenCore = project.property("mavenCore").toString()
+val mavenModel = project.property("mavenModel").toString()
+val mavenSettingsBuilder = project.property("mavenSettingsBuilder").toString()
+val mavenSettings = project.property("mavenSettings").toString()
+val commonsLang3 = project.property("commonsLang3").toString()
+val commonsIO = project.property("commonsIO").toString()
+val commonsBeanutils = project.property("commonsBeanutils").toString()
+val ownerJava8 = project.property("ownerJava8").toString()
+val junit = project.property("junit").toString()
+val systemStubsJunit4 = project.property("systemStubsJunit4").toString()
+val assertjCore = project.property("assertjCore").toString()
+val bytemanBmunit = project.property("bytemanBmunit").toString()
+val mockitoCore = project.property("mockitoCore").toString()
+val wiremockJre8 = project.property("wiremockJre8").toString()
+val jgit = project.property("jgit").toString()
+val junitParams = project.property("junitParams").toString()
 
 dependencies {
     implementation(project(":common"))
@@ -59,52 +68,52 @@ dependencies {
     shadow(localGroovy())
     shadow(gradleApi())
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-core:$pmeVersion") {
+    implementation(pmeCore) {
         exclude(group = "ch.qos.logback")
         // Exclude until new release due to Quarkus bom
         exclude(group = "org.jboss.pnc.otel")
     }
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-io:$pmeVersion") {
+    implementation(pmeIO) {
         exclude(group = "ch.qos.logback")
         // Exclude until new release due to Quarkus bom
         exclude(group = "org.jboss.pnc.otel")
     }
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common-lite:$pmeVersion") {
+    implementation(pmeCommonLite) {
         exclude(group = "ch.qos.logback")
         // Exclude until new release due to Quarkus bom
         exclude(group = "org.jboss.pnc.otel")
     }
 
-    implementation("org.commonjava.atlas:atlas-identities:$atlasVersion") {
+    implementation(atlasIdentities) {
         exclude(group = "ch.qos.logback")
     }
 
-    runtimeOnly("org.apache.maven:maven-artifact:$mavenVersion")
-    runtimeOnly("org.apache.maven:maven-core:$mavenVersion")
-    runtimeOnly("org.apache.maven:maven-model:$mavenVersion")
+    runtimeOnly(mavenArtifact)
+    runtimeOnly(mavenCore)
+    runtimeOnly(mavenModel)
 
-    implementation("org.apache.maven:maven-settings-builder:$mavenVersion")
-    implementation("org.apache.maven:maven-settings:$mavenVersion")
+    implementation(mavenSettingsBuilder)
+    implementation(mavenSettings)
 
-    implementation("org.apache.commons:commons-lang3:$commonsLangVersion")
-    implementation("commons-io:commons-io:$commonsIOVersion")
-    implementation("commons-beanutils:commons-beanutils:$commonsBeanVersion")
+    implementation(commonsLang3)
+    implementation(commonsIO)
+    implementation(commonsBeanutils)
 
-    implementation("org.aeonbits.owner:owner-java8:$ownerVersion")
+    implementation(ownerJava8)
 
     testImplementation(project(path = ":common", configuration = "testFixturesCompile"))
     testImplementation(gradleTestKit())
-    testImplementation("junit:junit:$junitVersion")
-    testImplementation("uk.org.webcompere:system-stubs-junit4:$systemStubsVersion")
-    testImplementation("org.assertj:assertj-core:$assertjVersion")
-    testImplementation("org.jboss.byteman:byteman-bmunit:$bytemanVersion")
+    testImplementation(junit)
+    testImplementation(systemStubsJunit4)
+    testImplementation(assertjCore)
+    testImplementation(bytemanBmunit)
     testImplementation(files("${System.getProperty("java.home")}/../lib/tools.jar"))
-    testImplementation("org.mockito:mockito-core:5.23.0")
-    testImplementation("com.github.tomakehurst:wiremock-jre8:2.35.1")
-    testImplementation("org.eclipse.jgit:org.eclipse.jgit:$jgitVersion")
-    testImplementation("pl.pragmatists:JUnitParams:1.1.1")
+    testImplementation(mockitoCore)
+    testImplementation(wiremockJre8)
+    testImplementation(jgit)
+    testImplementation(junitParams)
 }
 
 tasks.withType<Test>().configureEach { systemProperties["jdk.attach.allowAttachSelf"] = "true" }

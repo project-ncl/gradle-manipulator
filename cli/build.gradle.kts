@@ -1,25 +1,36 @@
 group = "org.jboss.pnc.gradle-manipulator"
 
-val assertjVersion = project.property("assertjVersion") as String
-val commonsIOVersion = project.property("commonsIOVersion") as String
-val gradleVersion = project.property("gradleVersion") as String
-val groovyVersion = project.property("groovyVersion") as String
-val jgitVersion = project.property("jgitVersion") as String
-val junitVersion = project.property("junitVersion") as String
-val logbackVersion = project.property("logbackVersion") as String
-val mavenVersion = project.property("mavenVersion") as String
-val ownerVersion = project.property("ownerVersion") as String
-val pmeVersion = project.property("pmeVersion") as String
-val slf4jVersion = project.property("slf4jVersion") as String
-val systemStubsVersion = project.property("systemStubsVersion") as String
+val logbackClassic = project.property("logbackClassic").toString()
+val logbackCore = project.property("logbackCore").toString()
+val gradleCoreApi = project.property("gradleCoreApi").toString()
+val gradleBaseServices = project.property("gradleBaseServices").toString()
+val gradleToolingApi = project.property("gradleToolingApi").toString()
+val picocli = project.property("picocli").toString()
+val pmeCore = project.property("pmeCore").toString()
+val pmeCommon = project.property("pmeCommon").toString()
+val pmeIO = project.property("pmeIO").toString()
+val slf4jApi = project.property("slf4jApi").toString()
+val groovy = project.property("groovy").toString()
+val ownerJava8 = project.property("ownerJava8").toString()
+val mavenCore = project.property("mavenCore").toString()
+val mavenModel = project.property("mavenModel").toString()
+val mavenArtifact = project.property("mavenArtifact").toString()
+val commonsIO = project.property("commonsIO").toString()
+val junit = project.property("junit").toString()
+val assertjCore = project.property("assertjCore").toString()
+val systemStubsJunit4 = project.property("systemStubsJunit4").toString()
+val plexusArchiver = project.property("plexusArchiver").toString()
+val jgit = project.property("jgit").toString()
 
 dependencies {
+    // logback uses strictly() to pin the version across all transitive paths
+    val logbackVersion = project.property("logbackVersion").toString()
     implementation("ch.qos.logback:logback-classic") { version { strictly(logbackVersion) } }
     implementation("ch.qos.logback:logback-core") { version { strictly(logbackVersion) } }
 
     // Minimum Gradle API to provide the Project. Not using gradleApi as that pulls in too much.
-    implementation("org.gradle:gradle-core-api:$gradleVersion")
-    implementation("org.gradle:gradle-base-services:$gradleVersion")
+    implementation(gradleCoreApi)
+    implementation(gradleBaseServices)
 
     // XXX: Versions 4.x > 4.0.1 suffer from <https://github.com/johnrengelman/shadow/issues/425>
     // To avoid this the CLI module for Gradle 4 avoids using api using implementation instead.
@@ -28,43 +39,43 @@ dependencies {
     } else {
         api(project(":common"))
     }
-    implementation("org.gradle:gradle-tooling-api:$gradleVersion")
-    implementation("info.picocli:picocli:4.7.7")
+    implementation(gradleToolingApi)
+    implementation(picocli)
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-core:$pmeVersion") {
+    implementation(pmeCore) {
         exclude(group = "ch.qos.logback")
         exclude(group = "org.commonjava.maven.galley")
     }
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-common:$pmeVersion") {
+    implementation(pmeCommon) {
         exclude(group = "ch.qos.logback")
         exclude(group = "org.commonjava.maven.galley")
     }
 
-    implementation("org.jboss.pnc.maven-manipulator:pom-manipulation-io:$pmeVersion") {
+    implementation(pmeIO) {
         exclude(group = "ch.qos.logback")
         exclude(group = "org.commonjava.maven.galley")
     }
 
-    implementation("org.slf4j:slf4j-api:$slf4jVersion")
-    implementation("org.codehaus.groovy:groovy:$groovyVersion")
+    implementation(slf4jApi)
+    implementation(groovy)
 
     // Owner: Need Java8 dependency which pulls in owner itself.
-    implementation("org.aeonbits.owner:owner-java8:$ownerVersion")
+    implementation(ownerJava8)
 
-    runtimeOnly("org.apache.maven:maven-core:$mavenVersion")
-    runtimeOnly("org.apache.maven:maven-model:$mavenVersion")
-    runtimeOnly("org.apache.maven:maven-artifact:$mavenVersion")
+    runtimeOnly(mavenCore)
+    runtimeOnly(mavenModel)
+    runtimeOnly(mavenArtifact)
 
-    testRuntimeOnly("commons-io:commons-io:$commonsIOVersion")
+    testRuntimeOnly(commonsIO)
     testImplementation(project(path = ":common", configuration = "testFixturesCompile"))
 
     testImplementation(project(":analyzer"))
-    testImplementation("junit:junit:$junitVersion")
-    testImplementation("org.assertj:assertj-core:$assertjVersion")
-    testImplementation("uk.org.webcompere:system-stubs-junit4:$systemStubsVersion")
-    testImplementation("org.codehaus.plexus:plexus-archiver:4.14.0")
-    testImplementation("org.eclipse.jgit:org.eclipse.jgit:$jgitVersion")
+    testImplementation(junit)
+    testImplementation(assertjCore)
+    testImplementation(systemStubsJunit4)
+    testImplementation(plexusArchiver)
+    testImplementation(jgit)
 }
 
 java {

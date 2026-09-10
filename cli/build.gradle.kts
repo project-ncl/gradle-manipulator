@@ -22,11 +22,21 @@ val systemStubsJunit4 = project.property("systemStubsJunit4").toString()
 val plexusArchiver = project.property("plexusArchiver").toString()
 val jgit = project.property("jgit").toString()
 
+// Force logback to a fixed version across all configurations so that:
+// 1. No transitive dependency can upgrade it (equivalent to strictly()).
+// 2. configuration.copy() in AlignmentTask always resolves a concrete coordinate — the
+//    strictly()-only version constraint (introduced in Gradle 4.6) leaves requiredVersion empty
+//    on copied configurations, causing resolution failure. resolutionStrategy.force() sets a
+//    concrete version that survives copying and works on all Gradle versions from 4.x through 9.x.
+// Gradle 8.14.4 changed strictly() to no longer preserve requiredVersion from the coordinate
+// string — see https://github.com/gradle/gradle/issues/35228 — making force() the safer choice.
+configurations.all {
+    resolutionStrategy.force(logbackClassic, logbackCore)
+}
+
 dependencies {
-    // logback uses strictly() to pin the version across all transitive paths
-    val logbackVersion = project.property("logbackVersion").toString()
-    implementation("ch.qos.logback:logback-classic") { version { strictly(logbackVersion) } }
-    implementation("ch.qos.logback:logback-core") { version { strictly(logbackVersion) } }
+    implementation(logbackClassic)
+    implementation(logbackCore)
 
     // Minimum Gradle API to provide the Project. Not using gradleApi as that pulls in too much.
     implementation(gradleCoreApi)

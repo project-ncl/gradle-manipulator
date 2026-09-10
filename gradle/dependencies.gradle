@@ -22,8 +22,8 @@ ext {
     // Must use 6.x series as 7.x and above require JDK17
     jgitVersion             = "6.10.1.202505221210-r"
     junitVersion            = "4.13.2"
-    // CLI targets JDK11, so 1.5.x is fine (1.4.x+ requires JDK11).
-    logbackVersion          = "1.5.38"
+    // CLI targets JDK11, so 1.6.x is fine (1.4.x+ requires JDK11).
+    logbackVersion          = "1.6.3"
     mavenVersion            = "3.9.15"
     mockitoVersion          = "5.23.0"
     opentelemetryVersion    = "2.1.0"

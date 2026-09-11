@@ -37,6 +37,8 @@ plugins {
 
     if (GradleVersion.current() < GradleVersion.version("7.4")) {
         id("com.gradle" + ".plugin-publish") version "0.21.0" apply false // frozen: Gradle <6.0
+    } else if (GradleVersion.current() < GradleVersion.version("8.3")) {
+        id("com.gradle" + ".plugin-publish") version "2.1.1" apply false // frozen: Gradle <8.3
     } else {
         id("com.gradle.plugin-publish") version "2.2.0" apply false
     }

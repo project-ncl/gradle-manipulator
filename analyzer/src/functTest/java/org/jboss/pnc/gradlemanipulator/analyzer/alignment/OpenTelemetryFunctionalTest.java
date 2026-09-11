@@ -15,12 +15,11 @@ import static org.junit.Assume.assumeTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 import org.aeonbits.owner.ConfigCache;
 import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.gradle.api.Project;
@@ -36,11 +35,22 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 import uk.org.webcompere.systemstubs.rules.SystemOutRule;
 import uk.org.webcompere.systemstubs.rules.SystemPropertiesRule;
 
-@RunWith(JUnitParamsRunner.class)
+@RunWith(Parameterized.class)
 public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
+
+    @Parameters(name = "{0}")
+    public static Iterable<Object[]> data() {
+        return Arrays.asList(new Object[][] { { true }, { false } });
+    }
+
+    @Parameter
+    public boolean useLegacyConfigurationCopy;
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule();
@@ -79,8 +89,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    @Parameters({ "true", "false" })
-    public void verifyOpenTelemetryGradle(boolean useLegacyConfigurationCopy)
+    public void verifyOpenTelemetryGradle()
             throws IOException, URISyntaxException, ManipulationException {
         // XXX: Use of pluginManagement.plugins{}
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.6")) >= 0);
@@ -116,8 +125,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    @Parameters({ "true", "false" })
-    public void verifyOpenTelemetryKotlin(boolean useLegacyConfigurationCopy)
+    public void verifyOpenTelemetryKotlin()
             throws IOException, URISyntaxException, ManipulationException {
         // XXX: Use of pluginManagement.plugins{}
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.6")) >= 0);
@@ -184,8 +192,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    @Parameters({ "true", "false" })
-    public void verifyOpenTelemetryJavaInstrumentationKotlin(boolean useLegacyConfigurationCopy) throws Exception {
+    public void verifyOpenTelemetryJavaInstrumentationKotlin() throws Exception {
         // XXX: Kotlin requirements
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("7.5")) >= 0);
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.10.2")) < 0);
@@ -238,8 +245,7 @@ public class OpenTelemetryFunctionalTest extends AbstractWiremockTest {
     }
 
     @Test
-    @Parameters({ "true", "false" })
-    public void verifyOpenTelemetryKotlin2(boolean useLegacyConfigurationCopy)
+    public void verifyOpenTelemetryKotlin2()
             throws IOException, URISyntaxException, ManipulationException {
         // XXX: Use of pluginManagement.plugins{}
         assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("8.5")) >= 0);

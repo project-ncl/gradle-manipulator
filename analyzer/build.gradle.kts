@@ -59,7 +59,6 @@ val bytemanBmunit = project.property("bytemanBmunit").toString()
 val mockitoCore = project.property("mockitoCore").toString()
 val wiremockJre8 = project.property("wiremockJre8").toString()
 val jgit = project.property("jgit").toString()
-val junitParams = project.property("junitParams").toString()
 
 dependencies {
     implementation(project(":common"))
@@ -113,7 +112,6 @@ dependencies {
     testImplementation(mockitoCore)
     testImplementation(wiremockJre8)
     testImplementation(jgit)
-    testImplementation(junitParams)
 }
 
 tasks.withType<Test>().configureEach { systemProperties["jdk.attach.allowAttachSelf"] = "true" }

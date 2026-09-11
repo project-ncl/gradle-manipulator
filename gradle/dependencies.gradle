@@ -70,6 +70,4 @@ ext {
     slf4jApi                = "org.slf4j:slf4j-api:$slf4jVersion"
     systemStubsJunit4       = "uk.org.webcompere:system-stubs-junit4:$systemStubsVersion"
     wiremockJre8            = "com.github.tomakehurst:wiremock-jre8:$wiremockVersion"
-    // JUnitParams is abandoned (last release 2017) — pinned permanently, not managed by Dependabot
-    junitParams             = "pl.pragmatists:JUnitParams:1.1.1"
 }

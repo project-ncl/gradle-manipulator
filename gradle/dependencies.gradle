@@ -33,7 +33,12 @@ ext {
     pmeVersion              = "5.8"
     slf4jVersion            = "2.0.18"
     systemStubsVersion      = "2.1.8"
-    wiremockVersion         = "3.0.1"
+    // wiremock-jre8 is intentionally pinned at 2.35.2 and ignored by Dependabot (see .github/dependabot.yml).
+    // Upgrading to 3.x breaks Gradle 4.10–5.2 compatibility: WireMock 3.x requires Jetty 11 and the
+    // TargetJvmVersion attribute API to resolve Java 11 variants, which is unavailable in Gradle < 5.3.
+    // WireMock 2.x uses Jetty 9.4.x (EOL), but it is test-only and never included in any published artifact.
+    // Long-term fix: replace WireMock with OkHttp MockWebServer (~30 functional test classes to rewrite).
+    wiremockVersion         = "2.35.2"
 
     // Full coordinate strings — Dependabot reads these directly from this file
     // and updates the version variable above when a new release is available.

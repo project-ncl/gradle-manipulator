@@ -25,6 +25,20 @@ updates:
     # literals from Dependabot's static parser (VALUE_REGEX requires a single quoted token).
     # Only the active/highest-Gradle branch of each plugin uses a plain literal and receives
     # updates. No ignore rules are needed for frozen branches as Dependabot cannot see them.
+    ignore:
+      # wiremock-jre8 is pinned at 2.35.2 (test-only, never shipped in any artifact).
+      # Upgrading to 3.x was attempted in commit 50c081cb but reverted because:
+      #   - wiremock-jre8 3.x depends on Jetty 11, which requires Java 11 variant resolution.
+      #     The TargetJvmVersion attribute API used to express this is not available in
+      #     Gradle < 5.3, breaking builds on the Gradle 4.10–5.2 compatibility matrix.
+      #   - Jetty 9.4.x (used by 2.x) is EOL; the remaining CVEs in both 9.4.49 and the
+      #     latest 9.4.58 are unfixable within the 9.4 branch regardless of the patch version.
+      #   - WireMock is test-only infrastructure that is never included in any published
+      #     artifact, so the CVE exposure is limited to CI runners only.
+      # The correct long-term fix is to replace WireMock entirely (e.g. OkHttp MockWebServer),
+      # but that requires rewriting ~30 functional test classes and is out of scope here.
+      - dependency-name: "com.github.tomakehurst:wiremock-jre8"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
   # - package-ecosystem: "sbt"
   #   directory: "/" # Location of package manifests
   #   schedule:

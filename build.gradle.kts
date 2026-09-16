@@ -32,7 +32,7 @@ plugins {
     } else if (GradleVersion.current() < GradleVersion.version("8.3")) {
         id("com.diffplug" + ".spotless") version "7.2.1" // frozen: Gradle 6.8.3-8.2
     } else {
-        id("com.diffplug.spotless") version "8.10.1"
+        id("com.diffplug.spotless") version "8.10.2"
     }
 
     if (GradleVersion.current() < GradleVersion.version("7.4")) {

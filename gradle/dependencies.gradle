@@ -31,7 +31,7 @@ ext {
     picocliVersion          = "4.7.7"
     plexusArchiverVersion   = "4.14.0"
     pmeVersion              = "5.8"
-    slf4jVersion            = "2.0.18"
+    slf4jVersion            = "2.0.19"
     systemStubsVersion      = "2.1.8"
     // wiremock-jre8 is intentionally pinned at 2.35.2 and ignored by Dependabot (see .github/dependabot.yml).
     // Upgrading to 3.x breaks Gradle 4.10–5.2 compatibility: WireMock 3.x requires Jetty 11 and the

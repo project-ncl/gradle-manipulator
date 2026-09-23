@@ -40,7 +40,7 @@ plugins {
     } else if (GradleVersion.current() < GradleVersion.version("8.3")) {
         id("com.gradle" + ".plugin-publish") version "2.1.1" apply false // frozen: Gradle <8.3
     } else {
-        id("com.gradle.plugin-publish") version "2.2.0" apply false
+        id("com.gradle.plugin-publish") version "2.2.1" apply false
     }
     // net.researchgate.release 3.x migrated all config fields to Gradle Property<T>, which requires
     // Gradle >= 8.2.  On older Gradle versions we freeze to 2.8.1 which uses plain Groovy fields.

@@ -10,7 +10,7 @@
 // See: https://github.com/remkop/picocli/blob/main/dependencies.gradle
 ext {
     assertjVersion          = "3.27.7"
-    atlasVersion            = "1.2.2"
+    atlasVersion            = "1.2.3"
     bytemanVersion          = "4.0.27"
     commonsBeanVersion      = "1.11.0"
     commonsIOVersion        = "2.22.0"

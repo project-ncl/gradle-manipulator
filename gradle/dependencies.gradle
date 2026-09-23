@@ -30,7 +30,7 @@ ext {
     ownerVersion            = "1.0.12"
     picocliVersion          = "4.7.7"
     plexusArchiverVersion   = "4.14.0"
-    pmeVersion              = "5.8"
+    pmeVersion              = "5.9"
     slf4jVersion            = "2.0.19"
     systemStubsVersion      = "2.1.8"
     // wiremock-jre8 is intentionally pinned at 2.35.2 and ignored by Dependabot (see .github/dependabot.yml).

@@ -4,7 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -225,7 +225,7 @@ public class PluginUtils {
 
             for (File buildFile : files) {
                 try {
-                    List<String> lines = org.apache.commons.io.FileUtils.readLines(buildFile, Charset.defaultCharset());
+                    List<String> lines = org.apache.commons.io.FileUtils.readLines(buildFile, StandardCharsets.UTF_8);
                     String eol = getEOL(logger, buildFile);
 
                     for (int i = 0; i < lines.size(); i++) {
@@ -358,7 +358,7 @@ public class PluginUtils {
                                 plugin,
                                 String.join(",", configBlocks),
                                 buildFile);
-                        FileUtils.writeStringToFile(buildFile, content, Charset.defaultCharset());
+                        FileUtils.writeStringToFile(buildFile, content, StandardCharsets.UTF_8);
                     }
                 } catch (IOException e) {
                     throw new ManipulationException("Unable to read build file {}", buildFile, e);
@@ -382,7 +382,7 @@ public class PluginUtils {
         File settingsFile = new File(target, "settings.gradle");
         if (settingsFile.exists()) {
             try {
-                List<String> lines = FileUtils.readLines(settingsFile, Charset.defaultCharset());
+                List<String> lines = FileUtils.readLines(settingsFile, StandardCharsets.UTF_8);
                 Pattern p = Pattern.compile("^((?!^\\s*//).*" + Pattern.quote(SEMANTIC_BUILD_VERSIONING) + ".*)$");
                 for (String s : lines) {
                     if (p.matcher(s).matches()) {
@@ -408,7 +408,7 @@ public class PluginUtils {
         for (File buildFile : files) {
             boolean removed = false;
             try {
-                List<String> lines = org.apache.commons.io.FileUtils.readLines(buildFile, Charset.defaultCharset());
+                List<String> lines = org.apache.commons.io.FileUtils.readLines(buildFile, StandardCharsets.UTF_8);
 
                 for (int i = 0; i < lines.size(); i++) {
                     String line = lines.get(i);
@@ -425,7 +425,7 @@ public class PluginUtils {
                 if (removed) {
                     String content = String.join(getEOL(logger, buildFile), lines);
                     logger.debug("Added LENIENT lockMode to {}", buildFile);
-                    FileUtils.writeStringToFile(buildFile, content, Charset.defaultCharset());
+                    FileUtils.writeStringToFile(buildFile, content, StandardCharsets.UTF_8);
                 }
             } catch (IOException e) {
                 throw new ManipulationException("Unable to read build file {}", buildFile, e);

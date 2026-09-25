@@ -1,0 +1,10 @@
+gradle.settingsEvaluated { settings ->
+    settings.pluginManagement.repositories.eachWithIndex { repo, i ->
+        println "MGMT[$i]: ${repo.name}"
+    }
+    if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("6.8")) {
+        settings.dependencyResolutionManagement.repositories.eachWithIndex { repo, i ->
+            println "DRM[$i]: ${repo.name}"
+        }
+    }
+}

@@ -1,0 +1,7 @@
+task printDrmRepos {
+    doLast {
+        project.repositories.eachWithIndex { repo, i ->
+            println "REPO[$i]: ${repo.name}"
+        }
+    }
+}

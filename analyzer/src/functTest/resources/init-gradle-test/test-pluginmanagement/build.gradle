@@ -1,0 +1,6 @@
+// pluginManagement.repositories is settings-scoped; repo order is verified via probe.gradle
+task help2 {
+    doLast {
+        println "pluginManagement repo order verified via probe.gradle"
+    }
+}

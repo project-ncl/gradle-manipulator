@@ -1,0 +1,51 @@
+apply plugin: InternalRepositoryPlugin
+
+// NCLSUP-1118 , NCLSUP-1122, NCLSUP-1160, NCLSUP-1315, NCLSUP-1312
+class InternalRepositoryPlugin implements Plugin<Gradle> {
+    void apply(Gradle gradle) {
+
+        def configureMirror = { RepositoryHandler repositories ->
+            repositories.maven {
+                name = "artifactory-mvn-plugins"
+                url = "file:///dev/null"
+                credentials(HttpHeaderCredentials) {
+                    name  = "Authorization"
+                    value = "Bearer ${System.getenv('ARTIFACTORY_READ_TOKEN') ?: ''}"
+                }
+                authentication {
+                    header(HttpHeaderAuthentication)
+                }
+            }
+        }
+
+        gradle.allprojects {
+            configureMirror(project.buildscript.repositories)
+            configureMirror(project.repositories)
+            project.buildscript.repositories.gradlePluginPortal()
+            project.repositories.gradlePluginPortal()
+        }
+        if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("6.0")) {
+            gradle.beforeSettings { Settings settings ->
+                configureMirror(settings.pluginManagement.repositories)
+                configureMirror(settings.buildscript.repositories)
+                settings.pluginManagement.repositories.gradlePluginPortal()
+                settings.buildscript.repositories.gradlePluginPortal()
+            }
+        }
+        else {
+            // For Gradle 4.10 -> 5.x
+            gradle.settingsEvaluated { Settings settings ->
+                configureMirror(settings.pluginManagement.repositories)
+                configureMirror(settings.buildscript.repositories)
+                settings.pluginManagement.repositories.gradlePluginPortal()
+                settings.buildscript.repositories.gradlePluginPortal()
+            }
+        }
+        if (org.gradle.util.GradleVersion.current() >= org.gradle.util.GradleVersion.version("6.8")) {
+            gradle.beforeSettings { Settings settings ->
+                configureMirror(settings.dependencyResolutionManagement.repositories)
+                settings.dependencyResolutionManagement.repositories.gradlePluginPortal()
+            }
+        }
+    }
+}

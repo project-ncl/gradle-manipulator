@@ -1,0 +1,8 @@
+rootProject.name = "test-drm"
+
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        maven { url = "https://maven.repository.redhat.com/ga/" }
+    }
+}

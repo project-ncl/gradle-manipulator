@@ -1,0 +1,26 @@
+name: Release to Maven Central
+
+permissions: {}
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref_to_release:
+        description: 'Branch or commit to release. Default: repo default branch'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  call-release-job:
+    permissions:
+      contents: write # needed to push commit and tag back to the repository
+    uses: project-ncl/shared-github-actions/.github/workflows/gradle-release.yml@646d9b629925d6405fb06ed1476aefd6b2cdca86 # v0.0.23
+    with:
+      additional_release_args: "-Prelease.useAutomaticVersion=true"
+      ref_to_release: ${{ inputs.ref_to_release }}
+    secrets:
+      SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+      SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}

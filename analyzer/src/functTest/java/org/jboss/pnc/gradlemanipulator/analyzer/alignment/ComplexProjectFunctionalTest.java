@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Collection;
 import java.util.List;
@@ -85,7 +85,7 @@ public class ComplexProjectFunctionalTest extends AbstractWiremockTest {
                         new File(
                                 projectRoot,
                                 Project.DEFAULT_BUILD_FILE),
-                        Charset.defaultCharset()).contains(AlignmentTask.INJECT_GME_START));
+                        StandardCharsets.UTF_8).contains(AlignmentTask.INJECT_GME_START));
         assertEquals(
                 AlignmentTask.INJECT_GME_END,
                 FileUtils.getLastLine(

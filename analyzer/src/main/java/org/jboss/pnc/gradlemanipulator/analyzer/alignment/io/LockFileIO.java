@@ -2,7 +2,7 @@ package org.jboss.pnc.gradlemanipulator.analyzer.alignment.io;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -48,7 +48,7 @@ public class LockFileIO {
 
     public Set<ProjectVersionRef> readProjectVersionRefLocksOfFile(File lockfile) {
         try {
-            return FileUtils.readLines(lockfile, Charset.defaultCharset())
+            return FileUtils.readLines(lockfile, StandardCharsets.UTF_8)
                     .stream()
                     .filter(l -> !l.startsWith("#"))
                     .map(l -> {
@@ -98,7 +98,7 @@ public class LockFileIO {
             logger.debug("Examining lockfile {}", lockFile);
 
             try {
-                List<String> lockFileLines = FileUtils.readLines(lockFile, Charset.defaultCharset());
+                List<String> lockFileLines = FileUtils.readLines(lockFile, StandardCharsets.UTF_8);
                 AtomicBoolean modified = new AtomicBoolean(false);
 
                 alignedDependencies.forEach((key, value) -> {
@@ -127,7 +127,7 @@ public class LockFileIO {
                     }
                 });
                 if (modified.get()) {
-                    FileUtils.writeLines(lockFile, lockFileLines);
+                    FileUtils.writeLines(lockFile, StandardCharsets.UTF_8.name(), lockFileLines);
                 }
             } catch (IOException e) {
                 throw new ManipulationUncheckedException(e);

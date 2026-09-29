@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -369,7 +368,7 @@ public class Main implements Callable<Void> {
             versionQuery.add("printVersion");
             executeGradle(stdout, true, versionQuery);
             try {
-                String projectVersion = stdout.toString(Charset.defaultCharset()).trim();
+                String projectVersion = stdout.toString(StandardCharsets.UTF_8.name()).trim();
 
                 if (StringUtils.isEmpty(projectVersion)) {
                     throw new ManipulationException(

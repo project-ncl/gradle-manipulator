@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
@@ -105,7 +105,7 @@ public class LockFileIOTest {
                         tuple("guava", "25.1-android"));
 
         List<File> locks = LockFileIO.getLockFiles(tempDir.getRoot());
-        assertThat(FileUtils.readLines(locks.get(0), Charset.defaultCharset())).anyMatch(
+        assertThat(FileUtils.readLines(locks.get(0), StandardCharsets.UTF_8)).anyMatch(
                 f -> f.contains(
                         "2.1.10.redhat-00001=compileClasspath,runtimeClasspath"));
 

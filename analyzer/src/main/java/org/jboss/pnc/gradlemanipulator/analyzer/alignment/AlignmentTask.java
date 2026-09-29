@@ -9,9 +9,9 @@ import static org.jboss.pnc.gradlemanipulator.common.utils.FileUtils.append;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -649,9 +649,9 @@ public class AlignmentTask extends DefaultTask {
     private void processPropertiesForBuildCache(File rootProject) throws IOException {
         File properties = new File(rootProject, "gradle.properties");
         if (properties.exists()) {
-            List<String> lines = FileUtils.readLines(properties, Charset.defaultCharset());
+            List<String> lines = FileUtils.readLines(properties, StandardCharsets.UTF_8);
             if (lines.removeIf(i -> i.contains("org.gradle.caching"))) {
-                FileUtils.writeLines(properties, lines);
+                FileUtils.writeLines(properties, StandardCharsets.UTF_8.name(), lines);
             }
         }
     }
@@ -665,7 +665,7 @@ public class AlignmentTask extends DefaultTask {
                 StandardCopyOption.REPLACE_EXISTING);
 
         if (!isEmpty(configuration.manipulationVersion())) {
-            String gmeGradleString = FileUtils.readFileToString(gmeGradle, Charset.defaultCharset());
+            String gmeGradleString = FileUtils.readFileToString(gmeGradle, StandardCharsets.UTF_8);
             String currentVersion = gmeGradleString.replaceFirst(
                     "(?s).*(classpath \"org.jboss.pnc.gradle-manipulator:manipulation:)([0-9]+\\.[0-9]+(-SNAPSHOT)??)\".*",
                     "$2");
@@ -676,11 +676,11 @@ public class AlignmentTask extends DefaultTask {
             FileUtils.writeStringToFile(
                     gmeGradle,
                     gmeGradleString.replaceFirst(currentVersion, configuration.manipulationVersion()),
-                    Charset.defaultCharset());
+                    StandardCharsets.UTF_8);
         }
 
         if (rootGradle.exists()) {
-            List<String> buildScript = FileUtils.readLines(rootGradle, Charset.defaultCharset());
+            List<String> buildScript = FileUtils.readLines(rootGradle, StandardCharsets.UTF_8);
             String injectedLine = rootGradle.getName().endsWith(".kts") ? INJECT_GME_START_KOTLIN : INJECT_GME_START;
 
             if (buildScript.stream().noneMatch(s -> s.contains(injectedLine))) {
@@ -704,7 +704,7 @@ public class AlignmentTask extends DefaultTask {
                     buildScript.addAll(0, Collections.singletonList(injectedLine + " }"));
                 }
                 logger.debug("Updating {} with {}", rootGradle, injectedLine);
-                FileUtils.writeLines(rootGradle, buildScript);
+                FileUtils.writeLines(rootGradle, StandardCharsets.UTF_8.name(), buildScript);
             }
         } else {
             logger.warn("Unable to find build.gradle in {} to modify.", rootDir);
@@ -722,7 +722,7 @@ public class AlignmentTask extends DefaultTask {
         // Use DokkaVersion to determine how to replace <DOKKA> in the gme-plugin-configs with
         // either 0.9.18, 0.10 or 1.4 version
         if (dokkaVersion != DokkaVersion.NONE) {
-            String gmePluginFile = FileUtils.readFileToString(gmePluginConfigsGradle, Charset.defaultCharset());
+            String gmePluginFile = FileUtils.readFileToString(gmePluginConfigsGradle, StandardCharsets.UTF_8);
             String replacementStart = "\n"
                     + "        if (project.getTasks().getNames().stream().any{s -> s.startsWith(\"dokka\")}) {\n";
             String replacementDokka = "          dokka {\n";
@@ -759,7 +759,7 @@ public class AlignmentTask extends DefaultTask {
                 // No default as that is NONE
             }
             logger.debug("Replacing Dokka template for version {}", dokkaVersion);
-            FileUtils.writeStringToFile(gmePluginConfigsGradle, gmePluginFile, Charset.defaultCharset());
+            FileUtils.writeStringToFile(gmePluginConfigsGradle, gmePluginFile, StandardCharsets.UTF_8);
         }
 
         if (rootGradle.exists()) {
@@ -770,7 +770,8 @@ public class AlignmentTask extends DefaultTask {
 
             if (!line.trim().equals(injectedLine)) {
                 // Haven't appended it before.
-                try (BufferedWriter writer = new BufferedWriter(new FileWriter(rootGradle, true))) {
+                try (BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(new FileOutputStream(rootGradle, true), StandardCharsets.UTF_8))) {
                     // Ensure the marker is on a line by itself.
                     writer.newLine();
                     writer.write(injectedLine);
@@ -807,7 +808,7 @@ public class AlignmentTask extends DefaultTask {
                 FileFilterUtils.and(new SuffixFileFilter(".gradle"), new NotFileFilter(new NameFileFilter(GME_REPOS))),
                 DirectoryFileFilter.DIRECTORY);
         for (File extraGradleScript : extraGradleScripts) {
-            final List<String> lines = FileUtils.readLines(extraGradleScript, Charset.defaultCharset());
+            final List<String> lines = FileUtils.readLines(extraGradleScript, StandardCharsets.UTF_8);
             if (FilenameUtils.getBaseName(extraGradleScript.getName()).equals("settings")) {
                 if (!APPLY_GME_REPOS
                         .equals(
@@ -817,7 +818,7 @@ public class AlignmentTask extends DefaultTask {
                     result.addAll(lines);
                     result.add(System.lineSeparator());
                     result.add(APPLY_GME_REPOS);
-                    FileUtils.writeLines(extraGradleScript, result);
+                    FileUtils.writeLines(extraGradleScript, StandardCharsets.UTF_8.name(), result);
                 }
             } else if (!APPLY_GME_REPOS
                     .equals(org.jboss.pnc.gradlemanipulator.common.utils.FileUtils.getFirstLine(lines))) {
@@ -825,7 +826,7 @@ public class AlignmentTask extends DefaultTask {
                 result.add(APPLY_GME_REPOS);
                 result.add(System.lineSeparator());
                 result.addAll(lines);
-                FileUtils.writeLines(extraGradleScript, result);
+                FileUtils.writeLines(extraGradleScript, StandardCharsets.UTF_8.name(), result);
             }
         }
     }

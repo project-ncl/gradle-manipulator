@@ -7,7 +7,7 @@ import static org.junit.Assume.assumeTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.zip.ZipFile;
@@ -68,7 +68,7 @@ public class KafkaProjectWithMavenPluginFunctionalTest {
                                 "Located archivesBaseName override ; forcing project name to 'connect-runtime' from 'runtime' for correct usage"));
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".pom")).exists();
         assertThat(pathToArtifacts.resolve(ARTIFACT_NAME + ".jar")).exists();
-        assertThat(FileUtils.readFileToString(repoPathToPom, Charset.defaultCharset()))
+        assertThat(FileUtils.readFileToString(repoPathToPom, StandardCharsets.UTF_8))
                 .contains("artifactId>connect-transforms");
         assertTrue(systemOutRule.getLinesNormalized().contains("Found signing plugin; disabling"));
     }

@@ -12,7 +12,7 @@ import static org.junit.Assume.assumeTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.gradle.util.GradleVersion;
 import org.jboss.pnc.gradlemanipulator.analyzer.alignment.TestUtils.TestManipulationModel;
@@ -91,7 +91,7 @@ public class PGJDBCKotlinFunctionalTest extends AbstractWiremockTest {
         assertTrue(new File(projectRoot, AlignmentTask.GRADLE + '/' + AlignmentTask.GME_REPOS).exists());
         assertTrue(new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS).exists());
         assertEquals(AlignmentTask.INJECT_GME_END_KOTLIN, FileUtils.getLastLine(buildFile));
-        List<String> lines = org.apache.commons.io.FileUtils.readLines(buildFile, Charset.defaultCharset());
+        List<String> lines = org.apache.commons.io.FileUtils.readLines(buildFile, StandardCharsets.UTF_8);
         assertEquals(1, lines.stream().filter(s -> s.contains("buildscript")).count());
 
         assertThat(alignmentModel).isNotNull().satisfies(am -> {

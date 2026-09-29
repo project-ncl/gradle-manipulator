@@ -8,11 +8,12 @@ import static org.junit.Assert.fail;
 
 import ch.qos.logback.core.pattern.color.ANSIConstants;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.UUID;
@@ -276,7 +277,7 @@ public class MainTest {
         final File initFile = tempDir.newFile();
         String init = FileUtils.readFileToString(
                 new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
         final String dir1 = escapeBackslashes(
                 new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().toURI())
                         .getParent());
@@ -290,11 +291,13 @@ public class MainTest {
                         "\n        flatDir {\n            dirs '" + dir2 +
                         "'\n        }\n");
         System.err.println("Writing to " + initFile + ":" + init);
-        FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
+        FileUtils.writeStringToFile(initFile, init, StandardCharsets.UTF_8);
 
         Properties actualVersion = new Properties();
 
-        try (Reader reader = new FileReader(new File(root, "gradle.properties"))) {
+        try (Reader reader = new InputStreamReader(
+                new FileInputStream(new File(root, "gradle.properties")),
+                StandardCharsets.UTF_8)) {
             actualVersion.load(reader);
         }
 
@@ -322,7 +325,7 @@ public class MainTest {
                         + actualVersion.getProperty("version"));
         assertTrue(gmeGradle.exists());
         assertTrue(
-                FileUtils.readFileToString(gmeGradle, Charset.defaultCharset())
+                FileUtils.readFileToString(gmeGradle, StandardCharsets.UTF_8)
                         .contains(
                                 "org.jboss.pnc.gradle-manipulator:manipulation:"
                                         + actualVersion.getProperty("version")));
@@ -356,7 +359,7 @@ public class MainTest {
                         .getParent());
         String init = FileUtils.readFileToString(
                 new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
         init = init.replaceFirst(
                 "(?s)mavenLocal.*snapshots\"\\n\\s+[}]",
                 "\n        flatDir {\n            dirs '" + dir1 +
@@ -364,7 +367,7 @@ public class MainTest {
                         "\n        flatDir {\n            dirs '" + dir2 +
                         "'\n        }\n");
         System.err.println("Writing to " + initFile + ":" + init);
-        FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
+        FileUtils.writeStringToFile(initFile, init, StandardCharsets.UTF_8);
 
         Main m = new Main();
         String[] args = new String[] {

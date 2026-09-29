@@ -16,7 +16,6 @@ import static org.assertj.core.api.Assertions.tuple;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -124,19 +123,19 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         //verify that dummy.gradle and another.gradle now includes the gme-repos.gradle injection
         File extraGradleFile = projectRoot.toPath().resolve("gradle/dummy.gradle").toFile();
         assertThat(extraGradleFile).exists();
-        assertThat(FileUtils.readLines(extraGradleFile, Charset.defaultCharset()))
+        assertThat(FileUtils.readLines(extraGradleFile, StandardCharsets.UTF_8))
                 .filteredOn(l -> l.trim().equals(AlignmentTask.APPLY_GME_REPOS))
                 .hasSize(1);
         extraGradleFile = projectRoot.toPath().resolve("gradle/subdirectory/another.gradle").toFile();
         assertThat(extraGradleFile).exists();
-        assertThat(FileUtils.readLines(extraGradleFile, Charset.defaultCharset()))
+        assertThat(FileUtils.readLines(extraGradleFile, StandardCharsets.UTF_8))
                 .filteredOn(l -> l.trim().equals(AlignmentTask.APPLY_GME_REPOS))
                 .hasSize(1);
 
         // verify that settings.gradle in gradle/plugins has injection appended (not prepended)
         extraGradleFile = projectRoot.toPath().resolve("gradle/plugins/settings.gradle").toFile();
         assertThat(extraGradleFile).exists();
-        List<String> settingsLines = FileUtils.readLines(extraGradleFile, Charset.defaultCharset());
+        List<String> settingsLines = FileUtils.readLines(extraGradleFile, StandardCharsets.UTF_8);
         assertThat(settingsLines)
                 .filteredOn(l -> l.trim().equals(AlignmentTask.APPLY_GME_REPOS))
                 .hasSize(1);
@@ -146,7 +145,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         // Verify the org.gradle.caching has been removed.
         File properties = new File(projectRoot, "gradle.properties");
         assertThat(linesOf(properties)).anyMatch(value -> !value.contains("org.gradle.caching"));
-        assertThat(FileUtils.readLines(properties, Charset.defaultCharset()))
+        assertThat(FileUtils.readLines(properties, StandardCharsets.UTF_8))
                 .filteredOn(l -> l.contains("org.gradle.caching"))
                 .hasSize(0);
     }
@@ -191,7 +190,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         });
         File gme = new File(projectRoot, AlignmentTask.GME);
         assertThat(gme).exists();
-        assertThat(FileUtils.readFileToString(gme, Charset.defaultCharset()))
+        assertThat(FileUtils.readFileToString(gme, StandardCharsets.UTF_8))
                 .contains("org.jboss.pnc.gradle-manipulator:manipulation:0.1.2.3.4");
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
         assertThat(new File(projectRoot, AlignmentTask.GRADLE + '/' + AlignmentTask.GME_REPOS)).exists();
@@ -205,7 +204,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         //verify that dummy.gradle now includes the gme-repos.gradle injection
         final File extraGradleFile = projectRoot.toPath().resolve("gradle/dummy.gradle").toFile();
         assertThat(extraGradleFile).exists();
-        assertThat(FileUtils.readLines(extraGradleFile, Charset.defaultCharset()))
+        assertThat(FileUtils.readLines(extraGradleFile, StandardCharsets.UTF_8))
                 .filteredOn(l -> l.trim().equals(AlignmentTask.APPLY_GME_REPOS))
                 .hasSize(1);
     }
@@ -242,7 +241,7 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
                 Collections.singletonMap("org.gradle.project.gmeAnalyse", "true")).build();
         alignmentModel = new TestManipulationModel(ManipulationIO.readManipulationModel(projectRoot));
         List<String> lines = FileUtils
-                .readLines(new File(projectRoot, Project.DEFAULT_BUILD_FILE), Charset.defaultCharset());
+                .readLines(new File(projectRoot, Project.DEFAULT_BUILD_FILE), StandardCharsets.UTF_8);
 
         assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
         assertThat(alignmentModel).isNotNull().satisfies(am -> {
@@ -267,11 +266,11 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         File props = new File(projectRoot, "gradle.properties");
         FileUtils.writeStringToFile(
                 props,
-                FileUtils.readFileToString(props, Charset.defaultCharset())
+                FileUtils.readFileToString(props, StandardCharsets.UTF_8)
                         .replace(
                                 "version=1.0.1",
                                 "version=1.0.1-SNAPSHOT"),
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         final TestManipulationModel alignmentModel = TestUtils.align(
                 projectRoot,
@@ -586,11 +585,11 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         File props = new File(projectRoot, "gradle.properties");
         FileUtils.writeStringToFile(
                 props,
-                FileUtils.readFileToString(props, Charset.defaultCharset())
+                FileUtils.readFileToString(props, StandardCharsets.UTF_8)
                         .replace(
                                 "version=1.0.1",
                                 "version=0.1"),
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         final Map<String, String> gmeProps = new HashMap<>();
         gmeProps.put("versionOverride", "1.0.1");

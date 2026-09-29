@@ -8,7 +8,7 @@ import static org.junit.Assume.assumeTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
@@ -71,7 +71,7 @@ public class ElasticSearchProjectFunctionalTest {
         assertThat(
                 FileUtils.readFileToString(
                         pathToArtifacts.resolve(ARTIFACT_NAME + ".pom").toFile(),
-                        Charset.defaultCharset()))
+                        StandardCharsets.UTF_8))
                 .contains("transport-netty4-client");
         assertTrue(systemOutRule.getLinesNormalized().contains("Detected application of plugin hook"));
         assertTrue(systemOutRule.getLinesNormalized().contains("Removing publishing repository test"));

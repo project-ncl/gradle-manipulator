@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -104,7 +104,7 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
         });
 
         // verify that the custom groovy script altered the build script
-        final List<String> lines = FileUtils.readLines(new File(projectRoot, "build.gradle"), Charset.defaultCharset());
+        final List<String> lines = FileUtils.readLines(new File(projectRoot, "build.gradle"), StandardCharsets.UTF_8);
         assertThat(lines, StringAssert.class).filteredOn(l -> l.contains("new CustomVersion"))
                 .singleElement()
                 .contains("CustomVersion( '1.0.1.redhat-00002', project )");
@@ -115,7 +115,7 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
         assertTrue(systemOutRule.getLinesNormalized().contains("Attempting to read URL"));
         assertTrue(systemOutRule.getLinesNormalized().contains("found new version is 1.0.1.redhat-00002"));
         assertTrue(systemOutRule.getLinesNormalized().contains("original version is 1.0.1" + System.lineSeparator()));
-        assertThat(FileUtils.readFileToString(new File(projectRoot, "build.gradle"), Charset.defaultCharset()))
+        assertThat(FileUtils.readFileToString(new File(projectRoot, "build.gradle"), StandardCharsets.UTF_8))
                 .contains("classpath \"org.hibernate:hibernate-core:5.3.7.Final-redhat-00001")
                 .contains(
                         "publishing {" + System.lineSeparator() +
@@ -123,7 +123,7 @@ public class SimpleProjectWithCustomGroovyScriptFunctionalTest extends AbstractW
                                 "    nebula {" + System.lineSeparator() +
                                 "      artifact(\"build/distributions/${project.name}-${version}.zip\")"
                                 + System.lineSeparator());
-        assertThat(FileUtils.readFileToString(new File(projectRoot, "settings.gradle"), Charset.defaultCharset()))
+        assertThat(FileUtils.readFileToString(new File(projectRoot, "settings.gradle"), StandardCharsets.UTF_8))
                 .doesNotContain("x-pack")
                 .contains("another-pack");
         assertTrue(systemOutRule.getLinesNormalized().contains("Retrieved"));

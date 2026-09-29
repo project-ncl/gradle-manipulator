@@ -4,7 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import lombok.experimental.UtilityClass;
@@ -24,7 +24,7 @@ public class FileUtils {
      */
     public static String getLastLine(File target) throws IOException {
         String line = "";
-        try (ReversedLinesFileReader rFile = new ReversedLinesFileReader(target, Charset.defaultCharset())) {
+        try (ReversedLinesFileReader rFile = new ReversedLinesFileReader(target, StandardCharsets.UTF_8)) {
             while (isBlank(line)) {
                 line = rFile.readLine();
             }

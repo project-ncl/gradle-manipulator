@@ -6,7 +6,7 @@ import static junit.framework.TestCase.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.logging.LogLevel;
@@ -74,9 +74,9 @@ public class SettingsFileIOTest {
     public void testSettingsDokka() throws IOException {
         File tmpFolder = folder.newFolder();
         File settingsGradle = new File(tmpFolder, "settings.gradle");
-        FileUtils.writeStringToFile(settingsGradle, "rootProject.name = 'reactor'", Charset.defaultCharset());
+        FileUtils.writeStringToFile(settingsGradle, "rootProject.name = 'reactor'", StandardCharsets.UTF_8);
         SettingsFileIO.writeDokkaSettings(tmpFolder, PluginUtils.DokkaVersion.MINIMUM);
-        String result = FileUtils.readFileToString(settingsGradle, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(settingsGradle, StandardCharsets.UTF_8);
         assertEquals(StringUtils.countMatches(result, "{"), StringUtils.countMatches(result, "}"));
         assertTrue(result.contains("pluginManagement { resolutionStrategy { eachPlugin { if (requested.id.id "));
     }
@@ -85,9 +85,9 @@ public class SettingsFileIOTest {
     public void testSettingsNoDokka() throws IOException {
         File tmpFolder = folder.newFolder();
         File settingsGradle = new File(tmpFolder, "settings.gradle");
-        FileUtils.writeStringToFile(settingsGradle, "rootProject.name = 'reactor'", Charset.defaultCharset());
+        FileUtils.writeStringToFile(settingsGradle, "rootProject.name = 'reactor'", StandardCharsets.UTF_8);
         SettingsFileIO.writeDokkaSettings(tmpFolder, PluginUtils.DokkaVersion.NONE);
-        String result = FileUtils.readFileToString(settingsGradle, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(settingsGradle, StandardCharsets.UTF_8);
         assertEquals(StringUtils.countMatches(result, "{"), StringUtils.countMatches(result, "}"));
         assertFalse(result.contains("pluginManagement { resolutionStrategy { eachPlugin { if (requested.id.id "));
     }
@@ -99,9 +99,9 @@ public class SettingsFileIOTest {
         FileUtils.writeStringToFile(
                 settingsGradle,
                 "pluginManagement\n\n{\n\n}\nrootProject.name = 'reactor'",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
         SettingsFileIO.writeDokkaSettings(tmpFolder, PluginUtils.DokkaVersion.MINIMUM);
-        String result = FileUtils.readFileToString(settingsGradle, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(settingsGradle, StandardCharsets.UTF_8);
         assertTrue(
                 result.contains(
                         "pluginManagement {\nresolutionStrategy {\n"
@@ -119,9 +119,9 @@ public class SettingsFileIOTest {
                 "/*\n*\n*/\npluginManagement\n\n{\nresolutionStrategy "
                         + "{}\n}\nrootProject.name = "
                         + "'reactor'",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
         SettingsFileIO.writeDokkaSettings(tmpFolder, PluginUtils.DokkaVersion.MINIMUM);
-        String result = FileUtils.readFileToString(settingsGradle, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(settingsGradle, StandardCharsets.UTF_8);
         assertEquals(StringUtils.countMatches(result, "{"), StringUtils.countMatches(result, "}"));
         assertTrue(
                 result.contains(

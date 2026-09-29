@@ -6,7 +6,7 @@ import static org.junit.Assume.assumeTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.apache.commons.io.FileUtils;
@@ -67,13 +67,13 @@ public class SimpleProjectWithMavenPluginBasenameFunctionalTest {
 
         // verify installed artifacts
         verifyArtifacts(m2Directory);
-        assertThat(FileUtils.readFileToString(repoPathToPom, Charset.defaultCharset()))
+        assertThat(FileUtils.readFileToString(repoPathToPom, StandardCharsets.UTF_8))
                 .contains("Apache License, Version")
                 .contains("artifactId>base-name");
 
         // verify published artifacts
         verifyArtifacts(publishDirectory);
-        assertThat(FileUtils.readFileToString(repoPathToPom, Charset.defaultCharset()))
+        assertThat(FileUtils.readFileToString(repoPathToPom, StandardCharsets.UTF_8))
                 .contains("Apache License, Version")
                 .contains("artifactId>base-name");
     }

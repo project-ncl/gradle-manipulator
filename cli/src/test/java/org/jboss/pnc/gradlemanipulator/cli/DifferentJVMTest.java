@@ -6,10 +6,11 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import kong.unirest.Unirest;
 import org.apache.commons.io.FileUtils;
@@ -107,7 +108,7 @@ public class DifferentJVMTest {
         final File initFile = tempDir.newFile();
         String init = FileUtils.readFileToString(
                 new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
         final String dir1 = escapeBackslashes(
                 new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().toURI())
                         .getParent());
@@ -121,11 +122,13 @@ public class DifferentJVMTest {
                         "\n        flatDir {\n            dirs '" + dir2 +
                         "'\n        }\n");
         System.err.println("Writing to " + initFile + ":" + init);
-        FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
+        FileUtils.writeStringToFile(initFile, init, StandardCharsets.UTF_8);
 
         Properties actualVersion = new Properties();
 
-        try (Reader reader = new FileReader(new File(root, "gradle.properties"))) {
+        try (Reader reader = new InputStreamReader(
+                new FileInputStream(new File(root, "gradle.properties")),
+                StandardCharsets.UTF_8)) {
             actualVersion.load(reader);
         }
 
@@ -152,7 +155,7 @@ public class DifferentJVMTest {
                         + actualVersion.getProperty("version"));
         assertTrue(gmeGradle.exists());
         assertTrue(
-                FileUtils.readFileToString(gmeGradle, Charset.defaultCharset())
+                FileUtils.readFileToString(gmeGradle, StandardCharsets.UTF_8)
                         .contains(
                                 "org.jboss.pnc.gradle-manipulator:manipulation:"
                                         + actualVersion.getProperty("version")));
@@ -177,7 +180,7 @@ public class DifferentJVMTest {
         final File initFile = tempDir.newFile();
         String init = FileUtils.readFileToString(
                 new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
         final String dir1 = escapeBackslashes(
                 new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().toURI())
                         .getParent());
@@ -191,11 +194,13 @@ public class DifferentJVMTest {
                         "\n        flatDir {\n            dirs '" + dir2 +
                         "'\n        }\n");
         System.err.println("Writing to " + initFile + ":" + init);
-        FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
+        FileUtils.writeStringToFile(initFile, init, StandardCharsets.UTF_8);
 
         Properties actualVersion = new Properties();
 
-        try (Reader reader = new FileReader(new File(root, "gradle.properties"))) {
+        try (Reader reader = new InputStreamReader(
+                new FileInputStream(new File(root, "gradle.properties")),
+                StandardCharsets.UTF_8)) {
             actualVersion.load(reader);
         }
 
@@ -226,7 +231,7 @@ public class DifferentJVMTest {
                         + actualVersion.getProperty("version"));
         assertTrue(gmeGradle.exists());
         assertTrue(
-                FileUtils.readFileToString(gmeGradle, Charset.defaultCharset())
+                FileUtils.readFileToString(gmeGradle, StandardCharsets.UTF_8)
                         .contains(
                                 "org.jboss.pnc.gradle-manipulator:manipulation:"
                                         + actualVersion.getProperty("version")));
@@ -255,7 +260,7 @@ public class DifferentJVMTest {
         final File initFile = tempDir.newFile();
         String init = FileUtils.readFileToString(
                 new File(root, "/analyzer/build/resources/main/analyzer-init.gradle"),
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
         final String dir1 = escapeBackslashes(
                 new File(AlignmentPlugin.class.getProtectionDomain().getCodeSource().getLocation().toURI())
                         .getParent());
@@ -269,7 +274,7 @@ public class DifferentJVMTest {
                         "\n        flatDir {\n            dirs '" + dir2 +
                         "'\n        }\n");
         System.err.println("Writing to " + initFile + ":" + init);
-        FileUtils.writeStringToFile(initFile, init, Charset.defaultCharset());
+        FileUtils.writeStringToFile(initFile, init, StandardCharsets.UTF_8);
 
         Main m = new Main();
         String[] args = new String[] {

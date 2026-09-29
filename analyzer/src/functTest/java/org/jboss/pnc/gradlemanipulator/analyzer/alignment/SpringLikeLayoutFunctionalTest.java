@@ -16,7 +16,7 @@ import static org.junit.Assume.assumeTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -133,12 +133,12 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
 
         File pluginConfigs = new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS);
-        String pContents = org.apache.commons.io.FileUtils.readFileToString(pluginConfigs, Charset.defaultCharset());
+        String pContents = org.apache.commons.io.FileUtils.readFileToString(pluginConfigs, StandardCharsets.UTF_8);
         assertTrue(systemOutRule.getLinesNormalized().contains("Replacing Dokka template for version MINIMUM"));
         assertTrue(pContents.contains("noJdkLink = true"));
 
         File settings = new File(projectRoot, "settings.gradle");
-        String sContents = org.apache.commons.io.FileUtils.readFileToString(settings, Charset.defaultCharset());
+        String sContents = org.apache.commons.io.FileUtils.readFileToString(settings, StandardCharsets.UTF_8);
         assertTrue(systemOutRule.getLinesNormalized().contains("with Dokka resolutionStrategy information"));
         assertTrue(sContents.contains("pluginManagement { resolutionStrategy { eachPlugin { if (requested.id.id =="));
     }
@@ -206,12 +206,12 @@ public class SpringLikeLayoutFunctionalTest extends AbstractWiremockTest {
         verify(1, postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS)));
 
         File pluginConfigs = new File(projectRoot, AlignmentTask.GME_PLUGINCONFIGS);
-        String pContents = org.apache.commons.io.FileUtils.readFileToString(pluginConfigs, Charset.defaultCharset());
+        String pContents = org.apache.commons.io.FileUtils.readFileToString(pluginConfigs, StandardCharsets.UTF_8);
         assertFalse(systemOutRule.getLinesNormalized().contains("Replacing Dokka template for version MINIMUM"));
         assertFalse(pContents.contains("noJdkLink = true"));
 
         File settings = new File(projectRoot, "settings.gradle");
-        String sContents = org.apache.commons.io.FileUtils.readFileToString(settings, Charset.defaultCharset());
+        String sContents = org.apache.commons.io.FileUtils.readFileToString(settings, StandardCharsets.UTF_8);
         assertFalse(sContents.contains("pluginManagement { resolutionStrategy { eachPlugin { if (requested.id.id =="));
     }
 }

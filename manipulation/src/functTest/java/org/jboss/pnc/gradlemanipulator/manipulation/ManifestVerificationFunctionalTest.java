@@ -7,7 +7,6 @@ import static org.junit.Assume.assumeTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -72,7 +71,7 @@ public class ManifestVerificationFunctionalTest {
         File manifestFile = new File(projectRoot, "build/tmp/jar/MANIFEST.MF");
         assertTrue(manifestFile.exists());
 
-        assertThat(FileUtils.readFileToString(manifestFile, Charset.defaultCharset()).trim()).contains(
+        assertThat(FileUtils.readFileToString(manifestFile, StandardCharsets.UTF_8).trim()).contains(
                 "Manifest-Version: 1.0\r\n" +
                         "Implementation-Version: 0.13.0.temporary-redhat-00001\r\n" +
                         "Bundle-ManifestVersion: 2\r\n" +

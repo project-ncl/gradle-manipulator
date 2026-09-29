@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -160,7 +160,7 @@ public final class TestUtils {
         if (!buildFile.exists()) {
             buildFile = new File(projectRoot, "build.gradle.kts");
         }
-        List<String> lines = FileUtils.readLines(buildFile, Charset.defaultCharset());
+        List<String> lines = FileUtils.readLines(buildFile, StandardCharsets.UTF_8);
 
         return org.jboss.pnc.gradlemanipulator.common.utils.FileUtils.getFirstLine(lines);
     }

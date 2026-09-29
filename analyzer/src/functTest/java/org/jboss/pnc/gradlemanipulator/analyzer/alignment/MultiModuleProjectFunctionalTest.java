@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -169,7 +168,7 @@ public class MultiModuleProjectFunctionalTest extends AbstractWiremockTest {
         // make sure the project name was not changed
         List<String> settingsLines = org.apache.commons.io.FileUtils.readLines(
                 new File(projectRoot, "settings.gradle"),
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
         assertThat(settingsLines).map(String::trim)
                 .filteredOn(s -> s.startsWith("rootProject.name"))
                 .singleElement(as(STRING))

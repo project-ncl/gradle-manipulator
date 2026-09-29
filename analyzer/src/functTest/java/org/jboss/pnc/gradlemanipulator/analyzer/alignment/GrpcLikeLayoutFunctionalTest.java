@@ -17,7 +17,7 @@ import static org.junit.Assume.assumeTrue;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
@@ -154,7 +154,7 @@ public class GrpcLikeLayoutFunctionalTest extends AbstractWiremockTest {
         org.apache.commons.io.FileUtils.writeStringToFile(
                 new File(projectRoot, "gradle.properties"),
                 "    version = \"1.1.2\"\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         assertThatExceptionOfType(ManipulationUncheckedException.class)
                 .isThrownBy(() -> TestUtils.align(projectRoot, true))

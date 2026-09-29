@@ -4,9 +4,10 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -51,7 +52,7 @@ public class SettingsFileIO {
             File settingsGradle = new File(rootDir, s);
             // Might not exist for a single project build.
             if (settingsGradle.exists()) {
-                List<String> lines = FileUtils.readLines(settingsGradle, Charset.defaultCharset());
+                List<String> lines = FileUtils.readLines(settingsGradle, StandardCharsets.UTF_8);
                 logger.debug("Examining settings.gradle content {}", lines);
                 for (String line : lines) {
                     Matcher m = SETTINGS_ROOT_PROJECT.matcher(line);
@@ -63,7 +64,10 @@ public class SettingsFileIO {
                 if (isEmpty(result)) {
                     result = extractProjectNameFromScmUrl(rootDir);
 
-                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(settingsGradle, true))) {
+                    try (BufferedWriter writer = new BufferedWriter(
+                            new OutputStreamWriter(
+                                    new FileOutputStream(settingsGradle, true),
+                                    StandardCharsets.UTF_8))) {
                         // Ensure the marker is on a line by itself.
                         writer.newLine();
                         writer.write("rootProject.name=\"" + result + "\"");
@@ -93,7 +97,7 @@ public class SettingsFileIO {
         for (String s : Arrays.asList("settings.gradle", "settings.gradle.kts")) {
             File settings = new File(rootProject, s);
             if (settings.exists()) {
-                String settingsContents = FileUtils.readFileToString(settings, Charset.defaultCharset());
+                String settingsContents = FileUtils.readFileToString(settings, StandardCharsets.UTF_8);
                 logger.info("Updating {} with Dokka resolutionStrategy information", settings);
 
                 if (settingsContents.contains("resolutionStrategy")) {
@@ -111,7 +115,7 @@ public class SettingsFileIO {
                     settingsContents = "pluginManagement { resolutionStrategy { eachPlugin { if (requested.id.id == \"org.jetbrains.dokka\") { useVersion(\"0.9.18\") } } } }\n"
                             + settingsContents;
                 }
-                FileUtils.writeStringToFile(settings, settingsContents, Charset.defaultCharset());
+                FileUtils.writeStringToFile(settings, settingsContents, StandardCharsets.UTF_8);
             }
         }
     }
@@ -119,7 +123,7 @@ public class SettingsFileIO {
     private String extractProjectNameFromScmUrl(File rootDir) throws IOException {
         File gitConfig = findGitDir(rootDir);
         try {
-            List<String> lines = FileUtils.readLines(gitConfig, Charset.defaultCharset());
+            List<String> lines = FileUtils.readLines(gitConfig, StandardCharsets.UTF_8);
 
             logger.debug("Examining git config content {}", lines);
             for (String line : lines) {

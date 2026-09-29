@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -163,7 +163,7 @@ public class AlignmentTaskEmptyVersionTest {
 
         for (String line : formats.keySet()) {
             File tempFile = new File(gitFolder, "config");
-            FileUtils.writeStringToFile(tempFile, line, Charset.defaultCharset());
+            FileUtils.writeStringToFile(tempFile, line, StandardCharsets.UTF_8);
 
             String result = (String) m.invoke(null, new Object[] { tempDir.getRoot() });
 

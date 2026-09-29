@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -42,7 +42,7 @@ public class PluginUtilsTest {
         org.apache.commons.io.FileUtils.writeStringToFile(
                 target,
                 "# empty file",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         PluginUtils.pluginRemoval(logger, target.getParentFile(), Collections.singleton("gradle-enterprise-2"));
     }
@@ -55,7 +55,7 @@ public class PluginUtilsTest {
         org.apache.commons.io.FileUtils.writeStringToFile(
                 target,
                 "# empty file\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         PluginUtils.pluginRemoval(logger, target.getParentFile(), Collections.singleton("gradle-enterprise"));
 
@@ -73,7 +73,7 @@ public class PluginUtilsTest {
         org.apache.commons.io.FileUtils.writeStringToFile(
                 target,
                 "# empty file\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         PluginUtils.pluginRemoval(logger, target.getParentFile(), null);
 
@@ -112,7 +112,7 @@ public class PluginUtilsTest {
                         + "        // This { is wrong."
                         + "        termsOfServiceAgree = \"yes\"\n"
                         + "        tag(\"CI\")\n" + "        }\n" + "    }\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         PluginUtils.pluginRemoval(logger, target.getParentFile(), Collections.singleton("gradle-enterprise"));
         assertTrue(
@@ -133,7 +133,7 @@ public class PluginUtilsTest {
                 + "fun property(name: String) =\n" + "    when (extra.has(name)) {\n"
                 + "        true -> extra.get(name) as? String\n" + "        else -> null\n" + "    }\n" + "\n"
                 + "val isCiServer = System.getenv().containsKey(\"CI\")\n";
-        assertEquals(result, FileUtils.readFileToString(target, Charset.defaultCharset()));
+        assertEquals(result, FileUtils.readFileToString(target, StandardCharsets.UTF_8));
     }
 
     @Test
@@ -167,7 +167,7 @@ public class PluginUtilsTest {
                         + "            termsOfServiceAgree = \"yes\"\n"
                         + "            tag(\"CI\")\n" + "        }\n" + "    }\n"
                         + "}\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         PluginUtils.pluginRemoval(logger, target.getParentFile(), Collections.singleton("gradle-enterprise"));
 
@@ -189,7 +189,7 @@ public class PluginUtilsTest {
                 + "fun property(name: String) =\n" + "    when (extra.has(name)) {\n"
                 + "        true -> extra.get(name) as? String\n" + "        else -> null\n" + "    }\n" + "\n"
                 + "val isCiServer = System.getenv().containsKey(\"CI\")\n" + "\n" + "if (isCiServer) {\n" + "}\n";
-        assertEquals(result, FileUtils.readFileToString(target, Charset.defaultCharset()));
+        assertEquals(result, FileUtils.readFileToString(target, StandardCharsets.UTF_8));
     }
 
     @Test
@@ -235,7 +235,7 @@ public class PluginUtilsTest {
                         + "    }\n"
                         + "}\n"
                         + "if (true) { }\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         HashSet<String> plugins = new LinkedHashSet<>();
         plugins.add("com.github.burrunan.s3-build-cache");
@@ -260,7 +260,7 @@ public class PluginUtilsTest {
                 + "        true -> extra.get(name) as? String\n" + "        else -> null\n" + "    }\n" + "\n"
                 + "val isCiServer = System.getenv().containsKey(\"CI\")\n" + "\n" + "if (isCiServer) {\n" + "}\n"
                 + "if (true) { }\n";
-        assertEquals(result, FileUtils.readFileToString(target, Charset.defaultCharset()));
+        assertEquals(result, FileUtils.readFileToString(target, StandardCharsets.UTF_8));
     }
 
     @Test
@@ -305,7 +305,7 @@ public class PluginUtilsTest {
                         + "        // anonymous access will be used if environment variables are missing\n"
                         + "    }\n"
                         + "}\nif (true) { }\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         // Avoid singleton as the set is manipulated within the method
         PluginUtils.pluginRemoval(logger, target.getParentFile(), new LinkedHashSet<>(Collections.singleton("ALL")));
@@ -328,7 +328,7 @@ public class PluginUtilsTest {
                 + "        true -> extra.get(name) as? String\n" + "        else -> null\n" + "    }\n" + "\n"
                 + "val isCiServer = System.getenv().containsKey(\"CI\")\n" + "\n" + "if (isCiServer) {\n" + "}\n"
                 + "if (true) { }\n";
-        assertEquals(result, FileUtils.readFileToString(target, Charset.defaultCharset()));
+        assertEquals(result, FileUtils.readFileToString(target, StandardCharsets.UTF_8));
     }
 
     @Test
@@ -357,7 +357,7 @@ public class PluginUtilsTest {
                         + "    apply plugin: 'maven'\n"
                         + "    apply plugin: 'checkstyle'\n"
                         + "    apply plugin: 'de.marcphilipp.nexus-publish'\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         File subfolder = folder.newFolder();
         File subtarget = new File(subfolder, "publish.gradle");
@@ -366,12 +366,12 @@ public class PluginUtilsTest {
                 "signing {\n" + "    if (isReleaseVersion) {\n"
                         + "        sign publishing.publications.mavenJava\n" + "    }\n"
                         + "}\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         // Avoid singleton as the set is manipulated within the method
         PluginUtils.pluginRemoval(logger, target.getParentFile(), new LinkedHashSet<>(Collections.singleton("ALL")));
 
-        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(target, StandardCharsets.UTF_8);
 
         assertTrue(
                 systemOutRule.getLinesNormalized()
@@ -380,7 +380,7 @@ public class PluginUtilsTest {
                 systemOutRule.getLinesNormalized().contains("Replacing nexus-publish apply plugin with maven-publish"));
         assertTrue(result.contains("apply plugin: \"maven-publish\""));
         assertFalse(result.contains("com.github.ben-manes.versions"));
-        assertTrue(FileUtils.readFileToString(subtarget, Charset.defaultCharset()).trim().isEmpty());
+        assertTrue(FileUtils.readFileToString(subtarget, StandardCharsets.UTF_8).trim().isEmpty());
     }
 
     @Test
@@ -433,7 +433,7 @@ public class PluginUtilsTest {
                         + "    useInMemoryPgpKeys(System.getenv(\"GPG_PRIVATE_KEY\"), System.getenv(\"GPG_PASSWORD\"))\n"
                         + "    sign(publishing.publications[\"mavenPublication\"])\n"
                         + "  }\n" + "}\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         // Avoid singleton as the set is manipulated within the method
         PluginUtils.pluginRemoval(logger, target.getParentFile(), new LinkedHashSet<>(Collections.singleton("ALL")));
@@ -442,9 +442,9 @@ public class PluginUtilsTest {
                 systemOutRule.getLinesNormalized()
                         .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
 
-        assertFalse(FileUtils.readFileToString(target, Charset.defaultCharset()).contains("publishToSonatype"));
+        assertFalse(FileUtils.readFileToString(target, StandardCharsets.UTF_8).contains("publishToSonatype"));
         assertTrue(
-                FileUtils.readFileToString(target, Charset.defaultCharset())
+                FileUtils.readFileToString(target, StandardCharsets.UTF_8)
                         .contains(
                                 "  id(\"otel.japicmp-conventions\")\n"
                                         + "}\n" + "\n"
@@ -520,7 +520,7 @@ public class PluginUtilsTest {
                         + "    useInMemoryPgpKeys(signingKey, System.getenv(\"GPG_PASSWORD\"))\n"
                         + "    sign(publishing.publications[\"maven\"])\n" + "  }\n"
                         + "}\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         // Avoid singleton as the set is manipulated within the method
         PluginUtils.pluginRemoval(
@@ -533,7 +533,7 @@ public class PluginUtilsTest {
                         .contains("Removed instances of plugin \"signing\" with configuration block of signing from"));
 
         assertTrue(
-                FileUtils.readFileToString(target, Charset.defaultCharset())
+                FileUtils.readFileToString(target, StandardCharsets.UTF_8)
                         .contains(
                                 "plugins {\n"
                                         + "  `maven-publish`\n"
@@ -592,14 +592,14 @@ public class PluginUtilsTest {
                         + "      gradle.startParameter.projectProperties[\"smokeTestSuite\"]?.let {\n"
                         + "        value(\"Smoke test suite\", it)\n" + "      }\n" + "    }\n" + "  }\n" + "}\n" + "\n"
                         + "val geCacheUsername = System.getenv(\"GE_CACHE_USERNAME\") ?: \"\"\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         HashSet<String> plugins = new LinkedHashSet<>();
         plugins.add("com.gradle.common-custom-user-data-gradle-plugin");
         plugins.add("com.gradle.enterprise");
         PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
 
-        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(target, StandardCharsets.UTF_8);
         assertFalse(result.contains("gradleEnterprise {"));
     }
 
@@ -651,13 +651,13 @@ public class PluginUtilsTest {
                         + "                    useGpgCmd()\n"
                         + "                }\n" + "            }\n"
                         + "        }\n" + "    }\n" + "}\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         HashSet<String> plugins = new LinkedHashSet<>();
         plugins.add("ALL");
         PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
 
-        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(target, StandardCharsets.UTF_8);
 
         assertFalse(result.contains("SigningPlugin"));
         assertFalse(result.contains("io.codearte.nexus-staging"));
@@ -685,13 +685,13 @@ public class PluginUtilsTest {
                         + "        tasks.withType(Sign::class) {\n"
                         + "            onlyIf { System.getenv(\"CI\") != null }\n"
                         + "        }\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         HashSet<String> plugins = new LinkedHashSet<>();
         plugins.add("ALL");
         PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
 
-        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(target, StandardCharsets.UTF_8);
         assertFalse(result.contains("closeAndReleaseRepository"));
     }
 
@@ -756,13 +756,13 @@ public class PluginUtilsTest {
                         + "            useInMemoryPgpKeys(System.getenv(\"GPG_PRIVATE_KEY\"), System.getenv(\"GPG_PASSWORD\"))\n"
                         + "            sign(the<PublishingExtension>().publications[\"mavenPublication\"])\n"
                         + "        }\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         HashSet<String> plugins = new LinkedHashSet<>();
         plugins.add("ALL");
         PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
 
-        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(target, StandardCharsets.UTF_8);
         assertFalse(result.contains("SigningExtension"));
         assertFalse(result.contains("NexusPublishExtension"));
     }
@@ -784,13 +784,13 @@ public class PluginUtilsTest {
                         + "        rejectVersionIf {\n"
                         + "            isNonStable(candidate.version)\n"
                         + "        }\n" + "    }\n" + "}",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         HashSet<String> plugins = new LinkedHashSet<>();
         plugins.add("ALL");
         PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
 
-        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(target, StandardCharsets.UTF_8);
 
         assertFalse(result.contains("DependencyUpdatesTask"));
         assertFalse(result.contains("benmanes"));
@@ -840,13 +840,13 @@ public class PluginUtilsTest {
                         + "  termsOfServiceAgree = 'yes'\n"
                         + "  termsOfServiceUrl = 'https://gradle.com/terms-of-service'\n" +
                         "}\n\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         HashSet<String> plugins = new LinkedHashSet<>();
         plugins.add("ALL");
         PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
 
-        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(target, StandardCharsets.UTF_8);
 
         assertFalse(result.contains("id \"com.gradle.enterprise\" version \"3.0\""));
         assertTrue(result.contains("gradle-enterprise-gradle-plugin"));
@@ -891,13 +891,13 @@ public class PluginUtilsTest {
                         + "  delayBetweenRetriesInMillis = (findProperty('delayBetweenRetriesInMillis') ?: '10000') as int\n"
                         + "  numberOfRetries = (findProperty('numberOfRetries') ?: '100') as int\n"
                         + "}\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         HashSet<String> plugins = new LinkedHashSet<>();
         plugins.add("ALL");
         PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
 
-        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(target, StandardCharsets.UTF_8);
 
         assertFalse(result.contains("nexusStaging"));
     }
@@ -929,7 +929,7 @@ public class PluginUtilsTest {
                         + "    apply plugin: 'maven'\n"
                         + "    apply plugin: 'checkstyle'\n"
                         + "    apply plugin: 'de.marcphilipp.nexus-publish'\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         // Avoid singleton as the set is manipulated within the method
         PluginUtils.pluginRemoval(
@@ -937,7 +937,7 @@ public class PluginUtilsTest {
                 target.getParentFile(),
                 new LinkedHashSet<>(Collections.singleton("RECC")));
 
-        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(target, StandardCharsets.UTF_8);
 
         assertTrue(
                 systemOutRule.getLinesNormalized().contains("Replacing nexus-publish apply plugin with maven-publish"));
@@ -968,13 +968,13 @@ public class PluginUtilsTest {
                         + "        checkConstraints = true\n" + "\n"
                         + "    }\n"
                         + "}",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         HashSet<String> plugins = new LinkedHashSet<>();
         plugins.add("ALL");
         PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
 
-        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(target, StandardCharsets.UTF_8);
 
         assertFalse(result.contains("dependencyUpdates"));
         assertFalse(result.contains("benmanes"));
@@ -1020,13 +1020,13 @@ public class PluginUtilsTest {
                         + "  rejectVersionIf {\n"
                         + "    (candidate.group in ignoredGroups) && (candidate.version != currentVersion)\n"
                         + "  }\n" + "}\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         HashSet<String> plugins = new LinkedHashSet<>();
         plugins.add("ALL");
         PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
 
-        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(target, StandardCharsets.UTF_8);
 
         assertFalse(result.contains("update.DependencyUpdatesTask"));
         assertFalse(result.contains("<DependencyUpdatesTask>"));
@@ -1063,13 +1063,13 @@ public class PluginUtilsTest {
                         "animalsniffer {\n" +
                         "    annotation = \"io.reactivex.internal.util.SuppressAnimalSniffer\"\n" +
                         "}",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         HashSet<String> plugins = new LinkedHashSet<>();
         plugins.add("ALL");
         PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
 
-        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(target, StandardCharsets.UTF_8);
 
         assertFalse(result.contains("libraries.signature"));
         assertFalse(result.contains("mojo.signature"));
@@ -1122,14 +1122,14 @@ public class PluginUtilsTest {
                         "                '-removeheaders': 'Private-Package')\n" +
                         "    }\n" +
                         "}\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         HashSet<String> plugins = new LinkedHashSet<>();
         plugins.add("io.github.gradle-nexus.publish-plugin");
         plugins.add("signing");
         PluginUtils.pluginRemoval(logger, target.getParentFile(), plugins);
 
-        String result = FileUtils.readFileToString(target, Charset.defaultCharset());
+        String result = FileUtils.readFileToString(target, StandardCharsets.UTF_8);
 
         assertFalse(result.contains("nexusPublishing"));
         assertEquals(
@@ -1168,7 +1168,7 @@ public class PluginUtilsTest {
                         + "    classpath 'org.apache.httpcomponents:httpclient:4.5.13'\n"
                         + "    classpath 'gradle.plugin.net.vivin:gradle-semantic-build-versioning:4.0.0'\n"
                         + "  }\n" + "}\n" + "\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         boolean result = PluginUtils.checkForSemanticBuildVersioning(logger, target.getParentFile());
         assertFalse(result);
@@ -1196,7 +1196,7 @@ public class PluginUtilsTest {
                         + "include 'cruise-control', "
                         + "'cruise-control-metrics-reporter', "
                         + "'cruise-control-core'\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         boolean result = PluginUtils.checkForSemanticBuildVersioning(logger, target.getParentFile());
         assertTrue(result);
@@ -1215,12 +1215,12 @@ public class PluginUtilsTest {
                         + "    repositories {\n" + "        mavenCentral()\n"
                         + "        gradlePluginPortal()\n"
                         + "    }\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         PluginUtils.addLenientLockMode(logger, target.getParentFile());
         assertTrue(systemOutRule.getLinesNormalized().contains("Added LENIENT lockMode"));
         assertTrue(
-                FileUtils.readFileToString(target, Charset.defaultCharset())
+                FileUtils.readFileToString(target, StandardCharsets.UTF_8)
                         .contains(
                                 "buildscript {\n"
                                         + "    dependencyLocking {\n"
@@ -1240,18 +1240,39 @@ public class PluginUtilsTest {
                         + "    repositories {\n" + "        mavenCentral()\n"
                         + "        gradlePluginPortal()\n"
                         + "    }\n",
-                Charset.defaultCharset());
+                StandardCharsets.UTF_8);
 
         PluginUtils.addLenientLockMode(logger, target.getParentFile());
         assertTrue(systemOutRule.getLinesNormalized().contains("Added LENIENT lockMode"));
         assertTrue(
-                FileUtils.readFileToString(target, Charset.defaultCharset())
+                FileUtils.readFileToString(target, StandardCharsets.UTF_8)
                         .contains(
                                 "buildscript {\n"
                                         + "    dependencyLocking {\n"
                                         + " lockMode.set(LockMode.LENIENT) \n"
                                         + "        lockAllConfigurations()\n"
                                         + "    }\n"));
+    }
+
+    @Test
+    public void testPluginRemovalWithUtf8Content() throws IOException, ManipulationException {
+        File target = folder.newFile("build.gradle");
+        org.apache.commons.io.FileUtils.writeStringToFile(
+                target,
+                "// Ñoño comment — résumé plugin\n"
+                        + "plugins {\n"
+                        + "    id 'net.vivin.gradle-semantic-build-versioning' version '4.0.0'\n"
+                        + "}\n",
+                StandardCharsets.UTF_8);
+
+        PluginUtils.pluginRemoval(
+                logger,
+                target.getParentFile(),
+                Collections.singleton(PluginUtils.SEMANTIC_BUILD_VERSIONING));
+
+        String result = FileUtils.readFileToString(target, StandardCharsets.UTF_8);
+        assertTrue(result.contains("Ñoño comment — résumé plugin"));
+        assertFalse(result.contains(PluginUtils.SEMANTIC_BUILD_VERSIONING));
     }
 
     @Test

@@ -124,7 +124,7 @@ plugins {
                 false // frozen: Gradle 8.0-8.2 (last version compatible with Java 11)
         }
         else -> {
-            id("io.freefair.lombok") version "9.5.0" apply false
+            id("io.freefair.lombok") version "9.7.0" apply false
         }
     }
 

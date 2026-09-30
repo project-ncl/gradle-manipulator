@@ -60,6 +60,7 @@ public class ProjectUtils {
 
     /**
      * The Project name field is private and therefore can't be dynamically updated.
+     * Note name is removed in Gradle 9.8.0 in https://github.com/gradle/gradle/pull/34868
      *
      * @param project the current project
      * @param replacement the new name to use

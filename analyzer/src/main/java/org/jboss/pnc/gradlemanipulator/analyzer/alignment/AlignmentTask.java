@@ -99,6 +99,7 @@ import org.jboss.pnc.mavenmanipulator.core.state.VersioningState;
  * The actual Gradle task that creates the {@code manipulation.json} file for the whole project
  * (whether it's a single or multi module project)
  */
+@org.gradle.work.DisableCachingByDefault
 public class AlignmentTask extends DefaultTask {
     /**
      * The base filename of {@code gme.gradle} file.

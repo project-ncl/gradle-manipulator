@@ -78,3 +78,21 @@ case "${VERSION}" in
         echo "Not modifying build"
         ;;
 esac
+
+case "${VERSION}" in
+    4.10*|5.*|6.*)
+        if [ "${REVERSE}" = "1" ]; then
+            echo "Reversing DisableCachingByDefault removal"
+            find ../ -name 'AlignmentTask.java' -print0 | xargs -0 sed -i \
+                 -e '/^@org\.gradle\.work\.DisableCachingByDefault/{n;b};' \
+                 -e 's|^public class AlignmentTask|@org.gradle.work.DisableCachingByDefault\npublic class AlignmentTask|g;'
+        else
+            echo "Removing @DisableCachingByDefault (added in Gradle 7.0)"
+            find ../ -name 'AlignmentTask.java' -print0 | xargs -0 sed -i \
+                 -e '/^@org\.gradle\.work\.DisableCachingByDefault/d;'
+        fi
+        ;;
+    *)
+        echo "Not modifying DisableCachingByDefault"
+        ;;
+esac

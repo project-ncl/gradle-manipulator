@@ -140,3 +140,8 @@ tasks.register<Test>("functionalTest") {
     classpath = sourceSets["functionalTest"].runtimeClasspath
     mustRunAfter(tasks["test"])
 }
+
+// Gradle < 9: JavaGradlePluginPlugin wired testSourceSets() entries into `check` automatically.
+// Gradle >= 9: that implicit wiring was removed; wire it explicitly so `./gradlew build` still
+// runs functional tests on all supported Gradle versions.
+tasks.named("check") { dependsOn("functionalTest") }

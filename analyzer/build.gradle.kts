@@ -161,6 +161,11 @@ tasks.register<Test>("functionalTest") {
     systemProperties["jdk.attach.allowAttachSelf"] = "true"
 }
 
+// Gradle < 9: JavaGradlePluginPlugin wired testSourceSets() entries into `check` automatically.
+// Gradle >= 9: that implicit wiring was removed; wire it explicitly so `./gradlew build` still
+// runs functional tests on all supported Gradle versions.
+tasks.named("check") { dependsOn("functionalTest") }
+
 val testJar by
     tasks.registering(Jar::class) {
         mustRunAfter(tasks["functionalTest"])

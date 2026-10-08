@@ -1,6 +1,7 @@
 package org.jboss.pnc.gradlemanipulator.common.utils;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.gradle.api.Project;
@@ -60,15 +61,32 @@ public class ProjectUtils {
 
     /**
      * The Project name field is private and therefore can't be dynamically updated.
-     * Note name is removed in Gradle 9.8.0 in https://github.com/gradle/gradle/pull/34868
+     * In Gradle >= 9.8.0, the name was moved out of DefaultProject into a final field
+     * {@code projectName} on {@code ProjectIdentity}, accessible via
+     * {@code ProjectInternal.getOwner().getIdentity()}.
+     * See https://github.com/gradle/gradle/pull/34868
      *
      * @param project the current project
      * @param replacement the new name to use
      */
     public void updateNameField(Project project, Object replacement) {
         try {
-            FieldUtils.writeField(project, "name", replacement, true);
-        } catch (IllegalAccessException e) {
+            if (GradleVersion.current().compareTo(GradleVersion.version("9.8")) >= 0) {
+                // In Gradle >= 9.8, name is stored as ProjectIdentity.projectName (final field).
+                // Access it via ProjectInternal.getOwner().getIdentity().
+                // setAccessible(true) is required on each Method because DefaultProjectState and
+                // ProjectIdentity are in the org.gradle.core module which is not open to us.
+                Method getOwner = project.getClass().getMethod("getOwner");
+                getOwner.setAccessible(true);
+                Object projectState = getOwner.invoke(project);
+                Method getIdentity = projectState.getClass().getMethod("getIdentity");
+                getIdentity.setAccessible(true);
+                Object projectIdentity = getIdentity.invoke(projectState);
+                FieldUtils.writeField(projectIdentity, "projectName", replacement, true);
+            } else {
+                FieldUtils.writeField(project, "name", replacement, true);
+            }
+        } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new ManipulationUncheckedException("Unable to update name field to {}", replacement, e);
         }
     }

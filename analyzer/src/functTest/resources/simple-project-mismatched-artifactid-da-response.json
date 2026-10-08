@@ -1,0 +1,8 @@
+[
+  {
+    "bestMatchVersion": "2.0.15.Final-redhat-00001",
+    "version": "2.0.15.Final",
+    "groupId": "io.undertow",
+    "artifactId": "undertow-core"
+  }
+]

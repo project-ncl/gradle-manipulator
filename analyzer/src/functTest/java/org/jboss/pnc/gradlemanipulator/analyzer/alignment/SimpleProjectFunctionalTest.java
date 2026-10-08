@@ -574,6 +574,72 @@ public class SimpleProjectFunctionalTest extends AbstractWiremockTest {
         assertThat(systemOutRule.getLinesNormalized()).contains(expectedTextString);
     }
 
+    /**
+     * Verifies that when a MavenPublication's artifactId differs from the project name, alignment
+     * still succeeds and the renamed artifactId is used in the DA lookup.
+     * <p>
+     * This exercises {@link org.jboss.pnc.gradlemanipulator.common.utils.ProjectUtils#updateNameField}
+     * which uses version-gated reflection — the Gradle &gt;= 9.8 path rewrites
+     * {@code ProjectIdentity.projectName} rather than {@code DefaultProject.name}.
+     * <p>
+     * The project's {@code settings.gradle} declares {@code rootProject.name = 'root'} while the
+     * MavenPublication uses {@code artifactId = 'root-renamed'}. AlignmentTask detects the mismatch,
+     * calls {@code updateNameField} to rename the project in the Gradle runtime, and sends the renamed
+     * GAV ({@code org.acme.gradle:root-renamed:1.0.1}) to the DA LOOKUP_LATEST endpoint.
+     */
+    @Test
+    public void ensureNameFieldUpdatedWhenArtifactIdDiffersFromProjectName()
+            throws IOException, URISyntaxException, ManipulationException {
+        // Override the WireMock stubs set up in @Before with responses for this fixture.
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_GAVS))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(
+                                                readSampleDAResponse(
+                                                        "simple-project-mismatched-artifactid-da-response.json"))));
+        stubFor(
+                post(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json;charset=utf-8")
+                                        .withBody(
+                                                readSampleDAResponse(
+                                                        "simple-project-mismatched-artifactid-da-response-project.json"))));
+
+        final File projectRoot = tempDir.newFolder("simple-project-mismatched-artifactid");
+        final TestManipulationModel alignmentModel = TestUtils.align(projectRoot, projectRoot.getName());
+
+        assertThat(new File(projectRoot, AlignmentTask.GME)).exists();
+
+        // The DA LOOKUP_LATEST call must carry the renamed artifactId, not the original project name.
+        // If updateNameField fails (e.g. on Gradle 9.8+ before the fix), project.getName() still
+        // returns "root" and the lookup is sent with "root", which won't match our stub returning
+        // "root-renamed" — causing the build to fail before we even get here.
+        verify(
+                postRequestedFor(urlEqualTo("/da/rest/v-1/" + DefaultTranslator.Endpoint.LOOKUP_LATEST))
+                        .withRequestBody(containing("\"artifactId\":\"root-renamed\"")));
+
+        // The aligned version is computed from the max dependency suffix + 1:
+        //   undertow aligned at redhat-00001 → project gets redhat-00002.
+        // Note: am.getName() returns "root" (the value written back by SettingsFileIO from
+        // settings.gradle). The key assertion is that the LOOKUP_LATEST verify above passed,
+        // confirming updateNameField worked and the DA call used "root-renamed".
+        assertThat(alignmentModel).isNotNull().satisfies(am -> {
+            assertThat(am.getGroup()).isEqualTo("org.acme.gradle");
+            assertThat(am.getVersion()).isEqualTo("1.0.1.redhat-00002");
+            assertThat(am.findCorrespondingChild(":")).satisfies(root -> {
+                assertThat(root.getVersion()).isEqualTo("1.0.1.redhat-00002");
+                assertThat(root.getAlignedDependencies().values())
+                        .extracting("artifactId", "versionString")
+                        .containsOnly(tuple("undertow-core", "2.0.15.Final-redhat-00001"));
+            });
+        });
+    }
+
     @Test
     public void verifyOverrideHandling() throws IOException, URISyntaxException, ManipulationException {
         final File projectRoot = tempDir.newFolder("simple-project");

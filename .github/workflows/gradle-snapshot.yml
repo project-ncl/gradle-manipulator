@@ -12,9 +12,9 @@ jobs:
     with:
       project_name: "project-ncl/gradle-manipulator"
       java_version: "17"
-      snapshot_deploy_args: "--info build publishToCentral AggregateJacocoReport"
+      snapshot_deploy_args: "--info build publishToCentral aggregateJacocoReport"
       upload_coverage: true
-      coverage_files: "./build/reports/jacoco/aggregate/jacocoTestReport.xml"
+      coverage_files: "./build/reports/jacoco/aggregateJacocoReport/aggregateJacocoReport.xml"
     secrets:
       SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
       SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}

@@ -12,7 +12,6 @@ import kotlin.reflect.full.memberFunctions
 import org.ajoberstar.grgit.Grgit
 import org.gradle.kotlin.dsl.project
 import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata
-import org.gradle.testing.jacoco.tasks.JacocoReport
 
 plugins {
     java
@@ -148,8 +147,12 @@ plugins {
         GradleVersion.current() < GradleVersion.version("7.0") -> {
             id("io.freefair" + ".aggregate-jacoco-report") version "5.3.3.3" // frozen: Gradle 6.7-6.x
         }
+        GradleVersion.current() < GradleVersion.version("7.1") -> {
+            // JavaPluginExtension.getSourceSets() was added in Gradle 7.1; 6.6.3 calls it and fails on 7.0
+            id("io.freefair" + ".aggregate-jacoco-report") version "5.3.3.3" // frozen: Gradle 7.0
+        }
         GradleVersion.current() < GradleVersion.version("8.0") -> {
-            id("io.freefair" + ".aggregate-jacoco-report") version "6.6.3" // frozen: Gradle 7.0-7.x
+            id("io.freefair" + ".aggregate-jacoco-report") version "6.6.3" // frozen: Gradle 7.1-7.x
         }
         GradleVersion.current() < GradleVersion.version("8.3") -> {
             id("io.freefair" + ".aggregate-jacoco-report") version "8.1.0" // frozen: Gradle 8.0-8.2
@@ -173,15 +176,8 @@ if (!JavaVersion.current().isJava11Compatible) {
     throw GradleException("This build must be run with at least Gradle 4.10")
 }
 
-// freefair aggregate-jacoco-report requires Gradle >= 5.1; register a no-op stub so that
-// CI's aggregateJacocoReport invocation does not fail on Gradle 4.x.
-if (GradleVersion.current() < GradleVersion.version("5.1")) {
-    tasks.register("aggregateJacocoReport")
-} else {
-    tasks.named("aggregateJacocoReport", JacocoReport::class) {
-        reports.xml.required.set(true)
-    }
-}
+// Configure aggregate Jacoco reporting via Groovy script to handle Gradle API differences across versions.
+apply(from = "gradle/jacoco.gradle")
 
 apply(plugin = "net.researchgate.release")
 
@@ -322,7 +318,12 @@ subprojects {
     apply(plugin = "idea")
     apply(plugin = "com.adarshr.test-logger")
     apply(plugin = "io.freefair.lombok")
-    apply(plugin = "jacoco")
+    // jacoco agent is incompatible with JDK 11+ on Gradle 4.10 (agent version too old for
+    // bootstrap class pre-instrumentation). Aggregate coverage is not supported on Gradle <5.1
+    // anyway (no aggregateJacocoReport task), so skip jacoco entirely there.
+    if (GradleVersion.current() >= GradleVersion.version("5.1")) {
+        apply(plugin = "jacoco")
+    }
 
     extra["lombokVersion"] = extensions.findByType(LombokExtension::class)?.version
 

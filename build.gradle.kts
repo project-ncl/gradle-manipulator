@@ -12,6 +12,7 @@ import kotlin.reflect.full.memberFunctions
 import org.ajoberstar.grgit.Grgit
 import org.gradle.kotlin.dsl.project
 import org.gradle.plugin.devel.tasks.PluginUnderTestMetadata
+import org.gradle.testing.jacoco.tasks.JacocoReport
 
 plugins {
     java
@@ -129,21 +130,32 @@ plugins {
     }
 
     // NOTE: See comment above re. frozen branch plugin ID concatenation.
-    // Not compatible with Gradle 9 yet.
-    // https://github.com/kordamp/kordamp-gradle-plugins/issues/540
-    // See also below as a fake task for AggregateJacocoReport has been created for Gradle 9
+    // Replaces org.kordamp.gradle.jacoco (incompatible with Gradle 9+).
+    // freefair version numbering tracks Gradle from v8 onwards; older versions frozen by range.
     when {
-        GradleVersion.current() < GradleVersion.version("5.3") -> {
-            /* not supported; do not apply */
+        GradleVersion.current() < GradleVersion.version("5.1") -> {
+            /* not supported on Gradle <5.1; see stub task registered below */
+        }
+        GradleVersion.current() < GradleVersion.version("6.0") -> {
+            id("io.freefair" + ".aggregate-jacoco-report") version "3.8.4" // frozen: Gradle 5.1-5.x
+        }
+        GradleVersion.current() < GradleVersion.version("6.4") -> {
+            id("io.freefair" + ".aggregate-jacoco-report") version "5.0.1" // frozen: Gradle 6.0-6.3
+        }
+        GradleVersion.current() < GradleVersion.version("6.7") -> {
+            id("io.freefair" + ".aggregate-jacoco-report") version "5.1.1" // frozen: Gradle 6.4-6.6
         }
         GradleVersion.current() < GradleVersion.version("7.0") -> {
-            id("org.kordamp.gradle" + ".jacoco") version "0.46.0" // frozen: Gradle 5.3-6.x
+            id("io.freefair" + ".aggregate-jacoco-report") version "5.3.3.3" // frozen: Gradle 6.7-6.x
         }
         GradleVersion.current() < GradleVersion.version("8.0") -> {
-            id("org.kordamp.gradle" + ".jacoco") version "0.47.0" // frozen: Gradle 7.x
+            id("io.freefair" + ".aggregate-jacoco-report") version "6.6.3" // frozen: Gradle 7.0-7.x
         }
-        GradleVersion.current() < GradleVersion.version("9.0") -> {
-            id("org.kordamp.gradle.jacoco") version "0.54.0"
+        GradleVersion.current() < GradleVersion.version("8.3") -> {
+            id("io.freefair" + ".aggregate-jacoco-report") version "8.1.0" // frozen: Gradle 8.0-8.2
+        }
+        else -> {
+            id("io.freefair.aggregate-jacoco-report") version "9.8.0"
         }
     }
 }
@@ -161,11 +173,14 @@ if (!JavaVersion.current().isJava11Compatible) {
     throw GradleException("This build must be run with at least Gradle 4.10")
 }
 
-// XXX: Jacoco plugin only supports Gradle >= 5.3 ; create empty task on those Gradle versions so that build does not
-// fail
-if (GradleVersion.current() < GradleVersion.version("5.3") ||
-    GradleVersion.current() >= GradleVersion.version("9.0.0")) {
-    tasks.register("AggregateJacocoReport")
+// freefair aggregate-jacoco-report requires Gradle >= 5.1; register a no-op stub so that
+// CI's aggregateJacocoReport invocation does not fail on Gradle 4.x.
+if (GradleVersion.current() < GradleVersion.version("5.1")) {
+    tasks.register("aggregateJacocoReport")
+} else {
+    tasks.named("aggregateJacocoReport", JacocoReport::class) {
+        reports.xml.required.set(true)
+    }
 }
 
 apply(plugin = "net.researchgate.release")
@@ -307,6 +322,7 @@ subprojects {
     apply(plugin = "idea")
     apply(plugin = "com.adarshr.test-logger")
     apply(plugin = "io.freefair.lombok")
+    apply(plugin = "jacoco")
 
     extra["lombokVersion"] = extensions.findByType(LombokExtension::class)?.version
 

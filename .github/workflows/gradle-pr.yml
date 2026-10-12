@@ -57,10 +57,10 @@ jobs:
     with:
       java_version: "11"
       gradle_version: ${{ matrix.gradle }}
-      build_args: "--no-daemon --stacktrace clean build AggregateJacocoReport"
+      build_args: "--no-daemon --stacktrace clean build aggregateJacocoReport"
       pre_build_script: "./gradle/fix-build.sh ${{ matrix.gradle }}"
       upload_coverage: true
-      coverage_files: "./build/reports/jacoco/aggregate/jacocoTestReport.xml"
+      coverage_files: "./build/reports/jacoco/aggregateJacocoReport/aggregateJacocoReport.xml"
 
   build-gradle-2:
     needs: [check-java-formatting]
@@ -78,7 +78,7 @@ jobs:
     with:
       java_version: "17"
       gradle_version: ${{ matrix.gradle }}
-      build_args: "--no-daemon --stacktrace clean build AggregateJacocoReport"
+      build_args: "--no-daemon --stacktrace clean build aggregateJacocoReport"
       upload_coverage: true
-      coverage_files: "./build/reports/jacoco/aggregate/jacocoTestReport.xml"
+      coverage_files: "./build/reports/jacoco/aggregateJacocoReport/aggregateJacocoReport.xml"
       upload_artifacts: ${{ matrix.upload_artifacts }}

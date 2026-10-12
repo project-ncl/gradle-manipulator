@@ -8,11 +8,13 @@ on:
 
 jobs:
   call-snapshot-job:
-    uses: project-ncl/shared-github-actions/.github/workflows/gradle-snapshot.yml@f0ec1696c5dfea0d6d16c135c14f54049b94edaf # v0.0.24
+    uses: project-ncl/shared-github-actions/.github/workflows/gradle-snapshot.yml@4e09fec66b900407112913c36ce3cc4d1ff8c26c # main
     with:
       project_name: "project-ncl/gradle-manipulator"
       java_version: "17"
-      snapshot_deploy_args: "--info build publishToCentral -x test -x funcTest"
+      snapshot_deploy_args: "--info build publishToCentral -x test -x funcTest AggregateJacocoReport"
+      upload_coverage: true
+      coverage_files: "./build/reports/jacoco/aggregate/jacocoTestReport.xml"
     secrets:
       SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
       SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}

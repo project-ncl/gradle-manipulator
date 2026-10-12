@@ -1,0 +1,38 @@
+import org.gradle.testing.jacoco.tasks.JacocoReport
+import org.gradle.util.GradleVersion
+
+if (GradleVersion.current() < GradleVersion.version("5.1")) {
+    tasks.register("aggregateJacocoReport")
+} else {
+    tasks.named("aggregateJacocoReport", JacocoReport) {
+        if (GradleVersion.current() < GradleVersion.version("7.1")) {
+            reports.xml.enabled = true
+        } else {
+            reports.xml.required.set(true)
+        }
+
+        // The freefair plugin wires executionData to all subproject Jacoco exec files, some of
+        // which won't exist (e.g. skipped test runs). We must filter to only existing files.
+        //
+        // Getting this right is subtle — three approaches that don't work:
+        //
+        //   executionData.setFrom(executionData.filter { it.exists() })
+        //     → circular: the filtered view holds a live back-reference to executionData,
+        //       so resolving the collection recurses infinitely → StackOverflowError.
+        //
+        //   project.files(executionData).filter { it.exists() }
+        //     → project.files() wraps lazily, not copy; still holds a live reference back
+        //       to executionData after setFrom → same StackOverflowError on Gradle ≤ 6.5.
+        //
+        //   doFirst { executionData.setFrom(...) }
+        //     → @InputFiles are finalized before task actions run (Gradle 5.6+) →
+        //       "property is final and cannot be changed any further".
+        //
+        // Fix: snapshot the raw 'from' items into a plain ArrayList BEFORE calling setFrom.
+        // executionData.from returns the Set of raw (unresolved) items that back the
+        // collection — copying it into an ArrayList severs all links back to executionData,
+        // so the subsequent filter closure has no path back to it.
+        def detachedFrom = new ArrayList(executionData.from)
+        executionData.setFrom(project.files(detachedFrom).filter { it.exists() })
+    }
+}

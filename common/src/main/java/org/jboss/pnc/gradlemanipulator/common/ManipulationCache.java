@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
+
+import org.commonjava.atlas.maven.ident.ref.ProjectRef;
 import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.commonjava.atlas.maven.ident.ref.SimpleProjectVersionRef;
 import org.gradle.api.Project;
@@ -20,8 +22,9 @@ import org.jboss.pnc.gradlemanipulator.common.model.ManipulationModel;
 import org.jboss.pnc.gradlemanipulator.common.utils.PluginUtils.DokkaVersion;
 import org.jboss.pnc.gradlemanipulator.common.utils.ProjectUtils;
 import org.jboss.pnc.gradlemanipulator.common.versioning.RelaxedProjectVersionRef;
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException;
 import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationUncheckedException;
-import org.jboss.pnc.mavenmanipulator.core.impl.Version;
+import org.jboss.pnc.mavenmanipulator.core.impl.VersionCalculator;
 
 /**
  * Cache that is stored in the root project extensions.
@@ -120,7 +123,8 @@ public class ManipulationCache {
         return cache;
     }
 
-    private ManipulationCache(Project rootProject) {
+    // Package-private for tests.
+    ManipulationCache(Project rootProject) {
         this.rootProject = rootProject;
     }
 
@@ -173,14 +177,19 @@ public class ManipulationCache {
     }
 
     public List<ProjectVersionRef> getProjectVersionRefs(boolean versionSuffixSnapshot) {
-        return projectVersionRefs.stream()
-                .map(
-                        e -> !versionSuffixSnapshot
-                                ? new SimpleProjectVersionRef(
-                                        e.asProjectRef(),
-                                        Version.removeSnapshot(e.getVersionString()))
-                                : e)
-                .collect(Collectors.toList());
+        return projectVersionRefs.stream().map(e -> {
+            try {
+                ProjectRef pr = e.asProjectRef();
+                return new SimpleProjectVersionRef(
+                        pr,
+                        VersionCalculator.handlePotentialSnapshotVersion(
+                                versionSuffixSnapshot,
+                                pr,
+                                e.getVersionString()));
+            } catch (ManipulationException ex) {
+                throw new ManipulationUncheckedException(ex);
+            }
+        }).collect(Collectors.toList());
     }
 
     public String getProjectCounterRemaining() {

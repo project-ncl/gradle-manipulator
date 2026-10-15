@@ -1,0 +1,24 @@
+plugins {
+    id 'org.jboss.pnc.gradle-manipulator.analyzer'
+    id 'java'
+    id 'maven-publish'
+}
+
+group = 'org.acme.gradle'
+version = '1.0.1'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
+}

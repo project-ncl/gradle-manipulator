@@ -1175,6 +1175,8 @@ public class AlignmentTask extends DefaultTask {
 
     /**
      * Writes a maven settings file containing artifact repositories used by this project.
+     * Repositories injected by external init scripts (e.g. CI environment mirrors) are
+     * automatically excluded so they do not pollute the backup.
      *
      * @param repositories A map of repositories to the file path where it occurred.
      */
@@ -1190,10 +1192,94 @@ public class AlignmentTask extends DefaultTask {
                 repositoriesFile = new File(getProject().getRootDir(), repositoriesFilePath);
             }
 
-            RepositoryExporter.export(repositories, repositoriesFile);
+            List<File> externalInitScripts = getProject().getGradle()
+                    .getStartParameter()
+                    .getAllInitScripts()
+                    .stream()
+                    .filter(f -> !"analyzer-init.gradle".equals(f.getName()))
+                    .collect(Collectors.toList());
+
+            Set<String> excludeUrls = collectInitScriptExcludeUrls(externalInitScripts);
+            Set<String> excludeNames = collectInitScriptExcludeNames(externalInitScripts);
+            logger.debug("Init script repository URL exclusions: {}", excludeUrls);
+            logger.debug("Init script repository name exclusions: {}", excludeNames);
+
+            RepositoryExporter.export(repositories, repositoriesFile, excludeUrls, excludeNames);
         } else {
             logger.info("Repository export disabled.");
         }
+    }
+
+    /**
+     * Reads each external init script and extracts repository URLs to exclude from the
+     * settings export. This covers:
+     * <ul>
+     * <li>Explicitly declared {@code url = "..."} / {@code url "..."} values</li>
+     * <li>{@code gradlePluginPortal()} calls — mapped to its well-known URL
+     * {@code https://plugins.gradle.org/m2/}.
+     * <p>
+     * <b>Note:</b> Even if the project's own {@code build.gradle} also declares
+     * {@code gradlePluginPortal()}, it is intentionally excluded from
+     * {@code repositories-backup.xml} as PNC {@code repository-driver} always adds that
+     * remote for every Gradle build so its not required.</li>
+     * </ul>
+     *
+     * @param externalInitScripts non-GME init script files to analyse
+     * @return immutable set of URLs to exclude
+     */
+    private Set<String> collectInitScriptExcludeUrls(List<File> externalInitScripts) {
+        if (externalInitScripts.isEmpty()) {
+            return Collections.emptySet();
+        }
+        Pattern urlPattern = Pattern.compile("url\\s*[=:]?\\s*[\"']([^\"']+)[\"']");
+        Set<String> excludeUrls = new LinkedHashSet<>();
+        for (File initScript : externalInitScripts) {
+            logger.info("Analysing init script for repository URL exclusions: {}", initScript.getAbsolutePath());
+            try {
+                String content = FileUtils.readFileToString(initScript, StandardCharsets.UTF_8);
+                Matcher m = urlPattern.matcher(content);
+                while (m.find()) {
+                    String url = m.group(1);
+                    excludeUrls.add(url.endsWith("/") ? url.substring(0, url.length() - 1) : url);
+                }
+                if (content.contains("gradlePluginPortal()")) {
+                    excludeUrls.add("https://plugins.gradle.org/m2");
+                }
+            } catch (IOException e) {
+                logger.warn(
+                        "Could not read init script '{}' for repository exclusion analysis: {}",
+                        initScript.getAbsolutePath(),
+                        e.getMessage());
+            }
+        }
+        return Collections.unmodifiableSet(excludeUrls);
+    }
+
+    /**
+     * Reads each external init script and extracts repository names to exclude from the
+     * settings export. Covers explicitly declared {@code name = "..."} / {@code name "..."} values.
+     *
+     * @param externalInitScripts non-GME init script files to analyse
+     * @return immutable set of repository names to exclude
+     */
+    private Set<String> collectInitScriptExcludeNames(List<File> externalInitScripts) {
+        if (externalInitScripts.isEmpty()) {
+            return Collections.emptySet();
+        }
+        Pattern namePattern = Pattern.compile("name\\s*[=:]?\\s*[\"']([^\"']+)[\"']");
+        Set<String> excludeNames = new LinkedHashSet<>();
+        for (File initScript : externalInitScripts) {
+            try {
+                String content = FileUtils.readFileToString(initScript, StandardCharsets.UTF_8);
+                Matcher m = namePattern.matcher(content);
+                while (m.find()) {
+                    excludeNames.add(m.group(1));
+                }
+            } catch (IOException e) {
+                // warning already logged by collectInitScriptExcludeUrls for the same file
+            }
+        }
+        return Collections.unmodifiableSet(excludeNames);
     }
 
     private Map<RelaxedProjectVersionRef, ProjectVersionRef> processAnyExistingManipulationFile(

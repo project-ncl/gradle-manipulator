@@ -2,10 +2,12 @@
 title: Known Issues
 ---
 
+# Known Issues
+
 * Contents
 {:toc}
 
-#### Spring Dependency Management Plugin
+## Spring Dependency Management Plugin
 
 The [Dependency Management Plugin](https://docs.spring.io/dependency-management-plugin/docs/current/reference/html) is
 a Gradle plugin that provides Maven-like dependency management and exclusions.

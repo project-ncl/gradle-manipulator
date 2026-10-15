@@ -2,10 +2,12 @@
 title: Plugins
 ---
 
+# Plugins
+
 * Contents
 {:toc}
 
-### Plugin Removal
+## Plugin Removal
 
 GME supports removal of plugins prior to running the alignment phase. Note that plugin removal is
 only supported through use of the CLI. If the property `-DpluginRemoval=<plugin-id>,....` is set, it
@@ -57,7 +59,7 @@ Tasks are also removed if they are mentioned within the build scripts. Note that
 publish.finalizedBy closeAndReleaseRepository
 ```
 
-#### Shortcuts
+### Shortcuts
 
 Two special shortcuts are available to support removing collections of plugins:
 
@@ -76,7 +78,7 @@ Two special shortcuts are available to support removing collections of plugins:
 
 
 
-### Gradle Semantic Build Versioning Plugin
+## Gradle Semantic Build Versioning Plugin
 
 This plugin (see [here](https://github.com/vivin/gradle-semantic-build-versioning)) provides support for
 automatic semantic versioning of builds based off git commit information.
@@ -87,7 +89,7 @@ command, inserting that into the `gradle.properties`. Finally it will remove the
 is kept static.
 
 
-### Dokka Plugin
+## Dokka Plugin
 
 Special handling has been included for the [dokka](https://github.com/Kotlin/dokka/) plugin in
 order to inject the correct settings for earlier versions which did not respect proxy settings.
@@ -102,7 +104,7 @@ It is possible to disable this through the configuration key `dokkaPlugin` (defa
 </tr>
 </table>
 
-#### [Gradle Maven Publish Plugin](https://github.com/vanniktech/gradle-maven-publish-plugin)
+### [Gradle Maven Publish Plugin](https://github.com/vanniktech/gradle-maven-publish-plugin)
 
 The gradle-maven-publish-plugin implicitly injects other plugins such as the signing and dokka
 plugins. In version 0.8.0 it injects 0.9.17 of the Dokka plugin. Currently GME is not able to change
@@ -110,6 +112,6 @@ this injected version to 0.9.18 (unlike a directly included 0.9.17 version) and 
 lead to problems with the GME injected code. It is currently recommended that the version is changed
 from 0.8.0 to >= 0.9.0 which injects the dokka plugin at version 0.9.18.
 
-### Publish Plugin Hook
+## Publish Plugin Hook
 
 Certain project builds don't apply the publish plugin directly (be it the legacy or current one); instead they implement their own 'build plugin' (e.g. within `buildSrc`) that itself then applies plugins. This can lead to the situation where this custom plugin is applied and actioned after the GME tooling plugin which therefore does not detect any publishing plugins. It is possible to list those custom plugins as 'hooks' that GME will detect, and attempt to customise the publishing again. It is a comma separated list with a single default entry of `elasticsearch.esplugin`.

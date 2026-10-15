@@ -1,3 +1,6 @@
 _site
+Gemfile.lock
+Gemfile.local.lock
+.jekyll-cache
+.jekyll-metadata
 .idea
-

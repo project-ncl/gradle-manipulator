@@ -1,10 +1,11 @@
 ---
+title: "Gradle Manipulator"
 ---
 
 * Contents
 {:toc}
 
-### Overview
+## Overview
 
 GME (Gradle Manipulation Extension) is a set of Gradle plugins and a CLI that allow the alignment of versions of a Gradle project according to some external preference.
 
@@ -15,9 +16,9 @@ The file is then meant to be used by the `manipulation` plugin to enforce the ve
 
 The metadata file is named `manipulation.json` and is created by the `generateAlignmentMetadata` task of the `alignment` plugin in the root directory of the target Gradle project. The file is in JSON format, may be read and written through [this](https://www.javadoc.io/static/org.jboss.pnc.gradle-manipulator/common/5.0/org/jboss/pnc/gradlemanipulator/common/io/ManipulationIO.html) utility class. The Java source may be found [here](https://github.com/project-ncl/gradle-manipulator/blob/main/common/src/main/java/org/jboss/pnc/gradlemanipulator/common/model/ManipulationModel.java) and the documentation is [here](https://www.javadoc.io/doc/org.jboss.pnc.gradle-manipulator/common/latest/org/jboss/pnc/gradlemanipulator/common/model/ManipulationModel.html). An example from the functional tests of the `manipulation.json` is [here](https://github.com/project-ncl/gradle-manipulator/blob/main/manipulation/src/functTest/resources/simple-project/manipulation.json).
 
-### Usage
+## Usage
 
-#### Applying the Plugin(s)
+### Applying the Plugin(s)
 
 There are multiple ways that the plugins can be applied.
 
@@ -38,7 +39,7 @@ Furthermore, when the `analyzer` plugin executes, it alters the main gradle scri
 </table>
 
 
-##### CLI
+#### CLI
 
 The CLI (available after version 1.4) is capable of running arbitrary groovy scripts prior to the build. See [here](https://project-ncl.github.io/gradle-manipulator/guide/groovy.html) for further details on this.
 
@@ -84,7 +85,7 @@ It is possible to run the Gradle process using a different JDK by passing in the
 
 To obtain the CLI it may be downloaded from Maven Central [here](https://repo1.maven.org/maven2/org/jboss/pnc/gradlemanipulator/cli).
 
-##### Init Script
+#### Init Script
 
 If a development version is being used, the init script is placed during the build into
 `analyzer/build/resources/main/analyzer-init.gradle`. If a released version is being used, it is deployed as
@@ -101,14 +102,14 @@ you should get the `manipulation.json` file in the root of the project.
 
 For detailed documentation on the parameters please see [here](https://project-ncl.github.io/gradle-manipulator/).
 
-#### Troubleshooting
+### Troubleshooting
 
 * Gradle build daemon disappeared unexpectedly
    * This may happen in Gradle versions prior to 5.x if the shell environment contains non ASCII characters (e.g. the PROMPT symbol).
 
-### Alignment Configuration
+## Alignment Configuration
 
-#### Customising the Manipulation Plugin Version
+### Customising the Manipulation Plugin Version
 
 <table bgcolor="red">
 <tr>
@@ -119,7 +120,7 @@ For detailed documentation on the parameters please see [here](https://project-n
 </table>
 When running the alignment plugin (e.g. via the CLI), it is possible to configure the version of the Manipulation Plugin that is injected. By default the same version as the alignment plugin will be used (i.e. the current version). By setting `manipulationVersion` to a value (e.g. `2.6.`) this version is requested instead.
 
-#### Unresolved Dependencies
+### Unresolved Dependencies
 
 By default, the alignment phase is set to fail when it encounters any unresolvable dependencies. For example, if the
 dependency `com.redhat:unresolved-dependency` in configuration `default` is unable to be resolved, then the alignment
@@ -141,15 +142,15 @@ Even though the alignment is successful at this point, the build itself will fai
 
 For more details on Gradle dependencies and configurations, see [Declaring dependencies](https://docs.gradle.org/current/userguide/declaring_dependencies.html) and [Resolvable and consumable configurations](https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:resolvable-consumable-configs) in the Gradle user manual.
 
-### General Configuration
+## General Configuration
 
-#### Disabling the Plugins
+### Disabling the Plugins
 
 You can disable GME using the `manipulation.disable` property:
 
     $ gradle -Dmanipulation.disable=true...
 
-#### Logging
+### Logging
 
 The tool uses its own logging system (that backs onto the Gradle logging system).
 
@@ -157,7 +158,7 @@ The tool uses its own logging system (that backs onto the Gradle logging system)
 * If `loggingColours` is set to true it will also use colours (default: true).
 * If `loggingLevel` is set to true it will output the logging category e.g. INFO. (default: false).
 
-#### Summary Logging
+### Summary Logging
 
 GME will output a summary of its changes at the end of the run. As well as reporting version and dependency alignment,
 it is also possible to report what _hasn't_ been aligned by setting the property `reportNonAligned=true`. This summary
@@ -188,12 +189,12 @@ This JSON file may be read as POJO by using the [JSONUtils](https://github.com/p
 class which utilises the [json](https://github.com/project-ncl/pom-manipulation-ext/blob/main/common/src/main/java/org/jboss/pnc/mavenmanipulator/common/json)
 package.
 
-### OpenTelemetry Instrumentation
+## OpenTelemetry Instrumentation
 
 If `OTEL_EXPORTER_OTLP_ENDPOINT` is defined (and optionally `OTEL_SERVICE_NAME`) then OpenTelemetry instrumentation
 will be activated. It will read trace information from the environment as described [here](https://github.com/jenkinsci/opentelemetry-plugin/blob/master/docs/job-traces.md#environment-variables-for-trace-context-propagation-and-integrations) and will propagate the information via headers in any REST calls.
 
-### Feature Guide
+## Feature Guide
 
 Below are links to more specific information about configuring sets of features in GME:
 

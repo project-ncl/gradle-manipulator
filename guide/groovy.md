@@ -2,22 +2,24 @@
 title: Groovy Script Injection
 ---
 
+# Groovy Script Injection
+
 * Contents
 {:toc}
 
-### Overview
+## Overview
 
 The tool offers the ability to run arbitrary groovy scripts on the sources prior to running the build. This allows GME to be extensible by the user and to carry out non-generic modifications.
 
 
-### Configuration
+## Configuration
 
 If the property `-DgroovyScripts=<value>,....` is set, it will load the remote Groovy script file.
 
 The argument should a comma separated list of HTTP / HTTPS URLs.
 
 
-### Groovy Scripts
+## Groovy Scripts
 
 Each groovy script will be run on the execution root (i.e. where Gradle is invoked).
 
@@ -50,7 +52,7 @@ import org.jboss.pnc.gradlemanipulator.common.groovy.BaseScript
 </tr>
 </table>
 
-### Invocation Stages
+## Invocation Stages
 
 In the example script, we saw the use of the `@InvocationPoint` annotation which controls when the script is run. It
 takes a single argument, `invocationPoint`, with the type `InvocationStage`. The possible values for `InvocationStage`
@@ -65,7 +67,7 @@ made. The table below provides a description of the invocation stages available 
 | ~~`BOTH`~~ | Runs the script during stages `FIRST` and `LAST`. _Note that as of version 2.10, `BOTH` has been replaced by `ALL`_.                                                                     | [1.5, 2.9] |
 | `ALL`      | Runs the script during _all_ possible stages: `FIRST`, and `LAST`.  The `getInvocationStage()` API can be used to determine in which stage the script is currently running.              | 2.10       |
 
-### API
+## API
 
 The following API is made available:
 
@@ -135,7 +137,7 @@ newContent = target.text.replaceFirst("classpath \"org.hibernate:hibernate-core:
 target.text = newContent
 ```
 
-#### Grab Annotations
+### Grab Annotations
 
 <table bgcolor="#ffff00">
 <tr>
@@ -147,7 +149,7 @@ target.text = newContent
 It is possible to use Grab annotations (e.g. `@Grab('org.zeroturnaround:zt-exec:1.10')`) to utilise other API beyond what is already available via GME and Gradle. Note this is **only** supported in `FIRST` phase.
 
 
-### Developing Groovy Scripts
+## Developing Groovy Scripts
 
 To make it easier to develop scripts for both GME (this project) and [PME](https://github.com/release-engineering/pom-manipulation-ext) an example project has been set up. The [manipulator-groovy-examples](https://github.com/project-ncl/manipulator-groovy-examples) provides a framework to develop and test such scripts.
 

@@ -1,15 +1,26 @@
 
 # GH-Pages Branch
 
-This branch contains the github pages content for [Gradle Manipulator](https://github.com/project-ncl/gradle-manipulator) and the pages are hosted at [GitHub Pages](https://project-ncl.github.io/gradle-manipulator).
+This branch contains the GitHub Pages content for
+[Gradle Manipulator](https://github.com/project-ncl/gradle-manipulator).
+Pages are hosted at <https://project-ncl.github.io/gradle-manipulator/>.
 
-It is possible to use [Jekyll](https://help.github.com/articles/using-jekyll-with-pages) to preview the changes. Jekyll can be run with `jekyll serve --watch -V`.
+## Theme
 
+The site uses the [`jekyll-theme-slate`](https://github.com/pages-themes/slate)
+gem. No theme files live in this branch; the gem is supplied by the GitHub
+Pages build environment.
 
-## Slate
-Slate is responsive theme for GitHub Pages. [Fork it](https://github.com/jsncostello/slate/fork_select) and use it on your own site or generate one automatically using [GitHub Pages](http://pages.github.com).
+## Local preview
 
-Slate in use:
-![Slate](https://f.cloud.github.com/assets/416727/1730110/c72a2f96-62d3-11e3-9d6f-efc53e24aeb2.png)
+`github-pages` does not resolve on Ruby ≥ 4.0. Use `Gemfile.local` instead:
 
-Slate is available under the MIT license.
+```
+bundle install --gemfile Gemfile.local
+BUNDLE_GEMFILE=Gemfile.local bundle exec jekyll serve --watch -V
+```
+
+## Deployment
+
+The site is built and deployed automatically by GitHub Pages (legacy build,
+source branch `gh-pages`, root folder `/`). No workflow file is needed.

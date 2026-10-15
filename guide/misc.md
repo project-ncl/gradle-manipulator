@@ -2,10 +2,12 @@
 title: Miscellaneous Manipulations
 ---
 
+# Miscellaneous Manipulations
+
 * Contents
 {:toc}
 
-#### Repository Extraction
+## Repository Extraction
 
 GME can export artifact repositories used by the project into a backup file
 in the project's root directory. This file uses Maven's settings.xml format.

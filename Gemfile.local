@@ -1,0 +1,26 @@
+# Local preview Gemfile. Usage:
+#
+#   bundle install --gemfile Gemfile.local
+#   BUNDLE_GEMFILE=Gemfile.local bundle exec jekyll serve --watch -V
+#
+# This file is NOT used by GitHub Pages CI (which uses the github-pages
+# gem via actions/jekyll-build-pages). It exists because github-pages
+# does not resolve on Ruby >= 4.0 locally.
+
+source "https://rubygems.org"
+
+gem "jekyll", "~> 4.3"
+
+group :jekyll_plugins do
+  gem "jekyll-theme-slate"
+end
+
+# Ruby 3.4+ moved these from default gems to bundled gems. Jekyll and
+# Liquid still require them, so they must be declared explicitly under
+# Bundler.
+gem "base64"      # required by Jekyll / Liquid on Ruby >= 3.4
+gem "bigdecimal"  # required by Jekyll / Liquid on Ruby >= 3.4
+gem "csv"         # required by Jekyll / Liquid on Ruby >= 3.4
+
+# Removed from Ruby stdlib in Ruby 3.0; needed by `jekyll serve`.
+gem "webrick"

@@ -2,10 +2,12 @@
 title: "Artifact Publishing"
 ---
 
+# Artifact Publishing
+
 * Contents
 {:toc}
 
-### Overview
+## Overview
 
 The `manipulation` plugin tries to detect a publishing plugin used by a project. It currently recognizes two plugins:
 
@@ -23,7 +25,7 @@ Following properties need to be given either as system properties or as environm
 
 In PNC above would be already defined as environment variables.
 
-### Legacy Maven Plugin
+## Legacy Maven Plugin
 
 If the project uses the legacy `maven` plugin, use the `uploadArchives` task to publish artifacts.
 
@@ -62,7 +64,7 @@ uploadArchives {
 
 ```
 
-### Maven-publish Plugin
+## Maven-publish Plugin
 
 If the project uses `maven-publish` plugin, use the `publish` task to publish artifacts.
 
@@ -100,7 +102,7 @@ publishing {
 }
 ```
 
-### Manifest Handling
+## Manifest Handling
 
 The custom action to update the version will also ensure that the information is correct within the `MANIFEST.MF` files.
 The following fields are updated:
@@ -124,7 +126,7 @@ If the following are not already present then the are updated with the project g
 * Implementation-Vendor
 * Implementation-Vendor-Id
 
-### Examples
+## Examples
 
 On local machine, you can try following to trigger publication.
 

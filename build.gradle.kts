@@ -460,6 +460,23 @@ subprojects {
         testFixturesCompile(gradleApi())
     }
 
+    // Make the IDE Gradle Build Server (BSP plugin) treat src/testFixtures as a
+    // test-scoped source set so JDT-LS resolves its imports correctly.
+    // The BSP plugin sets hasTests=true on a source set only when a Test task
+    // references its output dirs — without this, testFixtures gets the main
+    // classpath and imports like plexus-archiver/gradleApi internals are unresolved.
+    // testFixtures contains no runnable tests so this has no effect on CI.
+    // Only applied when running inside VS Code / Bob IDE (VSCODE_PID is set by the
+    // extension host and is present in the Gradle daemon's build environment during
+    // IDE project syncs, but absent on CI and plain command-line builds).
+    if (System.getenv("VSCODE_PID") != null) {
+        // tasks.named(String, KClass) { } is not available on Gradle 4.x Kotlin DSL;
+        // use untyped getByName + explicit cast which compiles on all supported versions.
+        (tasks.getByName("test") as Test).apply {
+            testClassesDirs = testClassesDirs + sourceSets["testFixtures"].output.classesDirs
+        }
+    }
+
     val testFixturesJar by
         tasks.registering(Jar::class) {
             archiveClassifier.set("test-fixtures")

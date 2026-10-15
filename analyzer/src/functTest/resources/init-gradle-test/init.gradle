@@ -1,6 +1,6 @@
 apply plugin: InternalRepositoryPlugin
 
-// NCLSUP-1118 , NCLSUP-1122, NCLSUP-1160, NCLSUP-1315, NCLSUP-1312
+// init.gradle to match typical init script used in other PNC services
 class InternalRepositoryPlugin implements Plugin<Gradle> {
     void apply(Gradle gradle) {
 

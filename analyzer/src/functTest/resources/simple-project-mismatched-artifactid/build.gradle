@@ -1,0 +1,28 @@
+plugins {
+    id 'org.jboss.pnc.gradle-manipulator.analyzer'
+    id 'java'
+    id 'maven-publish'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'io.undertow', name: 'undertow-core', version: '2.0.15.Final'
+}
+
+// The publication artifactId intentionally differs from the project name ("root") to exercise
+// the AlignmentTask mismatch path that calls ProjectUtils.updateNameField.
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'root-renamed'
+            from components.java
+        }
+    }
+}

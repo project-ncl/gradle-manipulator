@@ -5,6 +5,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -52,14 +53,26 @@ public final class RepositoryExporter {
     }
 
     /**
-     * Exports all repositories to the given settings file.
+     * Exports all repositories to the given settings file, excluding any repository whose URL
+     * matches {@code excludeUrls} or whose name matches {@code excludeNames}.
+     *
+     * <p>
+     * Repositories that originated from external init scripts (e.g. CI environment mirrors)
+     * should be passed in the exclusion sets so they are not written to
+     * {@code repositories-backup.xml} and do not cause circular proxy definitions in Indy.
      *
      * @param repositories the repositories to export
      * @param settingsFile the settings file to write to
+     * @param excludeUrls repository URLs to exclude (matched against {@link MavenArtifactRepository#getUrl()})
+     * @param excludeNames repository names to exclude (matched against {@link ArtifactRepository#getName()})
      */
-    public static void export(Map<ArtifactRepository, Path> repositories, File settingsFile) {
+    public static void export(
+            Map<ArtifactRepository, Path> repositories,
+            File settingsFile,
+            Set<String> excludeUrls,
+            Set<String> excludeNames) {
         RepositoryExporter repositoryExporter = new RepositoryExporter();
-        processRepositories(repositoryExporter, repositories);
+        processRepositories(repositoryExporter, repositories, excludeUrls, excludeNames);
 
         SettingsIO settingsWriter = new SettingsIO(new DefaultSettingsBuilderFactory().newInstance());
         logger.debug("Writing repository settings into {}", settingsFile.getAbsolutePath());
@@ -72,12 +85,51 @@ public final class RepositoryExporter {
         }
     }
 
+    /**
+     * Exports all repositories to the given settings file with no exclusions.
+     *
+     * @param repositories the repositories to export
+     * @param settingsFile the settings file to write to
+     */
+    public static void export(Map<ArtifactRepository, Path> repositories, File settingsFile) {
+        export(repositories, settingsFile, Collections.emptySet(), Collections.emptySet());
+    }
+
     private static void processRepositories(
             RepositoryExporter repositoryExporter,
-            Map<ArtifactRepository, Path> repositories) {
+            Map<ArtifactRepository, Path> repositories,
+            Set<String> excludeUrls,
+            Set<String> excludeNames) {
         for (Map.Entry<ArtifactRepository, Path> entry : repositories.entrySet()) {
             ArtifactRepository repository = entry.getKey();
             Path path = entry.getValue();
+            // Skip repositories that originated from external init scripts.
+            // These are identified by matching declared names or URLs extracted via static
+            // analysis of the init script files — see AlignmentTask.collectInitScriptExclude*().
+            if (excludeNames.contains(repository.getName())) {
+                logger.info(
+                        "Skipping init-script repository '{}' (name match) from {}",
+                        repository.getName(),
+                        path);
+                continue;
+            }
+            if (repository instanceof MavenArtifactRepository) {
+                URI repoUrl = ((MavenArtifactRepository) repository).getUrl();
+                String repoUrlStr = repoUrl != null ? repoUrl.toString() : null;
+                // Normalise trailing slash so "https://example.com/m2" and "https://example.com/m2/"
+                // both match entries in excludeUrls (which are stored without trailing slash).
+                if (repoUrlStr != null && repoUrlStr.endsWith("/")) {
+                    repoUrlStr = repoUrlStr.substring(0, repoUrlStr.length() - 1);
+                }
+                if (repoUrlStr != null && excludeUrls.contains(repoUrlStr)) {
+                    logger.info(
+                            "Skipping init-script repository '{}' ({}) from {}",
+                            repository.getName(),
+                            repoUrl,
+                            path);
+                    continue;
+                }
+            }
             if (repository instanceof DefaultMavenLocalArtifactRepository) {
                 DefaultMavenLocalArtifactRepository artifactRepository = (DefaultMavenLocalArtifactRepository) repository;
                 logger.debug("Skipping local maven repository '{}' from {}", artifactRepository.getUrl(), path);

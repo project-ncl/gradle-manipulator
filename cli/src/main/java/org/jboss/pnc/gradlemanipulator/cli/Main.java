@@ -361,6 +361,9 @@ public class Main implements Callable<Void> {
 
         connector.forProjectDirectory(target);
 
+        // FIRST and PREPARSE are equivalent in the CLI: both run before any Gradle execution.
+        GroovyUtils.runCustomGroovyScript(logger, InvocationStage.FIRST, target, configuration, null, null);
+
         if (PluginUtils.checkForSemanticBuildVersioning(logger, target)) {
             org.apache.commons.io.output.ByteArrayOutputStream stdout = new org.apache.commons.io.output.ByteArrayOutputStream();
             List<String> versionQuery = new ArrayList<>();
@@ -390,8 +393,6 @@ public class Main implements Callable<Void> {
         if (configuration.addLenientLockMode()) {
             PluginUtils.addLenientLockMode(logger, target);
         }
-
-        GroovyUtils.runCustomGroovyScript(logger, InvocationStage.FIRST, target, configuration, null, null);
 
         File lockFile = new File(target, "versions.lock");
         if (lockFile.exists()) {

@@ -115,7 +115,8 @@ public class GroovyUtils {
                 }
             }
 
-            if (targetStage == stage || stage == InvocationStage.ALL) {
+            if (targetStage == stage || stage == InvocationStage.ALL ||
+                    (targetStage == InvocationStage.FIRST && stage == InvocationStage.PREPARSE)) {
                 // Inject the values via a new BaseScript so user's can have completion.
                 if (script instanceof BaseScript) {
                     ((BaseScript) script).setValues(

@@ -361,6 +361,8 @@ public class Main implements Callable<Void> {
 
         connector.forProjectDirectory(target);
 
+        GroovyUtils.runCustomGroovyScript(logger, InvocationStage.PREPARSE, target, configuration, null, null);
+
         if (PluginUtils.checkForSemanticBuildVersioning(logger, target)) {
             org.apache.commons.io.output.ByteArrayOutputStream stdout = new org.apache.commons.io.output.ByteArrayOutputStream();
             List<String> versionQuery = new ArrayList<>();

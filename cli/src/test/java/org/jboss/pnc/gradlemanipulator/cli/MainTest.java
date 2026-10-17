@@ -199,6 +199,25 @@ public class MainTest {
     }
 
     @Test
+    public void testInvokeGroovyWithPreparse() throws Exception {
+
+        final File projectRoot = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
+
+        final URL groovy = Thread.currentThread().getContextClassLoader().getResource("sample-preparse.groovy");
+
+        Main m = new Main();
+        String[] args = new String[] {
+                "-t",
+                projectRoot.getParentFile().getAbsolutePath(),
+                "tasks",
+                "-DgroovyScripts=" + groovy };
+        m.run(args);
+
+        assertTrue(systemOutRule.getLinesNormalized().contains("Running Groovy script at PREPARSE on"));
+        assertTrue(systemOutRule.getLinesNormalized().contains("InvocationStage PREPARSE"));
+    }
+
+    @Test
     public void testInvokeGroovyFails1() throws Exception {
         final File projectRoot = new File(MainTest.class.getClassLoader().getResource("build.gradle").getPath());
         final URL groovy = Thread.currentThread().getContextClassLoader().getResource("sample-bad1.groovy");

@@ -15,7 +15,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -95,7 +94,6 @@ public class PluginUtils {
      * This class encapsulates the different methods plugins can appear and therefore how they can be removed
      */
     @Setter
-    @RequiredArgsConstructor
     public static class PluginReference {
 
         public PluginReference(String configBlock) {
@@ -112,6 +110,19 @@ public class PluginUtils {
             this.tasks = tasks == null ? Collections.emptySet() : tasks;
             configureExtension = "";
             imports = Collections.emptySet();
+        }
+
+        public PluginReference(
+                Set<String> configBlocks,
+                String type,
+                Set<String> tasks,
+                String configureExtension,
+                Set<String> imports) {
+            this.configBlocks = configBlocks;
+            this.type = type;
+            this.tasks = tasks;
+            this.configureExtension = configureExtension;
+            this.imports = imports;
         }
 
         private final Set<String> configBlocks;

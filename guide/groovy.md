@@ -61,11 +61,16 @@ made. The table below provides a description of the invocation stages available 
 
 | Stage      | Description                                                                                                                                                                              | Since      |
 |------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
-| `PREPARSE` | Alias for `FIRST`.                                                                                                                                                                       | 2.10       |
+| `PREPARSE` | Alias for `FIRST` (see note below).                                                                                                                                                      | 2.10       |
 | `FIRST`    | Runs the script before any other manipulators. It is safe to modify build files on disk during this stage.                                                                               | 1.5        |
 | `LAST`     | Runs the script after any other manipulators.                                                                                                                                            | 1.5        |
 | ~~`BOTH`~~ | Runs the script during stages `FIRST` and `LAST`. _Note that as of version 2.10, `BOTH` has been replaced by `ALL`_.                                                                     | [1.5, 2.9] |
 | `ALL`      | Runs the script during _all_ possible stages: `FIRST`, and `LAST`.  The `getInvocationStage()` API can be used to determine in which stage the script is currently running.              | 2.10       |
+
+> **Note:** In PME, `FIRST` means "after all POM files have been read into memory, but before any manipulations have
+> been performed." That distinction does not exist in GME — Gradle does not read build files into an in-memory model
+> before execution, so there is no equivalent pre-manipulation, post-parse phase. As a result, `FIRST` and `PREPARSE`
+> are identical in GME: both run before any Gradle execution or alignment takes place.
 
 ## API
 

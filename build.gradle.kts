@@ -158,7 +158,7 @@ plugins {
             id("io.freefair" + ".aggregate-jacoco-report") version "8.1.0" // frozen: Gradle 8.0-8.2
         }
         else -> {
-            id("io.freefair.aggregate-jacoco-report") version "9.8.0"
+            id("io.freefair.aggregate-jacoco-report") version "9.8.2"
         }
     }
 }

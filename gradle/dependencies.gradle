@@ -29,7 +29,7 @@ ext {
     opentelemetryVersion    = "2.1.0"
     ownerVersion            = "1.0.12"
     picocliVersion          = "4.7.7"
-    plexusArchiverVersion   = "4.14.0"
+    plexusArchiverVersion   = "4.15.0"
     pmeVersion              = "5.10"
     slf4jVersion            = "2.0.20"
     systemStubsVersion      = "2.1.8"

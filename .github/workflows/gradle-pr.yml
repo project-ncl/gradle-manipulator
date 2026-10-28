@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   check-java-formatting:
-    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@9735924b878ff3890cfaf16acb28e06531963ebf # v0.0.25
+    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@461b242bf215856b94e7b40f1ecfa06f7ebb1b45 # v0.0.26
     with:
       java_version: "17"
       gradle_version: "8.3"
@@ -53,7 +53,7 @@ jobs:
             8.2.1,
           ]
     if: github.repository == 'project-ncl/gradle-manipulator'
-    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@9735924b878ff3890cfaf16acb28e06531963ebf # v0.0.25
+    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@461b242bf215856b94e7b40f1ecfa06f7ebb1b45 # v0.0.26
     with:
       java_version: "11"
       gradle_version: ${{ matrix.gradle }}
@@ -74,7 +74,7 @@ jobs:
           - gradle: 9.3.1
             upload_artifacts: true
     if: github.repository == 'project-ncl/gradle-manipulator'
-    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@9735924b878ff3890cfaf16acb28e06531963ebf # v0.0.25
+    uses: project-ncl/shared-github-actions/.github/workflows/gradle-ci.yml@461b242bf215856b94e7b40f1ecfa06f7ebb1b45 # v0.0.26
     with:
       java_version: "17"
       gradle_version: ${{ matrix.gradle }}

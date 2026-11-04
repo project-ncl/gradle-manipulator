@@ -11,7 +11,7 @@
 ext {
     assertjVersion          = "3.27.7"
     atlasVersion            = "1.2.3"
-    bytemanVersion          = "4.0.27"
+    bytemanVersion          = "4.0.28.1"
     commonsBeanVersion      = "1.11.0"
     commonsIOVersion        = "2.22.0"
     commonsLangVersion      = "3.21.0"

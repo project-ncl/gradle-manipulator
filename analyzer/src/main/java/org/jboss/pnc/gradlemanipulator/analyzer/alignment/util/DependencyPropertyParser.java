@@ -10,7 +10,7 @@ import org.gradle.api.InvalidUserDataException;
  * Utility class that is meant to parse properties like {@code dependencyOverride}
  * <p>
  * See section "Exclusions and Overrides" of
- * https://release-engineering.github.io/pom-manipulation-ext/guide/dep-manip.html.
+ * https://project-ncl.github.io/pom-manipulation-ext/guide/dep-manip.html.
  */
 @UtilityClass
 public class DependencyPropertyParser {

@@ -26,7 +26,7 @@ import org.jboss.pnc.mavenmanipulator.io.rest.Translator;
  * This class is used to hold all configuration values for the two plugins. The configuration is processed
  * via <a href=http://owner.aeonbits.org>Owner</a>. The naming scheme of
  * the configuration variables has been chosen to match the
- * <a href=https://release-engineering.github.io/pom-manipulation-ext/#feature-guide>PME</a> naming.
+ * <a href=https://project-ncl.github.io/pom-manipulation-ext/#feature-guide>PME</a> naming.
  */
 @Sources({ "system:properties", "system:env" })
 @LoadPolicy(MERGE)

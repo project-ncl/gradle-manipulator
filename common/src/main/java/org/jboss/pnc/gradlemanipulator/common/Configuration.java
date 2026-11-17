@@ -176,6 +176,20 @@ public interface Configuration extends Accessible, Reloadable {
     @DefaultValue("true")
     Boolean dokkaPlugin();
 
+    /**
+     * Whether to inject HTTP/HTTPS proxy system properties as {@code jFlags} on every
+     * Javadoc task. This is required because the {@code javadoc} tool runs in a child JVM
+     * and does not inherit the parent JVM's proxy system properties automatically
+     * (see <a href="https://issues.gradle.org/browse/GRADLE-1228">GRADLE-1228</a>).
+     * <p>
+     * Enabled by default. Set {@code -DjavadocProxyFlags=false} to disable.
+     *
+     * @return whether to inject proxy jFlags on Javadoc tasks
+     */
+    @Key("javadocProxyFlags")
+    @DefaultValue("true")
+    boolean javadocProxyFlags();
+
     @Key("publishPluginHooks")
     @DefaultValue("elasticsearch.esplugin")
     String[] publishPluginHooks();

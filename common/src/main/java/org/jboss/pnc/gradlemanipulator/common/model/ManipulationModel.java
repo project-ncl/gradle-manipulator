@@ -3,7 +3,9 @@ package org.jboss.pnc.gradlemanipulator.common.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -117,6 +119,27 @@ public class ManipulationModel {
         result.putAll(manipulationModel.getAlignedDependencies());
         for (ManipulationModel child : manipulationModel.getChildren().values()) {
             addDependenciesRec(child, result);
+        }
+    }
+
+    /**
+     * Returns all versions declared across this model and all its children.
+     *
+     * @return all versions declared across this model and all its children
+     */
+    @JsonIgnore
+    public Set<String> getAllVersions() {
+        final Set<String> result = new HashSet<>();
+        collectVersionsRec(this, result);
+        return result;
+    }
+
+    private void collectVersionsRec(ManipulationModel manipulationModel, Set<String> result) {
+        if (StringUtils.isNotBlank(manipulationModel.getVersion())) {
+            result.add(manipulationModel.getVersion());
+        }
+        for (ManipulationModel child : manipulationModel.getChildren().values()) {
+            collectVersionsRec(child, result);
         }
     }
 

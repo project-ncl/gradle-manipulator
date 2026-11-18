@@ -4,8 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.aeonbits.owner.ConfigFactory;
 import org.commonjava.atlas.maven.ident.ref.ProjectVersionRef;
 import org.commonjava.atlas.maven.ident.ref.SimpleProjectVersionRef;
@@ -492,5 +497,264 @@ public class UpdateProjectVersionCustomizerTest {
         new UpdateProjectVersionCustomizer(configuration, p).customize(resp);
 
         assertThat(resp.getProjectOverrides().get(p)).isEqualTo("1.0.0.Final-rhlw-00000-n-00002");
+    }
+
+    // -------------------------------------------------------------------------
+    // NCLSUP-1773: lookup base version vs calculation base version (scenarios D1-D9)
+    //
+    // The cache PVR is registered the way AlignmentTask does it: published GA + the (reused,
+    // prefix-normalised) base version that was sent to DA. The Gradle project name deliberately
+    // differs from the published artifactId in D1/D2 (Gradle project 'core' published as
+    // 'solr-core').
+    // -------------------------------------------------------------------------
+
+    private static final String SOLR_GROUP = "org";
+
+    private Project newProject(String name) throws IOException {
+        final File dir = tempDir.newFolder(name);
+        final Project p = ProjectBuilder.builder().withName(name).withProjectDir(dir).build();
+        p.setVersion("10.0.0");
+        p.setGroup(SOLR_GROUP);
+        return p;
+    }
+
+    private String calculate(Project root, Project target, Map<ProjectVersionRef, String> translation)
+            throws ManipulationException {
+        final Response resp = new Response(translation);
+        final Configuration configuration = ConfigFactory.create(Configuration.class);
+        new UpdateProjectVersionCustomizer(configuration, root).customize(resp);
+        return resp.getProjectOverrides().get(target);
+    }
+
+    private void writeManipulationJson(File rootDir, String rootVersion, String childName, String childVersion)
+            throws IOException {
+        final String json = "{\n" +
+                "  \"group\" : \"" + SOLR_GROUP + "\",\n" +
+                "  \"name\" : \"" + rootDir.getName() + "\",\n" +
+                "  \"projectPathName\" : \"" + rootDir.getName() + "\",\n" +
+                "  \"version\" : \"" + rootVersion + "\",\n" +
+                "  \"originalVersion\" : \"10.0.0\",\n" +
+                "  \"children\" : {\n" +
+                "    \"" + childName + "\" : {\n" +
+                "      \"group\" : \"" + SOLR_GROUP + "\",\n" +
+                "      \"name\" : \"solr-" + childName + "\",\n" +
+                "      \"projectPathName\" : \"" + childName + "\",\n" +
+                "      \"version\" : \"" + childVersion + "\",\n" +
+                "      \"originalVersion\" : \"10.0.0\"\n" +
+                "    }\n" +
+                "  }\n" +
+                "}\n";
+        Files.write(new File(rootDir, "manipulation.json").toPath(), json.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static int counterOf(String version) {
+        final Matcher m = Pattern.compile("-(\\d+)(-SNAPSHOT)?$").matcher(version);
+        assertThat(m.find()).as("no trailing counter in '%s'", version).isTrue();
+        return Integer.parseInt(m.group(1));
+    }
+
+    /** D1: Gradle name 'core' != published artifactId 'solr-core'; reused base must be kept. */
+    @Test
+    public void nclsup1773_D1_nameMismatch_reusedBaseKept() throws IOException, ManipulationException {
+        System.setProperty("enforceVersionPrefix", "rhlw");
+        System.setProperty("versionIncrementalSuffix", "n");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final Project p = newProject("core");
+        ManipulationCache.getCache(p)
+                .addGAV(p, new SimpleProjectVersionRef(SOLR_GROUP, "solr-core", "10.0.0.rhlw-00003"));
+
+        assertThat(calculate(p, p, Collections.emptyMap())).isEqualTo("10.0.0.rhlw-00003-n-00001");
+    }
+
+    /** D2: as D1 plus a DA translation for the reused base. */
+    @Test
+    public void nclsup1773_D2_nameMismatch_translationIncrements() throws IOException, ManipulationException {
+        System.setProperty("enforceVersionPrefix", "rhlw");
+        System.setProperty("versionIncrementalSuffix", "n");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final Project p = newProject("core");
+        final ProjectVersionRef pvr = new SimpleProjectVersionRef(SOLR_GROUP, "solr-core", "10.0.0.rhlw-00003");
+        ManipulationCache.getCache(p).addGAV(p, pvr);
+
+        assertThat(calculate(p, p, Collections.singletonMap(pvr, "10.0.0.rhlw-00003-n-00004")))
+                .isEqualTo("10.0.0.rhlw-00003-n-00005");
+    }
+
+    /** D3 (control): as D1 with project name == artifactId. */
+    @Test
+    public void nclsup1773_D3_nameMatch_control() throws IOException, ManipulationException {
+        System.setProperty("enforceVersionPrefix", "rhlw");
+        System.setProperty("versionIncrementalSuffix", "n");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final Project p = newProject("solr-core");
+        ManipulationCache.getCache(p)
+                .addGAV(p, new SimpleProjectVersionRef(SOLR_GROUP, "solr-core", "10.0.0.rhlw-00003"));
+
+        assertThat(calculate(p, p, Collections.emptyMap())).isEqualTo("10.0.0.rhlw-00003-n-00001");
+    }
+
+    /** D4: a candidate from an older lineage (rhlw-00000-n-...) must not advance the rhlw-00003-n counter. */
+    @Test
+    public void nclsup1773_D4_lineageIsolation() throws IOException, ManipulationException {
+        System.setProperty("enforceVersionPrefix", "rhlw");
+        System.setProperty("versionIncrementalSuffix", "n");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final Project p = newProject("solr-core");
+        final ProjectVersionRef pvr = new SimpleProjectVersionRef(SOLR_GROUP, "solr-core", "10.0.0.rhlw-00003");
+        ManipulationCache.getCache(p).addGAV(p, pvr);
+
+        assertThat(calculate(p, p, Collections.singletonMap(pvr, "10.0.0.rhlw-00000-n-00016")))
+                .isEqualTo("10.0.0.rhlw-00003-n-00001");
+    }
+
+    /** D5: pooling - translations of all cached PVRs feed one project; the max wins (locks section 3.4). */
+    @Test
+    public void nclsup1773_D5_pooledTranslationsUseMax() throws IOException, ManipulationException {
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final Project p = newProject("alpha");
+        final ProjectVersionRef alpha = new SimpleProjectVersionRef(SOLR_GROUP, "alpha", "10.0.0");
+        final ProjectVersionRef beta = new SimpleProjectVersionRef(SOLR_GROUP, "beta", "10.0.0");
+        final ManipulationCache cache = ManipulationCache.getCache(p);
+        cache.addGAV(p, alpha);
+        cache.addGAV(null, beta);
+        final Map<ProjectVersionRef, String> translation = new HashMap<>();
+        translation.put(alpha, "10.0.0.redhat-00002");
+        translation.put(beta, "10.0.0.redhat-00004");
+
+        assertThat(calculate(p, p, translation)).isEqualTo("10.0.0.redhat-00005");
+    }
+
+    /** D6a: snapshot suffix preserved. */
+    @Test
+    public void nclsup1773_D6a_snapshotPreserved() throws IOException, ManipulationException {
+        System.setProperty("enforceVersionPrefix", "rhlw");
+        System.setProperty("versionIncrementalSuffix", "n");
+        System.setProperty("versionSuffixSnapshot", "true");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final Project p = newProject("solr-core");
+        p.setVersion("10.0.0.rhlw-00003-SNAPSHOT");
+        final ProjectVersionRef pvr = new SimpleProjectVersionRef(
+                SOLR_GROUP,
+                "solr-core",
+                "10.0.0.rhlw-00003-SNAPSHOT");
+        ManipulationCache.getCache(p).addGAV(p, pvr);
+
+        assertThat(calculate(p, p, Collections.singletonMap(pvr, "10.0.0.rhlw-00003-n-00001")))
+                .isEqualTo("10.0.0.rhlw-00003-n-00002-SNAPSHOT");
+    }
+
+    /** D6b: snapshot suffix not preserved. */
+    @Test
+    public void nclsup1773_D6b_snapshotStripped() throws IOException, ManipulationException {
+        System.setProperty("enforceVersionPrefix", "rhlw");
+        System.setProperty("versionIncrementalSuffix", "n");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final Project p = newProject("solr-core");
+        p.setVersion("10.0.0.rhlw-00003-SNAPSHOT");
+        ManipulationCache.getCache(p)
+                .addGAV(p, new SimpleProjectVersionRef(SOLR_GROUP, "solr-core", "10.0.0.rhlw-00003-SNAPSHOT"));
+        // With versionSuffixSnapshot=false the translation map key has the snapshot stripped.
+        final ProjectVersionRef key = new SimpleProjectVersionRef(SOLR_GROUP, "solr-core", "10.0.0.rhlw-00003");
+
+        assertThat(calculate(p, p, Collections.singletonMap(key, "10.0.0.rhlw-00003-n-00001")))
+                .isEqualTo("10.0.0.rhlw-00003-n-00002");
+    }
+
+    /**
+     * D7 (invariant, json candidates): manipulation.json has root rhlw-00002 and child 'core' rhlw-00005. The
+     * calculation for 'core' (base rhlw-00005) must never reproduce an existing version, i.e. the counter must be
+     * &gt; 5. Candidates currently only contain the root node version so this is expected to FAIL (duplicate).
+     */
+    @Test
+    public void nclsup1773_D7_invariant_jsonChildNodeCounterIsRespected() throws IOException, ManipulationException {
+        System.setProperty("versionIncrementalSuffix", "rhlw");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final File rootDir = tempDir.newFolder("solr-root");
+        final Project root = ProjectBuilder.builder().withName("solr-root").withProjectDir(rootDir).build();
+        root.setVersion("10.0.0");
+        root.setGroup(SOLR_GROUP);
+        final Project core = ProjectBuilder.builder().withName("core").withParent(root).build();
+        core.setVersion("10.0.0");
+        core.setGroup(SOLR_GROUP);
+        writeManipulationJson(rootDir, "10.0.0.rhlw-00002", "core", "10.0.0.rhlw-00005");
+        // Names match here on purpose: D7 isolates the candidate-set defect from the name-mismatch defect (D1/D2).
+        ManipulationCache.getCache(root)
+                .addGAV(core, new SimpleProjectVersionRef(SOLR_GROUP, "core", "10.0.0.rhlw-00005"));
+
+        final String result = calculate(root, core, Collections.emptyMap());
+
+        assertThat(result).isNotEqualTo("10.0.0.rhlw-00005");
+        assertThat(counterOf(result)).as("counter of '%s' must exceed highest known counter 5", result)
+                .isGreaterThan(5);
+    }
+
+    /** D8 (invariant): DA translation beats the json candidate (same lineage). */
+    @Test
+    public void nclsup1773_D8_invariant_daBeatsJson() throws IOException, ManipulationException {
+        System.setProperty("versionIncrementalSuffix", "rhlw");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final Project p = newProject("core");
+        writeManipulationJson(p.getRootDir(), "10.0.0.rhlw-00003", "core", "10.0.0.rhlw-00003");
+        final ProjectVersionRef pvr = new SimpleProjectVersionRef(SOLR_GROUP, "core", "10.0.0.rhlw-00003");
+        ManipulationCache.getCache(p).addGAV(p, pvr);
+
+        assertThat(calculate(p, p, Collections.singletonMap(pvr, "10.0.0.rhlw-00007")))
+                .isEqualTo("10.0.0.rhlw-00008");
+    }
+
+    /** D9 (invariant): DA translation beats the json candidate (new 'n' lineage). */
+    @Test
+    public void nclsup1773_D9_invariant_daBeatsJson_newLineage() throws IOException, ManipulationException {
+        System.setProperty("versionIncrementalSuffix", "n");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final Project p = newProject("core");
+        writeManipulationJson(p.getRootDir(), "10.0.0.rhlw-00003", "core", "10.0.0.rhlw-00003");
+        final ProjectVersionRef pvr = new SimpleProjectVersionRef(SOLR_GROUP, "core", "10.0.0.rhlw-00003");
+        ManipulationCache.getCache(p).addGAV(p, pvr);
+
+        assertThat(calculate(p, p, Collections.singletonMap(pvr, "10.0.0.rhlw-00003-n-00007")))
+                .isEqualTo("10.0.0.rhlw-00003-n-00008");
+    }
+
+    /** F1 (NCLSUP-967 guard): differing base lineages stay independent under pooled candidates. */
+    @Test
+    public void nclsup967_F1_differentBaseLineagesStayIndependent() throws IOException, ManipulationException {
+        System.setProperty("versionIncrementalSuffix", "redhat");
+        System.setProperty("ignoreUnresolvableDependencies", "true");
+
+        final Project root = newProject("root");
+        root.setVersion("0.17.0");
+        final Project alpha = ProjectBuilder.builder().withName("bom-alpha").withParent(root).build();
+        alpha.setVersion("0.17.0-alpha");
+
+        final ProjectVersionRef rootPvr = new SimpleProjectVersionRef(
+                "io.opentelemetry",
+                "opentelemetry-java",
+                "0.17.0");
+        final ProjectVersionRef alphaPvr = new SimpleProjectVersionRef(
+                "io.opentelemetry",
+                "opentelemetry-bom-alpha",
+                "0.17.0-alpha");
+
+        final ManipulationCache cache = ManipulationCache.getCache(root);
+        cache.addGAV(root, rootPvr);
+        cache.addGAV(alpha, alphaPvr);
+
+        final Map<ProjectVersionRef, String> translations = new HashMap<>();
+        translations.put(rootPvr, "0.17.0.redhat-00004");
+        translations.put(alphaPvr, "0.17.0.alpha-redhat-00001");
+
+        assertThat(calculate(root, root, translations)).isEqualTo("0.17.0.redhat-00005");
+        assertThat(calculate(root, alpha, translations)).isEqualTo("0.17.0.alpha-redhat-00002");
     }
 }

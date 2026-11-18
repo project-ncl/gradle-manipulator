@@ -76,14 +76,28 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
                     // full prior version rather than the clean source version.
                     final String groupId = project.getGroup().toString();
                     final String artifactId = project.getName();
-                    final String calculatorInput = cache.getProjectVersionRefs(state.isPreserveSnapshot())
-                            .stream()
-                            .filter(
-                                    pvr -> pvr.getGroupId().equals(groupId)
-                                            && pvr.getArtifactId().equals(artifactId))
-                            .map(ProjectVersionRef::getVersionString)
-                            .findFirst()
-                            .orElse(project.getVersion().toString());
+                    final File manipulationFile = new File(
+                            rootProject.getRootDir(),
+                            ManipulationIO.MANIPULATION_FILE_NAME);
+                    final String calculatorInput = cache.getProjectBaseVersion(project, state.isPreserveSnapshot())
+                            .orElseGet(
+                                    () -> cache.getProjectVersionRefs(state.isPreserveSnapshot())
+                                            .stream()
+                                            .filter(
+                                                    pvr -> pvr.getGroupId().equals(groupId)
+                                                            && pvr.getArtifactId().equals(artifactId))
+                                            .map(ProjectVersionRef::getVersionString)
+                                            .findFirst()
+                                            .orElseGet(() -> {
+                                                if (manipulationFile.exists()) {
+                                                    logger.warn(
+                                                            "Fallback to raw Gradle version '{}' taken for project '{}' while an existing "
+                                                                    + "manipulation.json was present; project base version was not found in cache.",
+                                                            project.getVersion(),
+                                                            project.getPath());
+                                                }
+                                                return project.getVersion().toString();
+                                            }));
                     if (!calculatorInput.equals(project.getVersion().toString())) {
                         logger.info(
                                 "Using cached REST input version '{}' (instead of Gradle version '{}') "
@@ -134,6 +148,7 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
 
     private class GradleVersionCalculator extends VersionCalculator {
         private Map<ProjectVersionRef, String> translationMap = null;
+        private Set<String> existingFileCandidates = null;
 
         public String calculate(
                 final String groupId,
@@ -148,11 +163,16 @@ public class UpdateProjectVersionCustomizer implements AlignmentService.Manipula
 
             final Set<String> result = new HashSet<>();
 
-            // If there is an existing manipulation file, also use this as potential candidates.
-            File m = new File(rootProject.getRootDir(), ManipulationIO.MANIPULATION_FILE_NAME);
-            if (m.exists()) {
-                result.add(ManipulationIO.readManipulationModel(rootProject.getRootDir()).getVersion());
+            if (existingFileCandidates == null) {
+                existingFileCandidates = new HashSet<>();
+                File m = new File(rootProject.getRootDir(), ManipulationIO.MANIPULATION_FILE_NAME);
+                if (m.exists()) {
+                    existingFileCandidates.addAll(
+                            ManipulationIO.readManipulationModel(rootProject.getRootDir()).getAllVersions());
+                }
             }
+            result.addAll(existingFileCandidates);
+
             logger.debug(
                     "Adding project version candidates from cache {}",
                     cache.getProjectVersionRefs(state.isPreserveSnapshot()));

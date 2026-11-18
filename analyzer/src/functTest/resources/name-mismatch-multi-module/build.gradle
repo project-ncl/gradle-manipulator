@@ -1,0 +1,43 @@
+// NCLSUP-1773 fixture: Gradle project names ('core', 'util') differ from the published
+// artifactIds ('solr-core', 'solr-util') and the root ('solr-root') has no publication at all.
+//
+// Optional system properties used by individual tests:
+//   -DcorePublicationGroup=<group>  publish ':core' under a group different from the Gradle group.
+//   -DmatchNames=true               publish each project under its own project name (isolates the group case).
+plugins {
+    // including this plugin directly instead of by an init script, which allows to use the freshly build version
+    id 'org.jboss.pnc.gradle-manipulator.analyzer'
+}
+
+def publishedArtifactIds = ['core': 'solr-core', 'util': 'solr-util']
+
+allprojects {
+    group = 'org.apache.solr'
+
+    apply plugin: 'org.jboss.pnc.gradle-manipulator.analyzer'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+
+    if (project.name == 'core' && System.getProperty('coreVersion')) {
+        version = System.getProperty('coreVersion')
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                artifactId = System.getProperty('matchNames') ? project.name : publishedArtifactIds[project.name]
+                if (project.name == 'core' && System.getProperty('corePublicationGroup')) {
+                    groupId = System.getProperty('corePublicationGroup')
+                }
+                from components.java
+            }
+        }
+    }
+}

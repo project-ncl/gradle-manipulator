@@ -337,6 +337,26 @@ public class AlignmentTask extends DefaultTask {
                                     org.jboss.pnc.gradlemanipulator.common.utils.FileUtils
                                             .relativize(root, project.getProjectDir().toPath())));
 
+            String baseVersion = resolveBaseVersion(
+                    project,
+                    existingRootModel,
+                    groupId,
+                    projectName,
+                    currentProjectVersion,
+                    configuration);
+            String effectiveGroup = StringUtils.isNotBlank(groupId)
+                    ? groupId
+                    // This fallback shouldn't be needed - we attempt to find the groupId, falling
+                    // back to the rootproject, then using a hardcoded string.
+                    : (StringUtils.isNotBlank(project.getRootProject().getGroup().toString())
+                            ? project.getRootProject().getGroup().toString()
+                            : "gme-unknown-groupid");
+            ProjectVersionRef basePvr = ProjectVersionFactory.withGAV(
+                    effectiveGroup,
+                    projectName,
+                    baseVersion);
+            cache.addProjectBaseVersion(project, basePvr);
+
             if (StringUtils.isBlank(groupId)) {
                 logger.warn(
                         "Project '{}:{}:{}' is not fully defined ; skipping.",
@@ -350,80 +370,8 @@ public class AlignmentTask extends DefaultTask {
                         projectName,
                         currentProjectVersion);
             } else {
-                ProjectVersionRef current = ProjectVersionFactory.withGAV(
-                        groupId,
-                        projectName,
-                        currentProjectVersion);
-
-                // If a prior manipulation.json exists, replace the project version sent to the
-                // REST endpoint with the previously manipulated version so that DA can compute
-                // the correct next increment from the already-aligned base.
-                if (existingRootModel != null) {
-                    ManipulationModel existingNode;
-                    try {
-                        existingNode = existingRootModel.findCorrespondingChild(project.getPath());
-                    } catch (ManipulationUncheckedException e) {
-                        // The existing model has no node for this project path (e.g. a newly added module).
-                        // Fall back to the current Gradle version rather than failing the build.
-                        logger.warn(
-                                "No existing manipulation model node found for project path '{}'; "
-                                        + "using current Gradle version '{}' for REST request.",
-                                project.getPath(),
-                                currentProjectVersion);
-                        existingNode = null;
-                    }
-                    if (existingNode != null) {
-                        String existingVersion = existingNode.getVersion();
-                        if (StringUtils.isBlank(existingVersion)) {
-                            logger.warn(
-                                    "Existing manipulation model node for '{}' has a blank version; "
-                                            + "using current Gradle version '{}' for REST request.",
-                                    project.getPath(),
-                                    currentProjectVersion);
-                        } else if (!existingNode.getGroup().equals(groupId)
-                                || !existingNode.getName().equals(projectName)) {
-                            throw new ManipulationUncheckedException(
-                                    "Existing manipulation model node for path '{}' has GA '{}:{}' but current "
-                                            + "build has GA '{}:{}'; the existing manipulation.json does not match "
-                                            + "the current build and cannot be reused.",
-                                    project.getPath(),
-                                    existingNode.getGroup(),
-                                    existingNode.getName(),
-                                    groupId,
-                                    projectName);
-                        } else {
-                            logger.info(
-                                    "Reusing existing manipulation version '{}' (instead of '{}') "
-                                            + "as the project REST input version for '{}'.",
-                                    existingVersion,
-                                    currentProjectVersion,
-                                    project.getPath());
-                            current = ProjectVersionFactory.withGAV(groupId, projectName, existingVersion);
-                        }
-                    }
-                }
-
-                // Enforce version prefix if configured: normalise the project version sent to DA
-                // so the REST lookup uses the same enforced base that VersionCalculator will use.
-                if (configuration.enforceVersionPrefix() != null) {
-                    VersioningState prefixState = new VersioningState(configuration.getProperties());
-                    String normalised = VersionCalculator.enforceVersionPrefix(
-                            prefixState,
-                            current.getVersionString());
-                    if (!normalised.equals(current.getVersionString())) {
-                        logger.info(
-                                "enforceVersionPrefix: normalising project version '{}' to '{}' for REST lookup.",
-                                current.getVersionString(),
-                                normalised);
-                        current = ProjectVersionFactory.withGAV(
-                                current.getGroupId(),
-                                current.getArtifactId(),
-                                normalised);
-                    }
-                }
-
-                logger.debug("Adding {} to cache for scanning.", current);
-                cache.addGAV(project, current);
+                logger.debug("Adding {} to cache for scanning.", basePvr);
+                cache.addGAV(project, basePvr);
             }
 
             AppliedPlugin ap = project.getPluginManager().findPlugin(DOKKA);
@@ -1209,6 +1157,82 @@ public class AlignmentTask extends DefaultTask {
         } else {
             logger.info("Repository export disabled.");
         }
+    }
+
+    private String resolveBaseVersion(
+            Project project,
+            ManipulationModel existingRootModel,
+            String groupId,
+            String projectName,
+            String currentProjectVersion,
+            Configuration configuration) {
+        String resolvedVersion = currentProjectVersion;
+
+        // If a prior manipulation.json exists, replace the project version sent to the
+        // REST endpoint with the previously manipulated version so that DA can compute
+        // the correct next increment from the already-aligned base.
+        if (existingRootModel != null) {
+            ManipulationModel existingNode;
+            try {
+                existingNode = existingRootModel.findCorrespondingChild(project.getPath());
+            } catch (ManipulationUncheckedException e) {
+                // The existing model has no node for this project path (e.g. a newly added module).
+                // Fall back to the current Gradle version rather than failing the build.
+                logger.warn(
+                        "No existing manipulation model node found for project path '{}'; "
+                                + "using current Gradle version '{}' for REST request.",
+                        project.getPath(),
+                        currentProjectVersion);
+                existingNode = null;
+            }
+            if (existingNode != null) {
+                String existingVersion = existingNode.getVersion();
+                if (StringUtils.isBlank(existingVersion)) {
+                    logger.warn(
+                            "Existing manipulation model node for '{}' has a blank version; "
+                                    + "using current Gradle version '{}' for REST request.",
+                            project.getPath(),
+                            currentProjectVersion);
+                } else if (!existingNode.getGroup().equals(groupId)
+                        || !existingNode.getName().equals(projectName)) {
+                    throw new ManipulationUncheckedException(
+                            "Existing manipulation model node for path '{}' has GA '{}:{}' but current "
+                                    + "build has GA '{}:{}'; the existing manipulation.json does not match "
+                                    + "the current build and cannot be reused.",
+                            project.getPath(),
+                            existingNode.getGroup(),
+                            existingNode.getName(),
+                            groupId,
+                            projectName);
+                } else {
+                    logger.info(
+                            "Reusing existing manipulation version '{}' (instead of '{}') "
+                                    + "as the project REST input version for '{}'.",
+                            existingVersion,
+                            currentProjectVersion,
+                            project.getPath());
+                    resolvedVersion = existingVersion;
+                }
+            }
+        }
+
+        // Enforce version prefix if configured: normalise the project version sent to DA
+        // so the REST lookup uses the same enforced base that VersionCalculator will use.
+        if (configuration.enforceVersionPrefix() != null) {
+            VersioningState prefixState = new VersioningState(configuration.getProperties());
+            String normalised = VersionCalculator.enforceVersionPrefix(
+                    prefixState,
+                    resolvedVersion);
+            if (!normalised.equals(resolvedVersion)) {
+                logger.info(
+                        "enforceVersionPrefix: normalising project version '{}' to '{}' for REST lookup.",
+                        resolvedVersion,
+                        normalised);
+                resolvedVersion = normalised;
+            }
+        }
+
+        return resolvedVersion;
     }
 
     private Map<RelaxedProjectVersionRef, ProjectVersionRef> processAnyExistingManipulationFile(

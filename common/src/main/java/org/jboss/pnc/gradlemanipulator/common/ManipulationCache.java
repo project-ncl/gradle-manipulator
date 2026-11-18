@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.Getter;
@@ -57,6 +58,18 @@ public class ManipulationCache {
     private ManipulationModel model;
 
     private final List<ProjectVersionRef> projectVersionRefs = new ArrayList<>();
+
+    /**
+     * Maps each Gradle project's path (e.g. {@code ":core"}) to the exact {@link ProjectVersionRef} that
+     * was (or would be) sent to DA during REST lookup.
+     * <p>
+     * When reusing a previous {@code manipulation.json} or applying {@code enforceVersionPrefix},
+     * {@code AlignmentTask} records the normalised/reused base version here keyed by project path.
+     * This allows {@code UpdateProjectVersionCustomizer} to retrieve the exact same base version during
+     * calculation, even when Gradle project names differ from published artifactIds (e.g. Gradle name
+     * {@code "core"} published as {@code "solr-core"}), or when a project has no publication at all.
+     */
+    private final Map<String, ProjectVersionRef> projectBaseVersions = new LinkedHashMap<>();
 
     /**
      * This is the project dependencies - it represents a mapping of project module to a map of the original Dependency
@@ -164,6 +177,9 @@ public class ManipulationCache {
         if (project != null && model != null) {
             model.findCorrespondingChild(project.getPath()).setGroup(ProjectUtils.getRealGroupId(project));
         }
+        if (project != null && gav != null) {
+            addProjectBaseVersion(project, gav);
+        }
         this.projectVersionRefs.add(gav);
     }
 
@@ -174,6 +190,44 @@ public class ManipulationCache {
 
     public void addRepository(ArtifactRepository repository, Path projectDir) {
         repositories.put(repository, projectDir);
+    }
+
+    /**
+     * Records the resolved base {@link ProjectVersionRef} for a Gradle project.
+     *
+     * @param project the Gradle project
+     * @param pvr the resolved base GAV (including any reused or prefix-enforced version)
+     */
+    public void addProjectBaseVersion(Project project, ProjectVersionRef pvr) {
+        if (project != null && pvr != null) {
+            projectBaseVersions.put(project.getPath(), pvr);
+        }
+    }
+
+    /**
+     * Retrieves the base version string for a Gradle project, applying snapshot handling if requested.
+     *
+     * @param project the Gradle project
+     * @param versionSuffixSnapshot whether to preserve or strip SNAPSHOT suffixes
+     * @return the resolved base version string, or {@link Optional#empty()} if not recorded
+     */
+    public Optional<String> getProjectBaseVersion(Project project, boolean versionSuffixSnapshot) {
+        if (project == null) {
+            return Optional.empty();
+        }
+        ProjectVersionRef pvr = projectBaseVersions.get(project.getPath());
+        if (pvr == null) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(
+                    VersionCalculator.handlePotentialSnapshotVersion(
+                            versionSuffixSnapshot,
+                            pvr.asProjectRef(),
+                            pvr.getVersionString()));
+        } catch (ManipulationException ex) {
+            throw new ManipulationUncheckedException(ex);
+        }
     }
 
     public List<ProjectVersionRef> getProjectVersionRefs(boolean versionSuffixSnapshot) {

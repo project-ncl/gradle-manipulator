@@ -1,0 +1,6 @@
+rootProject.name = 'solr-root'
+include 'core'
+// -DonlyCore=true leaves ':util' out so that the build has a single published child.
+if (!System.getProperty('onlyCore')) {
+    include 'util'
+}

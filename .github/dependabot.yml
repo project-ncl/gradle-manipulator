@@ -39,6 +39,17 @@ updates:
       # but that requires rewriting ~30 functional test classes and is out of scope here.
       - dependency-name: "com.github.tomakehurst:wiremock-jre8"
         update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
+      # The Gradle wrapper version is deliberately pinned: the project must be built with a
+      # specific (older) Gradle version, so Dependabot must not bump gradle/wrapper.
+      # See https://github.com/project-ncl/gradle-manipulator/pull/688
+      - dependency-name: "gradle-wrapper"
+      # JGit 7.x requires Java 17 as a minimum, but the Gradle 4.10–8.2 compatibility matrix
+      # in gradle-pr.yml runs on JDK 11. JGit is test-only, so stay on 6.x (minor/patch
+      # updates are still allowed).
+      # See https://github.com/project-ncl/gradle-manipulator/pull/689
+      - dependency-name: "org.eclipse.jgit:org.eclipse.jgit"
+        update-types: ["version-update:semver-major"]
+
   # - package-ecosystem: "sbt"
   #   directory: "/" # Location of package manifests
   #   schedule:

@@ -19,6 +19,7 @@ import org.jboss.pnc.gradlemanipulator.common.io.ManipulationIO;
 import org.jboss.pnc.gradlemanipulator.common.logging.GMLogger;
 import org.jboss.pnc.gradlemanipulator.common.model.ManipulationModel;
 import org.jboss.pnc.gradlemanipulator.common.utils.ProjectUtils;
+import org.jboss.pnc.gradlemanipulator.manipulation.actions.JavadocProxyFlagsAction;
 import org.jboss.pnc.gradlemanipulator.manipulation.actions.LegacyMavenPublishingRepositoryAction;
 import org.jboss.pnc.gradlemanipulator.manipulation.actions.ManifestUpdateAction;
 import org.jboss.pnc.gradlemanipulator.manipulation.actions.MavenPublishingRepositoryAction;
@@ -127,6 +128,9 @@ public class ManipulationPlugin implements Plugin<Project> {
         // add actions to manipulate project
         project.afterEvaluate(new OverrideDependenciesAction(correspondingModule, resolvedDependenciesRepository));
         project.afterEvaluate(new ManifestUpdateAction(correspondingModule));
+        if (configuration.javadocProxyFlags()) {
+            project.afterEvaluate(new JavadocProxyFlagsAction());
+        }
         project.afterEvaluate(p -> p.getConfigurations().configureEach(c -> {
             if (c.isCanBeResolved()) {
                 ProjectUtils.updateResolutionStrategy(c);

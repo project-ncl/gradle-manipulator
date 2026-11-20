@@ -207,4 +207,49 @@ public class SimpleProjectFunctionalTest {
                 .withPluginClasspath()
                 .build();
     }
+
+    @Test
+    public void ensureJavadocProxyFlagsInjected() throws IOException, URISyntaxException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
+
+        final File simpleProjectRoot = tempDir.newFolder("simple-project");
+        TestUtils.copyDirectory("simple-project", simpleProjectRoot);
+        assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
+
+        // TestUtils.createGradleRunner() forwards all non-built-in system properties as -D JVM
+        // args to the forked daemon, so the JavadocProxyFlagsAction running inside the build
+        // will see these values via System.getProperty(key).
+        System.setProperty("http.proxyHost", "proxy.example.test");
+        System.setProperty("http.proxyPort", "8080");
+
+        final BuildResult buildResult = TestUtils.createGradleRunner()
+                .withProjectDir(simpleProjectRoot)
+                .withArguments("--info", "api")
+                .build();
+
+        assertThat(buildResult.task(":api").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
+        assertThat(buildResult.getOutput())
+                .contains("adding proxy jFlag '-Dhttp.proxyHost=proxy.example.test'");
+        assertThat(buildResult.getOutput())
+                .contains("adding proxy jFlag '-Dhttp.proxyPort=8080'");
+    }
+
+    @Test
+    public void ensureJavadocProxyFlagsDisabledByProperty() throws IOException, URISyntaxException {
+        assumeTrue(GradleVersion.current().compareTo(GradleVersion.version("5.0")) >= 0);
+
+        final File simpleProjectRoot = tempDir.newFolder("simple-project");
+        TestUtils.copyDirectory("simple-project", simpleProjectRoot);
+        assertThat(simpleProjectRoot.toPath().resolve("build.gradle")).exists();
+
+        System.setProperty("http.proxyHost", "proxy.example.test");
+
+        final BuildResult buildResult = TestUtils.createGradleRunner()
+                .withProjectDir(simpleProjectRoot)
+                .withArguments("--info", "api", "-DjavadocProxyFlags=false")
+                .build();
+
+        assertThat(buildResult.task(":api").getOutcome()).isEqualTo(TaskOutcome.SUCCESS);
+        assertThat(buildResult.getOutput()).doesNotContain("adding proxy jFlag");
+    }
 }
